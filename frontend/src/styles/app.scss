@@ -981,7 +981,7 @@ main.pages.is-loading {
   &__btn { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-left: 8px; border: 0; border-radius: 7px; background: var(--ds-fill-4); cursor: pointer; padding: 1px; overflow: hidden; vertical-align: -6px;
     &:hover, &[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--ds-blue); } &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
   &__thumb { display: block; width: 22px; height: 22px; border-radius: 6px; object-fit: cover; background: #fff; }
-  &__float { position: fixed; width: 160px; height: 160px; border-radius: 12px; object-fit: cover; background: #fff; box-shadow: var(--ds-shadow-lg); border: 1px solid var(--ds-separator); z-index: 80; pointer-events: none; animation: cook-in 0.15s ease-out; } }
+  &__float { position: fixed; inset: auto; margin: 0; padding: 0; overflow: hidden; width: 160px; height: 160px; border-radius: 12px; object-fit: cover; background: #fff; box-shadow: var(--ds-shadow-lg); border: 1px solid var(--ds-separator); z-index: 80; pointer-events: none; animation: cook-in 0.15s ease-out; } }
 
 // Замены продуктов: кнопка-стрелки у названия, всплывающий список вариантов с разницей ккал/цены
 .ings__swap { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-left: 6px; vertical-align: -5px; border: 0; border-radius: 6px; background: var(--ds-fill-4); color: var(--ds-label-secondary); cursor: pointer;

@@ -203,14 +203,14 @@
   var SIZE=160,GAP=10,img=null,cur=null;
   function show(b){var r=b.getBoundingClientRect(),x=r.right+GAP;if(x+SIZE>window.innerWidth-8)x=r.left-GAP-SIZE;if(x<8)x=8;
     var y=Math.min(Math.max(8,r.top+r.height/2-SIZE/2),window.innerHeight-SIZE-8);
-    if(!img){img=document.createElement("img");img.className="pic__float";img.alt="";img.width=SIZE;img.height=SIZE;document.body.appendChild(img)}
-    img.src=b.dataset.pic;img.style.left=x+"px";img.style.top=y+"px";img.style.display="block";cur=b;b.setAttribute("aria-expanded","true")}
-  function hide(){if(img)img.style.display="none";if(cur)cur.setAttribute("aria-expanded","false");cur=null}
+    if(!img){img=document.createElement("img");img.className="pic__float";img.alt="";img.width=SIZE;img.height=SIZE;img.setAttribute("popover","manual");document.body.appendChild(img)}
+    img.src=b.dataset.pic;img.style.left=x+"px";img.style.top=y+"px";img.style.display="";try{if(!img.matches(":popover-open"))img.showPopover()}catch(e){img.style.display="block"}cur=b;b.setAttribute("aria-expanded","true")}
+  function hide(){if(img){try{img.hidePopover()}catch(e){}img.style.display="none"}if(cur)cur.setAttribute("aria-expanded","false");cur=null}
   var near=function(e){return e.target&&e.target.closest?e.target.closest(".pic__btn"):null};
   document.addEventListener("mouseover",function(e){var b=near(e);if(b)show(b)});
   document.addEventListener("mouseout",function(e){var b=near(e);if(b&&!b.contains(e.relatedTarget))hide()});
   document.addEventListener("focusin",function(e){var b=near(e);if(b)show(b)});
   document.addEventListener("focusout",function(e){var b=near(e);if(b)hide()});
-  document.addEventListener("click",function(e){var b=near(e);if(!b)return;e.preventDefault();e.stopPropagation();if(cur===b&&img&&img.style.display!=="none")hide();else show(b)});
+  document.addEventListener("click",function(e){var b=near(e);if(!b)return;e.preventDefault();e.stopPropagation();if(cur===b)hide();else show(b)});
   window.addEventListener("scroll",function(){if(cur)show(cur)},{passive:true});
 })();

@@ -5,10 +5,18 @@ import { useT } from "../i18n";
 // Миниатюра продукта рядом с названием: по наведению или нажатию раскрывается до 160×160.
 // Картинка живёт в портале с position: fixed — справа от иконки, если не помещается — слева; по вертикали
 // центрируется по иконке и прижимается к краям окна. Так она не накрывает ни свою строку, ни столбец цен.
-// Внутри <dialog> портал ведёт в сам диалог: top layer перекрывает body при любом z-index.
+// Картинка — popover (top layer), поэтому видна и над <dialog>, а портал в body не растягивает лист по горизонтали.
 
 const SIZE = 160;
 const GAP = 10;
+
+function openPopover(el: HTMLImageElement | null) {
+  try {
+    el?.showPopover();
+  } catch {
+    // браузер без Popover API: картинка и так position: fixed
+  }
+}
 
 export function IngredientPic({ src }: { src?: string }) {
   const { t } = useT();
@@ -36,7 +44,7 @@ export function IngredientPic({ src }: { src?: string }) {
       <button ref={ref} type="button" className="pic__btn" onClick={toggle} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-label={t("ing.photo")} title={t("ing.photo")} aria-expanded={!!pos}>
         <img className="pic__thumb" src={src} alt="" width={22} height={22} loading="lazy" decoding="async" />
       </button>
-      {pos && createPortal(<img className="pic__float" src={src} alt="" width={SIZE} height={SIZE} style={{ left: pos.x, top: pos.y }} />, ref.current?.closest("dialog") ?? document.body)}
+      {pos && createPortal(<img ref={openPopover} className="pic__float" popover="manual" src={src} alt="" width={SIZE} height={SIZE} style={{ left: pos.x, top: pos.y }} />, document.body)}
     </>
   );
 }
