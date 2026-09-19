@@ -828,3 +828,28 @@ func (s *Server) legalPage(w http.ResponseWriter, r *http.Request) {
 		"Title": title, "Doc": doc + "_" + textLang, "Updated": humanDate(pl.L, legalUpdated), "Other": other, "OtherTitle": i18n.T(pl.L, otherKey), "Email": email,
 	})
 }
+
+// ardManifest — /.well-known/ard.json (и прежнее имя ai-catalog.json): записи Agentic Resource Discovery,
+// по которым реестры агентов находят каталог рецептов и llms.txt.
+func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
+	base := s.baseURL(r)
+	host := strings.TrimPrefix(strings.TrimPrefix(base, "https://"), "http://")
+	entries := []map[string]any{
+		{
+			"identifier": "urn:air:" + host + ":site:recipes", "displayName": "Racion recipe catalog", "type": "text/html",
+			"url": base + "/recipes", "description": "494 home recipes with ingredients per portion, steps, calories and macros, estimated cost in 22 countries; every page carries schema.org Recipe JSON-LD. 15 languages via /<lang>/recipes.",
+			"representativeQueries": []string{"weekly dinner recipes under 500 kcal", "what to cook with chicken and rice", "cheap family dinners with prices"},
+		},
+		{
+			"identifier": "urn:air:" + host + ":site:collections", "displayName": "Racion curated collections", "type": "text/html",
+			"url": base + "/collections", "description": "Curated recipe sets: holiday tables, quick dinners, dacha and grill, kids party — schema.org ItemList.",
+		},
+		{
+			"identifier": "urn:air:" + host + ":doc:llms", "displayName": "Racion llms.txt", "type": "text/markdown",
+			"url": base + "/llms.txt", "description": "Site overview for language models: what to read, what not to fetch, usage terms.",
+		},
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	_ = json.NewEncoder(w).Encode(map[string]any{"entries": entries})
+}

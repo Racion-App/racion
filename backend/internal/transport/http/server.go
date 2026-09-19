@@ -84,6 +84,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
 	mux.HandleFunc("GET /api/partners", s.partners)
 	mux.HandleFunc("GET /llms.txt", s.llmsTxt)
+	mux.HandleFunc("GET /.well-known/ard.json", s.ardManifest)
+	mux.HandleFunc("GET /.well-known/ai-catalog.json", s.ardManifest)
 	mux.HandleFunc("GET /api/admin/partners", s.adminPartners)
 	mux.HandleFunc("POST /api/admin/partners", s.limited(s.lim.write, s.adminSavePartner))
 	mux.HandleFunc("DELETE /api/admin/partners/{code}", s.adminDeletePartner)
