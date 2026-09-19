@@ -345,7 +345,55 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 			}
 		}
 	}
-	return tx.Commit(ctx)
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+	return seedCollections(ctx, pool)
+}
+
+// seedCollections — редакционные подборки из collections.json: upsert по slug, рецепты целиком. Файл — источник
+// правды (правки из админки переносятся в него экспортом, см. ops/export_collections.py); подборки, которых
+// в файле нет, не трогаются. Рецепты, которых нет в базе, пропускаются.
+func seedCollections(ctx context.Context, pool *pgxpool.Pool) error {
+	raw, err := data.ReadFile("data/collections.json")
+	if err != nil {
+		return nil
+	}
+	var list []struct {
+		Slug, Name, Description, Cover string
+		Public                         bool
+		Names, Descriptions            map[string]string
+		Recipes                        []string
+	}
+	if err := json.Unmarshal(raw, &list); err != nil {
+		return fmt.Errorf("collections.json: %w", err)
+	}
+	for _, c := range list {
+		if c.Names == nil {
+			c.Names = map[string]string{}
+		}
+		if c.Descriptions == nil {
+			c.Descriptions = map[string]string{}
+		}
+		var id string
+		if err := pool.QueryRow(ctx, `INSERT INTO collections (user_id, name, description, cover, slug, public, curated, name_i18n, description_i18n)
+			VALUES (NULL, $1, $2, $3, $4, $5, true, $6, $7)
+			ON CONFLICT (slug) WHERE slug IS NOT NULL DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, cover = EXCLUDED.cover,
+			public = EXCLUDED.public, curated = true, name_i18n = EXCLUDED.name_i18n, description_i18n = EXCLUDED.description_i18n
+			RETURNING id`, c.Name, c.Description, c.Cover, c.Slug, c.Public, c.Names, c.Descriptions).Scan(&id); err != nil {
+			return fmt.Errorf("collection %s: %w", c.Slug, err)
+		}
+		if _, err := pool.Exec(ctx, `DELETE FROM collection_items WHERE collection_id = $1`, id); err != nil {
+			return err
+		}
+		for n, rid := range c.Recipes {
+			if _, err := pool.Exec(ctx, `INSERT INTO collection_items (collection_id, recipe_id, added_at)
+				SELECT $1, $2, now() + make_interval(secs => $3) WHERE EXISTS (SELECT 1 FROM recipes WHERE id = $2) ON CONFLICT DO NOTHING`, id, rid, n); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Substitutes — таблица замен продуктов из data/substitutes.json: id → варианты {id, ratio, note}.
@@ -365,10 +413,11 @@ func Substitutes() map[string][]SubEntry {
 }
 
 type SubEntry struct {
-	ID     string  `json:"id"`
-	Ratio  float64 `json:"ratio"`
-	Note   string  `json:"note"`
-	NoteEn string  `json:"note_en"` // заметка по-английски: для всех языков, кроме русского
+	ID     string   `json:"id"`
+	Ratio  float64  `json:"ratio"`
+	Note   string   `json:"note"`
+	NoteEn string   `json:"note_en"` // заметка по-английски: для всех языков, кроме русского
+	Not    []string `json:"not"`     // не предлагать рецептам с этими тегами (бульон вместо вина — не в напиток)
 }
 
 // Occasions — события из data/occasions.json.

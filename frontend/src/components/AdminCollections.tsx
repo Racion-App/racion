@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Eye, EyeOff, Plus, Search, Trash2, X } from "lucide-react";
+import { Eye, EyeOff, FolderOpen, Plus, Search, Trash2, X } from "lucide-react";
+import { EmptyState } from "./EmptyState";
 import { api, ApiError } from "../lib/api";
 import type { AdminRecipe, Collection } from "../lib/types";
 import { AList, ARow } from "./AdminList";
@@ -38,7 +39,7 @@ export function AdminCollections({ photos, onToast }: { photos: boolean; onToast
           <Plus size={16} aria-hidden /> {t("admin.coll.new")}
         </button>
       </div>
-      <AList empty={list?.length === 0 && <p className="state__box">{t("coll.empty")}</p>}>
+      <AList empty={list?.length === 0 && <EmptyState icon={<FolderOpen size={20} />} text={t("coll.empty")} />}>
         {list?.map((c) => (
           <ARow
             key={c.id}

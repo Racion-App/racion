@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Plus, Search, Sparkles, Trash2, Undo2, X } from "lucide-react";
+import { EmptyState } from "./EmptyState";
 import { api, ApiError } from "../lib/api";
 import type { AdminRecipe, CatalogRecipeInput, IngredientRef, Labeled } from "../lib/types";
 import { PhotoField } from "./PhotoField";
@@ -107,7 +108,7 @@ export function AdminRecipes({ equipment, photos, ai, onToast, editId, onOpen, o
           />
         ))}
       </AList>
-      {items.length === 0 && <p className="state__box">{t("catalog.empty")}</p>}
+      {items.length === 0 && <EmptyState icon={<Search size={20} />} text={t("catalog.empty")} hint={t("catalog.empty.hint")} />}
     </section>
   );
 }

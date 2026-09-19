@@ -1075,5 +1075,6 @@
   "admin.partners.err.kind": "Tipo: equipamento ou entrega",
   "admin.partners.err.name": "Nome vazio",
   "admin.partners.err.url": "URL: https:// e {q}",
-  "partner.q.grill": "churrasqueira"
+  "partner.q.grill": "churrasqueira",
+  "account.plans.empty.hint": "Sete perguntas e o menu com preços e lista de compras está pronto."
 }

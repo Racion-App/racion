@@ -1088,5 +1088,6 @@
   "admin.partners.err.kind": "Вид: техніка або доставка",
   "admin.partners.err.name": "Порожня назва",
   "admin.partners.err.url": "Адреса: https:// та {q}",
-  "partner.q.grill": "мангал"
+  "partner.q.grill": "мангал",
+  "account.plans.empty.hint": "Сім запитань — і меню з цінами та списком покупок готове."
 }

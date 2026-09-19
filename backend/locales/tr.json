@@ -1074,5 +1074,6 @@
   "admin.partners.err.kind": "Tür: ekipman veya teslimat",
   "admin.partners.err.name": "Ad boş",
   "admin.partners.err.url": "Adres: https:// ve {q}",
-  "partner.q.grill": "mangal"
+  "partner.q.grill": "mangal",
+  "account.plans.empty.hint": "Yedi soru — fiyatlı menü ve alışveriş listesi hazır."
 }

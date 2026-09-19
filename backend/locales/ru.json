@@ -1124,5 +1124,6 @@
   "admin.partners.err.kind": "Вид: техника или доставка",
   "admin.partners.err.name": "Название пустое",
   "admin.partners.err.url": "Адрес: https:// и {q}",
-  "partner.q.grill": "мангал"
+  "partner.q.grill": "мангал",
+  "account.plans.empty.hint": "Семь вопросов — и меню с ценами и списком покупок готово."
 }

@@ -1088,5 +1088,6 @@
   "admin.partners.err.kind": "Rodzaj: sprzęt lub dostawa",
   "admin.partners.err.name": "Brak nazwy",
   "admin.partners.err.url": "Adres: https:// i {q}",
-  "partner.q.grill": "grill"
+  "partner.q.grill": "grill",
+  "account.plans.empty.hint": "Siedem pytań i menu z cenami oraz listą zakupów gotowe."
 }

@@ -20,7 +20,7 @@ const collCols = `c.id, c.name, c.created_at, c.public, c.curated, COALESCE(c.sl
 	COALESCE(array_agg(i.recipe_id ORDER BY i.added_at) FILTER (WHERE i.recipe_id IS NOT NULL), '{}')`
 
 func (r *Collections) query(ctx context.Context, where string, args ...any) ([]domain.Collection, error) {
-	rows, err := r.pool.Query(ctx, `SELECT `+collCols+` FROM collections c JOIN users u ON u.id = c.user_id LEFT JOIN collection_items i ON i.collection_id = c.id `+where+` GROUP BY c.id, u.nick ORDER BY c.curated DESC, c.created_at`, args...)
+	rows, err := r.pool.Query(ctx, `SELECT `+collCols+` FROM collections c LEFT JOIN users u ON u.id = c.user_id LEFT JOIN collection_items i ON i.collection_id = c.id `+where+` GROUP BY c.id, u.nick ORDER BY c.curated DESC, c.created_at`, args...)
 	if err != nil {
 		return nil, wrap("collections.list", err)
 	}

@@ -125,7 +125,7 @@ func main() {
 	subsTable := map[string][]service.SubEntry{}
 	for id, list := range seed.Substitutes() {
 		for _, e := range list {
-			subsTable[id] = append(subsTable[id], service.SubEntry{ID: e.ID, Ratio: e.Ratio, Note: e.Note, NoteEn: e.NoteEn})
+			subsTable[id] = append(subsTable[id], service.SubEntry{ID: e.ID, Ratio: e.Ratio, Note: e.Note, NoteEn: e.NoteEn, Not: e.Not})
 		}
 	}
 	services.Subs = service.NewSubstitutes(subsTable, services.Recipes)

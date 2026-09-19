@@ -1088,5 +1088,6 @@
   "admin.partners.err.kind": "Druh: vybavení nebo rozvoz",
   "admin.partners.err.name": "Chybí název",
   "admin.partners.err.url": "Adresa: https:// a {q}",
-  "partner.q.grill": "gril"
+  "partner.q.grill": "gril",
+  "account.plans.empty.hint": "Sedm otázek a menu s cenami a nákupním seznamem je hotové."
 }

@@ -1075,5 +1075,6 @@
   "admin.partners.err.kind": "Түрі: техника немесе жеткізу",
   "admin.partners.err.name": "Атауы бос",
   "admin.partners.err.url": "Мекенжай: https:// және {q}",
-  "partner.q.grill": "мангал"
+  "partner.q.grill": "мангал",
+  "account.plans.empty.hint": "Жеті сұрақ — бағасы мен сатып алу тізімі бар мәзір дайын."
 }

@@ -1074,5 +1074,6 @@
   "admin.partners.err.kind": "Tipo: attrezzatura o consegna",
   "admin.partners.err.name": "Nome vuoto",
   "admin.partners.err.url": "URL: https:// e {q}",
-  "partner.q.grill": "barbecue"
+  "partner.q.grill": "barbecue",
+  "account.plans.empty.hint": "Sette domande e il menu con prezzi e lista della spesa è pronto."
 }

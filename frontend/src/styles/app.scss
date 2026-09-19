@@ -801,7 +801,19 @@ body.catside-open { overflow: hidden; }
   &__title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
   &__lead { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ds-label-secondary); }
   &__meta { margin: 0; font-size: 13px; color: var(--ds-label-tertiary); } }
-main.pages.is-loading { .rgrid, .pager { opacity: 0.55; transition: opacity var(--ds-dur-fast); pointer-events: none; } }
+// Загрузка каталога: результаты гаснут, поверх — кольцо; появляется с задержкой 180 мс, чтобы быстрые ответы не мигали
+main.pages .catmain { position: relative; }
+main.pages.is-loading {
+  .rgrid, .pager, .catsection { opacity: 0.45; transition: opacity var(--ds-dur-fast); pointer-events: none; }
+  .catmain::after {
+    content: ""; position: absolute; left: 50%; top: 140px; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%;
+    border: 3px solid var(--ds-fill-3); border-top-color: var(--ds-blue); opacity: 0;
+    animation: spin 0.8s linear infinite, fade-in var(--ds-dur-fast) 180ms forwards;
+  }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fade-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { main.pages.is-loading .catmain::after { animation: fade-in var(--ds-dur-fast) 180ms forwards; border-top-color: var(--ds-fill-3); } }
 // Свой рецепт в кабинете: статистика опубликованного и явная кнопка «Опубликовать»
 .planrow__stats { display: flex; gap: 12px; margin-top: 4px; font-size: 12.5px; color: var(--ds-label-tertiary); font-variant-numeric: tabular-nums;
   > span { display: inline-flex; align-items: center; gap: 4px; } }
@@ -1041,7 +1053,16 @@ main.pages.is-loading { .rgrid, .pager { opacity: 0.55; transition: opacity var(
 .account__title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.15; }
 .account__email { font-size: 13px; color: var(--ds-label-tertiary); margin: 2px 0 0; }
 .account__card { padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); display: grid; gap: 10px; }
-.account .state__box { padding: 12px 0; max-width: none; }
+// Пустое состояние списка: карточка на подложке, иконка в круге, заголовок, пояснение, действие
+.empty {
+  display: grid; justify-items: center; text-align: center; gap: 4px; padding: 22px 20px 20px;
+  border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px dashed var(--ds-separator-opaque);
+  &__icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--ds-fill-4); color: var(--ds-label-secondary); margin-bottom: 8px; }
+  &__title { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  &__hint { margin: 0; font-size: 13.5px; line-height: 1.4; color: var(--ds-label-tertiary); max-width: 380px; }
+  &__action { margin-top: 12px; .btn { display: inline-flex; align-items: center; gap: 6px; } }
+}
+.alist .empty { grid-column: 1 / -1; }
 // Форма своего рецепта: карточка, поля в столбик, продукты строками «имя · количество · убрать»
 .ownform {
   display: grid; gap: 14px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);

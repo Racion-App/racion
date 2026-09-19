@@ -1106,5 +1106,6 @@
   "admin.partners.err.kind": "Art: Geräte oder Lieferung",
   "admin.partners.err.name": "Name fehlt",
   "admin.partners.err.url": "URL: https:// und {q}",
-  "partner.q.grill": "Grill"
+  "partner.q.grill": "Grill",
+  "account.plans.empty.hint": "Sieben Fragen, und dein Menü mit Preisen und Einkaufsliste steht."
 }

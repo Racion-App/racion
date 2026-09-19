@@ -1074,5 +1074,6 @@
   "admin.partners.err.kind": "Soort: apparatuur of bezorging",
   "admin.partners.err.name": "Naam ontbreekt",
   "admin.partners.err.url": "URL: https:// en {q}",
-  "partner.q.grill": "barbecue"
+  "partner.q.grill": "barbecue",
+  "account.plans.empty.hint": "Zeven vragen en je menu met prijzen en boodschappenlijst staat klaar."
 }

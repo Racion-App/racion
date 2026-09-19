@@ -28,10 +28,11 @@ type SubRow struct {
 }
 
 type SubEntry struct {
-	ID     string  `json:"id"`
-	Ratio  float64 `json:"ratio"`
-	Note   string  `json:"note"`
-	NoteEn string  `json:"noteEn"` // для всех языков, кроме русского
+	ID     string   `json:"id"`
+	Ratio  float64  `json:"ratio"`
+	Note   string   `json:"note"`
+	NoteEn string   `json:"noteEn"` // для всех языков, кроме русского
+	Not    []string // теги рецепта, при которых замена неуместна
 }
 
 type Substitutes struct {
@@ -64,7 +65,7 @@ func (s *Substitutes) For(ctx context.Context, recipeID, country string, lang i1
 		row := SubRow{IngredientID: ri.IngredientID}
 		for _, e := range entries {
 			ing, ok := c.Ingredients[e.ID]
-			if !ok {
+			if !ok || unfit(e.Not, rc.Tags) {
 				continue
 			}
 			alt := rc
@@ -85,4 +86,16 @@ func (s *Substitutes) For(ctx context.Context, recipeID, country string, lang i1
 		}
 	}
 	return out, nil
+}
+
+// unfit — у рецепта есть тег, при котором эта замена не годится.
+func unfit(not, tags []string) bool {
+	for _, n := range not {
+		for _, t := range tags {
+			if n == t {
+				return true
+			}
+		}
+	}
+	return false
 }

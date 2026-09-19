@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { Activity, BookOpen, CalendarDays, Eye, Heart, Link2, LogOut, MessageCircle, Plus, ShoppingBag, ThumbsUp, Trash2, Upload, Users } from "lucide-react";
+import { Activity, BookOpen, CalendarDays, ChefHat, Eye, Heart, Link2, LogOut, MessageCircle, Plus, ShoppingBag, ThumbsDown, ThumbsUp, Trash2, Upload, Users } from "lucide-react";
 import { FamilyEditor } from "../components/FamilyEditor";
 import { TopBar } from "../components/TopBar";
 import { OwnRecipeForm } from "../components/OwnRecipeForm";
@@ -11,6 +11,7 @@ import { TranslationLine } from "../components/TranslationStatus";
 import { PhotoField } from "../components/PhotoField";
 import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
+import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { approx, weekRange } from "../lib/format";
@@ -204,7 +205,7 @@ export function Account() {
               <>
                 <p className="quiz__hint">{t("account.recipes.hint")}</p>
                 {own === null && <div className="skeleton" style={{ height: 80 }} />}
-                {own?.length === 0 && <p className="state__box">{t("account.recipes.empty")}</p>}
+                {own?.length === 0 && <EmptyState icon={<ChefHat size={20} />} text={t("account.recipes.empty")} />}
                 {own?.map((r) => (
                   <div className="planrow" key={r.id}>
                     <button type="button" className="planrow__main planrow__main--btn" onClick={() => setEditing(r)} aria-label={t("account.recipe.edit", { title: r.title })}>
@@ -306,7 +307,7 @@ export function Account() {
             <h3 className="account__sub">{t("account.favs")}</h3>
             <p className="quiz__hint">{t("account.favs.hint")}</p>
             {favorites === null && <div className="skeleton" style={{ height: 80 }} />}
-            {favorites?.length === 0 && <p className="state__box">{t("account.favs.empty")}</p>}
+            {favorites?.length === 0 && <EmptyState icon={<Heart size={20} />} text={t("account.favs.empty")} action={<Link className="btn btn-soft" to="/recipes">{t("nav.recipes")}</Link>} />}
             {favorites?.map((f) => (
               <div className="planrow" key={f.id}>
                 <a className="planrow__main" href={recipeHref(f.id)}>
@@ -333,7 +334,7 @@ export function Account() {
             <h3 className="account__sub">{t("account.dislikes")}</h3>
             <p className="quiz__hint">{t("account.dislikes.hint")}</p>
             {dislikes === null && <div className="skeleton" style={{ height: 80 }} />}
-            {dislikes?.length === 0 && <p className="state__box">{t("account.dislikes.empty")}</p>}
+            {dislikes?.length === 0 && <EmptyState icon={<ThumbsDown size={20} />} text={t("account.dislikes.empty")} />}
             {dislikes?.map((d) => (
               <div className="planrow" key={d.id}>
                 <a className="planrow__main" href={`${lang === "ru" ? "" : `/${lang}`}/recipe/${d.id}`}>
@@ -392,7 +393,7 @@ export function Account() {
                     )}
                   </div>
                 ))}
-                {family.accounts.length === 0 && <p className="state__box">{t("account.family.accounts.empty")}</p>}
+                {family.accounts.length === 0 && <EmptyState icon={<Users size={20} />} text={t("account.family.accounts.empty")} />}
                 <div className="account__actions">
                   {(family.owner || family.accounts.length === 0) && (
                     <button type="button" className="btn btn-soft" onClick={inviteFamily}>
@@ -414,12 +415,7 @@ export function Account() {
           <section aria-label={t("account.plans.aria")} className="account__section">
             {plans === null && <div className="skeleton" style={{ height: 120 }} />}
             {plans?.length === 0 && (
-              <div className="state__box">
-                <p>{t("account.plans.empty")}</p>
-                <Link to="/" className="btn btn-primary">
-                  {t("account.plans.first")}
-                </Link>
-              </div>
+              <EmptyState icon={<CalendarDays size={20} />} text={t("account.plans.empty")} hint={t("account.plans.empty.hint")} action={<Link to="/" className="btn btn-primary">{t("account.plans.first")}</Link>} />
             )}
             {plans?.map((p) => (
               <div className="planrow" key={p.id}>
@@ -460,7 +456,7 @@ export function Account() {
             <BudgetChart country={country} />
             <p className="quiz__hint purch__hint">{t("account.purchases.hint")}</p>
             {purchases === null && <div className="skeleton" style={{ height: 120 }} />}
-            {purchases?.length === 0 && <p className="state__box">{t("account.purchases.empty")}</p>}
+            {purchases?.length === 0 && <EmptyState icon={<ShoppingBag size={20} />} text={t("account.purchases.empty")} />}
             {purchases && purchases.length > 0 && <PurchaseReceipts purchases={purchases} money={approxRub} />}
           </section>
         )}

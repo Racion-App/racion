@@ -5,6 +5,7 @@ import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
 import { AdminPartners } from "../components/AdminPartners";
+import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
 import { TopBar } from "../components/TopBar";
 import { Select } from "../components/Select";
@@ -206,7 +207,7 @@ export function Admin() {
         {tab === "users" && (
           <section className="admin__section">
             <p className="admin__hint">{t("admin.users.hint")}</p>
-            <AList empty={users?.length === 0 && <p className="state__box">{t("admin.logs.empty")}</p>}>
+            <AList empty={users?.length === 0 && <EmptyState icon={<Users size={20} />} text={t("admin.logs.empty")} />}>
               {users?.map((u) => (
                 <ARow
                   key={u.id}
@@ -247,7 +248,7 @@ export function Admin() {
 
         {tab === "errors" && (
           <section className="admin__section">
-            {errors?.length === 0 && <p className="state__box">{t("admin.errors.empty")}</p>}
+            {errors?.length === 0 && <EmptyState icon={<AlertTriangle size={20} />} text={t("admin.errors.empty")} />}
             {errors?.map((e, i) => (
               <details className="admin__err" key={i}>
                 <summary>
@@ -278,7 +279,7 @@ export function Admin() {
                   {l.fields && Object.keys(l.fields).length > 0 && <code className="admin__log-fields">{JSON.stringify(l.fields)}</code>}
                 </div>
               ))}
-              {logs?.length === 0 && <p className="state__box">{t("admin.logs.empty")}</p>}
+              {logs?.length === 0 && <EmptyState icon={<ScrollText size={20} />} text={t("admin.logs.empty")} />}
             </div>
           </section>
         )}

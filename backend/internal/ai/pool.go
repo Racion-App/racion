@@ -13,7 +13,7 @@ import (
 // следующему. Какая модель ответила, пул возвращает наружу: это показывается в статусе перевода.
 
 type Provider struct {
-	Name      string        // mistral | gemini | groq | openrouter | openai | local
+	Name      string // mistral | gemini | groq | openrouter | openai | local
 	Client    *Client
 	MinGap    time.Duration // пауза между запросами (1 запрос/с у Mistral → 1.1s)
 	PerMinute int           // 0 — без лимита
@@ -34,11 +34,11 @@ type Provider struct {
 type ProviderStatus struct {
 	Name      string `json:"name"`
 	Model     string `json:"model"`
-	Today     int    `json:"today"`     // запросов за сегодня
-	PerDay    int    `json:"perDay"`    // дневной лимит (0 — нет)
-	OK        int    `json:"ok"`        // удачных с запуска
-	Failed    int    `json:"failed"`    // неудачных с запуска
-	Resting   bool   `json:"resting"`   // отдыхает после 429/402
+	Today     int    `json:"today"`   // запросов за сегодня
+	PerDay    int    `json:"perDay"`  // дневной лимит (0 — нет)
+	OK        int    `json:"ok"`      // удачных с запуска
+	Failed    int    `json:"failed"`  // неудачных с запуска
+	Resting   bool   `json:"resting"` // отдыхает после 429/402
 	RestUntil string `json:"restUntil,omitempty"`
 	LastError string `json:"lastError,omitempty"`
 }

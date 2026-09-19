@@ -1106,5 +1106,6 @@
   "admin.partners.err.kind": "Kind: equipment or delivery",
   "admin.partners.err.name": "Name is empty",
   "admin.partners.err.url": "URL: https:// and {q}",
-  "partner.q.grill": "grill"
+  "partner.q.grill": "grill",
+  "account.plans.empty.hint": "Seven questions and your menu with prices and a shopping list is ready."
 }

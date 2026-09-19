@@ -39,7 +39,7 @@ export function TopBar({ right }: { right?: ReactNode }) {
         {t("brand")}
       </Link>
       <div className="topbar__right">
-        {right ?? <span className="topbar__note">{t("nav.free")}</span>}
+        {right}
         <a href={`${prefix}/recipes`} className="pages-nav__link">
           {t("nav.recipes")}
         </a>

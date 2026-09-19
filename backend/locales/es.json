@@ -1075,5 +1075,6 @@
   "admin.partners.err.kind": "Tipo: equipo o entrega",
   "admin.partners.err.name": "Falta el nombre",
   "admin.partners.err.url": "URL: https:// y {q}",
-  "partner.q.grill": "barbacoa"
+  "partner.q.grill": "barbacoa",
+  "account.plans.empty.hint": "Siete preguntas y tu menú con precios y lista de la compra está listo."
 }

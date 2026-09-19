@@ -124,7 +124,7 @@ var coicopByID = map[string][2]string{
 	"black_pepper": {"CP01194", "other"}, "paprika": {"CP01194", "other"}, "curry": {"CP01194", "other"}, "cumin": {"CP01194", "other"}, "bay_leaf": {"CP01194", "other"},
 	"cinnamon": {"CP01194", "other"}, "chili_flakes": {"CP01194", "other"}, "garlic_powder": {"CP01194", "other"}, "oregano": {"CP01194", "other"},
 	"baking_powder": {"CP01199", "other"}, "starch": {"CP01199", "other"}, "yeast": {"CP01199", "other"}, "chicken_broth_cube": {"CP01193", "other"},
-	"tea": {"CP0121", "other"}, "apple_juice": {"CP0122", "other"}, "coconut_milk": {"CP01144", "other"}, "seaweed_nori": {"CP01199", "other"}, "puff_pastry": {"CP01191", "cereals"},
+	"tea": {"CP0121", "other"}, "apple_juice": {"CP0122", "other"}, "grape_juice": {"CP0122", "other"}, "coconut_milk": {"CP01144", "other"}, "seaweed_nori": {"CP01199", "other"}, "puff_pastry": {"CP01191", "cereals"},
 }
 
 // Кэш общих таблиц на один прогон синхронизации: PLI и курсы одинаковы для всех стран.

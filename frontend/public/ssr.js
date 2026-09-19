@@ -117,9 +117,15 @@
     fetch(url,{signal:busy.signal,headers:{"Accept":"text/html"},credentials:"same-origin"}).then(function(r){return r.text()}).then(function(html){
       var doc=new DOMParser().parseFromString(html,"text/html"),next=doc.querySelector("main.pages");
       if(!next){location.href=url;return}
-      main.innerHTML=next.innerHTML;document.title=doc.title;
+      // панель фильтров и колонку результатов меняем по содержимому, а не элементами: панель не моргает
+      // (класс is-open остаётся), её прокрутка и прокрутка страницы на месте, фокус не теряется зря
+      var ns=next.querySelector(".catside"),nm=next.querySelector(".catmain");
+      if(side&&ns&&nm&&main.querySelector(".catmain")){side.innerHTML=ns.innerHTML;main.querySelector(".catmain").innerHTML=nm.innerHTML;var nc=next.querySelector(".colstrip"),oc=main.querySelector(".colstrip");if(oc&&nc)oc.innerHTML=nc.innerHTML;else if(oc&&!nc)oc.remove()}
+      else main.innerHTML=next.innerHTML;
+      document.title=doc.title;
       var cd=main.querySelector(".catside__country");if(cd&&wasOpen)cd.open=true;
-      if(sideOpen){openSide(true);var s2=main.querySelector(".catside");if(s2)s2.scrollTop=sideTop}
+      var s2=main.querySelector(".catside");if(s2)s2.scrollTop=sideTop;
+      if(sideOpen)openSide(true);
       if(!scrollTo)window.scrollTo(0,Math.min(pageY,document.documentElement.scrollHeight-window.innerHeight));
       if(push)history.pushState({catalog:1},"",url);
       main.classList.remove("is-loading");busy=null;

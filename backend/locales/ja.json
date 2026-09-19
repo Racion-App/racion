@@ -1075,5 +1075,6 @@
   "admin.partners.err.kind": "種類：調理器具または配達",
   "admin.partners.err.name": "名前が空です",
   "admin.partners.err.url": "URL：https:// と {q}",
-  "partner.q.grill": "バーベキューグリル"
+  "partner.q.grill": "バーベキューグリル",
+  "account.plans.empty.hint": "7つの質問に答えるだけで、価格と買い物リスト付きの献立が完成します。"
 }

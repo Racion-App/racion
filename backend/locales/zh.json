@@ -1075,5 +1075,6 @@
   "admin.partners.err.kind": "类型：厨具或配送",
   "admin.partners.err.name": "名称为空",
   "admin.partners.err.url": "地址：https:// 且包含 {q}",
-  "partner.q.grill": "烧烤炉"
+  "partner.q.grill": "烧烤炉",
+  "account.plans.empty.hint": "回答七个问题，带价格和购物清单的菜单就准备好了。"
 }

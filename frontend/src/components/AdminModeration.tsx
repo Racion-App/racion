@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, ShieldCheck, X } from "lucide-react";
+import { EmptyState } from "./EmptyState";
 import { api } from "../lib/api";
 import type { ModerationItem } from "../lib/types";
 import { slotLabel } from "../lib/types";
@@ -38,7 +39,7 @@ export function AdminModeration({ onToast }: { onToast: (s: string) => void }) {
     <section className="admin__section">
       <h2 className="admin__h2">{t("admin.mod.queue")} {queue && <span className="comments__n num">{queue.length}</span>}</h2>
       {queue === null && <div className="skeleton" style={{ height: 80 }} />}
-      {queue?.length === 0 && <p className="state__box">{t("admin.mod.empty")}</p>}
+      {queue?.length === 0 && <EmptyState icon={<ShieldCheck size={20} />} text={t("admin.mod.empty")} />}
       {queue?.map((r) => (
         <article className={"modcard" + (r.submittedAt && Date.now() - new Date(r.submittedAt).getTime() > 20 * 3600000 ? " is-late" : "")} key={r.id}>
           <header className="modcard__head">

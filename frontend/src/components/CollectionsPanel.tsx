@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, FolderOpen, Link2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { EmptyState } from "./EmptyState";
 import { api } from "../lib/api";
 import type { Collection, Favorite } from "../lib/types";
 import { slotLabel } from "../lib/types";
@@ -74,7 +75,7 @@ export function CollectionsPanel({ onToast }: { onToast: (m: string) => void }) 
       <h3 className="account__sub">{t("coll.title")}</h3>
       <p className="quiz__hint">{t("coll.hint")}</p>
       {list === null && <div className="skeleton" style={{ height: 60 }} />}
-      {list?.length === 0 && <p className="state__box">{t("coll.empty")}</p>}
+      {list?.length === 0 && <EmptyState icon={<FolderOpen size={20} />} text={t("coll.empty")} />}
       <div className="coll">
         {list?.map((c) => (
           <div key={c.id}>
