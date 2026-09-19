@@ -1,0 +1,51 @@
+name: Deploy
+
+# Деплой на racion.app после зелёного CI на main: код с приватными сабмодулями (data, media) уезжает на сервер
+# по rsync, там docker compose пересобирает образы и перезапускает контейнеры. Секреты: DEPLOY_KEY (ssh-ключ
+# пользователя vadim), DEPLOY_HOST, DEPLOY_USER, DEPLOY_KNOWN_HOSTS, DATA_TOKEN (PAT с чтением data и media).
+# .env и backups на сервере не трогаем.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.DATA_TOKEN }}
+      - name: SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+      - name: Sync
+        run: |
+          rsync -az --delete \
+            --exclude .git --exclude .github --exclude .env --exclude backups --exclude backup.sh \
+            --exclude node_modules --exclude dist --exclude .impeccable \
+            -e "ssh -i ~/.ssh/deploy" ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/racion/
+      - name: Build and restart
+        run: |
+          ssh -i ~/.ssh/deploy ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} '
+            set -e
+            cd /opt/racion
+            docker compose build backend
+            docker compose build frontend
+            docker compose up -d --remove-orphans
+            docker image prune -f >/dev/null
+            sleep 8
+            curl -fsS -o /dev/null https://racion.app/healthz && echo "healthz ok"
+          '
