@@ -853,5 +853,5 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
-	_ = json.NewEncoder(w).Encode(map[string]any{"specVersion": "1.0", "host": host, "entries": entries})
+	_ = json.NewEncoder(w).Encode(map[string]any{"specVersion": "1.0", "host": map[string]any{"displayName": "Racion", "identifier": "did:web:" + host, "documentationUrl": base + "/llms.txt", "logoUrl": base + "/icons/icon-512.png"}, "entries": entries})
 }
