@@ -25,6 +25,11 @@ func (s *Server) withUser(next http.Handler) http.Handler {
 			if u, err := s.svc.Accounts.UserByToken(r.Context(), c.Value); err == nil && u != nil {
 				r = r.WithContext(context.WithValue(r.Context(), userKey, u))
 			}
+		} else if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
+			// ключ API (скрипты, помощники): те же права, что у владельца ключа
+			if u, err := s.svc.APIKeys.Auth(r.Context(), h); err == nil && u != nil {
+				r = r.WithContext(context.WithValue(r.Context(), userKey, u))
+			}
 		}
 		next.ServeHTTP(w, r)
 	})

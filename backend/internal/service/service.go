@@ -106,6 +106,7 @@ type Repos struct {
 	Households  HouseholdRepo
 	Collections CollectionRepo
 	Partners    PartnerRepo
+	APIKeys     APIKeyRepo
 }
 
 // Services — набор сценариев; транспорт получает его целиком.
@@ -128,6 +129,7 @@ type Services struct {
 	Subs         *Substitutes
 	Collections  *Collections
 	Partners     *Partners
+	APIKeys      *APIKeys
 }
 
 // New собирает сервисы; subscriber и baseURL нужны push-уведомлениям (VAPID и ссылки в них).
@@ -146,6 +148,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Family:      family,
 		Collections: NewCollections(repos.Collections, recipes),
 		Partners:    NewPartners(repos.Partners),
+		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
 	}
 }

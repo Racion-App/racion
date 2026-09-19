@@ -1089,5 +1089,17 @@
   "admin.partners.err.name": "Chybí název",
   "admin.partners.err.url": "Adresa: https:// a {q}",
   "partner.q.grill": "gril",
-  "account.plans.empty.hint": "Sedm otázek a menu s cenami a nákupním seznamem je hotové."
+  "account.plans.empty.hint": "Sedm otázek a menu s cenami a nákupním seznamem je hotové.",
+  "admin.keys": "Klíče API",
+  "admin.keys.hint": "Pro skripty a asistenty (Claude, Codex): klíč má vaše oprávnění. Jak přidávat recepty a sbírky —",
+  "admin.keys.copy": "Kopírovat",
+  "admin.keys.copied": "Klíč zkopírován",
+  "admin.keys.once": "Zobrazí se jen jednou: uložte si ho.",
+  "admin.keys.used": "použit {date}",
+  "admin.keys.unused": "zatím nepoužit",
+  "admin.keys.revoke": "Zneplatnit klíč",
+  "admin.keys.name": "Název, např. „Claude“",
+  "admin.keys.create": "Vytvořit klíč",
+  "admin.keys.err.name": "Název: do 40 znaků",
+  "admin.keys.err.limit": "Nejvýše deset klíčů"
 }

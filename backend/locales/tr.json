@@ -1075,5 +1075,17 @@
   "admin.partners.err.name": "Ad boş",
   "admin.partners.err.url": "Adres: https:// ve {q}",
   "partner.q.grill": "mangal",
-  "account.plans.empty.hint": "Yedi soru — fiyatlı menü ve alışveriş listesi hazır."
+  "account.plans.empty.hint": "Yedi soru — fiyatlı menü ve alışveriş listesi hazır.",
+  "admin.keys": "API anahtarları",
+  "admin.keys.hint": "Betikler ve asistanlar için (Claude, Codex): anahtar senin yetkilerini taşır. Tarif ve koleksiyon ekleme —",
+  "admin.keys.copy": "Kopyala",
+  "admin.keys.copied": "Anahtar kopyalandı",
+  "admin.keys.once": "Bir kez gösterilir: şimdi kaydet.",
+  "admin.keys.used": "{date} kullanıldı",
+  "admin.keys.unused": "henüz kullanılmadı",
+  "admin.keys.revoke": "Anahtarı iptal et",
+  "admin.keys.name": "Ad, örn. «Claude»",
+  "admin.keys.create": "Anahtar oluştur",
+  "admin.keys.err.name": "Ad: en fazla 40 karakter",
+  "admin.keys.err.limit": "En fazla on anahtar"
 }

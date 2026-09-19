@@ -1089,5 +1089,17 @@
   "admin.partners.err.name": "Brak nazwy",
   "admin.partners.err.url": "Adres: https:// i {q}",
   "partner.q.grill": "grill",
-  "account.plans.empty.hint": "Siedem pytań i menu z cenami oraz listą zakupów gotowe."
+  "account.plans.empty.hint": "Siedem pytań i menu z cenami oraz listą zakupów gotowe.",
+  "admin.keys": "Klucze API",
+  "admin.keys.hint": "Dla skryptów i asystentów (Claude, Codex): klucz ma twoje uprawnienia. Jak dodawać przepisy i kolekcje —",
+  "admin.keys.copy": "Kopiuj",
+  "admin.keys.copied": "Klucz skopiowany",
+  "admin.keys.once": "Pokazywany raz: zapisz teraz.",
+  "admin.keys.used": "użyty {date}",
+  "admin.keys.unused": "jeszcze nieużyty",
+  "admin.keys.revoke": "Unieważnij klucz",
+  "admin.keys.name": "Nazwa, np. „Claude”",
+  "admin.keys.create": "Utwórz klucz",
+  "admin.keys.err.name": "Nazwa: do 40 znaków",
+  "admin.keys.err.limit": "Najwyżej dziesięć kluczy"
 }

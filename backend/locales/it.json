@@ -1075,5 +1075,17 @@
   "admin.partners.err.name": "Nome vuoto",
   "admin.partners.err.url": "URL: https:// e {q}",
   "partner.q.grill": "barbecue",
-  "account.plans.empty.hint": "Sette domande e il menu con prezzi e lista della spesa è pronto."
+  "account.plans.empty.hint": "Sette domande e il menu con prezzi e lista della spesa è pronto.",
+  "admin.keys": "Chiavi API",
+  "admin.keys.hint": "Per script e assistenti (Claude, Codex): la chiave ha i tuoi permessi. Come aggiungere ricette e raccolte —",
+  "admin.keys.copy": "Copia",
+  "admin.keys.copied": "Chiave copiata",
+  "admin.keys.once": "Mostrata una sola volta: salvala ora.",
+  "admin.keys.used": "usata il {date}",
+  "admin.keys.unused": "mai usata",
+  "admin.keys.revoke": "Revoca chiave",
+  "admin.keys.name": "Nome, es. «Claude»",
+  "admin.keys.create": "Crea chiave",
+  "admin.keys.err.name": "Nome: fino a 40 caratteri",
+  "admin.keys.err.limit": "Massimo dieci chiavi"
 }

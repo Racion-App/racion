@@ -1076,5 +1076,17 @@
   "admin.partners.err.name": "Nome vazio",
   "admin.partners.err.url": "URL: https:// e {q}",
   "partner.q.grill": "churrasqueira",
-  "account.plans.empty.hint": "Sete perguntas e o menu com preços e lista de compras está pronto."
+  "account.plans.empty.hint": "Sete perguntas e o menu com preços e lista de compras está pronto.",
+  "admin.keys": "Chaves de API",
+  "admin.keys.hint": "Para scripts e assistentes (Claude, Codex): a chave tem as suas permissões. Como adicionar receitas e coleções —",
+  "admin.keys.copy": "Copiar",
+  "admin.keys.copied": "Chave copiada",
+  "admin.keys.once": "Mostrada uma vez: guarde agora.",
+  "admin.keys.used": "usada em {date}",
+  "admin.keys.unused": "ainda não usada",
+  "admin.keys.revoke": "Revogar chave",
+  "admin.keys.name": "Nome, ex.: «Claude»",
+  "admin.keys.create": "Criar chave",
+  "admin.keys.err.name": "Nome: até 40 caracteres",
+  "admin.keys.err.limit": "No máximo dez chaves"
 }

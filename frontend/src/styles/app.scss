@@ -1493,3 +1493,12 @@ main.pages.is-loading {
 .admin__h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); display: flex; align-items: center; gap: 8px; }
 .ownform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
 .badge--muted { background: var(--ds-fill-2); color: var(--ds-label-tertiary); }
+
+// Ключи API в админке: свежий ключ — плашка на синей подложке с копированием, список — строки с префиксом
+.keybox { display: grid; gap: 8px; padding: 12px 14px; margin: 8px 0; border-radius: var(--ds-radius-md); background: var(--ds-blue-tint); border: 1px solid var(--ds-blue);
+  &__key { font-size: 13px; word-break: break-all; user-select: all; }
+  small { color: var(--ds-label-secondary); font-size: 12.5px; }
+  .btn { justify-self: start; display: inline-flex; align-items: center; gap: 6px; } }
+.keyrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--ds-separator); color: var(--ds-label-secondary);
+  &__main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; b { color: var(--ds-label-primary); } code { font-size: 12.5px; } small { font-size: 12.5px; color: var(--ds-label-tertiary); } } }
+.keyform { display: flex; gap: 8px; margin-top: 10px; .form-control { flex: 1; min-height: 40px; } .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; } }

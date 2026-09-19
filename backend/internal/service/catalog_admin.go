@@ -58,6 +58,8 @@ func (a *CatalogAdmin) Get(id string) (planner.Recipe, error) {
 }
 
 // Save — новый рецепт (id из названия) или правка существующего; затем перечитываем каталог.
+var recipeIDRe = regexp.MustCompile(`^[a-z0-9_]{2,60}$`)
+
 func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (planner.Recipe, error) {
 	c := a.catalog.Load()
 	rc, err := a.validate(c, in)
@@ -69,7 +71,11 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 		rc.ID = uniqueSlug(c, rc.Title)
 		isNew = true
 	} else if _, ok := c.RecipeByID[rc.ID]; !ok {
-		return rc, domain.ErrNotFound
+		// неизвестный id: через API рецепт создают со своим id (латиница, цифры, _); опечатки в чужом формате — 404
+		if !recipeIDRe.MatchString(rc.ID) {
+			return rc, domain.ErrNotFound
+		}
+		isNew = true
 	} else {
 		rc.I18n = c.RecipeByID[rc.ID].I18n // переводы не трогаем
 	}

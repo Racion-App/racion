@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView, ApiKey } from "./types";
 import { tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -113,6 +113,9 @@ export const api = {
   collectionPublish: (id: string, pub: boolean) => request<Collection>(`/api/me/collections/${id}/public`, { method: "PUT", body: JSON.stringify({ public: pub }) }),
   publicCollections: (lang: string) => request<Collection[]>(`/api/collections?lang=${encodeURIComponent(lang)}`),
   partners: (country: string) => request<PartnerView>(`/api/partners?country=${encodeURIComponent(country)}`),
+  apiKeys: () => request<ApiKey[]>("/api/me/keys"),
+  apiKeyCreate: (name: string) => request<ApiKey>("/api/me/keys", { method: "POST", body: JSON.stringify({ name }) }),
+  apiKeyDelete: (id: string) => request<void>(`/api/me/keys/${encodeURIComponent(id)}`, { method: "DELETE" }),
   adminPartners: () => request<Partner[]>("/api/admin/partners"),
   adminSavePartner: (body: Partner) => request<Partner>("/api/admin/partners", { method: "POST", body: JSON.stringify(body) }),
   adminDeletePartner: (code: string) => request<void>(`/api/admin/partners/${encodeURIComponent(code)}`, { method: "DELETE" }),

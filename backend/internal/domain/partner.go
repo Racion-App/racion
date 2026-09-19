@@ -14,3 +14,13 @@ type Partner struct {
 	Active    bool   `json:"active"`
 	Priority  int    `json:"priority"`
 }
+
+// APIKey — ключ доступа к API от имени пользователя (админа). Key заполняется только в ответе на создание.
+type APIKey struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Prefix     string `json:"prefix"`
+	CreatedAt  string `json:"createdAt"`
+	LastUsedAt string `json:"lastUsedAt,omitempty"`
+	Key        string `json:"key,omitempty"`
+}

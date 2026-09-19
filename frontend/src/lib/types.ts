@@ -261,3 +261,4 @@ export type Extra = { id: number; name: string; qty: string; due: string | null;
 // Партнёрский магазин: шаблон ссылки с {q}; affiliate — показываем «Реклама» и erid.
 export type Partner = { code: string; country: string; kind: "goods" | "grocery"; name: string; url: string; affiliate: boolean; erid: string; active: boolean; priority: number };
 export type PartnerView = { goods: Partner[]; grocery: Partner[]; queries: Record<string, string> };
+export type ApiKey = { id: string; name: string; prefix: string; createdAt: string; lastUsedAt?: string; key?: string };

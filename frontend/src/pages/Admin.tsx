@@ -5,6 +5,7 @@ import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
 import { AdminPartners } from "../components/AdminPartners";
+import { AdminKeys } from "../components/AdminKeys";
 import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
 import { TopBar } from "../components/TopBar";
@@ -199,6 +200,7 @@ export function Admin() {
                     hint={p.perDay ? t("admin.ai.quota", { n: p.today, max: p.perDay }) : t("admin.ai.today", { n: p.today, ok: p.ok, failed: p.failed })}
                   />
                 ))}
+                {can("recipes") && <AdminKeys onToast={setToast} />}
               </div>
             </div>
           </section>

@@ -1125,5 +1125,17 @@
   "admin.partners.err.name": "Название пустое",
   "admin.partners.err.url": "Адрес: https:// и {q}",
   "partner.q.grill": "мангал",
-  "account.plans.empty.hint": "Семь вопросов — и меню с ценами и списком покупок готово."
+  "account.plans.empty.hint": "Семь вопросов — и меню с ценами и списком покупок готово.",
+  "admin.keys": "Ключи API",
+  "admin.keys.hint": "Для скриптов и помощников (Claude, Codex): ключ даёт те же права, что у тебя. Как добавлять рецепты и подборки —",
+  "admin.keys.copy": "Скопировать",
+  "admin.keys.copied": "Ключ скопирован",
+  "admin.keys.once": "Показывается один раз: сохрани сейчас.",
+  "admin.keys.used": "использован {date}",
+  "admin.keys.unused": "ещё не использовался",
+  "admin.keys.revoke": "Отозвать ключ",
+  "admin.keys.name": "Название, например «Claude»",
+  "admin.keys.create": "Создать ключ",
+  "admin.keys.err.name": "Название ключа: до 40 знаков",
+  "admin.keys.err.limit": "Не больше десяти ключей"
 }

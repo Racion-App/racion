@@ -1076,5 +1076,17 @@
   "admin.partners.err.name": "Атауы бос",
   "admin.partners.err.url": "Мекенжай: https:// және {q}",
   "partner.q.grill": "мангал",
-  "account.plans.empty.hint": "Жеті сұрақ — бағасы мен сатып алу тізімі бар мәзір дайын."
+  "account.plans.empty.hint": "Жеті сұрақ — бағасы мен сатып алу тізімі бар мәзір дайын.",
+  "admin.keys": "API кілттері",
+  "admin.keys.hint": "Скрипттер мен көмекшілер үшін (Claude, Codex): кілт сенің құқықтарыңды береді. Рецепт пен жинақ қосу —",
+  "admin.keys.copy": "Көшіру",
+  "admin.keys.copied": "Кілт көшірілді",
+  "admin.keys.once": "Бір рет көрсетіледі: қазір сақта.",
+  "admin.keys.used": "{date} қолданылды",
+  "admin.keys.unused": "әлі қолданылмаған",
+  "admin.keys.revoke": "Кілтті кері қайтару",
+  "admin.keys.name": "Атауы, мысалы «Claude»",
+  "admin.keys.create": "Кілт жасау",
+  "admin.keys.err.name": "Атауы: 40 таңбаға дейін",
+  "admin.keys.err.limit": "Он кілттен артық емес"
 }

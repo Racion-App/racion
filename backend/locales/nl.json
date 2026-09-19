@@ -1075,5 +1075,17 @@
   "admin.partners.err.name": "Naam ontbreekt",
   "admin.partners.err.url": "URL: https:// en {q}",
   "partner.q.grill": "barbecue",
-  "account.plans.empty.hint": "Zeven vragen en je menu met prijzen en boodschappenlijst staat klaar."
+  "account.plans.empty.hint": "Zeven vragen en je menu met prijzen en boodschappenlijst staat klaar.",
+  "admin.keys": "API-sleutels",
+  "admin.keys.hint": "Voor scripts en assistenten (Claude, Codex): een sleutel heeft jouw rechten. Recepten en collecties toevoegen —",
+  "admin.keys.copy": "Kopiëren",
+  "admin.keys.copied": "Sleutel gekopieerd",
+  "admin.keys.once": "Wordt één keer getoond: sla nu op.",
+  "admin.keys.used": "gebruikt {date}",
+  "admin.keys.unused": "nog niet gebruikt",
+  "admin.keys.revoke": "Sleutel intrekken",
+  "admin.keys.name": "Naam, bijv. “Claude”",
+  "admin.keys.create": "Sleutel maken",
+  "admin.keys.err.name": "Naam: maximaal 40 tekens",
+  "admin.keys.err.limit": "Maximaal tien sleutels"
 }

@@ -1107,5 +1107,17 @@
   "admin.partners.err.name": "Name is empty",
   "admin.partners.err.url": "URL: https:// and {q}",
   "partner.q.grill": "grill",
-  "account.plans.empty.hint": "Seven questions and your menu with prices and a shopping list is ready."
+  "account.plans.empty.hint": "Seven questions and your menu with prices and a shopping list is ready.",
+  "admin.keys": "API keys",
+  "admin.keys.hint": "For scripts and assistants (Claude, Codex): a key carries your permissions. How to add recipes and collections —",
+  "admin.keys.copy": "Copy",
+  "admin.keys.copied": "Key copied",
+  "admin.keys.once": "Shown once: save it now.",
+  "admin.keys.used": "used {date}",
+  "admin.keys.unused": "not used yet",
+  "admin.keys.revoke": "Revoke key",
+  "admin.keys.name": "Name, e.g. “Claude”",
+  "admin.keys.create": "Create key",
+  "admin.keys.err.name": "Key name: up to 40 characters",
+  "admin.keys.err.limit": "No more than ten keys"
 }
