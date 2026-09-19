@@ -1069,7 +1069,8 @@ main.pages.is-loading { .rgrid, .pager { opacity: 0.55; transition: opacity var(
   &__ai-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 }
 @media (min-width: 900px) {
-  .account { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; column-gap: 32px; }
+  // Правая колонка выше левой; 1fr на третьей строке забирает её высоту, иначе grid растянул бы шапку и вкладки
+  .account { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto auto 1fr; align-items: start; column-gap: 32px; }
   .account__head, .account .segmented--3, .account .segmented--4 { grid-column: 1; }
   .account__section { grid-column: 1; }
   .account__profile { grid-column: 2; grid-row: 1 / span 3; border-top: 0; padding-top: 0; }
