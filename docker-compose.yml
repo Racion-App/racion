@@ -45,6 +45,12 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
     restart: unless-stopped
 
   # Фото пользователей: S3-совместимое хранилище. В продакшене можно заменить на любой S3 (Selectel, Yandex, AWS),
@@ -65,11 +71,16 @@ services:
       args:
         VITE_METRIKA_ID: ${VITE_METRIKA_ID:-}
     ports:
-      - "${WEB_PORT:-8090}:80"
+      - "${WEB_PORTS:-8090-8091}:80"   # два порта, чтобы при плавном деплое рядом жили старый и новый контейнер
     volumes:
       - ./frontend/public/images:/usr/share/nginx/html/images:ro   # фото рецептов подхватываются без пересборки
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/favicon.svg"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
     restart: unless-stopped
 
 volumes:
