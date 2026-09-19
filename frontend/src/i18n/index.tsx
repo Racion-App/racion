@@ -153,7 +153,8 @@ async function loadDict(l: Lang): Promise<Dict> {
   const dict: Dict = {};
   for (const [k, v] of Object.entries(raw)) if (k !== "_meta" && typeof v === "string") dict[k] = v;
   DICTS[l] = dict;
-  writeCache(CACHE + l, { v: meta?.hash ?? "", dict });
+  // при упреждающей загрузке список языков мог прийти позже запроса — хэш берём свежий
+  writeCache(CACHE + l, { v: localeMeta(l)?.hash ?? meta?.hash ?? "", dict });
   return dict;
 }
 
@@ -210,6 +211,9 @@ export function LangProvider({ children }: { children: ReactNode }) {
     let alive = true;
     (async () => {
       try {
+        // первый визит: словарь текущего языка запрашиваем сразу, параллельно со списком языков —
+        // это убирает один круг до первой отрисовки; при смене языка ниже он просто не пригодится
+        const early = !DICTS[lang] && !readCache<unknown>(CACHE + lang) ? loadDict(lang).catch(() => ({})) : null;
         await loadLocales();
         // до загрузки списка языков браузерный язык мог не распознаться (список ещё не в кэше) — проверяем ещё раз
         if (auto) {
@@ -232,7 +236,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
             return;
           }
         }
-        await Promise.all([loadDict(lang), lang !== FALLBACK ? loadDict(FALLBACK) : Promise.resolve({}), lang !== "en" && lang !== FALLBACK ? loadDict("en") : Promise.resolve({})]);
+        await Promise.all([early ?? loadDict(lang), lang !== FALLBACK ? loadDict(FALLBACK) : Promise.resolve({}), lang !== "en" && lang !== FALLBACK ? loadDict("en") : Promise.resolve({})]);
       } catch {
         // без сети покажем ключи; страница всё равно работает
       }
