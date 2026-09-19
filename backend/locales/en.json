@@ -1211,9 +1211,9 @@
   "quiz.prep.none": "Every day",
   "quiz.prep.one": "Batch cook once a week",
   "quiz.prep.two": "Batch cook twice a week",
-  "quiz.prep.hint.none": "You cook on the day. Soups and stews are still planned for two days.",
-  "quiz.prep.hint.one": "You cook on Sunday and only reheat during the week. Anything that will not keep until Friday goes to the freezer or is swapped for a 15-minute dish.",
-  "quiz.prep.hint.two": "You cook on Sunday and on Wednesday evening. Almost everything then keeps in the fridge until its day, no freezer needed.",
+  "quiz.prep.hint.none": "You cook on the day. Soups and stews still go for two days.",
+  "quiz.prep.hint.one": "Sunday. After that you only reheat: what will not keep goes to the freezer or is swapped for a 15-minute dish.",
+  "quiz.prep.hint.two": "Sunday and Wednesday evening. Almost everything keeps in the fridge until its day.",
   "prep.title": "Batch cooking",
   "prep.day.before": "Sunday before the week",
   "prep.total": "about {time} at the stove",
@@ -1232,5 +1232,8 @@
   "expand": "Expand",
   "prep.mode.short.none": "every day",
   "prep.mode.short.one": "once a week",
-  "prep.mode.short.two": "twice a week"
+  "prep.mode.short.two": "twice a week",
+  "quiz.prep.days.none": "7 days",
+  "quiz.prep.days.one": "1 day",
+  "quiz.prep.days.two": "2 days"
 }
