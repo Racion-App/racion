@@ -102,7 +102,7 @@ export type Dish = {
   prep?: { session: number; mode: "fridge" | "freezer" | "fresh" }; // режим заготовок
 };
 
-export type PrepDay = { index: number; date: string; label: string; items: { recipeId: string; title: string; timeMin: number; mode: "fridge" | "freezer"; forDays: number[]; portions: number; side?: string }[]; totalMin: number };
+export type PrepDay = { index: number; date: string; label: string; items: { recipeId: string; title: string; timeMin: number; mode: "fridge" | "freezer"; forDays: number[]; portions: number; side?: string; sideId?: string }[]; totalMin: number };
 
 export type Day = {
   index: number;

@@ -47,6 +47,8 @@ type recipe struct {
 	Equipment   []string            `json:"equipment"`
 	Tags        []string            `json:"tags"`
 	Batch       bool                `json:"batch"`
+	Keep        *int                `json:"keep"`
+	Freeze      bool                `json:"freeze"`
 	Ingredients [][]json.RawMessage `json:"ingredients"`
 	Steps       []string            `json:"steps"`
 	Image       string              `json:"image"`
@@ -302,11 +304,11 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 				r.Description = d.Description
 			}
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, keep_days, freeze) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 			ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, slot=EXCLUDED.slot, time_min=EXCLUDED.time_min, equipment=EXCLUDED.equipment,
-			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n
+			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n, keep_days=EXCLUDED.keep_days, freeze=EXCLUDED.freeze
 			WHERE recipes.edited_at IS NULL`,
-			r.ID, r.Title, r.Slot, r.Time, r.Equipment, r.Tags, r.Batch, r.Steps, r.Image, r.Description, tr); err != nil {
+			r.ID, r.Title, r.Slot, r.Time, r.Equipment, r.Tags, r.Batch, r.Steps, r.Image, r.Description, tr, r.Keep, r.Freeze); err != nil {
 			return fmt.Errorf("recipe %s: %w", r.ID, err)
 		}
 		// продукты рецепта, правленного из админки, тоже его

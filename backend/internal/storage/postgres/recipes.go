@@ -211,12 +211,12 @@ func (r *CatalogRecipes) Save(ctx context.Context, rc planner.Recipe, isNew bool
 	}
 	defer tx.Rollback(ctx)
 	if isNew {
-		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, edited_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'{}', now())`,
-			rc.ID, rc.Title, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Batch, rc.Steps, rc.Image, rc.Description); err != nil {
+		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, edited_at, keep_days, freeze) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'{}', now(), $11, $12)`,
+			rc.ID, rc.Title, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Batch, rc.Steps, rc.Image, rc.Description, rc.KeepDays, rc.Freeze); err != nil {
 			return wrap("catalog.save", err)
 		}
-	} else if _, err := tx.Exec(ctx, `UPDATE recipes SET title=$2, slot=$3, time_min=$4, equipment=$5, tags=$6, batch=$7, steps=$8, image=$9, description=$10, edited_at=now(), deleted=false WHERE id=$1`,
-		rc.ID, rc.Title, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Batch, rc.Steps, rc.Image, rc.Description); err != nil {
+	} else if _, err := tx.Exec(ctx, `UPDATE recipes SET title=$2, slot=$3, time_min=$4, equipment=$5, tags=$6, batch=$7, steps=$8, image=$9, description=$10, edited_at=now(), deleted=false, keep_days=$11, freeze=$12 WHERE id=$1`,
+		rc.ID, rc.Title, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Batch, rc.Steps, rc.Image, rc.Description, rc.KeepDays, rc.Freeze); err != nil {
 		return wrap("catalog.save", err)
 	}
 	if _, err := tx.Exec(ctx, `DELETE FROM recipe_ingredients WHERE recipe_id = $1`, rc.ID); err != nil {

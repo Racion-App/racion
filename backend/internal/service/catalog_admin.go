@@ -116,7 +116,7 @@ func (a *CatalogAdmin) Tags() []string {
 
 func (a *CatalogAdmin) validate(c *planner.Catalog, in domain.CatalogRecipeInput) (planner.Recipe, error) {
 	rc := planner.Recipe{ID: strings.TrimSpace(in.ID), Title: strings.TrimSpace(in.Title), Description: strings.TrimSpace(in.Description),
-		Slot: in.Slot, TimeMin: in.TimeMin, Batch: in.Batch, Image: strings.TrimSpace(in.Image)}
+		Slot: in.Slot, TimeMin: in.TimeMin, Batch: in.Batch, KeepDays: in.Keep, Freeze: in.Freeze, Image: strings.TrimSpace(in.Image)}
 	if n := utf8.RuneCountInString(rc.Title); n < 2 || n > 80 {
 		return rc, domain.Invalid("own.err.title")
 	}

@@ -240,6 +240,8 @@ type CatalogRecipeInput struct {
 	Slot        string                     `json:"slot"`
 	TimeMin     int                        `json:"timeMin"`
 	Batch       bool                       `json:"batch"`
+	Keep        *int                       `json:"keep,omitempty"`   // режим заготовок: дней в холодильнике; nil — по правилам
+	Freeze      bool                       `json:"freeze,omitempty"` // можно заморозить готовым
 	Equipment   []string                   `json:"equipment"`
 	Tags        []string                   `json:"tags"`
 	Steps       []string                   `json:"steps"`

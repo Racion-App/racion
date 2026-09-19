@@ -579,10 +579,15 @@ export function Plan() {
                       {items.map((it) => (
                         <li key={it.recipeId} className="prep__row">
                           <span className="prep__min num">{it.timeMin} {t("min")}</span>
-                          <button type="button" className="prep__title" onClick={() => setRecipeId(it.recipeId)}>
-                            {it.title}
-                            {it.side && <small> + {it.side}</small>}
-                          </button>
+                          <span className="prep__name">
+                            <button type="button" className="prep__title" onClick={() => setRecipeId(it.recipeId)}>{it.title}</button>
+                            {it.side && (
+                              <>
+                                <small> + </small>
+                                <button type="button" className="prep__title prep__title--side" onClick={() => setRecipeId(it.sideId ?? it.recipeId)}>{it.side}</button>
+                              </>
+                            )}
+                          </span>
                           <span className="prep__days" aria-label={t("prep.for", { days: it.forDays.map((d) => plan.days[d]?.label).join(", ") })}>
                             {it.forDays.map((d) => <i key={d}>{plan.days[d]?.label}</i>)}
                             {it.portions > (plan.slotPortions?.[Object.keys(plan.slotPortions)[0]] ?? plan.portions) && <em className="num">×{fmtPortions(it.portions)}</em>}

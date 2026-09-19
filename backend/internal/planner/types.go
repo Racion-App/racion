@@ -77,7 +77,7 @@ type Recipe struct {
 	Equipment   []string              `json:"equipment"`
 	Tags        []string              `json:"tags"`
 	Batch       bool                  `json:"batch"`
-	KeepDays    int                   `json:"keep,omitempty"`   // сколько дней стоит в холодильнике готовым (0 — по правилам prep.go)
+	KeepDays    *int                  `json:"keep,omitempty"`   // сколько дней стоит в холодильнике готовым; nil — по правилам prep.go, 0 — есть свежим
 	Freeze      bool                  `json:"freeze,omitempty"` // можно заморозить готовым
 	Steps       []string              `json:"steps"`
 	Ingredients []RecipeIngredient    `json:"ingredients"`

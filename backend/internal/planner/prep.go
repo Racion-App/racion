@@ -50,8 +50,8 @@ type PrepInfo struct {
 // Keep — срок хранения готового блюда в холодильнике (дней) и можно ли его заморозить.
 // Явные поля рецепта важнее правил; правила — по тегам и названию.
 func Keep(r Recipe) (days int, freeze bool) {
-	if r.KeepDays > 0 || r.Freeze {
-		return r.KeepDays, r.Freeze
+	if r.KeepDays != nil {
+		return *r.KeepDays, r.Freeze
 	}
 	t := strings.ToLower(r.Title)
 	has := func(words ...string) bool {
@@ -159,6 +159,7 @@ type PrepItem struct {
 	ForDays  []int   `json:"forDays"` // индексы дней, когда это едят
 	Portions float64 `json:"portions"`
 	Side     string  `json:"side,omitempty"` // гарнир к блюду, готовится тогда же
+	SideID   string  `json:"sideId,omitempty"`
 }
 
 // prepDays собирает список заготовок по дням: свежие блюда (fresh) в него не входят, они готовятся в день еды.
@@ -206,6 +207,7 @@ func (c *Catalog) prepDays(plan *Plan) []PrepDay {
 				it := PrepItem{RecipeID: dish.RecipeID, Title: dish.Title, TimeMin: dish.TimeMin, Mode: dish.Prep.Mode, ForDays: forDays, Portions: portions}
 				if dish.Side != nil {
 					it.Side = dish.Side.Title
+					it.SideID = dish.Side.RecipeID
 					pd.TotalMin += dish.Side.TimeMin
 				}
 				pd.Items = append(pd.Items, it)

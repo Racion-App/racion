@@ -20,7 +20,7 @@ func TestKeepRules(t *testing.T) {
 			t.Errorf("%s: got %d/%v want %d/%v", c.title, d, f, c.days, c.freeze)
 		}
 	}
-	if d, f := Keep(Recipe{Title: "Что угодно", KeepDays: 5, Freeze: true}); d != 5 || !f {
+	if d, f := Keep(Recipe{Title: "Что угодно", KeepDays: ptr(5), Freeze: true}); d != 5 || !f {
 		t.Errorf("explicit fields ignored")
 	}
 }
@@ -48,3 +48,5 @@ func TestPrepAllowed(t *testing.T) {
 		t.Errorf("pasta on friday from wednesday must be fine")
 	}
 }
+
+func ptr(n int) *int { return &n }

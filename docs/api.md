@@ -56,6 +56,8 @@
   "slot": "dinner",
   "timeMin": 45,
   "batch": true,
+  "keep": 3,
+  "freeze": false,
   "equipment": ["oven"],
   "tags": ["meat", "protein"],
   "steps": [
