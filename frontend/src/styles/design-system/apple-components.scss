@@ -9,10 +9,12 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
-// Не трогаем focus у кнопок которые сами рисуют focus (Bootstrap form-control)
+// Поля ввода рисуют фокус сами (синяя рамка), общий outline и его border-radius 4px им не нужны:
+// иначе скругление поля дёргается при фокусе.
 .form-control:focus-visible,
 .form-select:focus-visible {
   outline: none;
+  border-radius: $border-radius;
 }
 
 // ── Base layout shell ───────────────────────────────────────────────────────
@@ -204,11 +206,11 @@
   background-color: var(--ds-bg-elevated) !important;
   color: var(--ds-label-primary) !important;
   border-color: var(--ds-border-input) !important;
-  // Без синего ореола на фокусе: рамка чуть темнее, и всё (решение продукта)
+  // Фокус — синяя рамка без ореола (решение продукта)
   &:focus {
     background-color: var(--ds-bg-elevated) !important;
     color: var(--ds-label-primary) !important;
-    border-color: var(--ds-fill-1) !important;
+    border-color: var(--ds-blue) !important;
     box-shadow: none !important;
   }
   &::placeholder { color: var(--ds-label-tertiary) !important; }
