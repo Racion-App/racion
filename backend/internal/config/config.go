@@ -12,6 +12,7 @@ type Config struct {
 	LogLevel        string // debug | info | warn | error
 	LogFormat       string // json | console
 	BaseURL         string // публичный адрес сайта для canonical и sitemap; пусто — из заголовков запроса
+	MetrikaID       string // счётчик Яндекс Метрики на SSR-страницах; пусто — не подключать
 	PushContact     string // контакт оператора для VAPID (mailto:…), его видят push-сервисы
 	OpenAIKey       string // ключ OpenAI для переводов и улучшения рецептов; пусто — функции ИИ выключены
 	OpenAIModel     string // модель для ИИ; по умолчанию gpt-5-nano
@@ -39,6 +40,7 @@ func Load() Config {
 		LogLevel:        env("LOG_LEVEL", "info"),
 		LogFormat:       env("LOG_FORMAT", "json"),
 		BaseURL:         env("BASE_URL", ""),
+		MetrikaID:       env("METRIKA_ID", ""),
 		PushContact:     env("PUSH_CONTACT", "mailto:admin@racion.app"),
 		OpenAIKey:       env("OPENAI_API_KEY", ""),
 		OpenAIModel:     env("OPENAI_MODEL", "gpt-5-nano"),

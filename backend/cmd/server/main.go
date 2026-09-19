@@ -196,6 +196,7 @@ func main() {
 			Services: services, Log: log.Named("http"), Geo: geoResolver,
 			Health:  func() error { return store.Ping(context.Background()) },
 			BaseURL: cfg.BaseURL,
+			Metrika: cfg.MetrikaID,
 			Logs:    ring,
 		}),
 		ReadHeaderTimeout: 5 * time.Second,

@@ -39,10 +39,12 @@ type Deps struct {
 	Geo      *geo.Resolver
 	Health   func() error // проверка живости хранилища для /healthz
 	BaseURL  string       // например https://racion.app; пусто — брать из запроса
+	Metrika  string       // id счётчика Яндекс Метрики для SSR-страниц
 	Logs     *logger.Ring // последние записи лога для админки
 }
 
 func New(d Deps) http.Handler {
+	metrikaID = d.Metrika
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)

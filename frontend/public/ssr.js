@@ -100,6 +100,15 @@
 })();
 
 // Каталог без перезагрузки: клик по стране, фильтру, странице и поиск подменяют <main> ответом сервера
+// Яндекс Метрика на SSR-страницах: id из <meta name="yandex-metrika"> (METRIKA_ID сервера); inline-скрипт запрещён CSP.
+(function(){
+  var m=document.querySelector('meta[name="yandex-metrika"]');if(!m||!m.content||window.ym)return;
+  var id=Number(m.content),q=[];function ym(){q.push(arguments)}ym.a=q;ym.l=Date.now();window.ym=ym;
+  var s=document.createElement("script");s.async=true;s.src="https://mc.yandex.ru/metrika/tag.js";document.head.appendChild(s);
+  ym(id,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});
+  // живой каталог меняет адрес без перезагрузки — сообщаем Метрике о просмотре
+  var push=history.pushState;history.pushState=function(){var r=push.apply(this,arguments);try{ym(id,"hit",location.href)}catch(e){}return r};
+})();
 // (тот же HTML), адрес меняется через pushState, «назад» работает. Фильтры остаются раскрытыми.
 (function(){
   var main=document.querySelector("main.pages");if(!main||!main.querySelector(".catside"))return;

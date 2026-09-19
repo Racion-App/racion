@@ -25,8 +25,12 @@ import (
 //go:embed templates/*.html
 var templateFS embed.FS
 
+// metrikaID — счётчик Яндекс Метрики для SSR-страниц (config METRIKA_ID); подключает ssr.js по <meta>, не inline (CSP).
+var metrikaID string
+
 var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"ogLocale": ogLocale,
+	"metrika":  func() string { return metrikaID },
 	"t":        func(l i18n.Lang, key string, args ...any) string { return i18n.T(l, key, args...) },
 	"money":    formatMoney,
 	"qty":      formatQty,

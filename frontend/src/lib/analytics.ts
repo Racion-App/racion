@@ -71,5 +71,15 @@ export function initAnalytics() {
   s.async = true;
   s.src = "https://mc.yandex.ru/metrika/tag.js";
   document.head.appendChild(s);
-  ym(Number(METRIKA_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
+  ym(Number(METRIKA_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+  // переходы внутри приложения идут через pushState — Метрика сама их не видит, сообщаем о просмотре страницы
+  const push = history.pushState.bind(history);
+  history.pushState = (...args: Parameters<History["pushState"]>) => {
+    push(...args);
+    try {
+      (w.ym as (id: number, m: string, u: string) => void)(Number(METRIKA_ID), "hit", location.href);
+    } catch {
+      /* счётчик ещё не загрузился */
+    }
+  };
 }
