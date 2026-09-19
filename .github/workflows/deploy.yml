@@ -1,9 +1,9 @@
 name: Deploy
 
-# Деплой на racion.app после зелёного CI на main: код с приватными сабмодулями (data, media) уезжает на сервер
-# по rsync, там docker compose пересобирает образы и перезапускает контейнеры. Секреты: DEPLOY_KEY (ssh-ключ
-# пользователя vadim), DEPLOY_HOST, DEPLOY_USER, DEPLOY_KNOWN_HOSTS, DATA_TOKEN (PAT с чтением data и media).
-# .env и backups на сервере не трогаем.
+# Деплой кода на racion.app после зелёного CI на main (или вручную): rsync на сервер по ssh, там docker compose
+# пересобирает образы и перезапускает контейнеры. База рецептов и фото живут в приватных репозиториях data и
+# media — они деплоят себя сами (свои workflow), здесь их папки исключены и на сервере не трогаются.
+# Секреты: DEPLOY_KEY (ssh-ключ пользователя vadim), DEPLOY_HOST, DEPLOY_USER, DEPLOY_KNOWN_HOSTS.
 
 on:
   workflow_run:
@@ -23,9 +23,6 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-          token: ${{ secrets.DATA_TOKEN }}
       - name: SSH key
         run: |
           mkdir -p ~/.ssh
@@ -34,8 +31,9 @@ jobs:
       - name: Sync
         run: |
           rsync -az --delete \
-            --exclude .git --exclude .github --exclude .env --exclude backups --exclude backup.sh \
+            --exclude .git --exclude .gitmodules --exclude .github --exclude .env --exclude backups --exclude backup.sh \
             --exclude node_modules --exclude dist --exclude .impeccable \
+            --exclude backend/internal/seed/data --exclude frontend/public/images \
             -e "ssh -i ~/.ssh/deploy" ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/racion/
       - name: Build and restart
         run: |
