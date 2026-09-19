@@ -118,7 +118,7 @@ a { text-underline-offset: 3px; }
 // ── Квиз ────────────────────────────────────────────────────────────────────
 .quiz {
   flex: 1; display: flex; flex-direction: column;
-  padding-bottom: calc(var(--r-bar-h) + var(--r-safe-bottom) + 16px);
+  padding-bottom: 16px;
 
   &__progress {
     display: grid; grid-auto-flow: column; gap: 4px;
@@ -235,10 +235,12 @@ a { text-underline-offset: 3px; }
   &[aria-checked="true"] { border-color: var(--ds-blue); background: var(--ds-blue-tint); box-shadow: 0 0 0 1px var(--ds-blue) inset; .option__val { color: var(--ds-blue); font-weight: 600; } }
 }
 
-// Нижняя панель действий — одна на квиз и на план.
+// Нижняя панель действий — одна на квиз и на план. В плане прибита к низу экрана; в квизе (--flow)
+// липнет к низу, пока прокрутка не дойдёт до её места перед подвалом, дальше едет со страницей.
 .actionbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
   padding: 10px var(--r-gutter) calc(10px + var(--r-safe-bottom));
+  &--flow { position: sticky; left: auto; right: auto; margin: 0 calc(-1 * var(--r-gutter)); }
   background: var(--ds-bg-overlay);
   backdrop-filter: var(--ds-blur-md); -webkit-backdrop-filter: var(--ds-blur-md);
   border-top: 1px solid var(--ds-separator);

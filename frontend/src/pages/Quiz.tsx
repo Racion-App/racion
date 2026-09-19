@@ -846,9 +846,8 @@ export function Quiz() {
           </section>
         )}
       </main>
-      <SiteFooter />
 
-      <div className="actionbar">
+      <div className="actionbar actionbar--flow">
         <div className="actionbar__inner">
           {step > 1 && (
             <button type="button" className="btn btn-ghost" onClick={() => go(step - 1)} aria-label={t("back")}>
@@ -875,6 +874,7 @@ export function Quiz() {
           )}
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
