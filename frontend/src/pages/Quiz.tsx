@@ -13,6 +13,7 @@ import { api } from "../lib/api";
 import { track } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
 import { readDraft } from "../lib/draft";
+import { weekRange } from "../lib/format";
 import type { Child, Country, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
 import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
@@ -357,7 +358,7 @@ export function Quiz() {
               <div className="quickstart" aria-label={t("quick.title")}>
                 <Link className="quickstart__card" to={`/plan/${lastPlan.id}`} onClick={() => track("quick_open_plan")}>
                   <span className="quickstart__icon"><CalendarDays size={20} aria-hidden /></span>
-                  <span><b>{t("quick.open")}</b><small>{lastPlan.title || t("quick.week", { date: lastPlan.startDate })} · {lastPlan.items} {t("quick.items")}{lastPlan.checked > 0 ? ` · ${t("quick.bought", { n: lastPlan.checked })}` : ""}</small></span>
+                  <span><b>{t("quick.open")}</b><small>{lastPlan.title || t("plan.title", { range: weekRange(lastPlan.startDate, lang) })} · {lastPlan.items} {t("quick.items")}{lastPlan.checked > 0 ? ` · ${t("quick.bought", { n: lastPlan.checked })}` : ""}</small></span>
                 </Link>
                 <button type="button" className="quickstart__card" disabled={busy || !p.store} onClick={() => { track("quick_rebuild"); void submit(); }}>
                   <span className="quickstart__icon"><RefreshCw size={20} aria-hidden /></span>
