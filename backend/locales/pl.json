@@ -289,7 +289,7 @@
   "catalog.page": "Strona {0} z {1}",
   "catalog.placeholder": "Na przykład: kurczak z kaszą gryczaną, zupa bezmięsna, twaróg",
   "catalog.prev": "Wstecz",
-  "catalog.prices": "Ceny w walucie kraju",
+  "catalog.prices": "Kraj i waluta",
   "catalog.prices.for": "Ceny dla {0} ({1}) — zmień",
   "catalog.recipe.few": "przepisy",
   "catalog.recipe.many": "przepisów",
@@ -1110,5 +1110,9 @@
   "auth.legal.pre": "Rejestrując się, akceptujesz",
   "auth.legal.and": "i",
   "auth.consent": "Zgadzam się na przetwarzanie moich danych, w tym podanych alergii, celów żywieniowych i składu rodziny — tylko do dopasowania menu.",
-  "filter.price.any": "dowolna"
+  "filter.price.any": "dowolna",
+  "filter.price.from": "od {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Cena minimalna",
+  "filter.price.max": "Cena maksymalna"
 }

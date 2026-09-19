@@ -246,6 +246,7 @@ var CatalogFilters = []FilterGroup{
 	{"time", []string{"20", "40", "60"}, false},
 	{"kcal", []string{"300", "500", "501"}, false},
 	{"price", []string{"1", "2", "3"}, false},
+	{"pmin", nil, false}, // нижняя граница цены порции с ползунка; вариантов нет — только число
 	{"eq", []string{"stove", "nooven", "nocook", "oven", "airfryer", "multicooker", "steamer", "microwave", "grill"}, false},
 }
 
@@ -347,6 +348,12 @@ func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Cou
 			limit, _ = strconv.ParseFloat(v[0], 64)
 		}
 		if ok && limit > 0 && cost > limit {
+			return false
+		}
+	}
+	if v := f["pmin"]; len(v) > 0 {
+		cost, ok := c.catalog.Load().PortionCost(r, country.Code)
+		if lo, _ := strconv.ParseFloat(v[0], 64); ok && lo > 0 && cost < lo {
 			return false
 		}
 	}

@@ -276,7 +276,7 @@
   "catalog.page": "Бет {0} - {1}",
   "catalog.placeholder": "Мысалы: тауық жарма гречка, етсіз сорпа, сүзбе",
   "catalog.prev": "Артқа",
-  "catalog.prices": "Бағалар елдің валютасында",
+  "catalog.prices": "Ел және валюта",
   "catalog.prices.for": "Бағалар үшін {0} ({1}) — өзгерту",
   "catalog.recipe.few": "рецепттер",
   "catalog.recipe.many": "рецепттер",
@@ -1097,5 +1097,9 @@
   "auth.legal.pre": "Тіркелу арқылы сен қабылдайсың:",
   "auth.legal.and": "және",
   "auth.consent": "Мен көрсеткен аллергиялар, тамақтану мақсаттары мен отбасы құрамын қоса, деректерімді тек мәзір таңдау үшін өңдеуге келісемін.",
-  "filter.price.any": "кез келген"
+  "filter.price.any": "кез келген",
+  "filter.price.from": "{0} бастап",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Ең төменгі баға",
+  "filter.price.max": "Ең жоғары баға"
 }

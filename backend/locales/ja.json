@@ -276,7 +276,7 @@
   "catalog.page": "ページ {0} / {1}",
   "catalog.placeholder": "例: 鶏肉・そば粉、肉なしのスープ、カッテージチーズ",
   "catalog.prev": "戻る",
-  "catalog.prices": "国の通貨での価格",
+  "catalog.prices": "国と通貨",
   "catalog.prices.for": "国の価格: {0} ({1}) — 変更",
   "catalog.recipe.few": "レシピ",
   "catalog.recipe.many": "レシピ",
@@ -1097,5 +1097,9 @@
   "auth.legal.pre": "登録すると次に同意したことになります：",
   "auth.legal.and": "および",
   "auth.consent": "入力したアレルギー、食事目標、世帯構成を含む私のデータが、献立作成のためだけに処理されることに同意します。",
-  "filter.price.any": "指定なし"
+  "filter.price.any": "指定なし",
+  "filter.price.from": "{0} 以上",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "最低価格",
+  "filter.price.max": "最高価格"
 }

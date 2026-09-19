@@ -275,7 +275,7 @@
   "catalog.page": "Page {0} sur {1}",
   "catalog.placeholder": "Par exemple : poulet sarrasin, soupe sans viande, fromage blanc",
   "catalog.prev": "Précédent",
-  "catalog.prices": "Prix dans la devise de",
+  "catalog.prices": "Pays et devise",
   "catalog.prices.for": "Prix pour {0} ({1}) — changer",
   "catalog.recipe.few": "recettes",
   "catalog.recipe.many": "recettes",
@@ -1096,5 +1096,9 @@
   "auth.legal.pre": "En vous inscrivant, vous acceptez les",
   "auth.legal.and": "et la",
   "auth.consent": "J’accepte le traitement de mes données, y compris les allergies, objectifs et composition du foyer que j’indique — uniquement pour adapter le menu.",
-  "filter.price.any": "indifférent"
+  "filter.price.any": "indifférent",
+  "filter.price.from": "à partir de {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Prix minimum",
+  "filter.price.max": "Prix maximum"
 }

@@ -276,7 +276,7 @@
   "catalog.page": "Página {0} de {1}",
   "catalog.placeholder": "Por ejemplo: pollo, trigo sarraceno; sopa vegetariana; requesón",
   "catalog.prev": "Atrás",
-  "catalog.prices": "Precios en la moneda de",
+  "catalog.prices": "País y moneda",
   "catalog.prices.for": "Precios para {0} ({1}) — cambiar",
   "catalog.recipe.few": "recetas",
   "catalog.recipe.many": "recetas",
@@ -1097,5 +1097,9 @@
   "auth.legal.pre": "Al registrarte aceptas las",
   "auth.legal.and": "y la",
   "auth.consent": "Consiento el tratamiento de mis datos, incluidas las alergias, objetivos y composición del hogar que indico — solo para ajustar el menú.",
-  "filter.price.any": "cualquiera"
+  "filter.price.any": "cualquiera",
+  "filter.price.from": "desde {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Precio mínimo",
+  "filter.price.max": "Precio máximo"
 }

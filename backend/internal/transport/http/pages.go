@@ -287,9 +287,13 @@ type filterView struct {
 // priceSlider — «не дороже N» одним движением: шкала от половины нижнего порога страны до двух верхних,
 // крайнее правое значение = без ограничения. Value — текущий порог (или Max, если фильтра нет).
 type priceSlider struct {
-	Min, Max, Step, Value float64
-	Label, Any, Symbol    string
-	Active                bool
+	Min, Max, Step, Lo, Hi float64 // шкала и текущие границы (Lo=Min и Hi=Max — без ограничения)
+	Label, Any, Symbol     string
+	Active                 bool
+	Quick                  []struct {
+		Label, Href string
+		On          bool
+	}
 }
 
 // recipesPage — /recipes: каталог с фильтрами, умным поиском и постраничкой. Обычный HTML, без React.
@@ -321,10 +325,10 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 					active[g.Param] = append(active[g.Param], v)
 				}
 			}
-			// цена — ползунок: любое число в валюте страны (порог «не дороже»)
-			if g.Param == "price" && len(active["price"]) == 0 {
+			// цена — ползунок: любое число в валюте страны («не дороже» price, «не дешевле» pmin)
+			if (g.Param == "price" || g.Param == "pmin") && len(active[g.Param]) == 0 {
 				if f, err := strconv.ParseFloat(v, 64); err == nil && f > 0 && f < 1e6 {
-					active["price"] = []string{strconv.FormatFloat(f, 'f', -1, 64)}
+					active[g.Param] = []string{strconv.FormatFloat(f, 'f', -1, 64)}
 				}
 			}
 		}
@@ -460,20 +464,48 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			} else if sl.Max >= 200 {
 				sl.Step = 5
 			}
-			sl.Value = sl.Max
+			sl.Lo, sl.Hi = sl.Min, sl.Max
 			if v := active["price"]; len(v) > 0 {
 				if idx, ok := map[string]int{"1": 0, "2": 1, "3": 2}[v[0]]; ok {
-					sl.Value = lv[idx]
+					sl.Hi = lv[idx]
 				} else if f, err := strconv.ParseFloat(v[0], 64); err == nil {
-					sl.Value = f
+					sl.Hi = math.Min(f, sl.Max)
 				}
 				sl.Active = true
-				activeCount++
-				titleParts = append(titleParts, strings.ToLower(i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, sl.Value))))
 			}
-			sl.Label = i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, sl.Value))
-			if !sl.Active {
+			if v := active["pmin"]; len(v) > 0 {
+				if f, err := strconv.ParseFloat(v[0], 64); err == nil {
+					sl.Lo = math.Max(f, sl.Min)
+					sl.Active = true
+				}
+			}
+			switch {
+			case !sl.Active:
 				sl.Label = sl.Any
+			case sl.Lo > sl.Min && sl.Hi < sl.Max:
+				sl.Label = i18n.T(pl.L, "filter.price.range", formatMoney(pl.Country, sl.Lo), formatMoney(pl.Country, sl.Hi))
+			case sl.Lo > sl.Min:
+				sl.Label = i18n.T(pl.L, "filter.price.from", formatMoney(pl.Country, sl.Lo))
+			default:
+				sl.Label = i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, sl.Hi))
+			}
+			if sl.Active {
+				activeCount++
+				titleParts = append(titleParts, strings.ToLower(sl.Label))
+			}
+			// быстрые пороги «до N»: снимают нижнюю границу
+			for i, lim := range lv {
+				id := strconv.Itoa(i + 1)
+				next := toggle("price", id, false)
+				delete(next, "pmin")
+				on := len(active["pmin"]) == 0 && len(active["price"]) > 0 && (active["price"][0] == id || active["price"][0] == strconv.FormatFloat(lim, 'f', -1, 64))
+				if on {
+					next = toggle("price", id, false) // toggle снял price — оставляем как есть (клик по активному чипу сбрасывает)
+				}
+				sl.Quick = append(sl.Quick, struct {
+					Label, Href string
+					On          bool
+				}{i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, lim)), link(next, 1), on})
 			}
 			fv.Slider = sl
 			views = append(views, fv)

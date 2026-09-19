@@ -281,7 +281,7 @@
   "catalog.page": "Seite {0} von {1}",
   "catalog.placeholder": "Zum Beispiel: Hähnchen Buchweizen, Suppe ohne Fleisch, Quark",
   "catalog.prev": "Zurück",
-  "catalog.prices": "Preise in der Währung von",
+  "catalog.prices": "Land und Währung",
   "catalog.prices.for": "Preise für {0} ({1}) — ändern",
   "catalog.recipe.many": "Rezepte",
   "catalog.recipe.one": "Rezept",
@@ -1128,5 +1128,9 @@
   "auth.legal.pre": "Mit der Registrierung akzeptierst du die",
   "auth.legal.and": "und die",
   "auth.consent": "Ich stimme der Verarbeitung meiner Daten zu, einschließlich der von mir angegebenen Allergien, Ernährungsziele und Haushaltsangaben — nur zur Menüplanung.",
-  "filter.price.any": "beliebig"
+  "filter.price.any": "beliebig",
+  "filter.price.from": "ab {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Mindestpreis",
+  "filter.price.max": "Höchstpreis"
 }

@@ -275,7 +275,7 @@
   "catalog.page": "Pagina {0} di {1}",
   "catalog.placeholder": "Per esempio: pollo con grano saraceno, zuppa senza carne, ricotta",
   "catalog.prev": "Indietro",
-  "catalog.prices": "Prezzi nella valuta di",
+  "catalog.prices": "Paese e valuta",
   "catalog.prices.for": "Prezzi per {0} ({1}) — cambiare",
   "catalog.recipe.few": "ricette",
   "catalog.recipe.many": "ricette",
@@ -1096,5 +1096,9 @@
   "auth.legal.pre": "Registrandoti accetti le",
   "auth.legal.and": "e l’",
   "auth.consent": "Acconsento al trattamento dei miei dati, comprese allergie, obiettivi e composizione della famiglia che indico — solo per adattare il menu.",
-  "filter.price.any": "qualsiasi"
+  "filter.price.any": "qualsiasi",
+  "filter.price.from": "da {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Prezzo minimo",
+  "filter.price.max": "Prezzo massimo"
 }

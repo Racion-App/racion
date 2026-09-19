@@ -276,7 +276,7 @@
   "catalog.page": "第 {0} 页，共 {1} 页",
   "catalog.placeholder": "例如：鸡肉荞麦、无肉汤、凝乳",
   "catalog.prev": "上一页",
-  "catalog.prices": "价格以所在国家货币计",
+  "catalog.prices": "国家和货币",
   "catalog.prices.for": "国家价格：{0}（{1}）— 更改",
   "catalog.recipe.few": "道食谱",
   "catalog.recipe.many": "道食谱",
@@ -1097,5 +1097,9 @@
   "auth.legal.pre": "注册即表示你接受",
   "auth.legal.and": "和",
   "auth.consent": "我同意处理我的数据，包括我填写的过敏、饮食目标和家庭成员信息——仅用于定制菜单。",
-  "filter.price.any": "不限"
+  "filter.price.any": "不限",
+  "filter.price.from": "{0} 起",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "最低价格",
+  "filter.price.max": "最高价格"
 }

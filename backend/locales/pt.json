@@ -276,7 +276,7 @@
   "catalog.page": "Página {0} de {1}",
   "catalog.placeholder": "Por exemplo: frango com trigo sarraceno, sopa sem carne, queijo cottage",
   "catalog.prev": "Voltar",
-  "catalog.prices": "Preços na moeda do país",
+  "catalog.prices": "País e moeda",
   "catalog.prices.for": "Preços para {0} ({1}) — alterar",
   "catalog.recipe.few": "receitas",
   "catalog.recipe.many": "receitas",
@@ -1097,5 +1097,9 @@
   "auth.legal.pre": "Ao registar-se aceita os",
   "auth.legal.and": "e a",
   "auth.consent": "Consinto o tratamento dos meus dados, incluindo alergias, objetivos e composição do agregado que indico — só para ajustar o menu.",
-  "filter.price.any": "qualquer"
+  "filter.price.any": "qualquer",
+  "filter.price.from": "a partir de {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Preço mínimo",
+  "filter.price.max": "Preço máximo"
 }

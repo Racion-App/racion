@@ -296,7 +296,7 @@
   "catalog.page": "Страница {0} из {1}",
   "catalog.placeholder": "Например: курица гречка, суп без мяса, творог",
   "catalog.prev": "Назад",
-  "catalog.prices": "Цены в валюте страны",
+  "catalog.prices": "Страна и валюта",
   "catalog.prices.for": "Цены для страны: {0} ({1}) — сменить",
   "catalog.recipe.few": "рецепта",
   "catalog.recipe.many": "рецептов",
@@ -1146,5 +1146,9 @@
   "auth.legal.pre": "Регистрируясь, ты принимаешь",
   "auth.legal.and": "и",
   "auth.consent": "Согласен на обработку данных, включая указанные мной аллергии, цели питания и состав семьи — только для подбора меню.",
-  "filter.price.any": "любая"
+  "filter.price.any": "любая",
+  "filter.price.from": "от {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Минимальная цена",
+  "filter.price.max": "Максимальная цена"
 }

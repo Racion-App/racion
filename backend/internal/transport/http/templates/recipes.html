@@ -39,9 +39,16 @@
   </details>
   {{range .Filters}}{{if ne .Param "slot"}}
   <div class="filters__group">
-    <div class="filters__label">{{.Label}}{{if .Slider}} <output class="filters__out num" data-price-out data-any="{{.Slider.Any}}" data-upto="{{t $.L "filter.price.upto" "{0}"}}">{{.Slider.Label}}</output>{{end}}</div>
+    <div class="filters__label">{{.Label}}{{if .Slider}} <output class="filters__out num" data-price-out data-any="{{.Slider.Any}}" data-upto="{{t $.L "filter.price.upto" "{0}"}}" data-from="{{t $.L "filter.price.from" "{0}"}}" data-range="{{t $.L "filter.price.range" "{0}" "{1}"}}">{{.Slider.Label}}</output>{{end}}</div>
     {{if .Slider}}
-    <input class="filters__range" type="range" data-price min="{{.Slider.Min}}" max="{{.Slider.Max}}" step="{{.Slider.Step}}" value="{{.Slider.Value}}" data-symbol="{{.Slider.Symbol}}" data-decimals="{{$.Country.Decimals}}" aria-label="{{.Label}}">
+    <div class="prange" data-price-slider data-symbol="{{.Slider.Symbol}}" data-decimals="{{$.Country.Decimals}}" data-min="{{.Slider.Min}}" data-max="{{.Slider.Max}}">
+      <div class="prange__track"><div class="prange__fill" data-price-fill></div></div>
+      <input class="prange__in" type="range" data-price-min min="{{.Slider.Min}}" max="{{.Slider.Max}}" step="{{.Slider.Step}}" value="{{.Slider.Lo}}" aria-label="{{t $.L "filter.price.min"}}">
+      <input class="prange__in" type="range" data-price-max min="{{.Slider.Min}}" max="{{.Slider.Max}}" step="{{.Slider.Step}}" value="{{.Slider.Hi}}" aria-label="{{t $.L "filter.price.max"}}">
+    </div>
+    <div class="chips chips--quick">
+      {{range .Slider.Quick}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}}</a>{{end}}
+    </div>
     {{else}}
     <div class="chips">
       {{range .Options}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}}</a>{{end}}

@@ -130,6 +130,7 @@
       document.title=doc.title;
       var cd=main.querySelector(".catside__country");if(cd&&wasOpen)cd.open=true;
       var s2=main.querySelector(".catside");if(s2)s2.scrollTop=sideTop;
+      initSlider();
       if(sideOpen)openSide(true);
       if(!scrollTo)window.scrollTo(0,Math.min(pageY,document.documentElement.scrollHeight-window.innerHeight));
       if(push)history.pushState({catalog:1},"",url);
@@ -147,16 +148,32 @@
     load(a.href,true,inPager?".rgrid":null);
   });
   // ползунок цены: подпись меняется на ходу, запрос уходит при отпускании; крайнее правое = без ограничения
+  // двойной ползунок цены «от — до»: бегунки не пересекаются, заливка между ними, подпись на ходу,
+  // запрос при отпускании; крайние положения = без ограничения (параметры pmin/price снимаются)
   function money(v,sym,dec){var s=dec>0?v.toFixed(dec).replace(".",","):String(Math.round(v));return sym==="$"||sym==="£"?sym+s:s+" "+sym}
-  main.addEventListener("input",function(e){
-    var r=e.target;if(!r.matches("[data-price]"))return;
-    var out=main.querySelector("[data-price-out]"),v=Number(r.value);
-    if(out)out.textContent=v>=Number(r.max)?out.dataset.any:(out.dataset.upto||"").replace("{0}",money(v,r.dataset.symbol,Number(r.dataset.decimals)));
-  });
+  function sliderState(box){
+    var lo=box.querySelector("[data-price-min]"),hi=box.querySelector("[data-price-max]"),min=Number(box.dataset.min),max=Number(box.dataset.max);
+    var a=Number(lo.value),b=Number(hi.value);if(a>b){var t=a;a=b;b=t;lo.value=a;hi.value=b}
+    return {lo:lo,hi:hi,a:a,b:b,min:min,max:max}
+  }
+  function paintSlider(box){
+    var s=sliderState(box),fill=box.querySelector("[data-price-fill]"),out=main.querySelector("[data-price-out]"),sym=box.dataset.symbol,dec=Number(box.dataset.decimals);
+    var p=function(v){return (v-s.min)/(s.max-s.min)*100};
+    if(fill){fill.style.left=p(s.a)+"%";fill.style.right=(100-p(s.b))+"%"}
+    // верхний бегунок перекрывает нижний у правого края: тот, что ближе к середине, ловит указатель
+    s.lo.style.zIndex=s.a>s.min+(s.max-s.min)*0.9?3:2;s.hi.style.zIndex=2;
+    if(!out)return;
+    var fromOn=s.a>s.min,toOn=s.b<s.max,m=function(v){return money(v,sym,dec)};
+    out.textContent=!fromOn&&!toOn?out.dataset.any:fromOn&&toOn?out.dataset.range.replace("{0}",m(s.a)).replace("{1}",m(s.b)):fromOn?out.dataset.from.replace("{0}",m(s.a)):out.dataset.upto.replace("{0}",m(s.b));
+  }
+  function initSlider(){var box=main.querySelector("[data-price-slider]");if(box)paintSlider(box)}
+  initSlider();
+  main.addEventListener("input",function(e){var box=e.target.closest("[data-price-slider]");if(box)paintSlider(box)});
   main.addEventListener("change",function(e){
-    var r=e.target;if(!r.matches("[data-price]"))return;
-    var u=new URL(location.href),v=Number(r.value);
-    if(v>=Number(r.max))u.searchParams.delete("price");else u.searchParams.set("price",String(v));
+    var box=e.target.closest("[data-price-slider]");if(!box)return;
+    var s=sliderState(box),u=new URL(location.href);
+    if(s.a>s.min)u.searchParams.set("pmin",String(s.a));else u.searchParams.delete("pmin");
+    if(s.b<s.max)u.searchParams.set("price",String(s.b));else u.searchParams.delete("price");
     u.searchParams.delete("p");
     load(u.toString(),true,null);
   });

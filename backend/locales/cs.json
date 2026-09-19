@@ -289,7 +289,7 @@
   "catalog.page": "Stránka {0} z {1}",
   "catalog.placeholder": "Například: kuřecí pohanka, polévka bez masa, tvaroh",
   "catalog.prev": "Zpět",
-  "catalog.prices": "Ceny v měně země",
+  "catalog.prices": "Země a měna",
   "catalog.prices.for": "Ceny pro {0} ({1}) — změna",
   "catalog.recipe.few": "recepty",
   "catalog.recipe.many": "receptů",
@@ -1110,5 +1110,9 @@
   "auth.legal.pre": "Registrací přijímáte",
   "auth.legal.and": "a",
   "auth.consent": "Souhlasím se zpracováním svých údajů včetně uvedených alergií, stravovacích cílů a složení domácnosti — pouze pro sestavení jídelníčku.",
-  "filter.price.any": "libovolná"
+  "filter.price.any": "libovolná",
+  "filter.price.from": "od {0}",
+  "filter.price.range": "{0} – {1}",
+  "filter.price.min": "Minimální cena",
+  "filter.price.max": "Maximální cena"
 }

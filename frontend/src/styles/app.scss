@@ -1546,6 +1546,18 @@ main.pages.is-loading {
   &__spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--ds-fill-3); border-top-color: var(--ds-blue); opacity: 0;
     animation: spin 0.8s linear infinite, fade-in var(--ds-dur-fast) 300ms forwards; } }
 
-// Ползунок цены в фильтрах: синяя дорожка до бегунка, подпись текущего порога справа от заголовка группы
+// Ползунок цены «от — до»: два нативных range друг над другом с прозрачной дорожкой; своя дорожка и
+// заливка между бегунками под ними; бегунок — белый круг с тенью, как в iOS
 .filters__out { float: right; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--ds-label-primary); }
-.filters__range { width: 100%; margin: 6px 0 2px; accent-color: var(--ds-blue); height: 28px; cursor: pointer; }
+.prange { position: relative; height: 32px; margin: 4px 0 6px;
+  &__track { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--ds-fill-3); }
+  &__fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--ds-blue); }
+  &__in { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 32px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; pointer-events: none;
+    &::-webkit-slider-runnable-track { height: 32px; background: transparent; }
+    &::-moz-range-track { height: 32px; background: transparent; }
+    &::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; pointer-events: auto; width: 24px; height: 24px; margin-top: 4px; border-radius: 50%; background: #fff; border: 0.5px solid rgba(0, 0, 0, 0.06); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.12); cursor: grab; }
+    &::-moz-range-thumb { pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 0.5px solid rgba(0, 0, 0, 0.06); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.12); cursor: grab; }
+    &:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.06); }
+    &:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--ds-blue-tint), 0 1px 3px rgba(0, 0, 0, 0.25); }
+    &:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--ds-blue-tint), 0 1px 3px rgba(0, 0, 0, 0.25); } } }
+.chips--quick { margin-top: 2px; }
