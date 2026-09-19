@@ -59,7 +59,9 @@ func (a *APIKeys) List(ctx context.Context, userID string) ([]domain.APIKey, err
 	return a.repo.List(ctx, userID)
 }
 
-func (a *APIKeys) Delete(ctx context.Context, userID, id string) error { return a.repo.Delete(ctx, userID, id) }
+func (a *APIKeys) Delete(ctx context.Context, userID, id string) error {
+	return a.repo.Delete(ctx, userID, id)
+}
 
 // Auth — владелец ключа из заголовка Authorization: Bearer rk_…; nil, если это не наш ключ.
 func (a *APIKeys) Auth(ctx context.Context, header string) (*domain.User, error) {

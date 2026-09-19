@@ -1087,5 +1087,13 @@
   "admin.keys.create": "Sleutel maken",
   "admin.keys.err.name": "Naam: maximaal 40 tekens",
   "admin.keys.err.limit": "Maximaal tien sleutels",
-  "admin.keys.hint2": "Voor scripts en assistenten (Claude, Codex): een sleutel heeft jouw rechten en wordt één keer getoond."
+  "admin.keys.hint2": "Voor scripts en assistenten (Claude, Codex): een sleutel heeft jouw rechten en wordt één keer getoond.",
+  "legal.terms": "Gebruiksvoorwaarden",
+  "legal.privacy": "Privacybeleid",
+  "legal.updated": "Bijgewerkt",
+  "legal.terms.desc": "Gebruiksvoorwaarden van Racion: wat je met recepten mag doen, rechten op je content, affiliate-links, aansprakelijkheid.",
+  "legal.privacy.desc": "Welke gegevens Racion verzamelt, waarom, waar ze staan en hoe je ze verwijdert.",
+  "auth.legal.pre": "Door je te registreren accepteer je de",
+  "auth.legal.and": "en het",
+  "auth.consent": "Ik geef toestemming voor de verwerking van mijn gegevens, inclusief de allergieën, doelen en gezinssamenstelling die ik opgeef — alleen om het menu af te stemmen."
 }

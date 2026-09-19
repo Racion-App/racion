@@ -1088,5 +1088,13 @@
   "admin.keys.create": "创建密钥",
   "admin.keys.err.name": "名称：不超过 40 个字符",
   "admin.keys.err.limit": "最多十个密钥",
-  "admin.keys.hint2": "供脚本和助手（Claude、Codex）使用：密钥拥有与你相同的权限，仅显示一次。"
+  "admin.keys.hint2": "供脚本和助手（Claude、Codex）使用：密钥拥有与你相同的权限，仅显示一次。",
+  "legal.terms": "使用条款",
+  "legal.privacy": "隐私政策",
+  "legal.updated": "更新于",
+  "legal.terms.desc": "Racion 使用条款：食谱的使用范围、你对内容的权利、联盟链接、责任。",
+  "legal.privacy.desc": "Racion 收集哪些数据、用途、存储位置以及如何删除。",
+  "auth.legal.pre": "注册即表示你接受",
+  "auth.legal.and": "和",
+  "auth.consent": "我同意处理我的数据，包括我填写的过敏、饮食目标和家庭成员信息——仅用于定制菜单。"
 }

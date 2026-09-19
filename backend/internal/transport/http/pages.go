@@ -150,13 +150,43 @@ func formatQty(l i18n.Lang, v float64, unit string) string {
 		if v >= 1000 {
 			return strings.Replace(fmt.Sprintf("%.2g %s", v/1000, i18n.T(l, "unit.l")), ".", dec, 1)
 		}
+		if v > 0 && v < 1 {
+			return strings.Replace(fmt.Sprintf("%.1f %s", v, i18n.T(l, "unit.ml")), ".", dec, 1)
+		}
 		return fmt.Sprintf("%d %s", int(math.Round(v)), i18n.T(l, "unit.ml"))
 	default:
 		if v >= 1000 {
 			return strings.Replace(fmt.Sprintf("%.2g %s", v/1000, i18n.T(l, "unit.kg")), ".", dec, 1)
 		}
+		if v > 0 && v < 1 {
+			return strings.Replace(fmt.Sprintf("%.1f %s", v, i18n.T(l, "unit.g")), ".", dec, 1)
+		}
 		return fmt.Sprintf("%d %s", int(math.Round(v)), i18n.T(l, "unit.g"))
 	}
+}
+
+// tagWords — теги рецепта словами языка (tag.<id>), без подписи — пропускаем: в keywords идут слова, не коды
+func tagWords(l i18n.Lang, tags []string) []string {
+	out := []string{}
+	for _, t := range tags {
+		if v := i18n.T(l, "tag."+t); v != "tag."+t {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+// breadcrumbLD — BreadcrumbList для @graph: пары «название, ссылка».
+func breadcrumbLD(items [][2]string) map[string]any {
+	list := make([]map[string]any, 0, len(items))
+	for i, it := range items {
+		el := map[string]any{"@type": "ListItem", "position": i + 1, "name": it[0]}
+		if it[1] != "" {
+			el["item"] = it[1]
+		}
+		list = append(list, el)
+	}
+	return map[string]any{"@type": "BreadcrumbList", "itemListElement": list}
 }
 
 func hasTag(r planner.Recipe, t string) bool { return service.HasTag(r, t) }
@@ -434,6 +464,7 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			Canonical:   base + link(active, page),
 			OGImage:     brandOG(base, pl.L),
 			OGWide:      true,
+			JSONLD:      catalogLD(base, pl, title),
 			Alternates:  s.alternates(r, query(active, page)),
 		},
 		"L": pl.L, "P": pl.P, "Country": pl.Country,
@@ -648,4 +679,73 @@ func ogLocale(l i18n.Lang) string {
 		return v
 	}
 	return "en_US"
+}
+
+// catalogLD — крошки каталога; сам список постраничный, его перечисляет sitemap.
+func catalogLD(base string, pl pageLocale, title string) template.JS {
+	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "catalog.title"), base + pl.P + "/recipes"}})
+	page := map[string]any{"@type": "CollectionPage", "name": title, "url": base + pl.P + "/recipes", "inLanguage": string(pl.L), "isPartOf": map[string]any{"@type": "WebSite", "name": i18n.T(pl.L, "page.brand"), "url": base + "/"}}
+	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{page, crumbs}})
+	return template.JS(b)
+}
+
+// llmsTxt — /llms.txt: краткое описание сайта для ассистентов и поисковых моделей (какие страницы читать, где API).
+func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
+	base := s.baseURL(r)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	fmt.Fprintf(w, `# Racion (Рацион)
+
+> Free weekly meal planner: seven questions (country and store, who eats, allergies, kitchen equipment, meals, budget) → seven days of dishes with real store prices and one shopping list rounded to packs. 15 languages, 22 countries, holiday tables, family weeks. No subscription.
+
+## Read
+- Recipes catalog (server-rendered HTML, schema.org Recipe JSON-LD on every recipe): %[1]s/recipes — other languages: %[1]s/en/recipes, %[1]s/de/recipes, …
+- Collections (schema.org ItemList): %[1]s/collections
+- Sitemap: %[1]s/sitemap.xml
+- Each recipe: name, description, ingredients with grams per portion, steps, kcal/protein/fat/carbs, estimated cost in the reader's country, equipment, tags.
+
+## Do not fetch
+- /api/ (private JSON API), /plan/ (personal weekly plans), /me, /login, /admin
+
+## About
+- Source: https://github.com/Racion-App/racion (AGPL-3.0). Contact: info@racion.app
+`, base)
+}
+
+// Юридические страницы: условия и политика. Тексты — в legal.html на русском и английском; остальные языки
+// получают английскую версию (перевод юридического текста без юриста — хуже, чем понятный английский).
+var legalOwner, legalEmail string
+
+const legalUpdated = "2026-09-19"
+
+func (s *Server) legalPage(w http.ResponseWriter, r *http.Request) {
+	pl, _ := s.localeFromPath(r)
+	doc := "privacy"
+	if strings.HasSuffix(r.URL.Path, "/terms") {
+		doc = "terms"
+	}
+	other, otherKey := "privacy", "legal.privacy"
+	if doc == "privacy" {
+		other, otherKey = "terms", "legal.terms"
+	}
+	textLang := "en"
+	if pl.L == i18n.RU || pl.L == "uk" || pl.L == "kk" {
+		textLang = "ru"
+	}
+	title := i18n.T(pl.L, "legal."+doc)
+	base := s.baseURL(r)
+	owner := legalOwner
+	if owner == "" {
+		owner = "владелец сервиса"
+	}
+	email := legalEmail
+	if email == "" {
+		email = "info@racion.app"
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_ = pageTpl.ExecuteTemplate(w, "legal.html", map[string]any{
+		"Base": pageBase{Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "legal."+doc+".desc"), Canonical: base + pl.P + "/" + doc, OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/"+doc)},
+		"L":    pl.L, "P": pl.P, "Country": pl.Country,
+		"Title": title, "Doc": doc + "_" + textLang, "Updated": humanDate(pl.L, legalUpdated), "Other": other, "OtherTitle": i18n.T(pl.L, otherKey), "Owner": owner, "Email": email,
+	})
 }

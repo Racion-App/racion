@@ -32,10 +32,10 @@
 <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/app.css">
 <!-- Yandex.Metrika counter -->
-<script>if(location.hostname==="racion.app"){(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=112818312","ym");ym(112818312,"init",{webvisor:true,clickmap:true,accurateTrackBounce:true,trackLinks:true});}</script>
+<script>if(location.hostname==="racion.app"&&document.cookie.indexOf("racion_analytics=0")<0){(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=112818312","ym");ym(112818312,"init",{webvisor:true,clickmap:true,accurateTrackBounce:true,trackLinks:true});}</script>
 <!-- /Yandex.Metrika counter -->
 <!-- Google Tag Manager -->
-<script>if(location.hostname==="racion.app"){(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-KFMJN8PF");}</script>
+<script>if(location.hostname==="racion.app"&&document.cookie.indexOf("racion_analytics=0")<0){(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-KFMJN8PF");}</script>
 <!-- End Google Tag Manager -->
 <script src="/theme.js"></script>
 {{if .Base.JSONLD}}<script type="application/ld+json">{{.Base.JSONLD}}</script>{{end}}
@@ -99,6 +99,8 @@
       <h3>{{t .L "foot.about"}}</h3>
       <p>{{t .L "foot.free"}}</p>
       <p>{{t .L "page.foot"}}</p>
+      <a href="{{.P}}/terms">{{t .L "legal.terms"}}</a>
+      <a href="{{.P}}/privacy">{{t .L "legal.privacy"}}</a>
       <button type="button" class="sitefoot__lang" data-lang-btn2><span class="fi fi-{{(langMeta .L).Flag}}"></span> {{(langMeta .L).Name}}</button>
     </div>
   </nav>
@@ -119,6 +121,7 @@
   </div>
 </dialog>{{end}}
 <script src="/ssr.js" defer></script>
+<script src="/consent.js" defer></script>
 </body>
 </html>
 {{end}}

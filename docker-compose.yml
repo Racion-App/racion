@@ -24,6 +24,8 @@ services:
       LOG_FORMAT: ${LOG_FORMAT:-json}
       BASE_URL: ${BASE_URL:-}
       METRIKA_ID: ${VITE_METRIKA_ID:-}
+      LEGAL_OWNER: ${LEGAL_OWNER:-}
+      LEGAL_EMAIL: ${LEGAL_EMAIL:-}
       PUSH_CONTACT: ${PUSH_CONTACT:-mailto:admin@racion.app}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}

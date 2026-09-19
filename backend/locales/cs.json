@@ -1101,5 +1101,13 @@
   "admin.keys.create": "Vytvořit klíč",
   "admin.keys.err.name": "Název: do 40 znaků",
   "admin.keys.err.limit": "Nejvýše deset klíčů",
-  "admin.keys.hint2": "Pro skripty a asistenty (Claude, Codex): klíč má vaše oprávnění a zobrazí se jen jednou."
+  "admin.keys.hint2": "Pro skripty a asistenty (Claude, Codex): klíč má vaše oprávnění a zobrazí se jen jednou.",
+  "legal.terms": "Podmínky použití",
+  "legal.privacy": "Zásady ochrany soukromí",
+  "legal.updated": "Aktualizováno",
+  "legal.terms.desc": "Podmínky použití Racion: co můžete dělat s recepty, práva k vašemu obsahu, partnerské odkazy, odpovědnost.",
+  "legal.privacy.desc": "Jaké údaje Racion sbírá, proč, kde je ukládá a jak je smazat.",
+  "auth.legal.pre": "Registrací přijímáte",
+  "auth.legal.and": "a",
+  "auth.consent": "Souhlasím se zpracováním svých údajů včetně uvedených alergií, stravovacích cílů a složení domácnosti — pouze pro sestavení jídelníčku."
 }

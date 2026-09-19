@@ -1087,5 +1087,13 @@
   "admin.keys.create": "Créer une clé",
   "admin.keys.err.name": "Nom : 40 caractères max.",
   "admin.keys.err.limit": "Dix clés maximum",
-  "admin.keys.hint2": "Pour scripts et assistants (Claude, Codex) : la clé porte vos droits et n’est affichée qu’une fois."
+  "admin.keys.hint2": "Pour scripts et assistants (Claude, Codex) : la clé porte vos droits et n’est affichée qu’une fois.",
+  "legal.terms": "Conditions d’utilisation",
+  "legal.privacy": "Politique de confidentialité",
+  "legal.updated": "Mis à jour",
+  "legal.terms.desc": "Conditions d’utilisation de Racion : usage des recettes, droits sur vos contenus, liens affiliés, responsabilité.",
+  "legal.privacy.desc": "Quelles données Racion collecte, pourquoi, où elles sont stockées et comment les supprimer.",
+  "auth.legal.pre": "En vous inscrivant, vous acceptez les",
+  "auth.legal.and": "et la",
+  "auth.consent": "J’accepte le traitement de mes données, y compris les allergies, objectifs et composition du foyer que j’indique — uniquement pour adapter le menu."
 }

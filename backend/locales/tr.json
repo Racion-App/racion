@@ -1087,5 +1087,13 @@
   "admin.keys.create": "Anahtar oluştur",
   "admin.keys.err.name": "Ad: en fazla 40 karakter",
   "admin.keys.err.limit": "En fazla on anahtar",
-  "admin.keys.hint2": "Betikler ve asistanlar için (Claude, Codex): anahtar senin yetkilerini taşır ve bir kez gösterilir."
+  "admin.keys.hint2": "Betikler ve asistanlar için (Claude, Codex): anahtar senin yetkilerini taşır ve bir kez gösterilir.",
+  "legal.terms": "Kullanım koşulları",
+  "legal.privacy": "Gizlilik politikası",
+  "legal.updated": "Güncellendi",
+  "legal.terms.desc": "Racion kullanım koşulları: tariflerle ne yapılabilir, içeriğinize ilişkin haklar, ortaklık bağlantıları, sorumluluk.",
+  "legal.privacy.desc": "Racion hangi verileri toplar, neden, nerede saklar ve nasıl silinir.",
+  "auth.legal.pre": "Kaydolarak şunları kabul edersiniz:",
+  "auth.legal.and": "ve",
+  "auth.consent": "Belirttiğim alerjiler, beslenme hedefleri ve hane bilgileri dahil verilerimin yalnızca menü uyarlaması için işlenmesine izin veriyorum."
 }

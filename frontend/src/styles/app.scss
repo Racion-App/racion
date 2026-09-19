@@ -858,7 +858,7 @@ main.pages.is-loading {
 .pages-nav__link { font-size: 14px; font-weight: 600; color: var(--ds-label-secondary); &.is-current { color: var(--ds-label-primary); } }
 // Подвал сайта: бренд и слоган с кнопкой, три колонки ссылок, копирайт; на телефоне колонки в столбик
 .sitefoot { margin-top: 40px; padding: 28px 0 40px; border-top: 1px solid var(--ds-separator); display: grid; gap: 24px; font-size: 14px; color: var(--ds-label-secondary);
-  a { color: inherit; text-decoration: none; &:hover { color: var(--ds-blue); } }
+  a:not(.btn) { color: inherit; text-decoration: none; &:hover { color: var(--ds-blue); } }
   &__top { display: grid; gap: 10px; justify-items: start; @media (min-width: 720px) { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 20px; } }
   &__brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; color: var(--ds-label-primary); svg { color: var(--ds-blue); } }
   &__tag { margin: 0; font-size: 14px; color: var(--ds-label-secondary); max-width: 520px; }
@@ -1516,3 +1516,32 @@ main.pages.is-loading {
     td:first-child { white-space: nowrap; color: var(--ds-label-secondary); }
     td:nth-child(2) { white-space: nowrap; } }
   code { font-size: 12.5px; } }
+
+// Юридические страницы: колонка текста, таблица данных, заголовки разделов
+.legal { max-width: 720px; margin: 0 auto; padding: 8px 0 40px; line-height: 1.55; font-size: 15.5px;
+  h1 { font-size: 28px; letter-spacing: -0.02em; margin: 8px 0 4px; }
+  h2 { font-size: 18px; letter-spacing: -0.01em; margin: 26px 0 8px; }
+  p, li { color: var(--ds-label-primary); } ul { padding-left: 20px; }
+  a { color: var(--ds-blue); }
+  &__meta { font-size: 13.5px; color: var(--ds-label-tertiary); margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0 14px;
+    th, td { text-align: left; vertical-align: top; padding: 8px 8px 8px 0; border-top: 1px solid var(--ds-separator); }
+    th { font-weight: 600; color: var(--ds-label-secondary); border-top: 0; } } }
+
+// Баннер выбора аналитики (ЕС): снизу, компактный, не перекрывает контент надолго
+.consent { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 60; margin: 0 auto; max-width: 640px;
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 12px 14px; border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); box-shadow: var(--ds-shadow-lg); font-size: 13.5px; color: var(--ds-label-secondary);
+  &__text { flex: 1 1 320px; b { color: var(--ds-label-primary); } a { color: var(--ds-blue); } }
+  &__btns { display: flex; gap: 8px; margin-left: auto; } }
+
+// Согласие при регистрации: чекбокс с текстом и строка со ссылками на условия и политику
+.auth__consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.4; color: var(--ds-label-secondary); cursor: pointer;
+  input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--ds-blue); flex: 0 0 auto; } }
+.auth__legal { margin: 0; font-size: 12.5px; color: var(--ds-label-tertiary); a { color: var(--ds-label-secondary); } }
+
+// Экран до старта приложения: знак и кольцо по центру; кольцо появляется с задержкой, чтобы на быстрой сети не мигать
+.boot { min-height: 70dvh; display: grid; place-items: center; align-content: center; gap: 18px;
+  &__mark { border-radius: 11px; box-shadow: var(--ds-shadow-lg); }
+  &__spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--ds-fill-3); border-top-color: var(--ds-blue); opacity: 0;
+    animation: spin 0.8s linear infinite, fade-in var(--ds-dur-fast) 300ms forwards; } }

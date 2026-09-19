@@ -2,6 +2,8 @@ package http
 
 import (
 	"bytes"
+	"encoding/json"
+	"html/template"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -186,7 +188,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: firstNonEmpty(ogImage(base, cover), brandOG(base, pl.L)), OGType: "article", OGWide: cover == "", Alternates: alts},
+		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: firstNonEmpty(ogImage(base, cover), brandOG(base, pl.L)), OGType: "article", OGWide: cover == "", Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID,
 	}
@@ -248,4 +250,17 @@ func (s *Server) collectionsPage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write(buf.Bytes())
+}
+
+// collectionLD — подборка как ItemList рецептов плюс хлебные крошки: поисковики и ассистенты видят состав целиком.
+func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []recipeCard) template.JS {
+	items := make([]map[string]any, 0, len(cards))
+	for i, c := range cards {
+		items = append(items, map[string]any{"@type": "ListItem", "position": i + 1, "url": base + pl.P + "/recipe/" + c.ID, "name": c.Title})
+	}
+	url := base + pl.P + "/collection/" + slug
+	list := map[string]any{"@type": "ItemList", "@id": url + "#list", "url": url, "name": name, "description": desc, "numberOfItems": len(cards), "itemListElement": items, "inLanguage": string(pl.L)}
+	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "coll.public.title"), base + pl.P + "/collections"}, {name, ""}})
+	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{list, crumbs}})
+	return template.JS(b)
 }

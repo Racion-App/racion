@@ -396,8 +396,9 @@ func (c *Catalog) pick(pool []Recipe, day int, slot string, portions float64, pr
 				s.score += 0.4
 			}
 		}
-		// праздничное (торт, кулич, начинки к блинам): в обычную неделю не берём, только события и коллекции
-		if (slices.Contains(r.Tags, "festive") || slices.Contains(r.Tags, "filling")) && !slices.Contains(tg.coll, r.ID) && s.wanted == "" {
+		// праздничное (торт, кулич, начинки к блинам) и гарниры (запечённая картошка, пюре, соусы): сами по себе
+		// это не приём пищи — в обычную неделю не берём, только события, коллекции и «хочется»
+		if (slices.Contains(r.Tags, "festive") || slices.Contains(r.Tags, "filling") || slices.Contains(r.Tags, "side") || slices.Contains(r.Tags, "sauce")) && !slices.Contains(tg.coll, r.ID) && s.wanted == "" {
 			continue
 		}
 		// своё блюдо: человек его добавил сам, значит хочет видеть в неделе

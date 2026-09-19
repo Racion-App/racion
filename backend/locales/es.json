@@ -1088,5 +1088,13 @@
   "admin.keys.create": "Crear clave",
   "admin.keys.err.name": "Nombre: hasta 40 caracteres",
   "admin.keys.err.limit": "Máximo diez claves",
-  "admin.keys.hint2": "Para scripts y asistentes (Claude, Codex): la clave tiene tus permisos y se muestra una sola vez."
+  "admin.keys.hint2": "Para scripts y asistentes (Claude, Codex): la clave tiene tus permisos y se muestra una sola vez.",
+  "legal.terms": "Condiciones de uso",
+  "legal.privacy": "Política de privacidad",
+  "legal.updated": "Actualizado",
+  "legal.terms.desc": "Condiciones de uso de Racion: qué puedes hacer con las recetas, derechos sobre tu contenido, enlaces de afiliado, responsabilidad.",
+  "legal.privacy.desc": "Qué datos recoge Racion, para qué, dónde se guardan y cómo borrarlos.",
+  "auth.legal.pre": "Al registrarte aceptas las",
+  "auth.legal.and": "y la",
+  "auth.consent": "Consiento el tratamiento de mis datos, incluidas las alergias, objetivos y composición del hogar que indico — solo para ajustar el menú."
 }

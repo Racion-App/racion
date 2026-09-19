@@ -273,8 +273,9 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	for _, st := range tx.Steps {
 		ldSteps = append(ldSteps, map[string]string{"@type": "HowToStep", "text": st})
 	}
+	pageURL := base + pl.P + "/recipe/" + rc.ID
 	ld := map[string]any{
-		"@context": "https://schema.org", "@type": "Recipe",
+		"@type": "Recipe", "@id": pageURL + "#recipe", "url": pageURL, "mainEntityOfPage": pageURL,
 		"name": tx.Title, "description": desc, "recipeYield": i18n.T(l, "recipe.yield"),
 		"inLanguage":         string(l),
 		"totalTime":          fmt.Sprintf("PT%dM", rc.TimeMin),
@@ -282,15 +283,34 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"recipeCuisine":      i18n.T(l, "recipe.cuisine"),
 		"recipeIngredient":   ingNames,
 		"recipeInstructions": ldSteps,
-		"nutrition": map[string]any{"@type": "NutritionInformation", "calories": fmt.Sprintf("%d kcal", int(math.Round(kcal))),
+		"nutrition": map[string]any{"@type": "NutritionInformation", "calories": fmt.Sprintf("%d kcal", int(math.Round(kcal))), "servingSize": i18n.T(l, "recipe.yield"),
 			"proteinContent": fmt.Sprintf("%d g", int(math.Round(prot))), "fatContent": fmt.Sprintf("%d g", int(math.Round(fat))), "carbohydrateContent": fmt.Sprintf("%d g", int(math.Round(carb)))},
-		"keywords": strings.Join(rc.Tags, ", "),
-		"author":   map[string]any{"@type": "Organization", "name": i18n.T(l, "page.brand")},
+		"keywords":  strings.Join(tagWords(l, rc.Tags), ", "),
+		"author":    map[string]any{"@type": "Organization", "name": i18n.T(l, "page.brand"), "url": base + "/"},
+		"publisher": map[string]any{"@type": "Organization", "name": i18n.T(l, "page.brand"), "url": base + "/", "logo": map[string]any{"@type": "ImageObject", "url": base + "/icons/icon-512.png"}},
 	}
 	if rc.Image != "" {
-		ld["image"] = base + rc.Image
+		// JPEG-копия первой: не все читалки разметки понимают WebP
+		ld["image"] = []string{ogImage(base, rc.Image), base + rc.Image}
 	}
-	ldJSON, _ := json.Marshal(ld)
+	if priced {
+		ld["estimatedCost"] = map[string]any{"@type": "MonetaryAmount", "currency": pl.Country.Currency, "value": fmt.Sprintf("%.2f", cost)}
+	}
+	var diets []string
+	if hasTag(rc, "vegetarian") {
+		diets = append(diets, "https://schema.org/VegetarianDiet")
+	}
+	if hasTag(rc, "vegan") {
+		diets = append(diets, "https://schema.org/VeganDiet")
+	}
+	if hasTag(rc, "pp") {
+		diets = append(diets, "https://schema.org/LowCalorieDiet")
+	}
+	if len(diets) > 0 {
+		ld["suitableForDiet"] = diets
+	}
+	crumbs := breadcrumbLD([][2]string{{i18n.T(l, "page.brand"), base + "/"}, {i18n.T(l, "catalog.title"), base + pl.P + "/recipes"}, {planner.SlotLabel(l, rc.Slot), base + pl.P + "/recipes?slot=" + rc.Slot}, {tx.Title, ""}})
+	ldJSON, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{ld, crumbs}})
 	slotHref := pl.P + "/recipes?slot=" + rc.Slot
 	slotCrumb := planner.SlotLabel(l, rc.Slot)
 	allLabel := i18n.T(l, "recipe.all", i18n.T(l, "slots."+rc.Slot))

@@ -1088,5 +1088,13 @@
   "admin.keys.create": "キーを作成",
   "admin.keys.err.name": "名前：40文字以内",
   "admin.keys.err.limit": "キーは10個まで",
-  "admin.keys.hint2": "スクリプトやアシスタント（Claude、Codex）用：キーはあなたの権限を持ち、一度だけ表示されます。"
+  "admin.keys.hint2": "スクリプトやアシスタント（Claude、Codex）用：キーはあなたの権限を持ち、一度だけ表示されます。",
+  "legal.terms": "利用規約",
+  "legal.privacy": "プライバシーポリシー",
+  "legal.updated": "更新日",
+  "legal.terms.desc": "Racion の利用規約：レシピの利用範囲、投稿内容の権利、アフィリエイトリンク、責任について。",
+  "legal.privacy.desc": "Racion が収集するデータ、目的、保存場所、削除方法。",
+  "auth.legal.pre": "登録すると次に同意したことになります：",
+  "auth.legal.and": "および",
+  "auth.consent": "入力したアレルギー、食事目標、世帯構成を含む私のデータが、献立作成のためだけに処理されることに同意します。"
 }

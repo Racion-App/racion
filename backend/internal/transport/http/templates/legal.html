@@ -1,0 +1,178 @@
+{{template "head" .}}
+<article class="legal">
+  <nav class="crumbs" aria-label="{{t .L "crumbs"}}"><a href="/">{{t .L "page.brand"}}</a><span aria-hidden="true">›</span><span>{{.Title}}</span></nav>
+  <h1>{{.Title}}</h1>
+  <p class="legal__meta">{{t .L "legal.updated"}}: {{.Updated}} · <a href="{{.P}}/{{.Other}}">{{.OtherTitle}}</a></p>
+  {{if eq .Doc "terms_ru"}}{{template "terms_ru" .}}{{else if eq .Doc "privacy_ru"}}{{template "privacy_ru" .}}{{else if eq .Doc "terms_en"}}{{template "terms_en" .}}{{else}}{{template "privacy_en" .}}{{end}}
+</article>
+{{template "foot" .}}
+
+{{define "terms_ru"}}
+<p>Это условия использования сайта и приложения racion.app (далее — «Рацион», «сервис»). Пользуясь сервисом, вы соглашаетесь с ними. Если что-то не подходит — не пользуйтесь сервисом.</p>
+
+<h2>1. Кто предоставляет сервис</h2>
+<p>Сервис создан и поддерживается частным лицом без образования юридического лица: {{.Owner}}, связь — <a href="mailto:{{.Email}}">{{.Email}}</a>. Сервис бесплатный, без подписок и платных функций. Исходный код опубликован под лицензией AGPL-3.0 отдельно от содержимого сайта.</p>
+
+<h2>2. Что делает сервис</h2>
+<p>Рацион составляет меню на неделю и список покупок по вашим ответам: страна, магазин, состав семьи, ограничения, техника, бюджет. Стоимость блюд считается по официальной статистике и средним ценам сетей — это ориентир, а не оферта магазина; в кассе цены будут другими. Калорийность и БЖУ считаются по справочным значениям продуктов и могут отличаться от реальных.</p>
+<p>Сервис не является медицинской услугой и не заменяет консультацию врача или диетолога. Пометки «без глютена», «без лактозы», список аллергенов и детские рационы — помощь в подборе, а не гарантия: перед покупкой сверяйте состав на упаковке, при заболеваниях и аллергии решения принимайте с врачом.</p>
+
+<h2>3. Аккаунт</h2>
+<p>Регистрация нужна, чтобы хранить недели, семью и свои рецепты. Возраст — от 16 лет; младше — с согласия родителя. Вы отвечаете за сохранность пароля и за действия в аккаунте. Один человек — один аккаунт. Мы можем приостановить аккаунт за злоупотребления: спам, обход ограничений, массовое выкачивание данных, попытки взлома.</p>
+
+<h2>4. Содержимое сервиса и права на него</h2>
+<p>Тексты рецептов, описания, подборки, фотографии, переводы, интерфейс и база данных сервиса — результат нашей работы. Их можно использовать <strong>лично и некоммерчески</strong>: готовить, сохранять себе, печатать, делиться ссылкой. Нельзя без нашего письменного разрешения: копировать базу рецептов целиком или большими частями, публиковать наши тексты и фото на других сайтах, в приложениях и книгах, использовать их в рекламе или платных продуктах, обучать на них модели. Ссылка на страницу рецепта приветствуется.</p>
+<p>Список ингредиентов и порядок приготовления как идея не охраняются авторским правом; охраняются конкретные тексты, фотографии и подборки. Если вам кажется, что какой-то материал на сайте нарушает ваши права, напишите нам (раздел 7) — разберёмся.</p>
+
+<h2>5. Ваши материалы</h2>
+<p>Добавляя свой рецепт, фото, комментарий или подборку, вы подтверждаете, что имеете на это право: это ваш текст и ваша фотография, либо у вас есть разрешение правообладателя. Вы даёте сервису бессрочное, безвозмездное, неисключительное право хранить, показывать, переводить на другие языки и обрабатывать эти материалы в рамках сервиса — в том числе показывать другим людям, если вы сами отправили рецепт на публикацию. Права остаются у вас; удалить свои материалы можно в кабинете, публикацию — отозвать.</p>
+<p>Нельзя загружать чужие тексты и фотографии под своим именем, рекламу, ссылки на сторонние ресурсы, оскорбления и опасные советы. Опубликованные рецепты проходят проверку; мы можем отклонить или снять публикацию без объяснения причин.</p>
+
+<h2>6. Партнёрские ссылки</h2>
+<p>Ссылки «где купить» и «собрать корзину» могут быть партнёрскими: если вы что-то купите по ним, сервис может получить вознаграждение от магазина. Цена для вас не меняется. Такие ссылки помечены словом «Реклама» и идентификатором там, где этого требует закон. Мы не отвечаем за товары, цены и доставку магазинов-партнёров.</p>
+
+<h2>7. Жалобы на материалы</h2>
+<p>Если материал на сайте нарушает ваши авторские или иные права, напишите на <a href="mailto:{{.Email}}">{{.Email}}</a>: ссылку на страницу, описание нарушения, подтверждение прав и ваши контакты. Мы отвечаем в течение семи дней и убираем спорный материал до выяснения, если жалоба обоснована.</p>
+
+<h2>8. Ответственность</h2>
+<p>Сервис предоставляется «как есть». Мы стараемся, чтобы он работал без ошибок, но не гарантируем бесперебойность, точность цен, калорийности и переводов. Мы не отвечаем за последствия использования рецептов и меню, за покупки у магазинов и за содержимое сторонних сайтов. Ответственность в любом случае ограничена суммой, которую вы заплатили за сервис, — то есть нулём.</p>
+
+<h2>9. Изменения</h2>
+<p>Мы можем менять сервис и эти условия. Заметные изменения условий покажем на сайте; дата последнего обновления — вверху страницы. Продолжая пользоваться сервисом после изменений, вы принимаете новую редакцию.</p>
+
+<h2>10. Право</h2>
+<p>К этим условиям применяется законодательство Российской Федерации. Для пользователей из Европейского союза сохраняются обязательные нормы защиты потребителей их страны. Споры решаются переговорами, а если не выходит — в суде по месту нахождения владельца сервиса.</p>
+{{end}}
+
+{{define "privacy_ru"}}
+<p>Здесь написано, какие данные собирает Рацион, зачем, где они лежат и как их удалить. Написано без юридического жаргона, насколько это возможно.</p>
+
+<h2>1. Оператор</h2>
+<p>Данные обрабатывает {{.Owner}} — частное лицо, владелец сервиса racion.app, без юридического лица. Связь по вопросам данных: <a href="mailto:{{.Email}}">{{.Email}}</a>. Для пользователей из России это политика в смысле закона 152-ФЗ «О персональных данных», для пользователей из ЕС — уведомление в смысле GDPR.</p>
+
+<h2>2. Какие данные и зачем</h2>
+<table>
+<tr><th>Что</th><th>Зачем</th><th>Основание</th></tr>
+<tr><td>Почта, пароль (хранится хэш), имя, ник, аватар</td><td>вход в аккаунт, подпись комментариев и опубликованных рецептов</td><td>договор (эти условия)</td></tr>
+<tr><td>Ответы квиза: страна, магазин, регион, сколько взрослых и детей и их возраст, цели питания, аппетит, аллергены и стоп-продукты, техника, бюджет</td><td>составить меню и список покупок; у вошедших — подставлять в следующий раз</td><td>согласие (вы сами вводите то, что хотите учесть)</td></tr>
+<tr><td>Недели, списки покупок, отметки «куплено», история покупок, любимые и нелюбимые блюда, свои рецепты, подборки, комментарии, состав семьи</td><td>сам сервис: хранить и показывать вам и вашей семье</td><td>договор</td></tr>
+<tr><td>IP-адрес, страна по IP, язык браузера, user-agent</td><td>подставить страну и язык, защита от злоупотреблений, лимиты запросов</td><td>законный интерес</td></tr>
+<tr><td>Обезличенные события использования (открыл неделю, нажал «в магазин»), ошибки браузера</td><td>понимать, что работает, а что нет</td><td>законный интерес</td></tr>
+<tr><td>Подписка на уведомления (адрес push-сервиса вашего браузера, час напоминания, часовой пояс)</td><td>напоминания, если вы их включили</td><td>согласие</td></tr>
+</table>
+<p>Сведения об аллергиях, целях питания и составе семьи могут относиться к особым категориям данных. Мы их не запрашиваем — вы указываете их сами и только для подбора меню. Не хотите — оставьте поля пустыми, сервис будет работать. Ставя галочку при регистрации, вы даёте согласие на их обработку для этой цели.</p>
+
+<h2>3. Cookies и локальное хранилище</h2>
+<p>Необходимые: cookie сессии (вход), cookie языка и страны, localStorage с черновиком квиза, темой, языком и последними неделями. Без них сервис не работает, согласие на них не требуется.</p>
+<p>Аналитика: Яндекс Метрика (с Вебвизором — записью действий на странице без содержимого полей ввода) и Google Tag Manager / Google Analytics. Они ставят свои cookies и получают обезличенные данные о посещении: адрес страницы, устройство, примерное местоположение. Пользователям из ЕС мы показываем выбор; отказ отключает аналитику на этом устройстве. Данные в Яндекс и Google передаются по их условиям: <a href="https://yandex.ru/legal/confidential/" rel="noopener">Яндекс</a>, <a href="https://policies.google.com/privacy" rel="noopener">Google</a>.</p>
+
+<h2>4. Кому передаём</h2>
+<ul>
+<li><strong>Хостинг</strong>: сервер в России (Москва). Там же резервные копии.</li>
+<li><strong>Нейросети</strong>: для переводов ваших рецептов, улучшения текста и чата по неделе на серверы Mistral AI (Франция), OpenRouter и OpenAI (США), Google (Gemini) уходят тексты рецептов и ваши сообщения в чате. Почта, имя и другие данные аккаунта туда не передаются. Не пользуйтесь этими функциями, если не хотите такой передачи.</li>
+<li><strong>Push-уведомления</strong>: через сервисы Google, Apple или Mozilla, выбранные вашим браузером.</li>
+<li><strong>Аналитика</strong>: Яндекс и Google, см. раздел 3.</li>
+<li><strong>Семья</strong>: если вы приняли приглашение в семью, участники видят общие недели, списки и отметки покупок, но не ваш пароль и не вашу почту.</li>
+</ul>
+<p>Данные не продаём и рекламодателям не передаём. По требованию закона можем передать данные государственным органам.</p>
+
+<h2>5. Сколько храним</h2>
+<p>Пока у вас есть аккаунт. Недели без аккаунта — 90 дней. Резервные копии — 14 дней после удаления. Логи сервера с IP-адресами — 30 дней. Обезличенная статистика хранится без срока.</p>
+
+<h2>6. Ваши права</h2>
+<p>Вы можете посмотреть, исправить и выгрузить свои данные в кабинете, отозвать согласие на аналитику и уведомления, удалить свои рецепты, подборки и комментарии. Чтобы удалить аккаунт целиком со всеми данными, напишите с почты аккаунта на <a href="mailto:{{.Email}}">{{.Email}}</a> — удалим в течение 7 дней, из резервных копий данные уйдут за 14. Пользователи из ЕС также вправе пожаловаться в надзорный орган своей страны; пользователи из России — в Роскомнадзор.</p>
+
+<h2>7. Безопасность</h2>
+<p>Соединение только по HTTPS, пароли хранятся хэшами, база не доступна извне, доступ к серверу по ключам. Полной защиты не бывает; о подозрении на утечку напишите нам.</p>
+
+<h2>8. Дети</h2>
+<p>Сервис не предназначен для самостоятельного использования детьми младше 16 лет. Данные о детях (возраст, тип питания) вводят родители для расчёта порций и прикорма.</p>
+
+<h2>9. Изменения</h2>
+<p>Дата последнего обновления — вверху. О существенных изменениях сообщим на сайте.</p>
+{{end}}
+
+{{define "terms_en"}}
+<p>These are the terms of use for the racion.app website and app (“Racion”, “the service”). By using the service you agree to them. If anything here does not suit you, please do not use the service.</p>
+
+<h2>1. Who provides the service</h2>
+<p>The service is built and run by a private individual, not a company: {{.Owner}}, contact <a href="mailto:{{.Email}}">{{.Email}}</a>. The service is free, with no subscriptions or paid features. The source code is published under AGPL-3.0 separately from the site content.</p>
+
+<h2>2. What the service does</h2>
+<p>Racion builds a weekly menu and a shopping list from your answers: country, store, household, restrictions, equipment, budget. Dish costs are estimated from official statistics and average store price levels — a guide, not a store offer; checkout prices will differ. Calories and macronutrients are computed from reference values and may differ from the real product.</p>
+<p>The service is not medical advice and does not replace a doctor or dietitian. Allergen lists, “gluten-free” or “lactose-free” marks and children's menus help you choose but are not a guarantee: check the packaging before buying; with a medical condition or allergy, decide together with your doctor.</p>
+
+<h2>3. Account</h2>
+<p>An account stores your weeks, family and own recipes. Minimum age is 16; younger users need a parent's consent. You are responsible for your password and for what happens in your account. One person, one account. We may suspend an account for abuse: spam, circumventing limits, bulk scraping, intrusion attempts.</p>
+
+<h2>4. Our content and your rights to it</h2>
+<p>Recipe texts, descriptions, collections, photos, translations, the interface and the database are our work. You may use them <strong>personally and non-commercially</strong>: cook, save, print, share a link. Without our written permission you may not copy the recipe database in whole or in large parts, republish our texts and photos on other sites, apps or books, use them in advertising or paid products, or train models on them. Linking to a recipe page is welcome.</p>
+<p>An ingredient list and a cooking method as an idea are not protected by copyright; the specific texts, photos and curated collections are. If you believe material on the site infringes your rights, write to us (section 7).</p>
+
+<h2>5. Your content</h2>
+<p>By adding a recipe, photo, comment or collection you confirm you have the right to do so: the text and photo are yours, or the rights holder allowed it. You grant the service a perpetual, royalty-free, non-exclusive licence to store, display, translate and process this content within the service — including showing it to others if you submit the recipe for publication. You keep your rights; you can delete your content in your account and withdraw a publication.</p>
+<p>Do not upload other people's texts or photos under your name, advertising, links to third-party resources, insults or dangerous advice. Published recipes are reviewed; we may reject or unpublish without giving reasons.</p>
+
+<h2>6. Affiliate links</h2>
+<p>“Where to buy” and “build a cart” links may be affiliate links: if you buy through them, the service may receive a commission from the store. Your price does not change. Such links are marked as advertising where the law requires. We are not responsible for partner stores' goods, prices or delivery.</p>
+
+<h2>7. Complaints about content</h2>
+<p>If material on the site infringes your copyright or other rights, email <a href="mailto:{{.Email}}">{{.Email}}</a> with the page link, a description of the infringement, proof of your rights and your contact details. We reply within seven days and take the disputed material down pending review when the complaint is substantiated.</p>
+
+<h2>8. Liability</h2>
+<p>The service is provided “as is”. We do our best to keep it working, but do not guarantee uptime or the accuracy of prices, calories or translations. We are not liable for the consequences of using recipes and menus, for purchases from stores or for third-party content. In any case liability is limited to the amount you paid for the service — that is, zero.</p>
+
+<h2>9. Changes</h2>
+<p>We may change the service and these terms. Significant changes are announced on the site; the date of the last update is at the top. Continuing to use the service after a change means you accept the new version.</p>
+
+<h2>10. Law</h2>
+<p>These terms are governed by the law of the Russian Federation. Users in the European Union keep the mandatory consumer protections of their country. Disputes are settled by negotiation and, failing that, in the court at the service owner's location.</p>
+{{end}}
+
+{{define "privacy_en"}}
+<p>This page explains what data Racion collects, why, where it is stored and how to delete it — in plain words as far as possible.</p>
+
+<h2>1. Controller</h2>
+<p>Data is processed by {{.Owner}}, a private individual who owns racion.app, not a company. Contact for data matters: <a href="mailto:{{.Email}}">{{.Email}}</a>. For users in the EU this is a privacy notice under the GDPR; for users in Russia it is a policy under Federal Law 152-FZ.</p>
+
+<h2>2. What data and why</h2>
+<table>
+<tr><th>What</th><th>Why</th><th>Basis</th></tr>
+<tr><td>Email, password (stored as a hash), name, nickname, avatar</td><td>sign-in, attribution of comments and published recipes</td><td>contract (these terms)</td></tr>
+<tr><td>Quiz answers: country, store, region, number of adults and children and their ages, dietary goals, appetite, allergens and excluded foods, equipment, budget</td><td>build the menu and shopping list; for signed-in users, prefill next time</td><td>consent (you enter what you want taken into account)</td></tr>
+<tr><td>Weeks, shopping lists, “bought” marks, purchase history, liked and disliked dishes, own recipes, collections, comments, household</td><td>the service itself: store and show to you and your family</td><td>contract</td></tr>
+<tr><td>IP address, country by IP, browser language, user agent</td><td>preselect country and language, abuse protection, rate limits</td><td>legitimate interest</td></tr>
+<tr><td>Anonymous usage events (opened a week, tapped “to the store”), browser errors</td><td>understand what works and what does not</td><td>legitimate interest</td></tr>
+<tr><td>Notification subscription (your browser's push endpoint, reminder hour, time zone)</td><td>reminders, if you enabled them</td><td>consent</td></tr>
+</table>
+<p>Allergies, dietary goals and household composition may count as special categories of data. We do not ask for them — you enter them yourself, only to tailor the menu. Leave the fields empty if you prefer; the service still works. By ticking the box at registration you consent to processing them for this purpose.</p>
+
+<h2>3. Cookies and local storage</h2>
+<p>Necessary: the session cookie (sign-in), language and country cookies, localStorage with the quiz draft, theme, language and recent weeks. The service does not work without them; no consent is needed.</p>
+<p>Analytics: Yandex Metrica (with Webvisor — session replay that excludes typed input) and Google Tag Manager / Google Analytics. They set their own cookies and receive anonymous visit data: page address, device, approximate location. EU users are shown a choice; declining disables analytics on that device. Data goes to Yandex and Google under their terms: <a href="https://yandex.com/legal/confidential/" rel="noopener">Yandex</a>, <a href="https://policies.google.com/privacy" rel="noopener">Google</a>.</p>
+
+<h2>4. Who receives data</h2>
+<ul>
+<li><strong>Hosting</strong>: a server in Russia (Moscow), backups in the same place.</li>
+<li><strong>AI providers</strong>: to translate your recipes, improve text and answer in the weekly-plan chat, recipe texts and your chat messages are sent to Mistral AI (France), OpenRouter and OpenAI (USA), Google (Gemini). Email, name and other account data are not sent. Do not use these features if you do not want this transfer.</li>
+<li><strong>Push notifications</strong>: through the Google, Apple or Mozilla push service chosen by your browser.</li>
+<li><strong>Analytics</strong>: Yandex and Google, see section 3.</li>
+<li><strong>Family</strong>: if you accept a family invitation, members see shared weeks, lists and purchase marks, but not your password or email.</li>
+</ul>
+<p>We do not sell data and do not share it with advertisers. We may disclose data to authorities when the law requires.</p>
+
+<h2>5. Retention</h2>
+<p>For as long as you have an account. Weeks without an account: 90 days. Backups: 14 days after deletion. Server logs with IP addresses: 30 days. Anonymous statistics: indefinitely.</p>
+
+<h2>6. Your rights</h2>
+<p>You can view, correct and export your data in your account, withdraw consent to analytics and notifications, delete your recipes, collections and comments. To delete the whole account with all data, email <a href="mailto:{{.Email}}">{{.Email}}</a> from the account's address — we delete within 7 days; backups expire within 14. EU users may also complain to the supervisory authority of their country; Russian users — to Roskomnadzor.</p>
+
+<h2>7. Security</h2>
+<p>HTTPS only, passwords stored as hashes, the database is not reachable from outside, server access by keys. No protection is complete; if you suspect a breach, tell us.</p>
+
+<h2>8. Children</h2>
+<p>The service is not intended for independent use by children under 16. Data about children (age, feeding type) is entered by parents to compute portions and baby food.</p>
+
+<h2>9. Changes</h2>
+<p>The date of the last update is at the top. Significant changes are announced on the site.</p>
+{{end}}

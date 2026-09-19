@@ -40,11 +40,14 @@ type Deps struct {
 	Health   func() error // проверка живости хранилища для /healthz
 	BaseURL  string       // например https://racion.app; пусто — брать из запроса
 	Metrika  string       // id счётчика Яндекс Метрики для SSR-страниц
+	Owner    string       // владелец сервиса для условий и политики (LEGAL_OWNER)
+	Contact  string       // почта для юридических страниц (LEGAL_EMAIL)
 	Logs     *logger.Ring // последние записи лога для админки
 }
 
 func New(d Deps) http.Handler {
 	metrikaID = d.Metrika
+	legalOwner, legalEmail = d.Owner, d.Contact
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)
@@ -79,6 +82,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
 	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
 	mux.HandleFunc("GET /api/partners", s.partners)
+	mux.HandleFunc("GET /llms.txt", s.llmsTxt)
 	mux.HandleFunc("GET /api/admin/partners", s.adminPartners)
 	mux.HandleFunc("POST /api/admin/partners", s.limited(s.lim.write, s.adminSavePartner))
 	mux.HandleFunc("DELETE /api/admin/partners/{code}", s.adminDeletePartner)
@@ -173,7 +177,11 @@ func New(d Deps) http.Handler {
 		mux.HandleFunc("GET /"+string(l)+"/recipe/{id}", s.recipePage)
 		mux.HandleFunc("GET /"+string(l)+"/collection/{slug}", s.collectionPage)
 		mux.HandleFunc("GET /"+string(l)+"/collections", s.collectionsPage)
+		mux.HandleFunc("GET /"+string(l)+"/terms", s.legalPage)
+		mux.HandleFunc("GET /"+string(l)+"/privacy", s.legalPage)
 	}
+	mux.HandleFunc("GET /terms", s.legalPage)
+	mux.HandleFunc("GET /privacy", s.legalPage)
 	mux.HandleFunc("GET /api/locales", s.localesList)
 	mux.HandleFunc("GET /api/lang", s.langHint)
 	mux.HandleFunc("GET /api/locales/{code}", s.localeFile)

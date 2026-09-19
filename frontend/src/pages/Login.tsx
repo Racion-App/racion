@@ -74,6 +74,17 @@ export function Login() {
             <span>{t("auth.password")}{mode === "register" && <small> {t("auth.password.min")}</small>}</span>
             <input className="form-control" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} />
           </label>
+          {mode === "register" && (
+            <>
+              <label className="auth__consent">
+                <input type="checkbox" required />
+                <span>{t("auth.consent")}</span>
+              </label>
+              <p className="auth__legal">
+                {t("auth.legal.pre")} <a href="/terms" target="_blank" rel="noopener">{t("legal.terms")}</a> {t("auth.legal.and")} <a href="/privacy" target="_blank" rel="noopener">{t("legal.privacy")}</a>.
+              </p>
+            </>
+          )}
           {error && (
             <p className="error-inline" role="alert">
               <AlertCircle size={18} aria-hidden /> {error}
