@@ -199,7 +199,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/locales/{code}", s.localeFile)
 	mux.HandleFunc("GET /sitemap.xml", s.sitemap)
 	mux.HandleFunc("GET /sitemap/{file}", s.sitemapLang) // /sitemap/ru.xml … по языку
-	mux.HandleFunc("GET /indexnow/{file}", s.indexNowKey)
+	mux.HandleFunc("GET /{file}", s.indexNowKey) // /<key>.txt в корне: ключ IndexNow действует на весь сайт только из корня
 	mux.HandleFunc("GET /robots.txt", s.robots)
 	return s.withLogging(s.withRecover(s.withHeaders(s.withLimit(s.withUser(mux)))))
 }

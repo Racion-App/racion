@@ -94,7 +94,8 @@ func (s *Server) notifySearch(paths ...string) {
 	s.svc.IndexNow.Notify(all...)
 }
 
-// indexNowKey — файл ключа по адресу /indexnow/<key>.txt: так поисковик проверяет, что запрос от владельца сайта.
+// indexNowKey — файл ключа по адресу /<key>.txt в корне: так поисковик проверяет, что запрос от владельца сайта
+// (ключ в подпапке подтверждал бы только адреса из этой подпапки).
 func (s *Server) indexNowKey(w http.ResponseWriter, r *http.Request) {
 	key := s.svc.IndexNow.Key(r.Context())
 	if key == "" || r.PathValue("file") != key+".txt" {

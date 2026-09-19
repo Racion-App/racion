@@ -17,7 +17,7 @@ import (
 
 // IndexNow — уведомление поисковиков о новых и изменённых страницах (Яндекс, Bing, Seznam, Naver и другие
 // участники протокола; Google IndexNow не читает и узнаёт об изменениях из sitemap). Адреса копятся и
-// уходят одним запросом раз в несколько секунд; ключ лежит в settings и отдаётся по /indexnow/<key>.txt.
+// уходят одним запросом раз в несколько секунд; ключ лежит в settings и отдаётся по /<key>.txt.
 type IndexNow struct {
 	settings SettingsRepo
 	base     string // публичный адрес сайта, например https://racion.app; пусто — уведомления выключены
@@ -108,7 +108,7 @@ func (x *IndexNow) flush() {
 	if len(urls) > 10000 {
 		urls = urls[:10000]
 	}
-	body, _ := json.Marshal(map[string]any{"host": host.Host, "key": key, "keyLocation": x.base + "/indexnow/" + key + ".txt", "urlList": urls})
+	body, _ := json.Marshal(map[string]any{"host": host.Host, "key": key, "keyLocation": x.base + "/" + key + ".txt", "urlList": urls})
 	req, _ := http.NewRequestWithContext(ctx, "POST", "https://api.indexnow.org/indexnow", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	res, err := x.client.Do(req)
