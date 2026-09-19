@@ -133,6 +133,9 @@ func (c *Catalog) Normalize(p Params) Params {
 	if p.BudgetMode != "week" {
 		p.BudgetMode = "perPersonDay"
 	}
+	if p.Prep != PrepOne && p.Prep != PrepTwo {
+		p.Prep = PrepNone
+	}
 	if p.BudgetValue < 0 || p.BudgetValue > 1_000_000 {
 		p.BudgetValue = 0
 	}
@@ -774,7 +777,7 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 				dayMains[d] = append(dayMains[d], mainIngredient(lr))
 				continue
 			}
-			pool := pools[slot]
+			pool := prepPool(p.Prep, pools[slot], d)
 			if len(pool) == 0 {
 				continue
 			}
@@ -795,6 +798,9 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 			used[r.ID]++
 			dayMains[d] = append(dayMains[d], mainIngredient(r))
 			dish := c.dish(r, slot, pr)
+			if pi, ok := prepAllowed(p.Prep, r, d); ok && p.Prep != PrepNone {
+				dish.Prep = &pi
+			}
 			mult := 1.0
 			if batchDay && r.Batch {
 				dish.Batch = true
@@ -1071,6 +1077,7 @@ func (c *Catalog) finish(plan *Plan) {
 			plan.Shopping = append(plan.Shopping, *g)
 		}
 	}
+	plan.PrepDays = c.prepDays(plan)
 	plan.Totals = Totals{
 		Cost:          pr.round(total),
 		PantryCost:    pr.round(pantryTotal),
@@ -1226,6 +1233,7 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 			pool = append(pool, r)
 		}
 	}
+	pool = prepPool(plan.Params.Prep, pool, day)
 	swaps := plan.Swaps + 1
 	rng := rand.New(rand.NewSource(plan.Seed + int64(swaps)*7919 + int64(day*10) + int64(len(slot))))
 	s, ok := c.pick(pool, day, slot, portions, pr, tg, used, dayMains, ct, rng)
@@ -1233,6 +1241,9 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 		return plan, fmt.Errorf("nothing to swap to")
 	}
 	newDish := c.dish(s.r, slot, pr)
+	if pi, ok := prepAllowed(plan.Params.Prep, s.r, day); ok && plan.Params.Prep != PrepNone {
+		newDish.Prep = &pi
+	}
 	batch := pairDay >= 0 && s.r.Batch && slot == "lunch"
 	sc := s
 	if !batch {

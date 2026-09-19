@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Repeat2, RotateCcw, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CookingPot, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { OfferCard, useOffer } from "../components/OfferCard";
 import { TopBar } from "../components/TopBar";
@@ -17,6 +17,9 @@ import { readJSON, writeJSON } from "../lib/storage";
 import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan as PlanT } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { useT } from "../i18n";
+
+// порции в списке заготовок: 4 или 2,5
+const fmtPortions = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ","));
 
 export function Plan() {
   const { id = "" } = useParams();
@@ -543,6 +546,37 @@ export function Plan() {
             ))}
           </div>
         )}
+        {plan.prepDays && plan.prepDays.length > 0 && !storeMode && (
+          <section className="prep" aria-label={t("prep.title")}>
+            <div className="prep__head">
+              <h2><CookingPot size={18} aria-hidden /> {t("prep.title")}</h2>
+              <span className="prep__hint">{t("quiz.prep." + (plan.params.prep || "none"))}</span>
+            </div>
+            {plan.prepDays.map((pd) => (
+              <div className="prep__day" key={pd.index}>
+                <div className="prep__dayhead">
+                  <b>{pd.label}</b> <span className="num">{dateShort(pd.date, lang)}</span>
+                  {pd.items.length > 0 && <span className="prep__total">{t("prep.total", { time: minutes(pd.totalMin) })}</span>}
+                </div>
+                {pd.items.length === 0 ? (
+                  <p className="prep__empty">{t("prep.empty")}</p>
+                ) : (
+                  <ul className="prep__list">
+                    {pd.items.map((it) => (
+                      <li key={it.recipeId} className="prep__item">
+                        <button type="button" className="prep__open" onClick={() => setRecipeId(it.recipeId)}>{it.title}{it.side && <span className="prep__side"> + {it.side}</span>}</button>
+                        <span className="prep__meta">
+                          <span className="num">{it.timeMin} {t("min")}</span> · {t("prep.portions", { n: fmtPortions(it.portions) })} · {t("prep.for", { days: it.forDays.map((d) => plan.days[d]?.label.toLowerCase()).join(", ") })}
+                          {it.mode === "freezer" && <span className="prep__mode prep__mode--freezer"><Snowflake size={12} aria-hidden /> {t("prep.mode.freezer")}</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </section>
+        )}
         {plan.days.map((day) => (
           <section className={"day" + (day.skipped ? " day--away" : "")} key={day.index} aria-label={`${day.label}, ${dateShort(day.date, lang)}`}>
             <div className="day__head">
@@ -954,6 +988,7 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, o
           ) : (
             <>
               <Clock size={13} aria-hidden /> {dish.timeMin} {t("min")}
+              {dish.prep && <span className={"dish__prep dish__prep--" + dish.prep.mode}>{dish.prep.mode === "freezer" ? <Snowflake size={12} aria-hidden /> : dish.prep.mode === "fridge" ? <Refrigerator size={12} aria-hidden /> : <Flame size={12} aria-hidden />} {t("dish.prep." + dish.prep.mode)}</span>}
               {dish.why && !dish.course && <span className="dish__reason" aria-label={t("dish.why")}>— {dish.why}</span>}
             </>
           )}

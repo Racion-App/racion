@@ -71,6 +71,7 @@ export type Params = {
   equipment: string[];
   slots: string[];
   startDate?: string;
+  prep?: "" | "one" | "two"; // заготовки: каждый день | раз в неделю | два раза
   wants: string[];
   collection?: string; // неделя из коллекции (id)
   have: string[]; // что уже есть дома: планировщик использует первым, список покупок вычитает упаковку
@@ -98,7 +99,10 @@ export type Dish = {
   why: string;
   whyCode?: unknown;
   side?: { recipeId: string; title: string; timeMin: number; kcal: number; protein: number; fat: number; carb: number; cost: number }; // гарнир; итоги блюда — суммой с ним
+  prep?: { session: number; mode: "fridge" | "freezer" | "fresh" }; // режим заготовок
 };
+
+export type PrepDay = { index: number; date: string; label: string; items: { recipeId: string; title: string; timeMin: number; mode: "fridge" | "freezer"; forDays: number[]; portions: number; side?: string }[]; totalMin: number };
 
 export type Day = {
   index: number;
@@ -139,6 +143,7 @@ export type ShopGroup = { category: string; label: string; items: ShopItem[]; co
 export type Plan = {
   id: string;
   params: Params;
+  prepDays?: PrepDay[];
   lang: string;
   country: Country;
   store: Store;

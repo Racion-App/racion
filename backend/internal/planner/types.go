@@ -77,6 +77,8 @@ type Recipe struct {
 	Equipment   []string              `json:"equipment"`
 	Tags        []string              `json:"tags"`
 	Batch       bool                  `json:"batch"`
+	KeepDays    int                   `json:"keep,omitempty"`   // сколько дней стоит в холодильнике готовым (0 — по правилам prep.go)
+	Freeze      bool                  `json:"freeze,omitempty"` // можно заморозить готовым
 	Steps       []string              `json:"steps"`
 	Ingredients []RecipeIngredient    `json:"ingredients"`
 	Image       string                `json:"image"`            // URL картинки, пусто — нет фото
@@ -215,6 +217,7 @@ type Params struct {
 	Equipment   []string `json:"equipment"`
 	Slots       []string `json:"slots"`
 	StartDate   string   `json:"startDate"`       // YYYY-MM-DD, понедельник; пусто = ближайший понедельник
+	Prep        string   `json:"prep,omitempty"`  // заготовки: "" каждый день | one раз в неделю | two два раза
 	Wants       []string `json:"wants,omitempty"` // продукты, которые хочется на этой неделе (id)
 	// Have — что уже есть дома (id продуктов): планировщик ставит блюда с ними раньше, список покупок
 	// вычитает одну типовую упаковку каждого.
@@ -251,6 +254,7 @@ type Dish struct {
 	Why      string  `json:"why"`  // почему выбрано: коротко и честно, на языке плана
 	WhyCode  WhyCode `json:"whyCode"`
 	Side     *Side   `json:"side,omitempty"` // гарнир к основному (итоги выше — суммой с ним)
+	Prep     *PrepInfo `json:"prep,omitempty"` // режим заготовок: когда и как приготовлено
 }
 
 // WhyCode — из чего собрана подпись «почему»; по нему подпись пересобирается на другом языке.
@@ -358,6 +362,7 @@ type Plan struct {
 	Notes        []string            `json:"notes"`              // пояснения (дети, источник цен)
 	Family       []string            `json:"family,omitempty"`   // имена аккаунтов, присоединившихся к плану; ставит транспорт
 	Occasion     *OccasionInfo       `json:"occasion,omitempty"` // событие вместо недели
+	PrepDays     []PrepDay           `json:"prepDays,omitempty"` // режим заготовок: что готовить в дни заготовок
 }
 
 // Справочники для UI.

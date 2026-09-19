@@ -805,6 +805,17 @@ export function Quiz() {
                 </p>
               )}
             </div>
+            <div className="quiz__group">
+              <p className="quiz__label">{t("quiz.prep")}</p>
+              <div className="segmented segmented--stack" role="radiogroup" aria-label={t("quiz.prep")}>
+                {(["", "one", "two"] as const).map((k) => (
+                  <button key={k || "none"} type="button" role="radio" aria-checked={(p.prep ?? "") === k} onClick={() => set({ prep: k })}>
+                    {t("quiz.prep." + (k || "none"))}
+                  </button>
+                ))}
+              </div>
+              <p className="quiz__hint">{t("quiz.prep.hint." + (p.prep || "none"))}</p>
+            </div>
           </section>
         )}
 

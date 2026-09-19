@@ -1678,3 +1678,22 @@ main.pages.is-loading {
 
 // Редактор комментария на фокусе — как обычное поле (ореол снят в design-system/apple-components.scss)
 .mdedit:focus { box-shadow: none; border-color: var(--ds-blue); outline: none; }
+
+// Режим заготовок: блок «что готовить в день заготовки» над неделей и метка на блюде
+.prep { margin: 4px 0 12px; padding: 14px 16px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  &__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
+    h2 { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 700; svg { color: var(--ds-blue); } } }
+  &__hint { font-size: 13px; color: var(--ds-label-tertiary); }
+  &__day { padding: 10px 0; border-top: 1px solid var(--ds-separator); &:first-of-type { border-top: 0; } }
+  &__dayhead { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 15px; .num { color: var(--ds-label-tertiary); font-size: 13px; } }
+  &__total { margin-left: auto; font-size: 13px; color: var(--ds-label-secondary); }
+  &__empty { margin: 6px 0 0; font-size: 14px; color: var(--ds-label-secondary); }
+  &__list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+  &__item { display: grid; gap: 2px; }
+  &__open { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 600; color: var(--ds-label-primary); text-align: left; cursor: pointer; &:hover { color: var(--ds-blue); } }
+  &__side { font-weight: 400; color: var(--ds-label-secondary); }
+  &__meta { font-size: 13px; color: var(--ds-label-secondary); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+  &__mode { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 6px; font-size: 12px; background: var(--ds-fill-4);
+    &--freezer { color: var(--ds-blue); } } }
+.dish__prep { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; font-size: 12px; color: var(--ds-label-tertiary); white-space: nowrap;
+  &--freezer { color: var(--ds-blue); } &--fresh { color: var(--ds-green, #34c759); } }
