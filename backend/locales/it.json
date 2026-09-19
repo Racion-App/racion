@@ -1077,7 +1077,6 @@
   "partner.q.grill": "barbecue",
   "account.plans.empty.hint": "Sette domande e il menu con prezzi e lista della spesa è pronto.",
   "admin.keys": "Chiavi API",
-  "admin.keys.hint": "Per script e assistenti (Claude, Codex): la chiave ha i tuoi permessi. Come aggiungere ricette e raccolte —",
   "admin.keys.copy": "Copia",
   "admin.keys.copied": "Chiave copiata",
   "admin.keys.once": "Mostrata una sola volta: salvala ora.",
@@ -1087,5 +1086,6 @@
   "admin.keys.name": "Nome, es. «Claude»",
   "admin.keys.create": "Crea chiave",
   "admin.keys.err.name": "Nome: fino a 40 caratteri",
-  "admin.keys.err.limit": "Massimo dieci chiavi"
+  "admin.keys.err.limit": "Massimo dieci chiavi",
+  "admin.keys.hint2": "Per script e assistenti (Claude, Codex): la chiave ha i tuoi permessi e viene mostrata una sola volta."
 }

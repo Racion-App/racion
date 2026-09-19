@@ -1091,7 +1091,6 @@
   "partner.q.grill": "grill",
   "account.plans.empty.hint": "Siedem pytań i menu z cenami oraz listą zakupów gotowe.",
   "admin.keys": "Klucze API",
-  "admin.keys.hint": "Dla skryptów i asystentów (Claude, Codex): klucz ma twoje uprawnienia. Jak dodawać przepisy i kolekcje —",
   "admin.keys.copy": "Kopiuj",
   "admin.keys.copied": "Klucz skopiowany",
   "admin.keys.once": "Pokazywany raz: zapisz teraz.",
@@ -1101,5 +1100,6 @@
   "admin.keys.name": "Nazwa, np. „Claude”",
   "admin.keys.create": "Utwórz klucz",
   "admin.keys.err.name": "Nazwa: do 40 znaków",
-  "admin.keys.err.limit": "Najwyżej dziesięć kluczy"
+  "admin.keys.err.limit": "Najwyżej dziesięć kluczy",
+  "admin.keys.hint2": "Dla skryptów i asystentów (Claude, Codex): klucz ma twoje uprawnienia i jest pokazywany raz."
 }

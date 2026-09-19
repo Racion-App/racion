@@ -1077,7 +1077,6 @@
   "partner.q.grill": "barbecue",
   "account.plans.empty.hint": "Sept questions, et votre menu avec prix et liste de courses est prêt.",
   "admin.keys": "Clés API",
-  "admin.keys.hint": "Pour scripts et assistants (Claude, Codex) : la clé porte vos droits. Ajouter recettes et collections —",
   "admin.keys.copy": "Copier",
   "admin.keys.copied": "Clé copiée",
   "admin.keys.once": "Affichée une seule fois : enregistrez-la maintenant.",
@@ -1087,5 +1086,6 @@
   "admin.keys.name": "Nom, ex. « Claude »",
   "admin.keys.create": "Créer une clé",
   "admin.keys.err.name": "Nom : 40 caractères max.",
-  "admin.keys.err.limit": "Dix clés maximum"
+  "admin.keys.err.limit": "Dix clés maximum",
+  "admin.keys.hint2": "Pour scripts et assistants (Claude, Codex) : la clé porte vos droits et n’est affichée qu’une fois."
 }

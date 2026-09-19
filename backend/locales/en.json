@@ -1109,7 +1109,6 @@
   "partner.q.grill": "grill",
   "account.plans.empty.hint": "Seven questions and your menu with prices and a shopping list is ready.",
   "admin.keys": "API keys",
-  "admin.keys.hint": "For scripts and assistants (Claude, Codex): a key carries your permissions. How to add recipes and collections —",
   "admin.keys.copy": "Copy",
   "admin.keys.copied": "Key copied",
   "admin.keys.once": "Shown once: save it now.",
@@ -1119,5 +1118,6 @@
   "admin.keys.name": "Name, e.g. “Claude”",
   "admin.keys.create": "Create key",
   "admin.keys.err.name": "Key name: up to 40 characters",
-  "admin.keys.err.limit": "No more than ten keys"
+  "admin.keys.err.limit": "No more than ten keys",
+  "admin.keys.hint2": "For scripts and assistants (Claude, Codex): a key carries your permissions and is shown once."
 }

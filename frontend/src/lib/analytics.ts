@@ -62,17 +62,10 @@ export function initAnalytics() {
     if (document.visibilityState === "hidden") flush(true);
   });
   if (!METRIKA_ID) return;
+  // сам счётчик — inline в index.html (так его видит проверка Метрики и он стартует до загрузки приложения);
+  // здесь только просмотры при переходах внутри приложения: они идут через pushState, Метрика сама их не видит
   const w = window as unknown as Record<string, unknown>;
-  if (w.ym) return;
-  const ymq: unknown[] = [];
-  const ym = Object.assign((...args: unknown[]) => void ymq.push(args), { a: ymq, l: Date.now() });
-  w.ym = ym;
-  const s = document.createElement("script");
-  s.async = true;
-  s.src = "https://mc.yandex.ru/metrika/tag.js";
-  document.head.appendChild(s);
-  ym(Number(METRIKA_ID), "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
-  // переходы внутри приложения идут через pushState — Метрика сама их не видит, сообщаем о просмотре страницы
+  if (!w.ym) return;
   const push = history.pushState.bind(history);
   history.pushState = (...args: Parameters<History["pushState"]>) => {
     push(...args);

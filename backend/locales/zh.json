@@ -1078,7 +1078,6 @@
   "partner.q.grill": "烧烤炉",
   "account.plans.empty.hint": "回答七个问题，带价格和购物清单的菜单就准备好了。",
   "admin.keys": "API 密钥",
-  "admin.keys.hint": "供脚本和助手（Claude、Codex）使用：密钥拥有与你相同的权限。如何添加食谱和合集 —",
   "admin.keys.copy": "复制",
   "admin.keys.copied": "密钥已复制",
   "admin.keys.once": "仅显示一次，请立即保存。",
@@ -1088,5 +1087,6 @@
   "admin.keys.name": "名称，例如“Claude”",
   "admin.keys.create": "创建密钥",
   "admin.keys.err.name": "名称：不超过 40 个字符",
-  "admin.keys.err.limit": "最多十个密钥"
+  "admin.keys.err.limit": "最多十个密钥",
+  "admin.keys.hint2": "供脚本和助手（Claude、Codex）使用：密钥拥有与你相同的权限，仅显示一次。"
 }

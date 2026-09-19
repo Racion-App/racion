@@ -1077,7 +1077,6 @@
   "partner.q.grill": "mangal",
   "account.plans.empty.hint": "Yedi soru — fiyatlı menü ve alışveriş listesi hazır.",
   "admin.keys": "API anahtarları",
-  "admin.keys.hint": "Betikler ve asistanlar için (Claude, Codex): anahtar senin yetkilerini taşır. Tarif ve koleksiyon ekleme —",
   "admin.keys.copy": "Kopyala",
   "admin.keys.copied": "Anahtar kopyalandı",
   "admin.keys.once": "Bir kez gösterilir: şimdi kaydet.",
@@ -1087,5 +1086,6 @@
   "admin.keys.name": "Ad, örn. «Claude»",
   "admin.keys.create": "Anahtar oluştur",
   "admin.keys.err.name": "Ad: en fazla 40 karakter",
-  "admin.keys.err.limit": "En fazla on anahtar"
+  "admin.keys.err.limit": "En fazla on anahtar",
+  "admin.keys.hint2": "Betikler ve asistanlar için (Claude, Codex): anahtar senin yetkilerini taşır ve bir kez gösterilir."
 }

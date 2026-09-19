@@ -1077,7 +1077,6 @@
   "partner.q.grill": "barbecue",
   "account.plans.empty.hint": "Zeven vragen en je menu met prijzen en boodschappenlijst staat klaar.",
   "admin.keys": "API-sleutels",
-  "admin.keys.hint": "Voor scripts en assistenten (Claude, Codex): een sleutel heeft jouw rechten. Recepten en collecties toevoegen —",
   "admin.keys.copy": "Kopiëren",
   "admin.keys.copied": "Sleutel gekopieerd",
   "admin.keys.once": "Wordt één keer getoond: sla nu op.",
@@ -1087,5 +1086,6 @@
   "admin.keys.name": "Naam, bijv. “Claude”",
   "admin.keys.create": "Sleutel maken",
   "admin.keys.err.name": "Naam: maximaal 40 tekens",
-  "admin.keys.err.limit": "Maximaal tien sleutels"
+  "admin.keys.err.limit": "Maximaal tien sleutels",
+  "admin.keys.hint2": "Voor scripts en assistenten (Claude, Codex): een sleutel heeft jouw rechten en wordt één keer getoond."
 }

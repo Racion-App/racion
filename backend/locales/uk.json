@@ -1091,7 +1091,6 @@
   "partner.q.grill": "мангал",
   "account.plans.empty.hint": "Сім запитань — і меню з цінами та списком покупок готове.",
   "admin.keys": "Ключі API",
-  "admin.keys.hint": "Для скриптів і помічників (Claude, Codex): ключ має твої права. Як додавати рецепти й добірки —",
   "admin.keys.copy": "Скопіювати",
   "admin.keys.copied": "Ключ скопійовано",
   "admin.keys.once": "Показується один раз: збережи зараз.",
@@ -1101,5 +1100,6 @@
   "admin.keys.name": "Назва, наприклад «Claude»",
   "admin.keys.create": "Створити ключ",
   "admin.keys.err.name": "Назва ключа: до 40 знаків",
-  "admin.keys.err.limit": "Не більше десяти ключів"
+  "admin.keys.err.limit": "Не більше десяти ключів",
+  "admin.keys.hint2": "Для скриптів і помічників (Claude, Codex): ключ має твої права й показується один раз."
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Activity, AlertTriangle, BookOpen, FolderOpen, ScrollText, ShieldCheck, Store, Users } from "lucide-react";
+import { Activity, AlertTriangle, BookOpen, FolderOpen, KeyRound, ScrollText, ShieldCheck, Store, Users } from "lucide-react";
 import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
 import { AdminPartners } from "../components/AdminPartners";
-import { AdminKeys } from "../components/AdminKeys";
+import { AdminApi } from "../components/AdminApi";
 import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
 import { TopBar } from "../components/TopBar";
@@ -20,7 +20,7 @@ import { useT } from "../i18n";
 // Панель администратора: числа, динамика по дням, события аналитики, аккаунты, ошибки браузера и лог сервера.
 // Открыта только почтам из ADMIN_EMAILS; остальным сервер отвечает 404, страница уводит на главную.
 
-type Tab = "overview" | "recipes" | "collections" | "moderation" | "users" | "errors" | "logs" | "partners";
+type Tab = "overview" | "recipes" | "collections" | "moderation" | "users" | "errors" | "logs" | "partners" | "api";
 
 export function Admin() {
   const { t, lang } = useT();
@@ -29,7 +29,7 @@ export function Admin() {
   // вкладка и открытый рецепт живут в адресе: /admin/users, /admin/recipes/olivier — работают «назад» и обновление
   const nav = useNavigate();
   const params = useParams<{ tab?: string; id?: string }>();
-  const TABS: Tab[] = ["overview", "recipes", "collections", "moderation", "users", "errors", "logs", "partners"];
+  const TABS: Tab[] = ["overview", "recipes", "collections", "moderation", "users", "errors", "logs", "partners", "api"];
   const tab: Tab = params.id ? "recipes" : TABS.includes(params.tab as Tab) ? (params.tab as Tab) : "overview";
   const setTab = (next: Tab) => nav(next === "overview" ? "/admin" : `/admin/${next}`);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -129,6 +129,11 @@ export function Admin() {
               <Store size={15} aria-hidden /> {t("admin.partners")}
             </button>
           )}
+          {can("recipes") && (
+            <button type="button" role="tab" className="chip" aria-pressed={tab === "api"} aria-selected={tab === "api"} onClick={() => setTab("api")}>
+              <KeyRound size={15} aria-hidden /> API
+            </button>
+          )}
         </div>
         {toast && (
           <div className="toast" role="status">
@@ -139,6 +144,7 @@ export function Admin() {
         {tab === "moderation" && can("moderation") && <AdminModeration onToast={setToast} />}
         {tab === "collections" && can("recipes") && <AdminCollections photos={!!meta?.photos} onToast={setToast} />}
         {tab === "partners" && can("partners") && <AdminPartners onToast={setToast} />}
+        {tab === "api" && can("recipes") && <AdminApi onToast={setToast} />}
         {err && <p className="error-inline">{err}</p>}
 
         {tab === "overview" && (
@@ -200,7 +206,6 @@ export function Admin() {
                     hint={p.perDay ? t("admin.ai.quota", { n: p.today, max: p.perDay }) : t("admin.ai.today", { n: p.today, ok: p.ok, failed: p.failed })}
                   />
                 ))}
-                {can("recipes") && <AdminKeys onToast={setToast} />}
               </div>
             </div>
           </section>

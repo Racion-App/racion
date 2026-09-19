@@ -1078,7 +1078,6 @@
   "partner.q.grill": "barbacoa",
   "account.plans.empty.hint": "Siete preguntas y tu menú con precios y lista de la compra está listo.",
   "admin.keys": "Claves API",
-  "admin.keys.hint": "Para scripts y asistentes (Claude, Codex): la clave tiene tus permisos. Cómo añadir recetas y colecciones —",
   "admin.keys.copy": "Copiar",
   "admin.keys.copied": "Clave copiada",
   "admin.keys.once": "Se muestra una sola vez: guárdala ahora.",
@@ -1088,5 +1087,6 @@
   "admin.keys.name": "Nombre, p. ej. «Claude»",
   "admin.keys.create": "Crear clave",
   "admin.keys.err.name": "Nombre: hasta 40 caracteres",
-  "admin.keys.err.limit": "Máximo diez claves"
+  "admin.keys.err.limit": "Máximo diez claves",
+  "admin.keys.hint2": "Para scripts y asistentes (Claude, Codex): la clave tiene tus permisos y se muestra una sola vez."
 }

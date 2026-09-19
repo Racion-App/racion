@@ -1078,7 +1078,6 @@
   "partner.q.grill": "バーベキューグリル",
   "account.plans.empty.hint": "7つの質問に答えるだけで、価格と買い物リスト付きの献立が完成します。",
   "admin.keys": "API キー",
-  "admin.keys.hint": "スクリプトやアシスタント（Claude、Codex）用：キーはあなたの権限を持ちます。レシピやコレクションの追加方法 —",
   "admin.keys.copy": "コピー",
   "admin.keys.copied": "キーをコピーしました",
   "admin.keys.once": "一度だけ表示されます。今すぐ保存してください。",
@@ -1088,5 +1087,6 @@
   "admin.keys.name": "名前（例：Claude）",
   "admin.keys.create": "キーを作成",
   "admin.keys.err.name": "名前：40文字以内",
-  "admin.keys.err.limit": "キーは10個まで"
+  "admin.keys.err.limit": "キーは10個まで",
+  "admin.keys.hint2": "スクリプトやアシスタント（Claude、Codex）用：キーはあなたの権限を持ち、一度だけ表示されます。"
 }

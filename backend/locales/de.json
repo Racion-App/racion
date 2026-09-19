@@ -1109,7 +1109,6 @@
   "partner.q.grill": "Grill",
   "account.plans.empty.hint": "Sieben Fragen, und dein Menü mit Preisen und Einkaufsliste steht.",
   "admin.keys": "API-Schlüssel",
-  "admin.keys.hint": "Für Skripte und Assistenten (Claude, Codex): ein Schlüssel hat deine Rechte. Rezepte und Sammlungen anlegen —",
   "admin.keys.copy": "Kopieren",
   "admin.keys.copied": "Schlüssel kopiert",
   "admin.keys.once": "Wird nur einmal angezeigt: jetzt speichern.",
@@ -1119,5 +1118,6 @@
   "admin.keys.name": "Name, z. B. „Claude“",
   "admin.keys.create": "Schlüssel erstellen",
   "admin.keys.err.name": "Name: bis 40 Zeichen",
-  "admin.keys.err.limit": "Höchstens zehn Schlüssel"
+  "admin.keys.err.limit": "Höchstens zehn Schlüssel",
+  "admin.keys.hint2": "Für Skripte und Assistenten (Claude, Codex): ein Schlüssel hat deine Rechte und wird nur einmal angezeigt."
 }
