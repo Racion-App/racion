@@ -32,6 +32,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Рацион" />
     <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Первые запросы приложения стартуют вместе с HTML, а не после загрузки скрипта -->
+    <link rel="preload" href="/api/meta" as="fetch" crossorigin />
     <!-- Yandex.Metrika counter -->
     <script>if(location.hostname==="racion.app"&&document.cookie.indexOf("racion_analytics=0")<0){function later(f){function go(){(window.requestIdleCallback||function(g){setTimeout(g,800)})(f)}if(document.readyState==="complete")go();else window.addEventListener("load",go)}later(function(){(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=112818312","ym");ym(112818312,"init",{webvisor:true,clickmap:true,accurateTrackBounce:true,trackLinks:true});});}</script>
     <!-- /Yandex.Metrika counter -->
