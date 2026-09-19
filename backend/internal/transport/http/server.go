@@ -41,12 +41,14 @@ type Deps struct {
 	BaseURL  string       // например https://racion.app; пусто — брать из запроса
 	Metrika  string       // id счётчика Яндекс Метрики для SSR-страниц
 	Contact  string       // почта для юридических страниц (LEGAL_EMAIL)
+	Images   string       // каталог с фото блюд (том фронтенда) для карточек превью
 	Logs     *logger.Ring // последние записи лога для админки
 }
 
 func New(d Deps) http.Handler {
 	metrikaID = d.Metrika
 	legalEmail = d.Contact
+	imagesDir = d.Images
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)
@@ -92,6 +94,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /og/", s.ogHome)
 	mux.HandleFunc("GET /og/plan/{id}", s.ogPlan)
 	mux.HandleFunc("GET /og/event/{id}", s.ogEvent)
+	mux.HandleFunc("GET /og/recipe/{id}", s.ogRecipe)
+	mux.HandleFunc("GET /og/collection/{slug}", s.ogCollection)
 	mux.HandleFunc("GET /api/me/collections", s.myCollections)
 	mux.HandleFunc("POST /api/me/collections", s.limited(s.lim.write, s.createCollection))
 	mux.HandleFunc("PUT /api/me/collections/{id}", s.limited(s.lim.write, s.renameCollection))

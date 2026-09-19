@@ -1101,5 +1101,7 @@
   "filter.price.from": "a partir de {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Preço mínimo",
-  "filter.price.max": "Preço máximo"
+  "filter.price.max": "Preço máximo",
+  "og.cta": "Ver receita",
+  "og.cta.collection": "Ver coleção"
 }

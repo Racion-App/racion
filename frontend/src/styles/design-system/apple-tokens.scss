@@ -34,7 +34,7 @@
 
   // ── Labels (полупрозрачные — Apple так делает для адаптации к фону) ───────
   --ds-label-primary:    rgba(0, 0, 0, 0.88);
-  --ds-label-secondary:  rgba(60, 60, 67, 0.65);
+  --ds-label-secondary:  rgba(60, 60, 67, 0.72); // 4.9:1 на белом — мелкий вторичный текст проходит WCAG AA
   --ds-label-tertiary:   rgba(60, 60, 67, 0.42);
   --ds-label-quaternary: rgba(60, 60, 67, 0.20);
   --ds-label-on-accent:  #FFFFFF;

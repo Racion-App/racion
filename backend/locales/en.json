@@ -1132,5 +1132,7 @@
   "filter.price.from": "from {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Minimum price",
-  "filter.price.max": "Maximum price"
+  "filter.price.max": "Maximum price",
+  "og.cta": "Open recipe",
+  "og.cta.collection": "Open collection"
 }

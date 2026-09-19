@@ -1132,5 +1132,7 @@
   "filter.price.from": "ab {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Mindestpreis",
-  "filter.price.max": "Höchstpreis"
+  "filter.price.max": "Höchstpreis",
+  "og.cta": "Rezept öffnen",
+  "og.cta.collection": "Sammlung öffnen"
 }

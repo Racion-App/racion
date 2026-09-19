@@ -188,7 +188,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: firstNonEmpty(ogImage(base, cover), brandOG(base, pl.L)), OGType: "article", OGWide: cover == "", Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards)},
+		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID,
 	}

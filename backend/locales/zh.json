@@ -1101,5 +1101,7 @@
   "filter.price.from": "{0} 起",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "最低价格",
-  "filter.price.max": "最高价格"
+  "filter.price.max": "最高价格",
+  "og.cta": "查看食谱",
+  "og.cta.collection": "查看合集"
 }

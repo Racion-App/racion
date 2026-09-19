@@ -25,6 +25,7 @@ services:
       BASE_URL: ${BASE_URL:-}
       METRIKA_ID: ${VITE_METRIKA_ID:-}
       LEGAL_EMAIL: ${LEGAL_EMAIL:-}
+      IMAGES_DIR: /images
       PUSH_CONTACT: ${PUSH_CONTACT:-mailto:admin@racion.app}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
@@ -41,6 +42,8 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-racion-secret}
       S3_BUCKET: ${S3_BUCKET:-racion}
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-/media}
+    volumes:
+      - ./frontend/public/images:/images:ro   # фото блюд для карточек превью ссылок
     depends_on:
       db:
         condition: service_healthy

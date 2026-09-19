@@ -1101,5 +1101,7 @@
   "filter.price.from": "{0} бастап",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Ең төменгі баға",
-  "filter.price.max": "Ең жоғары баға"
+  "filter.price.max": "Ең жоғары баға",
+  "og.cta": "Рецептті ашу",
+  "og.cta.collection": "Жинақты ашу"
 }

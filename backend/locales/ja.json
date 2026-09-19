@@ -1101,5 +1101,7 @@
   "filter.price.from": "{0} 以上",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "最低価格",
-  "filter.price.max": "最高価格"
+  "filter.price.max": "最高価格",
+  "og.cta": "レシピを見る",
+  "og.cta.collection": "コレクションを見る"
 }

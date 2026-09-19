@@ -1100,5 +1100,7 @@
   "filter.price.from": "vanaf {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Minimumprijs",
-  "filter.price.max": "Maximumprijs"
+  "filter.price.max": "Maximumprijs",
+  "og.cta": "Recept openen",
+  "og.cta.collection": "Collectie openen"
 }

@@ -1564,3 +1564,6 @@ main.pages.is-loading {
 
 // «Готовить» в строке действий страницы рецепта: единственная primary-кнопка шапки, иконка шефа
 .social__cook { display: inline-flex; align-items: center; gap: 6px; margin-right: 4px; }
+
+// Ссылки внутри текста различимы не только цветом: подчёркивание (согласие, cookies, юридические страницы)
+.consent__text a, .auth__legal a, .legal p a, .legal li a { text-decoration: underline; text-underline-offset: 2px; }

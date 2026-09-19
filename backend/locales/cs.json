@@ -1114,5 +1114,7 @@
   "filter.price.from": "od {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Minimální cena",
-  "filter.price.max": "Maximální cena"
+  "filter.price.max": "Maximální cena",
+  "og.cta": "Otevřít recept",
+  "og.cta.collection": "Otevřít sbírku"
 }

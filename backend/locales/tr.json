@@ -1100,5 +1100,7 @@
   "filter.price.from": "{0} ve üzeri",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "En düşük fiyat",
-  "filter.price.max": "En yüksek fiyat"
+  "filter.price.max": "En yüksek fiyat",
+  "og.cta": "Tarifi aç",
+  "og.cta.collection": "Koleksiyonu aç"
 }

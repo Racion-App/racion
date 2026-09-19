@@ -43,7 +43,7 @@ function initials(name: string): string {
 export function StoreMark({ code, name }: { code: string; name: string }) {
   const file = WITH_LOGO.has(code) ? code : ALIAS[code] && WITH_LOGO.has(ALIAS[code]) ? ALIAS[code] : null;
   if (file) {
-    return <img className="store-logo" src={`/logos/${file}.svg`} alt="" aria-hidden="true" draggable={false} />;
+    return <img className="store-logo" src={`/logos/${file}.svg`} alt="" aria-hidden="true" draggable={false} width={96} height={24} />;
   }
   if (code === "svetofor") {
     return (

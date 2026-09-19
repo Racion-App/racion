@@ -1114,5 +1114,7 @@
   "filter.price.from": "від {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Мінімальна ціна",
-  "filter.price.max": "Максимальна ціна"
+  "filter.price.max": "Максимальна ціна",
+  "og.cta": "Відкрити рецепт",
+  "og.cta.collection": "Відкрити добірку"
 }

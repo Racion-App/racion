@@ -1150,5 +1150,7 @@
   "filter.price.from": "от {0}",
   "filter.price.range": "{0} – {1}",
   "filter.price.min": "Минимальная цена",
-  "filter.price.max": "Максимальная цена"
+  "filter.price.max": "Максимальная цена",
+  "og.cta": "Открыть рецепт",
+  "og.cta.collection": "Открыть подборку"
 }
