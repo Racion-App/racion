@@ -235,6 +235,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	// «Коротко» — только то, чего нет в шапке и боковой панели.
 	var facts []string
 	eq := equipmentLabels(l, rc.Equipment)
+	buy := s.svc.Partners.BuyLinks(r.Context(), pl.Country.Code, l, rc.Equipment)
 	if rc.Batch {
 		facts = append(facts, i18n.T(l, "recipe.fact.batch"))
 	}
@@ -324,7 +325,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
 		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags,
-		"Equipment": eq, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
+		"Equipment": eq, "Buy": buy, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "recipe.html", data); err != nil {

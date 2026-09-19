@@ -1444,3 +1444,30 @@ main.pages.is-loading { .rgrid, .pager { opacity: 0.55; transition: opacity var(
   &__name { display: grid; gap: 1px; font-size: 16px; font-weight: 600; small { font-size: 12.5px; font-weight: 400; color: var(--ds-label-tertiary); } }
   &__foot { margin: 14px 0 0; font-size: 13px; color: var(--ds-label-tertiary); }
 }
+
+// Партнёрская строка под рецептом: «Где купить · Аэрогриль Яндекс Маркет ↗». Одна строка, третичный
+// цвет, без фона — читается как сноска, не как баннер. С флагом affiliate подпись «Реклама» и erid.
+.partner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; padding-top: 10px;
+  border-top: 1px solid var(--ds-separator); font-size: 13px; color: var(--ds-label-tertiary);
+  &__label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  &__link {
+    display: inline-flex; align-items: center; gap: 4px; color: var(--ds-label-secondary); font-weight: 500; text-decoration: none;
+    &:hover { color: var(--ds-blue); }
+    svg { opacity: 0.6; }
+  }
+  &__shop { color: var(--ds-label-tertiary); font-weight: 400; }
+  &__erid { font-size: 11px; font-variant-numeric: tabular-nums; }
+  &__hide {
+    margin-left: auto; width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 50%;
+    background: transparent; color: var(--ds-label-tertiary); cursor: pointer;
+    &:hover { background: var(--ds-fill-2); color: var(--ds-label-secondary); }
+  }
+  &__note { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ds-label-tertiary); }
+}
+.rpage .partner { margin-top: 10px; }
+
+.admin__group { margin-top: 18px; }
+.admin__h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); display: flex; align-items: center; gap: 8px; }
+.ownform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
+.badge--muted { background: var(--ds-fill-2); color: var(--ds-label-tertiary); }

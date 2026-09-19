@@ -118,7 +118,7 @@ func main() {
 	services := service.New(service.Repos{
 		Users: store.Users, Sessions: store.Sessions, Plans: store.Plans, Dislikes: store.Dislikes, Checks: store.Checks,
 		Purchases: store.Purchases, Extras: store.Extras, UserRecipes: store.UserRecipes, Events: store.Events,
-		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections,
+		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners,
 	}, catalogRef, cfg.PushContact, cfg.BaseURL)
 	services.Admin = service.NewAdmin(store.Admin, store.Users, cfg.AdminEmails)
 	// замены продуктов: таблица из seed/data/substitutes.json
@@ -150,6 +150,9 @@ func main() {
 	services.Recipes.SetTranslations(services.Translations)
 	services.PlanChat = service.NewPlanChat(aiPool, services.Plans)
 	go services.Translations.Run(ctx)
+	if err := services.Partners.Seed(ctx); err != nil {
+		log.Warn("partners seed", zap.Error(err))
+	}
 	// Фото в S3/MinIO: без S3_ENDPOINT загрузка выключена, всё остальное работает
 	if mediaStore, err := media.New(media.Config{Endpoint: cfg.S3Endpoint, AccessKey: cfg.S3AccessKey, SecretKey: cfg.S3SecretKey, Bucket: cfg.S3Bucket, Secure: cfg.S3Secure, PublicURL: cfg.S3PublicURL}); err != nil {
 		log.Warn("media", zap.Error(err))

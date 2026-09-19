@@ -3,6 +3,7 @@ import { ArrowLeftRight, ChefHat, Clock, Flame, Undo2, Users } from "lucide-reac
 import { CookMode } from "./CookMode";
 import { CollectionButton } from "./CollectionPicker";
 import { Sheet } from "./Sheet";
+import { PartnerRow } from "./PartnerRow";
 import { SocialBar } from "./SocialBar";
 import { api } from "../lib/api";
 import type { Recipe, SubOption, SubRow } from "../lib/types";
@@ -144,6 +145,7 @@ export function RecipeSheet({ recipeId, portions, country, onClose }: { recipeId
               <li key={n}>{s}</li>
             ))}
           </ol>
+          <PartnerRow equipment={recipe.equipment} country={country} onToast={setToast} />
         </>
       )}
     </Sheet>

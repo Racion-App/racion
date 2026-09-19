@@ -27,10 +27,11 @@ const (
 	PermRecipes    = "recipes"
 	PermModeration = "moderation"
 	PermErrors     = "errors"
+	PermPartners   = "partners"
 )
 
 var rolePerms = map[string][]string{
-	"admin":     {PermStats, PermUsers, PermRoles, PermLogs, PermRecipes, PermModeration, PermErrors},
+	"admin":     {PermStats, PermUsers, PermRoles, PermLogs, PermRecipes, PermModeration, PermErrors, PermPartners},
 	"moderator": {PermStats, PermRecipes, PermModeration, PermErrors},
 }
 

@@ -2,7 +2,7 @@
 // Без партнёрского API это deep-link с поиском по позиции: сайт открывается сразу на нужном товаре.
 // {q} — название продукта. Если у сети нет шаблона, остаются сервисы доставки страны и «скопировать список».
 
-export type CartTarget = { code: string; name: string; url: string };
+export type CartTarget = { code: string; name: string; url: string; affiliate?: boolean };
 
 const STORE_SEARCH: Record<string, string> = {
   pyaterochka: "https://5ka.ru/search/?text={q}",

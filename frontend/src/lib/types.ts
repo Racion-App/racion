@@ -257,3 +257,7 @@ export type SubRow = { ingredientId: string; options: SubOption[] };
 export type BudgetReport = { weeks: { start: string; planned: number; bought: number }[]; months: { month: string; bought: number }[]; deltaPct?: number | null; currency: string };
 export type Purchase = { id: number; planId: string | null; itemId: string; name: string; qty: string; cost: number; boughtAt: string };
 export type Extra = { id: number; name: string; qty: string; due: string | null; note: string };
+
+// Партнёрский магазин: шаблон ссылки с {q}; affiliate — показываем «Реклама» и erid.
+export type Partner = { code: string; country: string; kind: "goods" | "grocery"; name: string; url: string; affiliate: boolean; erid: string; active: boolean; priority: number };
+export type PartnerView = { goods: Partner[]; grocery: Partner[]; queries: Record<string, string> };

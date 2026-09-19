@@ -206,3 +206,24 @@ func DayMonthYear(l Lang, d, m, y int) string {
 	r := strings.NewReplacer("{d}", fmt.Sprint(d), "{month}", month(l, m, true), "{y}", fmt.Sprint(y))
 	return r.Replace(f)
 }
+
+// LangByCountry — язык по стране (для запроса в магазин страны и подсказки языка по IP); пусто — неизвестно.
+func LangByCountry(country string) string {
+	byCountry := map[string]string{
+		"RU": "ru", "BY": "ru", "KZ": "ru", "KG": "ru", "UA": "uk", "PL": "pl", "DE": "de", "AT": "de", "CH": "de", "LI": "de",
+		"ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es", "PE": "es", "FR": "fr", "BE": "fr", "CA": "en", "IT": "it",
+		"PT": "pt", "BR": "pt", "TR": "tr", "NL": "nl", "CZ": "cs", "SE": "sv", "NO": "no", "FI": "fi", "LT": "lt", "LV": "lv", "EE": "et",
+		"US": "en", "GB": "en", "IE": "en", "AU": "en", "NZ": "en", "IN": "en", "CN": "zh", "JP": "ja", "KR": "ko",
+	}
+	if l, ok := byCountry[country]; ok {
+		if _, valid := Valid(l); valid {
+			return l
+		}
+	}
+	for _, l := range Langs {
+		if Meta(l).Country == country {
+			return string(l)
+		}
+	}
+	return ""
+}

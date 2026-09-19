@@ -76,6 +76,10 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
 	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
+	mux.HandleFunc("GET /api/partners", s.partners)
+	mux.HandleFunc("GET /api/admin/partners", s.adminPartners)
+	mux.HandleFunc("POST /api/admin/partners", s.limited(s.lim.write, s.adminSavePartner))
+	mux.HandleFunc("DELETE /api/admin/partners/{code}", s.adminDeletePartner)
 	mux.HandleFunc("DELETE /api/admin/collections/{id}", s.adminDeleteCollection)
 	mux.HandleFunc("GET /collection/{slug}", s.collectionPage)
 	mux.HandleFunc("GET /collections", s.collectionsPage)
@@ -318,25 +322,7 @@ func (s *Server) rawGeoCountry(r *http.Request) string {
 }
 
 // geoLang — язык по стране посетителя, если такой язык есть в locales/.
-func geoLang(country string) string {
-	byCountry := map[string]string{
-		"RU": "ru", "BY": "ru", "KZ": "ru", "KG": "ru", "UA": "uk", "PL": "pl", "DE": "de", "AT": "de", "CH": "de", "LI": "de",
-		"ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es", "PE": "es", "FR": "fr", "BE": "fr", "CA": "en", "IT": "it",
-		"PT": "pt", "BR": "pt", "TR": "tr", "NL": "nl", "CZ": "cs", "SE": "sv", "NO": "no", "FI": "fi", "LT": "lt", "LV": "lv", "EE": "et",
-		"US": "en", "GB": "en", "IE": "en", "AU": "en", "NZ": "en", "IN": "en", "CN": "zh", "JP": "ja", "KR": "ko",
-	}
-	if l, ok := byCountry[country]; ok {
-		if _, valid := i18n.Valid(l); valid {
-			return l
-		}
-	}
-	for _, l := range i18n.Langs {
-		if i18n.Meta(l).Country == country {
-			return string(l)
-		}
-	}
-	return ""
-}
+func geoLang(country string) string { return i18n.LangByCountry(country) }
 
 // langHint — подсказка языка по стране посетителя (без кэша: зависит от IP).
 func (s *Server) langHint(w http.ResponseWriter, r *http.Request) {

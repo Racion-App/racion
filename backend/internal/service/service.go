@@ -105,6 +105,7 @@ type Repos struct {
 	Social      SocialRepo
 	Households  HouseholdRepo
 	Collections CollectionRepo
+	Partners    PartnerRepo
 }
 
 // Services — набор сценариев; транспорт получает его целиком.
@@ -126,6 +127,7 @@ type Services struct {
 	CatalogAdmin *CatalogAdmin
 	Subs         *Substitutes
 	Collections  *Collections
+	Partners     *Partners
 }
 
 // New собирает сервисы; subscriber и baseURL нужны push-уведомлениям (VAPID и ссылки в них).
@@ -143,6 +145,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Social:      social,
 		Family:      family,
 		Collections: NewCollections(repos.Collections, recipes),
+		Partners:    NewPartners(repos.Partners),
 		AI:          NewAssistant(nil),
 	}
 }

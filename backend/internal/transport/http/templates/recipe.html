@@ -131,6 +131,13 @@
       <section class="panel" aria-labelledby="need">
         <h2 id="need" class="panel__title">{{t .L "recipe.need"}}</h2>
         <p class="panel__sub">{{if .Equipment}}{{range $i, $e := .Equipment}}{{if $i}}, {{end}}{{$e}}{{end}}{{else}}{{t .L "recipe.need.none"}}{{end}}</p>
+        {{if .Buy}}
+        <div class="partner" data-partner>
+          <span class="partner__label">{{if (index .Buy 0).Affiliate}}{{t .L "partner.ad"}}{{else}}{{t .L "partner.where"}}{{end}}</span>
+          {{range .Buy}}<a class="partner__link" href="{{.URL}}" target="_blank" rel="sponsored nofollow noopener" data-partner-click="{{.Key}}">{{.Label}} <span class="partner__shop">{{.Name}}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>{{end}}
+          {{if (index .Buy 0).Erid}}<span class="partner__erid">erid: {{(index .Buy 0).Erid}}</span>{{end}}
+        </div>
+        {{end}}
       </section>
 
       <section class="panel panel--cta">

@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView } from "./types";
 import { tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -112,6 +112,10 @@ export const api = {
   collectionToggle: (id: string, recipeId: string, on: boolean) => request<void>(`/api/me/collections/${id}/items/${encodeURIComponent(recipeId)}`, { method: on ? "PUT" : "DELETE" }),
   collectionPublish: (id: string, pub: boolean) => request<Collection>(`/api/me/collections/${id}/public`, { method: "PUT", body: JSON.stringify({ public: pub }) }),
   publicCollections: (lang: string) => request<Collection[]>(`/api/collections?lang=${encodeURIComponent(lang)}`),
+  partners: (country: string) => request<PartnerView>(`/api/partners?country=${encodeURIComponent(country)}`),
+  adminPartners: () => request<Partner[]>("/api/admin/partners"),
+  adminSavePartner: (body: Partner) => request<Partner>("/api/admin/partners", { method: "POST", body: JSON.stringify(body) }),
+  adminDeletePartner: (code: string) => request<void>(`/api/admin/partners/${encodeURIComponent(code)}`, { method: "DELETE" }),
   adminCollections: () => request<Collection[]>("/api/admin/collections"),
   adminSaveCollection: (body: { id: string; name: string; slug: string; description: string; cover: string; public: boolean; recipes: string[]; names: Record<string, string>; descriptions: Record<string, string> }) => request<Collection>("/api/admin/collections", { method: "POST", body: JSON.stringify(body) }),
   adminDeleteCollection: (id: string) => request<void>(`/api/admin/collections/${id}`, { method: "DELETE" }),

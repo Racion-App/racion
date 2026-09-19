@@ -1,0 +1,70 @@
+[
+  {"code": "ru_ym", "country": "RU", "kind": "goods", "name": "Яндекс Маркет", "url": "https://market.yandex.ru/search?text={q}", "priority": 1},
+  {"code": "ru_ozon", "country": "RU", "kind": "goods", "name": "Ozon", "url": "https://www.ozon.ru/search/?text={q}", "priority": 2},
+  {"code": "ru_wb", "country": "RU", "kind": "goods", "name": "Wildberries", "url": "https://www.wildberries.ru/catalog/0/search.aspx?search={q}", "priority": 3},
+  {"code": "ru_kuper", "country": "RU", "kind": "grocery", "name": "Купер", "url": "https://kuper.ru/search?q={q}", "priority": 1},
+  {"code": "ru_lavka", "country": "RU", "kind": "grocery", "name": "Яндекс Лавка", "url": "https://lavka.yandex.ru/search?text={q}", "priority": 2},
+  {"code": "ru_samokat", "country": "RU", "kind": "grocery", "name": "Самокат", "url": "https://samokat.ru/search?query={q}", "priority": 3},
+
+  {"code": "by_onliner", "country": "BY", "kind": "goods", "name": "Onliner", "url": "https://catalog.onliner.by/search?query={q}", "priority": 1},
+  {"code": "by_21vek", "country": "BY", "kind": "goods", "name": "21vek", "url": "https://www.21vek.by/search/?q={q}", "priority": 2},
+  {"code": "by_ozon", "country": "BY", "kind": "goods", "name": "Ozon", "url": "https://ozon.by/search/?text={q}", "priority": 3},
+  {"code": "by_edostavka", "country": "BY", "kind": "grocery", "name": "Е-доставка", "url": "https://edostavka.by/search?query={q}", "priority": 1},
+
+  {"code": "kz_kaspi", "country": "KZ", "kind": "goods", "name": "Kaspi", "url": "https://kaspi.kz/shop/search/?text={q}", "priority": 1},
+  {"code": "kz_ozon", "country": "KZ", "kind": "goods", "name": "Ozon", "url": "https://ozon.kz/search/?text={q}", "priority": 2},
+  {"code": "kz_arbuz", "country": "KZ", "kind": "grocery", "name": "Arbuz", "url": "https://arbuz.kz/ru/almaty/search?q={q}", "priority": 1},
+
+  {"code": "us_amazon", "country": "US", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.com/s?k={q}", "priority": 1},
+  {"code": "us_walmart", "country": "US", "kind": "goods", "name": "Walmart", "url": "https://www.walmart.com/search?q={q}", "priority": 2},
+  {"code": "us_instacart", "country": "US", "kind": "grocery", "name": "Instacart", "url": "https://www.instacart.com/store/s?k={q}", "priority": 1},
+
+  {"code": "gb_amazon", "country": "GB", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.co.uk/s?k={q}", "priority": 1},
+  {"code": "gb_argos", "country": "GB", "kind": "goods", "name": "Argos", "url": "https://www.argos.co.uk/search/{q}/", "priority": 2},
+  {"code": "gb_ocado", "country": "GB", "kind": "grocery", "name": "Ocado", "url": "https://www.ocado.com/search?entry={q}", "priority": 1},
+
+  {"code": "de_amazon", "country": "DE", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.de/s?k={q}", "priority": 1},
+  {"code": "de_otto", "country": "DE", "kind": "goods", "name": "OTTO", "url": "https://www.otto.de/suche/{q}/", "priority": 2},
+  {"code": "de_mediamarkt", "country": "DE", "kind": "goods", "name": "MediaMarkt", "url": "https://www.mediamarkt.de/de/search.html?query={q}", "priority": 3},
+  {"code": "de_flink", "country": "DE", "kind": "grocery", "name": "Flink", "url": "https://www.goflink.com/de-DE/search?q={q}", "priority": 1},
+
+  {"code": "at_amazon", "country": "AT", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.de/s?k={q}", "priority": 1},
+  {"code": "at_mediamarkt", "country": "AT", "kind": "goods", "name": "MediaMarkt", "url": "https://www.mediamarkt.at/de/search.html?query={q}", "priority": 2},
+
+  {"code": "ch_galaxus", "country": "CH", "kind": "goods", "name": "Galaxus", "url": "https://www.galaxus.ch/de/search?q={q}", "priority": 1},
+  {"code": "ch_amazon", "country": "CH", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.de/s?k={q}", "priority": 2},
+
+  {"code": "fr_amazon", "country": "FR", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.fr/s?k={q}", "priority": 1},
+  {"code": "fr_darty", "country": "FR", "kind": "goods", "name": "Darty", "url": "https://www.darty.com/nav/recherche?text={q}", "priority": 2},
+  {"code": "fr_carrefour", "country": "FR", "kind": "grocery", "name": "Carrefour", "url": "https://www.carrefour.fr/s?q={q}", "priority": 1},
+
+  {"code": "it_amazon", "country": "IT", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.it/s?k={q}", "priority": 1},
+  {"code": "it_unieuro", "country": "IT", "kind": "goods", "name": "Unieuro", "url": "https://www.unieuro.it/online/search?q={q}", "priority": 2},
+
+  {"code": "es_amazon", "country": "ES", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.es/s?k={q}", "priority": 1},
+  {"code": "es_eci", "country": "ES", "kind": "goods", "name": "El Corte Inglés", "url": "https://www.elcorteingles.es/search-nwx/1/?s={q}", "priority": 2},
+  {"code": "es_mercadona", "country": "ES", "kind": "grocery", "name": "Mercadona", "url": "https://tienda.mercadona.es/search-results?query={q}", "priority": 1},
+
+  {"code": "pt_amazon", "country": "PT", "kind": "goods", "name": "Amazon", "url": "https://www.amazon.es/s?k={q}", "priority": 1},
+  {"code": "pt_worten", "country": "PT", "kind": "goods", "name": "Worten", "url": "https://www.worten.pt/search?query={q}", "priority": 2},
+
+  {"code": "nl_bol", "country": "NL", "kind": "goods", "name": "bol", "url": "https://www.bol.com/nl/nl/s/?searchtext={q}", "priority": 1},
+  {"code": "nl_coolblue", "country": "NL", "kind": "goods", "name": "Coolblue", "url": "https://www.coolblue.nl/zoeken?query={q}", "priority": 2},
+  {"code": "nl_ah", "country": "NL", "kind": "grocery", "name": "Albert Heijn", "url": "https://www.ah.nl/zoeken?query={q}", "priority": 1},
+
+  {"code": "be_bol", "country": "BE", "kind": "goods", "name": "bol", "url": "https://www.bol.com/be/nl/s/?searchtext={q}", "priority": 1},
+  {"code": "be_coolblue", "country": "BE", "kind": "goods", "name": "Coolblue", "url": "https://www.coolblue.be/nl/zoeken?query={q}", "priority": 2},
+
+  {"code": "pl_allegro", "country": "PL", "kind": "goods", "name": "Allegro", "url": "https://allegro.pl/listing?string={q}", "priority": 1},
+  {"code": "pl_mediaexpert", "country": "PL", "kind": "goods", "name": "Media Expert", "url": "https://www.mediaexpert.pl/search?query[querystring]={q}", "priority": 2},
+
+  {"code": "cz_alza", "country": "CZ", "kind": "goods", "name": "Alza", "url": "https://www.alza.cz/search.htm?exps={q}", "priority": 1},
+  {"code": "cz_rohlik", "country": "CZ", "kind": "grocery", "name": "Rohlík", "url": "https://www.rohlik.cz/hledat?q={q}", "priority": 1},
+
+  {"code": "se_elgiganten", "country": "SE", "kind": "goods", "name": "Elgiganten", "url": "https://www.elgiganten.se/search?SearchTerm={q}", "priority": 1},
+  {"code": "no_elkjop", "country": "NO", "kind": "goods", "name": "Elkjøp", "url": "https://www.elkjop.no/search?SearchTerm={q}", "priority": 1},
+  {"code": "fi_gigantti", "country": "FI", "kind": "goods", "name": "Gigantti", "url": "https://www.gigantti.fi/search?SearchTerm={q}", "priority": 1},
+  {"code": "lt_pigu", "country": "LT", "kind": "goods", "name": "Pigu", "url": "https://pigu.lt/lt/search?q={q}", "priority": 1},
+  {"code": "lv_220", "country": "LV", "kind": "goods", "name": "220.lv", "url": "https://220.lv/lv/search?q={q}", "priority": 1},
+  {"code": "ee_kaup24", "country": "EE", "kind": "goods", "name": "Kaup24", "url": "https://kaup24.ee/et/search?q={q}", "priority": 1}
+]
