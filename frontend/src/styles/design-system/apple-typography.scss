@@ -1,0 +1,56 @@
+// =============================================================================
+//  Apple Typography — SF Pro size scale (iOS 17 / macOS Sequoia)
+// =============================================================================
+
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+body {
+  font-family: var(--ds-font-sans);
+  font-size: 15px;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+  color: var(--ds-label-primary);
+  background: var(--ds-bg-base);
+  font-feature-settings: "ss01", "cv11";
+}
+
+// ── Apple type scale ────────────────────────────────────────────────────────
+
+.large-title {
+  font-size: 34px; line-height: 1.12; font-weight: 700;
+  letter-spacing: -0.022em; color: var(--ds-label-primary);
+}
+.title-1 { font-size: 28px; line-height: 1.16; font-weight: 700; letter-spacing: -0.020em; }
+.title-2 { font-size: 22px; line-height: 1.22; font-weight: 600; letter-spacing: -0.016em; }
+.title-3 { font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -0.014em; }
+.headline   { font-size: 17px; line-height: 1.30; font-weight: 600; letter-spacing: -0.011em; }
+.body-large { font-size: 17px; line-height: 1.45; font-weight: 400; letter-spacing: -0.011em; }
+.body       { font-size: 15px; line-height: 1.47; font-weight: 400; letter-spacing: -0.008em; }
+.callout    { font-size: 14px; line-height: 1.43; font-weight: 400; }
+.subhead    { font-size: 13px; line-height: 1.38; font-weight: 500; letter-spacing: 0; color: var(--ds-label-secondary); }
+.footnote   { font-size: 12px; line-height: 1.33; font-weight: 400; color: var(--ds-label-secondary); }
+.caption-1  { font-size: 11px; line-height: 1.36; font-weight: 500; color: var(--ds-label-secondary); letter-spacing: 0.01em; }
+.caption-2  { font-size: 10px; line-height: 1.40; font-weight: 600; color: var(--ds-label-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+
+.text-mono  { font-family: var(--ds-font-mono); font-feature-settings: "zero", "ss01"; }
+.text-rounded { font-family: var(--ds-font-rounded); }
+
+// ── Heading defaults — h1..h6 наследуют Apple-стиль ─────────────────────────
+
+h1, .h1 { @extend .large-title; margin: 0 0 var(--ds-space-4); }
+h2, .h2 { @extend .title-1;     margin: 0 0 var(--ds-space-3); }
+h3, .h3 { @extend .title-2;     margin: 0 0 var(--ds-space-3); }
+h4, .h4 { @extend .title-3;     margin: 0 0 var(--ds-space-2); }
+h5, .h5 { @extend .headline;    margin: 0 0 var(--ds-space-2); }
+h6, .h6 { @extend .subhead;     margin: 0 0 var(--ds-space-2); text-transform: uppercase; letter-spacing: 0.06em; }
+
+p { margin: 0 0 var(--ds-space-3); color: var(--ds-label-primary); }
+
+a {
+  color: var(--ds-blue);
+  text-decoration: none;
+  transition: opacity var(--ds-dur-fast) var(--ds-ease-standard);
+  &:hover { opacity: 0.78; }
+}
+
+::selection { background: var(--ds-blue-tint); color: var(--ds-label-primary); }

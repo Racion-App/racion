@@ -1,0 +1,389 @@
+// Package http — HTTP-транспорт: роутер на stdlib, JSON-ручки и HTML-страницы. Тонкий слой: разобрать запрос,
+// вызвать сервис, отдать ответ. Правила и SQL живут в service и storage, так что другой транспорт
+// (очередь, пакетное задание) собирается рядом из тех же сервисов.
+package http
+
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"strings"
+	"time"
+
+	"go.uber.org/zap"
+
+	"racion/internal/domain"
+	"racion/internal/geo"
+	"racion/internal/i18n"
+	"racion/internal/logger"
+	"racion/internal/planner"
+	"racion/internal/service"
+	"racion/locales"
+)
+
+type Server struct {
+	svc       *service.Services
+	catalog   *planner.Catalog // общий каталог для страниц и справочников
+	log       *zap.Logger
+	geo       *geo.Resolver
+	health    func() error
+	lim       *limits
+	logs      *logger.Ring
+	publicURL string // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
+}
+
+// Deps — всё, что нужно транспорту от приложения.
+type Deps struct {
+	Services *service.Services
+	Log      *zap.Logger
+	Geo      *geo.Resolver
+	Health   func() error // проверка живости хранилища для /healthz
+	BaseURL  string       // например https://racion.app; пусто — брать из запроса
+	Logs     *logger.Ring // последние записи лога для админки
+}
+
+func New(d Deps) http.Handler {
+	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", s.healthz)
+	mux.HandleFunc("GET /api/meta", s.meta)
+	mux.HandleFunc("POST /api/plans", s.limited(s.lim.build, s.createPlan))
+	mux.HandleFunc("GET /api/plans/{id}", s.getPlan)
+	mux.HandleFunc("POST /api/plans/{id}/swap", s.limited(s.lim.build, s.swap))
+	mux.HandleFunc("POST /api/plans/{id}/chat", s.limited(s.lim.build, s.planChat))
+	mux.HandleFunc("POST /api/plans/{id}/skip", s.limited(s.lim.write, s.skipDay))
+	mux.HandleFunc("POST /api/plans/{id}/move", s.limited(s.lim.write, s.moveDish))
+	mux.HandleFunc("POST /api/plans/{id}/repeat", s.limited(s.lim.build, s.repeatPlan))
+	mux.HandleFunc("GET /api/plans/{id}/checks", s.planChecks)
+	mux.HandleFunc("PUT /api/plans/{id}/checks", s.limited(s.lim.write, s.setCheck))
+	mux.HandleFunc("GET /api/plans/{id}/extras", s.listExtras)
+	mux.HandleFunc("POST /api/plans/{id}/extras", s.limited(s.lim.write, s.addExtra))
+	mux.HandleFunc("DELETE /api/plans/{id}/extras/{extra}", s.deleteExtra)
+	mux.HandleFunc("POST /api/plans/{id}/join", s.limited(s.lim.write, s.joinPlan))
+	mux.HandleFunc("PATCH /api/plans/{id}", s.renamePlan)
+	mux.HandleFunc("DELETE /api/plans/{id}", s.deletePlan)
+	mux.HandleFunc("GET /api/recipes", s.recipesAPI)
+	mux.HandleFunc("GET /api/recipes/{id}", s.recipe)
+	mux.HandleFunc("GET /api/recipes/{id}/stats", s.recipeStats)
+	mux.HandleFunc("PUT /api/recipes/{id}/like", s.limited(s.lim.write, s.setLike(true)))
+	mux.HandleFunc("DELETE /api/recipes/{id}/like", s.setLike(false))
+	mux.HandleFunc("PUT /api/recipes/{id}/favorite", s.limited(s.lim.write, s.setFavorite(true)))
+	mux.HandleFunc("POST /api/recipes/{id}/feedback", s.limited(s.lim.write, s.setFeedback))
+	mux.HandleFunc("GET /api/recipes/{id}/subs", s.recipeSubs)
+	mux.HandleFunc("GET /api/occasions", s.occasions)
+	mux.HandleFunc("POST /api/occasions/{id}", s.limited(s.lim.build, s.createOccasion))
+	mux.HandleFunc("GET /api/collections", s.publicCollections)
+	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
+	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
+	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
+	mux.HandleFunc("DELETE /api/admin/collections/{id}", s.adminDeleteCollection)
+	mux.HandleFunc("GET /collection/{slug}", s.collectionPage)
+	mux.HandleFunc("GET /collections", s.collectionsPage)
+	// превью ссылок для ботов мессенджеров на страницы приложения (nginx проксирует сюда по User-Agent)
+	mux.HandleFunc("GET /og/", s.ogHome)
+	mux.HandleFunc("GET /og/plan/{id}", s.ogPlan)
+	mux.HandleFunc("GET /og/event/{id}", s.ogEvent)
+	mux.HandleFunc("GET /api/me/collections", s.myCollections)
+	mux.HandleFunc("POST /api/me/collections", s.limited(s.lim.write, s.createCollection))
+	mux.HandleFunc("PUT /api/me/collections/{id}", s.limited(s.lim.write, s.renameCollection))
+	mux.HandleFunc("DELETE /api/me/collections/{id}", s.deleteCollection)
+	mux.HandleFunc("GET /api/me/collections/{id}/items", s.collectionItems)
+	mux.HandleFunc("PUT /api/me/collections/{id}/items/{recipe}", s.limited(s.lim.write, s.toggleCollectionItem(true)))
+	mux.HandleFunc("DELETE /api/me/collections/{id}/items/{recipe}", s.limited(s.lim.write, s.toggleCollectionItem(false)))
+	mux.HandleFunc("DELETE /api/recipes/{id}/favorite", s.setFavorite(false))
+	mux.HandleFunc("GET /api/recipes/{id}/comments", s.listComments)
+	mux.HandleFunc("POST /api/recipes/{id}/comments", s.limited(s.lim.write, s.addComment))
+	mux.HandleFunc("DELETE /api/comments/{comment}", s.deleteComment)
+	mux.HandleFunc("GET /api/me/favorites", s.myFavorites)
+	mux.HandleFunc("PUT /api/me/recipes/{id}/public", s.limited(s.lim.write, s.setOwnPublic))
+	mux.HandleFunc("GET /api/me/recipes/{id}/translations", s.ownTranslations)
+	mux.HandleFunc("POST /api/me/recipes/{id}/translations", s.limited(s.lim.write, s.ownTranslate))
+	mux.HandleFunc("GET /api/admin/ai", s.adminAI)
+	mux.HandleFunc("GET /api/ingredients", s.ingredientsAPI)
+	mux.HandleFunc("POST /api/events", s.limited(s.lim.events, s.events))
+	// аккаунт
+	mux.HandleFunc("POST /api/auth/register", s.limited(s.lim.auth, s.register))
+	mux.HandleFunc("POST /api/auth/login", s.limited(s.lim.auth, s.login))
+	mux.HandleFunc("POST /api/auth/logout", s.logout)
+	mux.HandleFunc("GET /api/me", s.me)
+	mux.HandleFunc("PATCH /api/me", s.updateMe)
+	mux.HandleFunc("GET /api/me/plans", s.myPlans)
+	mux.HandleFunc("GET /api/me/dislikes", s.listDislikes)
+	mux.HandleFunc("PUT /api/me/dislikes/{recipe}", s.addDislike)
+	mux.HandleFunc("DELETE /api/me/dislikes/{recipe}", s.removeDislike)
+	mux.HandleFunc("GET /api/me/purchases", s.myPurchases)
+	mux.HandleFunc("GET /api/me/budget", s.myBudget)
+	mux.HandleFunc("GET /api/admin/overview", s.adminOverview)
+	mux.HandleFunc("GET /api/admin/errors", s.adminErrors)
+	mux.HandleFunc("GET /api/admin/users", s.adminUsers)
+	mux.HandleFunc("GET /api/admin/logs", s.adminLogs)
+	mux.HandleFunc("GET /api/admin/recipes", s.adminRecipes)
+	mux.HandleFunc("GET /api/admin/recipes/{id}", s.adminRecipe)
+	mux.HandleFunc("POST /api/admin/recipes", s.limited(s.lim.write, s.adminSaveRecipe))
+	mux.HandleFunc("DELETE /api/admin/recipes/{id}", s.adminDeleteRecipe)
+	mux.HandleFunc("GET /api/admin/moderation", s.adminModeration)
+	mux.HandleFunc("POST /api/admin/moderation/{id}", s.limited(s.lim.write, s.adminDecide))
+	mux.HandleFunc("PUT /api/admin/users/{id}/role", s.limited(s.lim.write, s.adminSetRole))
+	mux.HandleFunc("POST /api/me/recipes/{id}/publish", s.limited(s.lim.write, s.publishOwn))
+	mux.HandleFunc("POST /api/me/recipes/{id}/suggestion", s.limited(s.lim.write, s.suggestionOwn))
+	mux.HandleFunc("GET /api/me/recipes", s.listOwnRecipes)
+	mux.HandleFunc("POST /api/me/recipes", s.limited(s.lim.write, s.createOwnRecipe))
+	mux.HandleFunc("PUT /api/me/recipes/{id}", s.limited(s.lim.write, s.updateOwnRecipe))
+	mux.HandleFunc("DELETE /api/me/recipes/{id}", s.deleteOwnRecipe)
+	mux.HandleFunc("POST /api/me/recipes/ai", s.limited(s.lim.write, s.assistRecipe))
+	mux.HandleFunc("POST /api/uploads", s.limited(s.lim.write, s.upload))
+	// семья
+	mux.HandleFunc("GET /api/me/family", s.getFamily)
+	mux.HandleFunc("PUT /api/me/family", s.limited(s.lim.write, s.saveFamily))
+	mux.HandleFunc("POST /api/me/family/invite", s.limited(s.lim.write, s.familyInvite))
+	mux.HandleFunc("POST /api/me/family/join", s.limited(s.lim.write, s.familyJoin))
+	mux.HandleFunc("POST /api/me/family/leave", s.familyLeave)
+	mux.HandleFunc("DELETE /api/me/family/accounts/{user}", s.familyRemove)
+	// push
+	mux.HandleFunc("GET /api/push/key", s.pushKey)
+	mux.HandleFunc("POST /api/me/push", s.limited(s.lim.write, s.pushSubscribe))
+	mux.HandleFunc("DELETE /api/me/push", s.pushUnsubscribe)
+	mux.HandleFunc("GET /api/me/notify", s.notifySettings)
+	mux.HandleFunc("PUT /api/me/notify", s.limited(s.lim.write, s.setNotifySettings))
+	mux.HandleFunc("POST /api/me/notify/test", s.limited(s.lim.auth, s.notifyTest))
+	// страницы для людей и поисковиков
+	mux.HandleFunc("GET /recipes", s.recipesPage)
+	mux.HandleFunc("GET /recipe/{id}", s.recipePage)
+	// /ru/... — тот же русский без префикса: постоянный редирект, чтобы у страницы был один адрес
+	mux.HandleFunc("GET /ru/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, strings.TrimPrefix(r.URL.Path, "/ru")+queryOf(r), http.StatusMovedPermanently)
+	})
+	for _, l := range i18n.Langs { // /en/recipes, /pl/recipe/{id} — для каждого языка из locales/
+		if l == i18n.RU {
+			continue
+		}
+		mux.HandleFunc("GET /"+string(l)+"/recipes", s.recipesPage)
+		mux.HandleFunc("GET /"+string(l)+"/recipe/{id}", s.recipePage)
+		mux.HandleFunc("GET /"+string(l)+"/collection/{slug}", s.collectionPage)
+		mux.HandleFunc("GET /"+string(l)+"/collections", s.collectionsPage)
+	}
+	mux.HandleFunc("GET /api/locales", s.localesList)
+	mux.HandleFunc("GET /api/lang", s.langHint)
+	mux.HandleFunc("GET /api/locales/{code}", s.localeFile)
+	mux.HandleFunc("GET /sitemap.xml", s.sitemap)
+	mux.HandleFunc("GET /robots.txt", s.robots)
+	return s.withLogging(s.withRecover(s.withHeaders(s.withLimit(s.withUser(mux)))))
+}
+
+// ── Middleware ─────────────────────────────────────────────────────────────
+
+// withHeaders — ответы API не кэшируются (в них сессия и личные данные); защитные заголовки ставит nginx.
+func queryOf(r *http.Request) string {
+	if r.URL.RawQuery == "" {
+		return ""
+	}
+	return "?" + r.URL.RawQuery
+}
+
+// withRecover — паника в обработчике не роняет процесс: API получает JSON 500, страницы — оформленную 500.
+func (s *Server) withRecover(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				s.log.Error("panic", zap.Any("err", rec), zap.String("path", r.URL.Path), zap.Stack("stack"))
+				if strings.HasPrefix(r.URL.Path, "/api/") {
+					writeErr(w, 500, i18n.T(i18n.FromRequest(r), "api.server"))
+				} else {
+					s.errorPage(w, r, 500)
+				}
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) withHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Cache-Control", "no-store")
+		} else {
+			// HTML-страницы зависят от сессии (лайки, комментарии, ник): браузер и прокси перепроверяют
+			w.Header().Set("Cache-Control", "private, no-cache")
+			w.Header().Add("Vary", "Cookie")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) withLogging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rw := &statusWriter{ResponseWriter: w, status: 200}
+		next.ServeHTTP(rw, r)
+		s.log.Info("http", zap.String("method", r.Method), zap.String("path", r.URL.Path), zap.Int("status", rw.status), zap.Duration("took", time.Since(start)))
+	})
+}
+
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *statusWriter) WriteHeader(code int) {
+	w.status = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+// ── Ответы ─────────────────────────────────────────────────────────────────
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+func writeErr(w http.ResponseWriter, status int, msg string) {
+	writeJSON(w, status, map[string]string{"error": msg})
+}
+
+// decode читает JSON-тело с лимитом размера.
+func decode(w http.ResponseWriter, r *http.Request, limit int64, v any) bool {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, limit)).Decode(v); err != nil {
+		writeErr(w, 400, "bad json")
+		return false
+	}
+	return true
+}
+
+// fail переводит ошибку сервиса в статус и текст на языке запроса.
+func (s *Server) fail(w http.ResponseWriter, r *http.Request, err error) {
+	lang := i18n.FromRequest(r)
+	var ve *domain.ValidationError
+	switch {
+	case errors.As(err, &ve):
+		writeErr(w, 422, i18n.T(lang, ve.Key))
+	case errors.Is(err, domain.ErrNotFound):
+		writeErr(w, 404, "not found")
+	case errors.Is(err, domain.ErrUnauthorized):
+		writeErr(w, 401, i18n.T(lang, "auth.required"))
+	case errors.Is(err, domain.ErrForbidden):
+		writeErr(w, 403, i18n.T(lang, "plan.readonly"))
+	case errors.Is(err, domain.ErrConflict):
+		writeErr(w, 409, "conflict")
+	case errors.Is(err, domain.ErrBadInput):
+		writeErr(w, 400, "bad json")
+	default:
+		s.log.Error("request failed", zap.String("path", r.URL.Path), zap.Error(err))
+		writeErr(w, 500, "db")
+	}
+}
+
+func (s *Server) healthz(w http.ResponseWriter, r *http.Request) {
+	if s.health != nil {
+		if err := s.health(); err != nil {
+			writeErr(w, 503, "db")
+			return
+		}
+	}
+	writeJSON(w, 200, map[string]any{"ok": true, "recipes": len(s.catalog.Recipes)})
+}
+
+// geoCountry — страна посетителя по IP (или по заголовку CF-IPCountry за Cloudflare), только если она
+// среди поддерживаемых; иначе пусто, и клиент подставит страну по языку.
+func (s *Server) geoCountry(r *http.Request) string {
+	code := r.Header.Get("CF-IPCountry")
+	if code == "" && s.geo != nil {
+		code = s.geo.Country(geo.ClientIP(r))
+	}
+	if _, ok := countryValid(code); ok {
+		return code
+	}
+	return ""
+}
+
+func (s *Server) meta(w http.ResponseWriter, r *http.Request) {
+	lang := i18n.FromRequest(r)
+	country := planner.CountryOf(r.URL.Query().Get("country"))
+	m := s.svc.Catalog.Meta(lang, country, s.geoCountry(r))
+	m.GeoLang = geoLang(s.rawGeoCountry(r))
+	m.AI = s.svc.AI.Enabled()
+	m.Photos = s.svc.Media.Enabled()
+	writeJSON(w, 200, m)
+}
+
+// rawGeoCountry — страна по IP без проверки «поддерживаем ли»: нужна для выбора языка.
+func (s *Server) rawGeoCountry(r *http.Request) string {
+	if code := r.Header.Get("CF-IPCountry"); code != "" {
+		return code
+	}
+	if s.geo != nil {
+		return s.geo.Country(geo.ClientIP(r))
+	}
+	return ""
+}
+
+// geoLang — язык по стране посетителя, если такой язык есть в locales/.
+func geoLang(country string) string {
+	byCountry := map[string]string{
+		"RU": "ru", "BY": "ru", "KZ": "ru", "KG": "ru", "UA": "uk", "PL": "pl", "DE": "de", "AT": "de", "CH": "de", "LI": "de",
+		"ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es", "PE": "es", "FR": "fr", "BE": "fr", "CA": "en", "IT": "it",
+		"PT": "pt", "BR": "pt", "TR": "tr", "NL": "nl", "CZ": "cs", "SE": "sv", "NO": "no", "FI": "fi", "LT": "lt", "LV": "lv", "EE": "et",
+		"US": "en", "GB": "en", "IE": "en", "AU": "en", "NZ": "en", "IN": "en", "CN": "zh", "JP": "ja", "KR": "ko",
+	}
+	if l, ok := byCountry[country]; ok {
+		if _, valid := i18n.Valid(l); valid {
+			return l
+		}
+	}
+	for _, l := range i18n.Langs {
+		if i18n.Meta(l).Country == country {
+			return string(l)
+		}
+	}
+	return ""
+}
+
+// langHint — подсказка языка по стране посетителя (без кэша: зависит от IP).
+func (s *Server) langHint(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, 200, map[string]string{"geo": geoLang(s.rawGeoCountry(r)), "accept": string(i18n.FromAccept(r.Header.Get("Accept-Language")))})
+}
+
+// localesList — языки для переключателя: код, название, флаг, полнота перевода.
+func (s *Server) localesList(w http.ResponseWriter, r *http.Request) {
+	out := make([]locales.Meta, 0, len(locales.Order))
+	for _, c := range locales.Order {
+		out = append(out, locales.All[c].Meta)
+	}
+	w.Header().Set("Cache-Control", "no-cache") // список маленький, а версии словарей должны обновляться сразу после выкладки
+	writeJSON(w, 200, out)
+}
+
+// localeFile — словарь языка как есть (JSON из locales/), с кэшем на час.
+func (s *Server) localeFile(w http.ResponseWriter, r *http.Request) {
+	loc, ok := locales.All[r.PathValue("code")]
+	if !ok {
+		writeErr(w, 404, "not found")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	_, _ = w.Write(loc.Raw)
+}
+
+func (s *Server) ingredientsAPI(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, 200, s.svc.Catalog.Ingredients(i18n.FromRequest(r)))
+}
+
+func (s *Server) events(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Sid    string            `json:"sid"`
+		Events []service.EventIn `json:"events"`
+	}
+	if !decode(w, r, 32<<10, &body) {
+		return
+	}
+	if err := s.svc.Events.Track(r.Context(), body.Sid, body.Events); err != nil {
+		if errors.Is(err, domain.ErrBadInput) {
+			writeErr(w, 400, "bad batch")
+			return
+		}
+		s.fail(w, r, err)
+		return
+	}
+	w.WriteHeader(204)
+}

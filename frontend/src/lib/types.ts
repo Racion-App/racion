@@ -1,0 +1,259 @@
+import { tStatic } from "../i18n";
+export type Labeled = { id: string; label: string };
+
+export type Store = { code: string; country: string; name: string; kind: string; priceIndex: number; note: string; sort: number };
+
+export type Country = {
+  code: string;
+  label?: string;
+  currency: string;
+  symbol: string;
+  decimals: number;
+  locale: string;
+  hasRegions: boolean;
+  presets?: { id: string; label: string; perDay: number }[];
+  default?: number;
+};
+
+export type Region = { code: string; name: string; kind: "rf" | "district" | "region" | "city"; parent: string };
+
+export type FormulaBrand = { id: string; name: string; packG: number; factor: number; note: string };
+
+export type Meta = {
+  lang: string;
+  countries: Country[];
+  stores: Store[];
+  regions: Region[];
+  prices: { source: string; period: string; weeklyDate: string } | null;
+  localPrices: Record<string, { source: string; period: string }>;
+  allergens: Labeled[];
+  equipment: Labeled[];
+  slots: Labeled[];
+  goals: { id: string; label: string; kcal: number }[];
+  feeding: Labeled[];
+  budgetPresets: { id: string; label: string; perDay: number }[];
+  formulaBrands: FormulaBrand[];
+  excludePresets: { id: string; label: string; kind: "ingredient" | "tag" }[];
+  ingredients: Labeled[];
+  recipes: number;
+  geoCountry: string; // страна по IP посетителя, если среди поддерживаемых; иначе ""
+  ai?: boolean; // помощник (нейросеть) для своих рецептов включён на сервере
+  photos?: boolean; // загрузка фото включена (есть S3)
+};
+
+export type Child = {
+  name?: string;
+  ageMonths: number;
+  feeding: "shared" | "separate" | "jars" | "milk" | string;
+  sharesMeals: boolean;
+  formula: boolean;
+  formulaBrand: string;
+  formulaMl: number;
+};
+
+export type Params = {
+  lang?: string;
+  country: string;
+  store: string;
+  region: string;
+  adults: number;
+  members: Member[];
+  kids: Child[];
+  goal: string;
+  kcalTarget: number;
+  budgetMode: "perPersonDay" | "week";
+  budgetValue: number;
+  compact?: boolean; // «меньше разных продуктов»
+  allergens: string[];
+  exclude: string[];
+  excludeTags: string[];
+  equipment: string[];
+  slots: string[];
+  startDate?: string;
+  wants: string[];
+  collection?: string; // неделя из коллекции (id)
+  have: string[]; // что уже есть дома: планировщик использует первым, список покупок вычитает упаковку
+};
+
+// Едок семьи: цель, аппетит и приёмы дома (пусто — все).
+export type Member = { name: string; goal: string; appetite: "small" | "normal" | "big"; slots: string[] };
+export type MemberView = { name: string; goal: string; goalLabel: string; kcal: number; factor: number; slots: string[] };
+export const APPETITES = ["small", "normal", "big"] as const;
+
+export type Dish = {
+  slot: string;
+  recipeId: string;
+  title: string;
+  timeMin: number;
+  leftover: boolean;
+  batch: boolean;
+  kcal: number;
+  protein: number;
+  fat: number;
+  carb: number;
+  cost: number;
+  own?: boolean; // рецепт пользователя
+  course?: string; // событие: курс вместо приёма пищи
+  why: string;
+  whyCode?: unknown;
+};
+
+export type Day = {
+  index: number;
+  date: string;
+  label: string;
+  dishes: Dish[];
+  kcal: number;
+  protein: number;
+  fat: number;
+  carb: number;
+  cost: number;
+  cookMin: number;
+  perMember?: number[];
+  skipped?: boolean; // «не дома»: не считается в покупках и итогах
+};
+
+export type ShopItem = {
+  ingredientId: string;
+  name: string;
+  category: string;
+  unit: string;
+  needed: number;
+  buy: number;
+  packs: number;
+  pack: number;
+  loose: boolean;
+  pantry: boolean;
+  cost: number;
+  rosstat: boolean;
+  home?: number; // сколько уже есть дома (вычтено из buy)
+  image?: string; // картинка продукта для подсказки
+  atHome?: boolean; // дома хватает на всю неделю
+  usedIn: string[];
+};
+
+export type ShopGroup = { category: string; label: string; items: ShopItem[]; cost: number };
+
+export type Plan = {
+  id: string;
+  params: Params;
+  lang: string;
+  country: Country;
+  store: Store;
+  portions: number;
+  days: Day[];
+  shopping: ShopGroup[];
+  kidsMenus: { child: number; ageLabel: string; factor: number; note: string; days: { index: number; label: string; dishes: { slot: string; recipeId: string; title: string; timeMin: number; kcal: number; cost: number }[] }[] }[];
+  totals: {
+    cost: number;
+    pantryCost: number;
+    babyCost: number;
+    kidsMenuCost: number;
+    usedCost: number;
+    homeSaved: number;
+    items: number;
+    kcalPerDay: number;
+    proteinPerDay: number;
+    fatPerDay: number;
+    carbPerDay: number;
+    cookMin: number;
+  };
+  budget: { mode: string; value: number; perDay: number; targetWeek: number };
+  goal: { level: string; label: string; kcalTarget: number };
+  members?: MemberView[];
+  slotPortions?: Record<string, number>;
+  family?: string[];
+  occasion?: { id: string; title: string; guests: number };
+  priceSource: { name: string; period: string; weeklyDate: string; region: string; regionCode: string; coverage: number };
+  seed: number;
+  swaps: number;
+  generatedAt: string;
+  warnings: string[];
+  notes: string[];
+};
+
+export type Recipe = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  slot: string;
+  slotLabel: string;
+  timeMin: number;
+  equipment: string[];
+  tags: string[];
+  batch: boolean;
+  steps: string[];
+  ingredients: { ingredientId: string; name: string; amount: number; unit: string; pantry: boolean; image?: string }[];
+  kcal: number;
+  protein: number;
+  fat: number;
+  carb: number;
+  own?: boolean;
+  public?: boolean;
+  author?: string;
+  stats?: RecipeStats;
+};
+
+// Свой рецепт: продукты из общей базы с количеством на порцию.
+export type OwnIngredient = { ingredientId: string; amount: number };
+export type TranslationSummary = { done: number; total: number; errors: number; running?: string; model?: string };
+export type TranslationStatus = { source: string; enabled: boolean; items: { lang: string; status: "queued" | "running" | "done" | "error"; model?: string; error?: string; updatedAt: string }[]; providers: string[] };
+
+export type OwnRecipe = {
+  id: string;
+  public?: boolean;
+  translations?: TranslationSummary;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  favorites?: number;
+  title: string;
+  description: string;
+  slot: string;
+  slotLabel?: string;
+  timeMin: number;
+  equipment: string[];
+  tags: string[];
+  steps: string[];
+  ingredients: OwnIngredient[];
+  image?: string; // фото из нашего хранилища
+  status?: "private" | "checking" | "review" | "improve" | "approved" | "rejected";
+  note?: string; // причина от нейросети или модератора
+  suggestion?: { title: string; description: string; steps: string[] }; // подробная версия от нейросети (status = improve)
+  kcal?: number;
+  cost?: number;
+};
+export type OwnRecipeInput = Omit<OwnRecipe, "id" | "slotLabel" | "kcal" | "cost" | "public">;
+export type IngredientRef = { id: string; label: string; unit: string; pantry: boolean; category: string };
+export const OWN_TAGS = ["pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty"];
+
+export const slotLabel = (_lang: string, slot: string) => tStatic(`slot.${slot}`);
+
+export type User = { id: string; email: string; name: string; nick: string; avatar?: string; defaults: Partial<Params> | Record<string, never> };
+export type RecipeStats = { likes: number; comments: number; liked: boolean; favorite: boolean };
+export type Comment = { id: number; nick: string; name: string; body: string; html: string; image?: string; avatar?: string; createdAt: string; mine: boolean };
+export type FamilyAccount = { userId: string; name: string; nick: string; owner: boolean; you: boolean };
+export type Family = { id: string; name: string; adults: Member[]; kids: Child[]; accounts: FamilyAccount[]; owner: boolean; inviteToken?: string };
+export type Favorite = { id: string; title: string; slot: string; own: boolean; image?: string };
+export type PlanSummary = { id: string; title: string; startDate: string; store: string; cost: number; country?: Country; portions: number; createdAt: string; checked: number; items: number; shared?: boolean };
+export type NotifySettings = { shopDay: number; shopHour: number; prep: boolean; week: boolean; noAsk?: boolean; tz: number };
+export type AdminOverview = {
+  counters: { users: number; usersWeek: number; activeWeek: number; plans: number; plansWeek: number; plansOwned: number; ownRecipes: number; households: number; pushUsers: number; comments: number; feedback: number; purchasesWeek: number; errorsWeek: number };
+  daily: { day: string; users: number; plans: number; visitors: number; quizStarts: number; errors: number }[];
+  events: { name: string; count: number; sessions: number }[];
+  top: { stores: { key: string; count: number }[] | null; recipes: { key: string; count: number }[] | null };
+};
+export type AdminUser = { id: string; email: string; name: string; createdAt: string; plans: number; lastSeen?: string; role: string };
+export type AdminRecipe = { id: string; title: string; description: string; slot: string; timeMin: number; batch: boolean; equipment: string[]; tags: string[]; steps: string[]; ingredients: OwnIngredient[]; image: string };
+export type CatalogRecipeInput = Omit<AdminRecipe, "id"> & { id: string };
+export type ModerationItem = AdminRecipe & { author?: string; status?: string; note?: string; submittedAt?: string };
+export type AdminError = { at: string; sid: string; message: string; url: string; stack: string; ua: string };
+export type AdminLog = { time: string; level: string; logger?: string; msg: string; fields?: Record<string, unknown> };
+export type Collection = { id: string; name: string; recipes: string[]; createdAt: string; public?: boolean; curated?: boolean; slug?: string; description?: string; cover?: string; coverAuto?: string; author?: string; names?: Record<string, string>; descriptions?: Record<string, string> };
+export type OccasionView = { id: string; icon: string; title: string; lead: string; guests: number; kind: "menu" | "week"; season: boolean; preset?: { excludeTags: string[]; allergens: string[]; goal: string }; courses: string[]; countries?: string[] };
+export type SubOption = { id: string; name: string; amount: number; unit: string; note: string; kcalDelta: number; costDelta: number; symbol?: string };
+export type SubRow = { ingredientId: string; options: SubOption[] };
+export type BudgetReport = { weeks: { start: string; planned: number; bought: number }[]; months: { month: string; bought: number }[]; deltaPct?: number | null; currency: string };
+export type Purchase = { id: number; planId: string | null; itemId: string; name: string; qty: string; cost: number; boughtAt: string };
+export type Extra = { id: number; name: string; qty: string; due: string | null; note: string };

@@ -1,0 +1,47 @@
+{
+  "name": "Рацион — меню на неделю и список покупок",
+  "short_name": "Рацион",
+  "description": "Семь вопросов — меню на неделю с ценами и список покупок. Бесплатно.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F2F2F7",
+  "theme_color": "#0A84FF",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Собрать неделю",
+      "url": "/?source=pwa",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Мои недели",
+      "url": "/me?source=pwa",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

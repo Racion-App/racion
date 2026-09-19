@@ -1,0 +1,19 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><span>{{t .L "coll.public.one"}}</span></nav>
+<header class="colhead">
+  {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512">{{end}}
+  <div class="colhead__body">
+    <h1 class="colhead__title">{{.Col.Name}}</h1>
+    {{if .Col.Description}}<p class="colhead__lead">{{.Col.Description}}</p>{{end}}
+    <p class="colhead__meta">{{len .Cards}} {{t .L "recipes.n"}}{{if and .Col.Author (not .Col.Curated)}} · @{{.Col.Author}}{{end}}</p>
+    <a class="btn btn-primary" href="{{.PlanHref}}">{{t .L "coll.week"}}</a>
+  </div>
+</header>
+{{if .Cards}}
+<div class="rgrid">
+  {{range .Cards}}{{template "card" .}}{{end}}
+</div>
+{{else}}
+<div class="state"><div class="state__box"><h2>{{t .L "coll.items.empty.public"}}</h2></div></div>
+{{end}}
+{{template "foot" .}}

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/styles/app.scss"
+        ],
+        "createdAt": "2026-09-18T11:18:47.713Z",
+        "reason": "same as the repo-root entry: L806 is a CSS chevron (two borders), the 4px .rcard__cover strip is the DESIGN.md decision; path relative to frontend/ because the hook runs from there"
+      }
+    ]
+  }
+}

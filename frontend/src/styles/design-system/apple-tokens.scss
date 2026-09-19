@@ -1,0 +1,164 @@
+// =============================================================================
+//  Apple Design Tokens
+//  CSS variables (light + dark). Единый источник правды для всей дизайн-системы.
+// =============================================================================
+
+:root {
+  color-scheme: light;
+
+  // ── System Colors (iOS 17 / macOS Sequoia, light) ─────────────────────────
+  --ds-blue:        #007AFF;
+  --ds-green:       #34C759;
+  --ds-indigo:      #5856D6;
+  --ds-orange:      #FF9500;
+  --ds-pink:        #FF2D55;
+  --ds-purple:      #AF52DE;
+  --ds-red:         #FF3B30;
+  --ds-teal:        #30B0C7;
+  --ds-yellow:      #FFCC00;
+  --ds-mint:        #00C7BE;
+  --ds-cyan:        #32ADE6;
+  --ds-brown:       #A2845E;
+
+  --ds-blue-tint:   rgba(0, 122, 255, 0.10);
+  --ds-green-tint:  rgba(52, 199, 89, 0.12);
+  --ds-red-tint:    rgba(255, 59, 48, 0.10);
+  --ds-orange-tint: rgba(255, 149, 0, 0.12);
+  --ds-purple-tint: rgba(175, 82, 222, 0.10);
+
+  // ── Backgrounds (macOS layered) ───────────────────────────────────────────
+  --ds-bg-base:        #F2F2F7;   // system grouped background
+  --ds-bg-elevated:    #FFFFFF;   // cards, sheets
+  --ds-bg-grouped:     #F9F9F9;   // sidebar, table headers
+  --ds-bg-overlay:     rgba(255, 255, 255, 0.72);  // glass nav
+
+  // ── Labels (полупрозрачные — Apple так делает для адаптации к фону) ───────
+  --ds-label-primary:    rgba(0, 0, 0, 0.88);
+  --ds-label-secondary:  rgba(60, 60, 67, 0.65);
+  --ds-label-tertiary:   rgba(60, 60, 67, 0.42);
+  --ds-label-quaternary: rgba(60, 60, 67, 0.20);
+  --ds-label-on-accent:  #FFFFFF;
+
+  // ── Separators / borders ──────────────────────────────────────────────────
+  --ds-separator:        rgba(60, 60, 67, 0.18);
+  --ds-separator-opaque: #D1D1D6;
+  --ds-border-input:     rgba(60, 60, 67, 0.24);
+
+  // ── Fills (system fill для controls) ──────────────────────────────────────
+  --ds-fill-1: rgba(120, 120, 128, 0.20);
+  --ds-fill-2: rgba(120, 120, 128, 0.16);
+  --ds-fill-3: rgba(118, 118, 128, 0.12);
+  --ds-fill-4: rgba(116, 116, 128, 0.08);
+
+  // ── Shadows (многослойные, как у Apple) ───────────────────────────────────
+  --ds-shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+  --ds-shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --ds-shadow-md:  0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.07);
+  --ds-shadow-lg:  0 2px 4px rgba(0, 0, 0, 0.05), 0 12px 32px rgba(0, 0, 0, 0.10);
+  --ds-shadow-xl:  0 4px 8px rgba(0, 0, 0, 0.06), 0 24px 56px rgba(0, 0, 0, 0.14);
+  --ds-shadow-focus: 0 0 0 4px rgba(0, 122, 255, 0.22);
+
+  // ── Radii (continuous corners — Apple любит squircle-стиль) ───────────────
+  --ds-radius-xs: 4px;
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 10px;
+  --ds-radius-lg: 14px;
+  --ds-radius-xl: 18px;
+  --ds-radius-2xl: 24px;
+  --ds-radius-pill: 9999px;
+
+  // ── Spacing (4px grid) ────────────────────────────────────────────────────
+  --ds-space-1:  4px;
+  --ds-space-2:  8px;
+  --ds-space-3:  12px;
+  --ds-space-4:  16px;
+  --ds-space-5:  20px;
+  --ds-space-6:  24px;
+  --ds-space-8:  32px;
+  --ds-space-10: 40px;
+  --ds-space-12: 48px;
+  --ds-space-16: 64px;
+
+  // ── Typography ────────────────────────────────────────────────────────────
+  --ds-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                  "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --ds-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ds-font-rounded: -apple-system-rounded, "SF Pro Rounded", "Inter", system-ui, sans-serif;
+
+  // ── Motion ────────────────────────────────────────────────────────────────
+  --ds-ease-spring:   cubic-bezier(0.32, 0.72, 0, 1);   // характерная Apple "spring"
+  --ds-ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ds-ease-emphasis: cubic-bezier(0.2, 0.0, 0, 1);
+  --ds-dur-fast:   140ms;
+  --ds-dur-base:   220ms;
+  --ds-dur-slow:   360ms;
+
+  // ── Glass / Vibrancy ──────────────────────────────────────────────────────
+  --ds-blur-sm: saturate(180%) blur(12px);
+  --ds-blur-md: saturate(180%) blur(20px);
+  --ds-blur-lg: saturate(180%) blur(40px);
+}
+
+// =============================================================================
+//  Dark mode — auto + manual override
+// =============================================================================
+@mixin ds-dark-tokens {
+  color-scheme: dark;
+
+  --ds-blue:        #0A84FF;
+  --ds-green:       #30D158;
+  --ds-indigo:      #5E5CE6;
+  --ds-orange:      #FF9F0A;
+  --ds-pink:        #FF375F;
+  --ds-purple:      #BF5AF2;
+  --ds-red:         #FF453A;
+  --ds-teal:        #40C8E0;
+  --ds-yellow:      #FFD60A;
+  --ds-mint:        #63E6E2;
+  --ds-cyan:        #64D2FF;
+  --ds-brown:       #AC8E68;
+
+  --ds-blue-tint:   rgba(10, 132, 255, 0.18);
+  --ds-green-tint:  rgba(48, 209, 88, 0.18);
+  --ds-red-tint:    rgba(255, 69, 58, 0.18);
+  --ds-orange-tint: rgba(255, 159, 10, 0.18);
+  --ds-purple-tint: rgba(191, 90, 242, 0.18);
+
+  // Three-tier dark surfaces (Linear / Vercel / Notion approach):
+  // base       — глубокий фон страницы
+  // grouped    — sidebar, header, нейтральные подложки
+  // elevated   — карточки, модалки, popover (выделяются на фоне)
+  --ds-bg-base:        #0A0A0B;
+  --ds-bg-grouped:     #131316;
+  --ds-bg-elevated:    #1B1B20;
+  --ds-bg-overlay:     rgba(20, 20, 23, 0.78);
+
+  --ds-label-primary:    rgba(255, 255, 255, 0.95);
+  --ds-label-secondary:  rgba(235, 235, 245, 0.62);
+  --ds-label-tertiary:   rgba(235, 235, 245, 0.42);
+  --ds-label-quaternary: rgba(235, 235, 245, 0.20);
+  --ds-label-on-accent:  #FFFFFF;
+
+  // Тонкие разделители — менее назойливые, чем стандартные iOS
+  --ds-separator:        rgba(255, 255, 255, 0.07);
+  --ds-separator-opaque: #2A2A2F;
+  --ds-border-input:     rgba(255, 255, 255, 0.10);
+
+  --ds-fill-1: rgba(255, 255, 255, 0.14);
+  --ds-fill-2: rgba(255, 255, 255, 0.10);
+  --ds-fill-3: rgba(255, 255, 255, 0.07);
+  --ds-fill-4: rgba(255, 255, 255, 0.04);
+
+  --ds-shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.40);
+  --ds-shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.45);
+  --ds-shadow-md:  0 1px 2px rgba(0, 0, 0, 0.40), 0 6px 16px rgba(0, 0, 0, 0.50);
+  --ds-shadow-lg:  0 2px 4px rgba(0, 0, 0, 0.42), 0 16px 40px rgba(0, 0, 0, 0.55);
+  --ds-shadow-xl:  0 6px 12px rgba(0, 0, 0, 0.45), 0 32px 72px rgba(0, 0, 0, 0.65);
+  --ds-shadow-focus: 0 0 0 4px rgba(10, 132, 255, 0.35);
+}
+
+[data-theme="dark"] { @include ds-dark-tokens; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { @include ds-dark-tokens; }
+}

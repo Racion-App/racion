@@ -1,0 +1,9 @@
+// Apple Design System — main entry.
+// Order matters: tokens → bootstrap-overrides → bootstrap → typography → components → utilities.
+
+@import "apple-bootstrap";
+@import "bootstrap";
+@import "apple-tokens";
+@import "apple-typography";
+@import "apple-components";
+@import "apple-utilities";

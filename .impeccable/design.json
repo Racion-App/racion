@@ -1,0 +1,966 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-09-17T20:42:49Z",
+ "title": "Design System: Рацион",
+ "extensions": {
+  "source": {
+   "inheritedFrom": "Rubby Design System (Apple HIG on Bootstrap 5.3)",
+   "vendoredAt": "frontend/src/styles/design-system/",
+   "tokenFile": "frontend/src/styles/design-system/apple-tokens.scss",
+   "surfaceFile": "frontend/src/styles/app.scss",
+   "ssrTemplates": [
+    "backend/internal/api/templates/layout.html",
+    "backend/internal/api/templates/recipe.html",
+    "backend/internal/api/templates/recipes.html"
+   ],
+   "surfaceTokens": {
+    "--r-sheet-max": "560px",
+    "--r-gutter": "16px",
+    "--r-bar-h": "64px",
+    "--r-tabular": "\"tnum\" 1, \"lnum\" 1",
+    "--r-safe-bottom": "env(safe-area-inset-bottom, 0px)",
+    "--rp-tint": "var(--ds-{orange|green|blue|purple}-tint) по .rpage--{breakfast|lunch|dinner|snack}"
+   }
+  },
+  "colorMeta": {
+   "blue": {
+    "role": "primary",
+    "displayName": "Системный синий",
+    "cssVar": "--ds-blue",
+    "canonical": "#007AFF",
+    "dark": "#0A84FF",
+    "tonalRamp": [
+     "#00224D",
+     "#003A80",
+     "#0052B3",
+     "#0069E6",
+     "#007AFF",
+     "#3D9CFF",
+     "#80BDFF",
+     "#CCE4FF"
+    ]
+   },
+   "blue-tint": {
+    "role": "primary",
+    "displayName": "Синяя подложка",
+    "cssVar": "--ds-blue-tint",
+    "canonical": "rgba(0, 122, 255, 0.10)",
+    "dark": "rgba(10, 132, 255, 0.18)",
+    "tonalRamp": [
+     "rgba(0,122,255,0.30)",
+     "rgba(0,122,255,0.24)",
+     "rgba(0,122,255,0.18)",
+     "rgba(0,122,255,0.14)",
+     "rgba(0,122,255,0.10)",
+     "rgba(0,122,255,0.07)",
+     "rgba(0,122,255,0.04)",
+     "rgba(0,122,255,0.02)"
+    ]
+   },
+   "green": {
+    "role": "secondary",
+    "displayName": "Системный зелёный (деньги)",
+    "cssVar": "--ds-green",
+    "canonical": "#34C759",
+    "dark": "#30D158",
+    "tonalRamp": [
+     "#0D3318",
+     "#165A2A",
+     "#20853D",
+     "#2AAB4E",
+     "#34C759",
+     "#5FD47A",
+     "#8FE2A3",
+     "#C9F1D2"
+    ]
+   },
+   "green-tint": {
+    "role": "secondary",
+    "displayName": "Тинт обеда (подложка шапки рецепта)",
+    "cssVar": "--ds-green-tint",
+    "canonical": "rgba(52, 199, 89, 0.10)",
+    "dark": "rgba(48, 209, 88, 0.18)",
+    "tonalRamp": [
+     "rgba(52,199,89,0.30)",
+     "rgba(52,199,89,0.24)",
+     "rgba(52,199,89,0.18)",
+     "rgba(52,199,89,0.14)",
+     "rgba(52,199,89,0.10)",
+     "rgba(52,199,89,0.07)",
+     "rgba(52,199,89,0.04)",
+     "rgba(52,199,89,0.02)"
+    ]
+   },
+   "orange": {
+    "role": "secondary",
+    "displayName": "Системный оранжевый (полоска завтрака; текст только у факта «дороже цели»)",
+    "cssVar": "--ds-orange",
+    "canonical": "#FF9500",
+    "dark": "#FF9F0A",
+    "tonalRamp": [
+     "#4D2D00",
+     "#804B00",
+     "#B36800",
+     "#E68600",
+     "#FF9500",
+     "#FFAF3D",
+     "#FFCA80",
+     "#FFE4CC"
+    ]
+   },
+   "orange-tint": {
+    "role": "secondary",
+    "displayName": "Тинт завтрака (подложка шапки рецепта)",
+    "cssVar": "--ds-orange-tint",
+    "canonical": "rgba(255, 149, 0, 0.12)",
+    "dark": "rgba(255, 159, 10, 0.18)",
+    "tonalRamp": [
+     "rgba(255,149,0,0.30)",
+     "rgba(255,149,0,0.24)",
+     "rgba(255,149,0,0.18)",
+     "rgba(255,149,0,0.14)",
+     "rgba(255,149,0,0.12)",
+     "rgba(255,149,0,0.08)",
+     "rgba(255,149,0,0.04)",
+     "rgba(255,149,0,0.02)"
+    ]
+   },
+   "purple": {
+    "role": "secondary",
+    "displayName": "Системный фиолетовый (полоска перекуса)",
+    "cssVar": "--ds-purple",
+    "canonical": "#AF52DE",
+    "dark": "#BF5AF2",
+    "tonalRamp": [
+     "#341843",
+     "#57297A",
+     "#7A39A8",
+     "#9C49D1",
+     "#AF52DE",
+     "#C37DE6",
+     "#D7A8EF",
+     "#EBD4F7"
+    ]
+   },
+   "purple-tint": {
+    "role": "secondary",
+    "displayName": "Тинт перекуса (подложка шапки рецепта)",
+    "cssVar": "--ds-purple-tint",
+    "canonical": "rgba(175, 82, 222, 0.10)",
+    "dark": "rgba(191, 90, 242, 0.18)",
+    "tonalRamp": [
+     "rgba(175,82,222,0.30)",
+     "rgba(175,82,222,0.24)",
+     "rgba(175,82,222,0.18)",
+     "rgba(175,82,222,0.14)",
+     "rgba(175,82,222,0.10)",
+     "rgba(175,82,222,0.07)",
+     "rgba(175,82,222,0.04)",
+     "rgba(175,82,222,0.02)"
+    ]
+   },
+   "red": {
+    "role": "tertiary",
+    "displayName": "Системный красный (ошибка, удаление)",
+    "cssVar": "--ds-red",
+    "canonical": "#FF3B30",
+    "dark": "#FF453A",
+    "tonalRamp": [
+     "#4D0E0B",
+     "#801A14",
+     "#B3261C",
+     "#E63325",
+     "#FF3B30",
+     "#FF6C63",
+     "#FF9D97",
+     "#FFD1CE"
+    ]
+   },
+   "red-tint": {
+    "role": "tertiary",
+    "displayName": "Красная подложка",
+    "cssVar": "--ds-red-tint",
+    "canonical": "rgba(255, 59, 48, 0.10)",
+    "dark": "rgba(255, 69, 58, 0.18)",
+    "tonalRamp": [
+     "rgba(255,59,48,0.30)",
+     "rgba(255,59,48,0.24)",
+     "rgba(255,59,48,0.18)",
+     "rgba(255,59,48,0.14)",
+     "rgba(255,59,48,0.10)",
+     "rgba(255,59,48,0.07)",
+     "rgba(255,59,48,0.04)",
+     "rgba(255,59,48,0.02)"
+    ]
+   },
+   "bg-base": {
+    "role": "neutral",
+    "displayName": "Грунт",
+    "cssVar": "--ds-bg-base",
+    "canonical": "#F2F2F7",
+    "dark": "#0A0A0B",
+    "tonalRamp": [
+     "#0A0A0B",
+     "#131316",
+     "#1B1B20",
+     "#2A2A2F",
+     "#8E8E93",
+     "#C7C7CC",
+     "#E5E5EA",
+     "#F2F2F7"
+    ]
+   },
+   "bg-elevated": {
+    "role": "neutral",
+    "displayName": "Лист",
+    "cssVar": "--ds-bg-elevated",
+    "canonical": "#FFFFFF",
+    "dark": "#1B1B20",
+    "tonalRamp": [
+     "#1B1B20",
+     "#2A2A2F",
+     "#48484A",
+     "#8E8E93",
+     "#C7C7CC",
+     "#E5E5EA",
+     "#F9F9F9",
+     "#FFFFFF"
+    ]
+   },
+   "bg-overlay": {
+    "role": "neutral",
+    "displayName": "Стекло панели",
+    "cssVar": "--ds-bg-overlay",
+    "canonical": "rgba(255, 255, 255, 0.72)",
+    "dark": "rgba(20, 20, 23, 0.78)",
+    "tonalRamp": [
+     "rgba(255,255,255,0.20)",
+     "rgba(255,255,255,0.32)",
+     "rgba(255,255,255,0.44)",
+     "rgba(255,255,255,0.56)",
+     "rgba(255,255,255,0.72)",
+     "rgba(255,255,255,0.82)",
+     "rgba(255,255,255,0.90)",
+     "rgba(255,255,255,0.96)"
+    ]
+   },
+   "label-primary": {
+    "role": "neutral",
+    "displayName": "Текст основной",
+    "cssVar": "--ds-label-primary",
+    "canonical": "rgba(0, 0, 0, 0.88)",
+    "dark": "rgba(255, 255, 255, 0.95)",
+    "tonalRamp": [
+     "rgba(0,0,0,0.88)",
+     "rgba(60,60,67,0.65)",
+     "rgba(60,60,67,0.42)",
+     "rgba(60,60,67,0.20)",
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)"
+    ]
+   },
+   "label-secondary": {
+    "role": "neutral",
+    "displayName": "Текст вторичный",
+    "cssVar": "--ds-label-secondary",
+    "canonical": "rgba(60, 60, 67, 0.65)",
+    "dark": "rgba(235, 235, 245, 0.62)",
+    "tonalRamp": [
+     "rgba(0,0,0,0.88)",
+     "rgba(60,60,67,0.65)",
+     "rgba(60,60,67,0.42)",
+     "rgba(60,60,67,0.20)",
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)"
+    ]
+   },
+   "label-tertiary": {
+    "role": "neutral",
+    "displayName": "Текст третичный",
+    "cssVar": "--ds-label-tertiary",
+    "canonical": "rgba(60, 60, 67, 0.42)",
+    "dark": "rgba(235, 235, 245, 0.42)",
+    "tonalRamp": [
+     "rgba(0,0,0,0.88)",
+     "rgba(60,60,67,0.65)",
+     "rgba(60,60,67,0.42)",
+     "rgba(60,60,67,0.20)",
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)"
+    ]
+   },
+   "label-quaternary": {
+    "role": "neutral",
+    "displayName": "Текст четвертичный (куплено, шеврон, точечная линия ссылки)",
+    "cssVar": "--ds-label-quaternary",
+    "canonical": "rgba(60, 60, 67, 0.20)",
+    "dark": "rgba(235, 235, 245, 0.20)",
+    "tonalRamp": [
+     "rgba(0,0,0,0.88)",
+     "rgba(60,60,67,0.65)",
+     "rgba(60,60,67,0.42)",
+     "rgba(60,60,67,0.20)",
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)"
+    ]
+   },
+   "separator": {
+    "role": "neutral",
+    "displayName": "Разделитель",
+    "cssVar": "--ds-separator",
+    "canonical": "rgba(60, 60, 67, 0.18)",
+    "dark": "rgba(255, 255, 255, 0.07)",
+    "tonalRamp": [
+     "#2A2A2F",
+     "#48484A",
+     "#8E8E93",
+     "#AEAEB2",
+     "#C7C7CC",
+     "#D1D1D6",
+     "#E5E5EA",
+     "#F2F2F7"
+    ]
+   },
+   "separator-opaque": {
+    "role": "neutral",
+    "displayName": "Разделитель плотный (пунктир отрыва)",
+    "cssVar": "--ds-separator-opaque",
+    "canonical": "#D1D1D6",
+    "dark": "#2A2A2F",
+    "tonalRamp": [
+     "#2A2A2F",
+     "#48484A",
+     "#8E8E93",
+     "#AEAEB2",
+     "#C7C7CC",
+     "#D1D1D6",
+     "#E5E5EA",
+     "#F2F2F7"
+    ]
+   },
+   "border-input": {
+    "role": "neutral",
+    "displayName": "Рамка поля",
+    "cssVar": "--ds-border-input",
+    "canonical": "rgba(60, 60, 67, 0.24)",
+    "dark": "rgba(255, 255, 255, 0.10)",
+    "tonalRamp": [
+     "#2A2A2F",
+     "#48484A",
+     "#8E8E93",
+     "#AEAEB2",
+     "#C7C7CC",
+     "#D1D1D6",
+     "#E5E5EA",
+     "#F2F2F7"
+    ]
+   },
+   "fill-1": {
+    "role": "neutral",
+    "displayName": "Заливка 1 (грип, скроллбар)",
+    "cssVar": "--ds-fill-1",
+    "canonical": "rgba(120, 120, 128, 0.20)",
+    "dark": "rgba(255, 255, 255, 0.14)",
+    "tonalRamp": [
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)",
+     "rgba(116,116,128,0.06)",
+     "rgba(116,116,128,0.04)",
+     "rgba(116,116,128,0.02)",
+     "rgba(116,116,128,0.01)"
+    ]
+   },
+   "fill-2": {
+    "role": "neutral",
+    "displayName": "Заливка 2 (hover, прогресс)",
+    "cssVar": "--ds-fill-2",
+    "canonical": "rgba(120, 120, 128, 0.16)",
+    "dark": "rgba(255, 255, 255, 0.10)",
+    "tonalRamp": [
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)",
+     "rgba(116,116,128,0.06)",
+     "rgba(116,116,128,0.04)",
+     "rgba(116,116,128,0.02)",
+     "rgba(116,116,128,0.01)"
+    ]
+   },
+   "fill-3": {
+    "role": "neutral",
+    "displayName": "Заливка 3 (кнопки-контролы, номера шагов, линии таблиц)",
+    "cssVar": "--ds-fill-3",
+    "canonical": "rgba(118, 118, 128, 0.12)",
+    "dark": "rgba(255, 255, 255, 0.07)",
+    "tonalRamp": [
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)",
+     "rgba(116,116,128,0.06)",
+     "rgba(116,116,128,0.04)",
+     "rgba(116,116,128,0.02)",
+     "rgba(116,116,128,0.01)"
+    ]
+   },
+   "fill-4": {
+    "role": "neutral",
+    "displayName": "Заливка 4 (волосяные линии, панели боковой колонки)",
+    "cssVar": "--ds-fill-4",
+    "canonical": "rgba(116, 116, 128, 0.08)",
+    "dark": "rgba(255, 255, 255, 0.04)",
+    "tonalRamp": [
+     "rgba(120,120,128,0.20)",
+     "rgba(120,120,128,0.16)",
+     "rgba(118,118,128,0.12)",
+     "rgba(116,116,128,0.08)",
+     "rgba(116,116,128,0.06)",
+     "rgba(116,116,128,0.04)",
+     "rgba(116,116,128,0.02)",
+     "rgba(116,116,128,0.01)"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "page-title": {
+    "displayName": "Page title",
+    "purpose": "Заголовок рецепта .rpage__title: 30px, на ≥1024 — 36px; max-width 24ch, text-wrap: balance."
+   },
+   "display": {
+    "displayName": "Display",
+    "purpose": "Вопрос квиза .quiz__title, заголовок каталога .pages__title, заголовок входа .auth__title."
+   },
+   "headline": {
+    "displayName": "Headline",
+    "purpose": "Заголовок чека .receipt__title (24px), кабинета .account__title; 22px/-0.018em — рецепт в нижнем листе; 26px/600 — цена порции .panel__big (в .num)."
+   },
+   "title": {
+    "displayName": "Title",
+    "purpose": "«Список покупок», «Итого», заголовки разделов рецепта (.rpage__section h2), значение счётчика."
+   },
+   "step": {
+    "displayName": "Step",
+    "purpose": "Текст шага .steps__item p (17/1.5); факт в плитке шапки dd 17/600."
+   },
+   "row-title": {
+    "displayName": "Row title",
+    "purpose": "Название блюда .dish__title, опция, подпись счётчика, строка продукта .ings__row (16), подводка .rpage__lead (16/400); 17px — бренд и позиция в режиме магазина."
+   },
+   "body": {
+    "displayName": "Body",
+    "purpose": "Плитки, чипы, позиции списка, заголовок карточки рецепта (15/600), сводка фильтров, «Коротко»."
+   },
+   "caption": {
+    "displayName": "Caption",
+    "purpose": "Метаданные чека, крошки, таблица .nutri (14), «Рецепты» в топбаре (14/600), .panel__title (13/600), .rcard__meta и .rpage__note (12.5)."
+   },
+   "label": {
+    "displayName": "Label (uppercase)",
+    "purpose": "Категория списка .list__cat и h3 в нижнем листе; +0.06em, uppercase, label-tertiary. Без капса: подпись факта dt (11/600), номер строки продукта (12), примечание к упаковке (12)."
+   },
+   "num": {
+    "displayName": "Num (mono)",
+    "purpose": "Класс .num: любое число — ₽, ккал, мин, г, мл, шт, %, номера строк, надстрочный номер в шаге (11). JetBrains Mono 500/600/700 самохостинг, tnum lnum, zero 0. Размер наследует от контекста 11–26px."
+   }
+  },
+  "fonts": [
+   {
+    "family": "Inter",
+    "src": "/fonts/InterVariable.woff2",
+    "weight": "100 900",
+    "display": "swap",
+    "preload": true
+   },
+   {
+    "family": "JetBrains Mono",
+    "src": "/fonts/JetBrainsMono-Medium.woff2",
+    "weight": 500,
+    "display": "swap"
+   },
+   {
+    "family": "JetBrains Mono",
+    "src": "/fonts/JetBrainsMono-SemiBold.woff2",
+    "weight": 600,
+    "display": "swap"
+   },
+   {
+    "family": "JetBrains Mono",
+    "src": "/fonts/JetBrainsMono-Bold.woff2",
+    "weight": 700,
+    "display": "swap"
+   }
+  ],
+  "shadows": [
+   {
+    "name": "shadow-xs",
+    "cssVar": "--ds-shadow-xs",
+    "value": "0 1px 2px rgba(0, 0, 0, 0.04)",
+    "purpose": "Плитки магазинов; карточка рецепта .rcard в покое."
+   },
+   {
+    "name": "shadow-sm",
+    "cssVar": "--ds-shadow-sm",
+    "value": "0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.05)",
+    "purpose": "Активная кнопка сегмент-контрола .viewswitch."
+   },
+   {
+    "name": "shadow-md",
+    "cssVar": "--ds-shadow-md",
+    "value": "0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.07)",
+    "purpose": "Лист чека, лист рецепта .rpage, карточка входа .auth__card (≥640px) — единственная приподнятая поверхность страницы; .rcard на hover."
+   },
+   {
+    "name": "shadow-lg",
+    "cssVar": "--ds-shadow-lg",
+    "value": "0 2px 4px rgba(0, 0, 0, 0.05), 0 12px 32px rgba(0, 0, 0, 0.10)",
+    "purpose": "Тост."
+   },
+   {
+    "name": "shadow-xl",
+    "cssVar": "--ds-shadow-xl",
+    "value": "0 4px 8px rgba(0, 0, 0, 0.06), 0 24px 56px rgba(0, 0, 0, 0.14)",
+    "purpose": "Нижний лист рецепта."
+   },
+   {
+    "name": "shadow-focus",
+    "cssVar": "--ds-shadow-focus",
+    "value": "0 0 0 4px rgba(0, 122, 255, 0.22)",
+    "purpose": "Кольцо :focus-visible на каждом интерактиве, outline: none."
+   },
+   {
+    "name": "selected-inset",
+    "value": "0 0 0 1px var(--ds-blue) inset",
+    "purpose": "Выбранная плитка / чип / опция поверх синей рамки."
+   },
+   {
+    "name": "glass-actionbar",
+    "value": "background: var(--ds-bg-overlay); backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--ds-separator)",
+    "purpose": "Фиксированная панель действий."
+   },
+   {
+    "name": "hero-wash",
+    "value": "background: linear-gradient(180deg, var(--rp-tint) 0%, var(--ds-bg-elevated) 100%)",
+    "purpose": "Шапка рецепта .rpage__hero: тинт приёма пищи уходит в белый лист; единственное место тинта на странице."
+   },
+   {
+    "name": "panel-tone",
+    "value": "background: var(--ds-fill-4); border: 0; box-shadow: none",
+    "purpose": "Панели боковой колонки .panel — тональный слой внутри листа, не карточка в карточке."
+   }
+  ],
+  "motion": [
+   {
+    "name": "ease-spring",
+    "cssVar": "--ds-ease-spring",
+    "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+    "purpose": "transform и box-shadow: нажатие, возврат отрыва, въезд шага, нижний лист, тост, hover карточки рецепта."
+   },
+   {
+    "name": "ease-standard",
+    "cssVar": "--ds-ease-standard",
+    "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "purpose": "Цвет, фон, прогресс квиза, вспышка reprint."
+   },
+   {
+    "name": "ease-emphasis",
+    "cssVar": "--ds-ease-emphasis",
+    "value": "cubic-bezier(0.2, 0, 0, 1)",
+    "purpose": "Только «печать» чека (.is-printing)."
+   },
+   {
+    "name": "dur-fast",
+    "cssVar": "--ds-dur-fast",
+    "value": "140ms",
+    "purpose": "Нажатия, hover, цвет, уголок фильтров."
+   },
+   {
+    "name": "dur-base",
+    "cssVar": "--ds-dur-base",
+    "value": "220ms",
+    "purpose": "Въезд шага, возврат блока после отрыва, тост, прогресс, hover .rcard."
+   },
+   {
+    "name": "dur-slow",
+    "cssVar": "--ds-dur-slow",
+    "value": "360ms",
+    "purpose": "Открытие нижнего листа (sheet-up)."
+   },
+   {
+    "name": "print",
+    "value": "420ms var(--ds-ease-emphasis) both; каскад 45ms на .day (до 12), .tear 380ms, .list 420ms, .totals 480ms; from { opacity: 0; transform: translateY(10px) }",
+    "purpose": "Единственный авторский момент: чек «печатается» при первом показе."
+   },
+   {
+    "name": "reprint",
+    "value": "600ms var(--ds-ease-standard); 0% background var(--ds-blue-tint) → 100% transparent",
+    "purpose": "Одна строка блюда после замены (.dish.is-fresh) и каждая пересчитанная граммовка после смены порций (.ings__qty.is-fresh)."
+   },
+   {
+    "name": "step-in",
+    "value": "var(--ds-dur-base) var(--ds-ease-spring) both; from { opacity: 0; transform: translateY(6px) }",
+    "purpose": "Шаг квиза."
+   },
+   {
+    "name": "sheet-up",
+    "value": "var(--ds-dur-slow) var(--ds-ease-spring); from { transform: translate(-50%, 24px); opacity: 0 }",
+    "purpose": "Нижний лист рецепта."
+   },
+   {
+    "name": "spin",
+    "value": "720ms linear infinite",
+    "purpose": "Иконка замены в .is-busy."
+   },
+   {
+    "name": "shimmer",
+    "value": "1.2s linear infinite, background-position 200%",
+    "purpose": "Skeleton."
+   },
+   {
+    "name": "card-lift",
+    "value": "box-shadow var(--ds-dur-base) var(--ds-ease-spring), transform var(--ds-dur-base) var(--ds-ease-spring); hover: shadow-md + translateY(-1px)",
+    "purpose": "Карточка рецепта .rcard."
+   },
+   {
+    "name": "pull-gesture",
+    "value": "translateY(var(--pull)) без transition на .is-pulling; dy ∈ [-140px, 0]; порог 48px; возврат var(--ds-dur-base) var(--ds-ease-spring)",
+    "purpose": "Отрыв списка пальцем по линии .tear."
+   },
+   {
+    "name": "view-transition-store",
+    "value": "document.startViewTransition(apply) с fallback",
+    "purpose": "Переключение .is-store и обратно."
+   },
+   {
+    "name": "reduced-motion",
+    "value": "@media (prefers-reduced-motion: reduce) — animation/transition 0.01ms, iteration-count 1",
+    "purpose": "Глобально."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "narrow",
+    "value": "360px",
+    "purpose": "≤360px: плитки магазинов в 2 колонки."
+   },
+   {
+    "name": "note-hide",
+    "value": "480px",
+    "purpose": "≤480px: .topbar__note скрыта."
+   },
+   {
+    "name": "facts-4",
+    "value": "560px",
+    "purpose": "≥560px: плитки фактов рецепта в 4 колонки; ≤560px: группа фильтров в одну колонку."
+   },
+   {
+    "name": "auth-card",
+    "value": "640px",
+    "purpose": "≥640px: вход становится карточкой 440px с тенью md."
+   },
+   {
+    "name": "sticky-aside-height",
+    "value": "760px (min-height)",
+    "purpose": "Вместе с ≥1024px: .rpage__aside position: sticky; top: 12px. Ниже — панель скроллится с листом."
+   },
+   {
+    "name": "account-wide",
+    "value": "900px",
+    "purpose": "≥900px: кабинет в две колонки minmax(0,1fr) 320px, профиль справа."
+   },
+   {
+    "name": "wide",
+    "value": "1024px",
+    "purpose": "≥1024px: .shell--wide 1120px; чек в две колонки minmax(0,1fr) 400px, линия отрыва скрыта, слот в колонке 64px; рецепт в две колонки minmax(0,1fr) 360px, H1 36px, поля 32px."
+   }
+  ],
+  "layout": {
+   "sheetMax": "560px",
+   "wideMax": "1120px",
+   "gutter": "16px",
+   "actionbarHeight": "64px",
+   "topbarHeight": "56px",
+   "topbarOrder": "brand · [note|right] · «Рецепты» text link · account icon 36px · theme toggle 36px",
+   "dishGrid": "minmax(0, 1fr) auto auto",
+   "dishGridWide": "64px minmax(0, 1fr) auto auto",
+   "itemGrid": "auto minmax(0, 1fr) auto",
+   "receiptGridWide": "minmax(0, 1fr) 400px",
+   "recipeColsWide": "minmax(0, 1fr) 360px",
+   "recipeOrder": "hero (crumbs · h1 · lead · 4 facts · tags) → cols (main | aside) → foot «Похожие» full width",
+   "ingredientGrid": "26px minmax(0, 1fr) auto",
+   "stepGrid": "32px minmax(0, 1fr)",
+   "factsGrid": "repeat(2, 1fr) → repeat(4, 1fr) @560",
+   "cardGrid": "repeat(auto-fill, minmax(240px, 1fr)); tight: 200px",
+   "filterGroupGrid": "96px minmax(0, 1fr)",
+   "accountGridWide": "minmax(0, 1fr) 320px",
+   "stickyAside": "@media (min-width: 1024px) and (min-height: 760px) — sticky top 12px; no nested scroll"
+  }
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "Один на страницу: «Дальше» в квизе, «В магазин» на чеке, «Собрать неделю» на рецепте. Синий градиент DS с inset-бликом и синей тенью.",
+   "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m15 11-1 9\"/><path d=\"m19 11-4-7\"/><path d=\"M2 11h20\"/><path d=\"m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4\"/><path d=\"M4.5 15.5h15\"/><path d=\"m5 11 4-7\"/><path d=\"m9 11 1 9\"/></svg> В магазин</button>",
+   "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--ds-font-sans, Inter, sans-serif); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -0.008em; min-height: 48px; padding: 10px 16px; border-radius: var(--ds-radius-md, 10px); border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform 140ms cubic-bezier(0.32,0.72,0,1), box-shadow 220ms cubic-bezier(0.32,0.72,0,1), background 180ms cubic-bezier(0.4,0,0.2,1), color 180ms; } .ds-btn:hover { transform: translateY(-0.5px); } .ds-btn:active { transform: scale(0.97); } .ds-btn:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-btn:disabled { opacity: 0.45; pointer-events: none; } .ds-btn-primary { color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--ds-blue, #007AFF) 100%, white 6%) 0%, var(--ds-blue, #007AFF) 100%); border-color: color-mix(in srgb, var(--ds-blue, #007AFF) 92%, black 8%); box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 -1px 0 rgba(0,0,0,0.08) inset, 0 1px 2px rgba(0,122,255,0.28), 0 4px 12px rgba(0,122,255,0.22); } .ds-btn-primary:hover { background: linear-gradient(180deg, var(--ds-blue, #007AFF) 0%, color-mix(in srgb, var(--ds-blue, #007AFF) 90%, black 10%) 100%); box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(0,122,255,0.30), 0 8px 20px rgba(0,122,255,0.30); } .ds-btn-primary:active { box-shadow: 0 1px 2px rgba(0,122,255,0.32) inset; }"
+  },
+  {
+   "name": "Secondary Button",
+   "kind": "button",
+   "refersTo": "button-secondary",
+   "description": "Белая с плотной рамкой; hover заливается синим. «Поделиться» на чеке, «Сбросить» в магазине, «Назад» / «Дальше» в пагинации каталога.",
+   "html": "<button class=\"ds-btn ds-btn-secondary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 17H7A5 5 0 0 1 7 7h2\"/><path d=\"M15 7h2a5 5 0 1 1 0 10h-2\"/><line x1=\"8\" x2=\"16\" y1=\"12\" y2=\"12\"/></svg> Поделиться</button>",
+   "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--ds-font-sans, Inter, sans-serif); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -0.008em; min-height: 48px; padding: 10px 16px; border-radius: var(--ds-radius-md, 10px); border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform 140ms cubic-bezier(0.32,0.72,0,1), background 180ms, color 180ms, border-color 180ms; } .ds-btn:hover { transform: translateY(-0.5px); } .ds-btn:active { transform: scale(0.97); } .ds-btn:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-btn-secondary { color: var(--ds-label-primary, rgba(0,0,0,0.88)); background: var(--ds-bg-elevated, #fff); border-color: var(--ds-separator-opaque, #D1D1D6); box-shadow: 0 1px 2px rgba(0,0,0,0.04); } .ds-btn-secondary:hover { background: var(--ds-blue, #007AFF); color: #fff; border-color: var(--ds-blue, #007AFF); }"
+  },
+  {
+   "name": "Ghost Icon Button",
+   "kind": "button",
+   "refersTo": "button-ghost",
+   "description": "Квадрат 48px под одну иконку в панели действий (печать, назад). Прозрачный, hover fill-3.",
+   "html": "<button class=\"ds-btn-ghost\" aria-label=\"Распечатать\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\"/><path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\"/><rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\"/></svg></button>",
+   "css": ".ds-btn-ghost { width: 48px; height: 48px; padding: 0; display: inline-grid; place-items: center; border-radius: var(--ds-radius-md, 10px); border: 1px solid transparent; background: transparent; color: var(--ds-label-primary, rgba(0,0,0,0.88)); cursor: pointer; transition: background 180ms, transform 140ms cubic-bezier(0.32,0.72,0,1); } .ds-btn-ghost:hover { background: var(--ds-fill-3, rgba(118,118,128,0.12)); } .ds-btn-ghost:active { transform: scale(0.97); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); }"
+  },
+  {
+   "name": "Top Bar",
+   "kind": "nav",
+   "refersTo": "icon-button",
+   "description": "Один топбар для React и SSR: бренд синей иконкой · текстовая ссылка «Рецепты» · иконка кабинета 36px · переключатель темы 36px. Никаких кнопок .btn в шапке.",
+   "html": "<header class=\"ds-topbar\"><a class=\"ds-topbar__brand\" href=\"#\" aria-label=\"Рацион — на главную\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M14 8H8\"/><path d=\"M16 12H8\"/><path d=\"M13 16H8\"/></svg> Рацион</a><nav class=\"ds-topbar__right\"><a class=\"ds-navlink is-current\" href=\"#\">Рецепты</a><a class=\"ds-iconbtn\" href=\"#\" aria-label=\"Кабинет\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"5\"/><path d=\"M20 21a8 8 0 0 0-16 0\"/></svg></a><button class=\"ds-iconbtn\" type=\"button\" aria-label=\"Тема: как в системе. Переключить на: светлая\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8\"/><path d=\"M10 19v-3.96 3.15\"/><path d=\"M7 19h5\"/><rect width=\"6\" height=\"10\" x=\"16\" y=\"12\" rx=\"2\"/></svg></button></nav></header>",
+   "css": ".ds-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; max-width: 560px; font-family: var(--ds-font-sans, Inter, sans-serif); } .ds-topbar__brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; letter-spacing: -0.014em; color: var(--ds-label-primary, rgba(0,0,0,0.88)); text-decoration: none; } .ds-topbar__brand svg { color: var(--ds-blue, #007AFF); } .ds-topbar__right { display: flex; align-items: center; gap: 6px; } .ds-navlink { font-size: 14px; font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); text-decoration: none; margin-right: 6px; } .ds-navlink.is-current { color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-iconbtn { width: 36px; height: 36px; border-radius: var(--ds-radius-md, 10px); border: 0; background: transparent; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); display: grid; place-items: center; cursor: pointer; transition: background 140ms, color 140ms; } .ds-iconbtn:hover { background: var(--ds-fill-3, rgba(118,118,128,0.12)); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-iconbtn.is-user { color: var(--ds-blue, #007AFF); } .ds-iconbtn:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); }"
+  },
+  {
+   "name": "Store Tile",
+   "kind": "card",
+   "refersTo": "tile",
+   "description": "role=radio в сетке 3 колонки: иконка сверху, название, подпись. Выбранная — синяя рамка, tint, inset-кольцо.",
+   "html": "<div class=\"ds-tiles\"><button class=\"ds-tile\" role=\"radio\" aria-checked=\"true\"><span class=\"ds-tile__icon\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\"/><path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\"/><path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\"/><path d=\"M2 7h20\"/></svg></span><span>Магнит<span class=\"ds-tile__sub\">у дома</span></span></button><button class=\"ds-tile\" role=\"radio\" aria-checked=\"false\"><span class=\"ds-tile__icon\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\"/><path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\"/><path d=\"M2 7h20\"/></svg></span><span>Пятёрочка<span class=\"ds-tile__sub\">у дома</span></span></button></div>",
+   "css": ".ds-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-width: 320px; } .ds-tile { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 10px; min-height: 88px; padding: 12px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); box-shadow: var(--ds-shadow-xs, 0 1px 2px rgba(0,0,0,0.04)); color: var(--ds-label-primary, rgba(0,0,0,0.88)); font-family: var(--ds-font-sans, Inter, sans-serif); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-align: left; cursor: pointer; transition: border-color 140ms, box-shadow 220ms cubic-bezier(0.32,0.72,0,1), transform 140ms cubic-bezier(0.32,0.72,0,1), background 140ms; } .ds-tile:hover { border-color: var(--ds-label-quaternary, rgba(60,60,67,0.20)); } .ds-tile:active { transform: scale(0.97); } .ds-tile:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-tile__icon { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); display: grid; place-items: center; } .ds-tile__sub { display: block; font-size: 12px; font-weight: 500; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin-top: 2px; line-height: 1.25; } .ds-tile[aria-checked=\"true\"] { border-color: var(--ds-blue, #007AFF); background: var(--ds-blue-tint, rgba(0,122,255,0.10)); box-shadow: 0 0 0 1px var(--ds-blue, #007AFF) inset; } .ds-tile[aria-checked=\"true\"] .ds-tile__icon { color: var(--ds-blue, #007AFF); }"
+  },
+  {
+   "name": "Chip",
+   "kind": "chip",
+   "refersTo": "chip",
+   "description": "Пилюля 44px с aria-pressed; выбранная — синий текст 600, галочка, tint, inset-кольцо. .chip--sm (34px, 13px) — теги рецепта и опции фильтров каталога как ссылки.",
+   "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg> Духовка</button><button class=\"ds-chip\" aria-pressed=\"false\">Мультиварка</button><a class=\"ds-chip ds-chip--sm\" href=\"#\">Суп</a><a class=\"ds-chip ds-chip--sm\" href=\"#\" aria-pressed=\"true\">Сытное</a></div>",
+   "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 9999px; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); color: var(--ds-label-primary, rgba(0,0,0,0.88)); font-family: var(--ds-font-sans, Inter, sans-serif); font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 140ms, border-color 140ms, color 140ms, transform 140ms cubic-bezier(0.32,0.72,0,1); } .ds-chip:active { transform: scale(0.96); } .ds-chip:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-chip[aria-pressed=\"true\"] { background: var(--ds-blue-tint, rgba(0,122,255,0.10)); border-color: var(--ds-blue, #007AFF); color: var(--ds-blue, #007AFF); box-shadow: 0 0 0 1px var(--ds-blue, #007AFF) inset; font-weight: 600; } .ds-chip--sm { min-height: 34px; padding: 0 12px; font-size: 13px; } .ds-chip--sm:hover { border-color: var(--ds-blue, #007AFF); color: var(--ds-blue, #007AFF); }"
+  },
+  {
+   "name": "Search Input",
+   "kind": "input",
+   "refersTo": "input",
+   "description": "Bootstrap .form-control под токенами DS: 48px, иконка слева, синяя рамка и кольцо на фокусе. Тот же блок — поиск каталога (.pages__search, max-width 480px).",
+   "html": "<div class=\"ds-search\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input class=\"ds-input\" type=\"search\" placeholder=\"Например: курица гречка, суп без мяса, творог\" aria-label=\"Поиск по рецептам\"></div>",
+   "css": ".ds-search { position: relative; max-width: 480px; } .ds-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); pointer-events: none; } .ds-input { width: 100%; min-height: 48px; padding: 0 14px 0 40px; font-family: var(--ds-font-sans, Inter, sans-serif); font-size: 16px; color: var(--ds-label-primary, rgba(0,0,0,0.88)); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-border-input, rgba(60,60,67,0.24)); border-radius: var(--ds-radius-md, 10px); transition: border-color 140ms, box-shadow 220ms; } .ds-input:focus { outline: none; border-color: var(--ds-blue, #007AFF); box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-input::placeholder { color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); }"
+  },
+  {
+   "name": "Recipe Card",
+   "kind": "card",
+   "refersTo": "recipe-card",
+   "description": "Компактная карточка без фото: полоска 4px цвета приёма пищи сверху, заголовок 15/600, мета-строка слот · мин · ккал · ≈ ₽ (рубли зелёные, числа в .num). Hover: shadow-md, подъём 1px, синий заголовок.",
+   "html": "<div class=\"ds-rgrid\"><a class=\"ds-rcard\" href=\"#\"><span class=\"ds-rcard__cover ds-rcard__cover--lunch\" aria-hidden=\"true\"></span><span class=\"ds-rcard__body\"><span class=\"ds-rcard__title\">Борщ</span><span class=\"ds-rcard__meta\"><span>Обед</span><span class=\"ds-num\">70 мин</span><span class=\"ds-num\">546 ккал</span><span class=\"ds-num is-rub\">≈ 77 ₽</span></span></span></a><a class=\"ds-rcard\" href=\"#\"><span class=\"ds-rcard__cover ds-rcard__cover--breakfast\" aria-hidden=\"true\"></span><span class=\"ds-rcard__body\"><span class=\"ds-rcard__title\">Белковый омлет с овощами</span><span class=\"ds-rcard__meta\"><span>Завтрак</span><span class=\"ds-num\">12 мин</span><span class=\"ds-num\">309 ккал</span><span class=\"ds-num is-rub\">≈ 70 ₽</span></span></span></a></div>",
+   "css": ".ds-rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-width: 440px; font-family: var(--ds-font-sans, Inter, sans-serif); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-rcard { display: grid; grid-template-rows: auto 1fr; overflow: hidden; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); box-shadow: var(--ds-shadow-xs, 0 1px 2px rgba(0,0,0,0.04)); color: var(--ds-label-primary, rgba(0,0,0,0.88)); text-decoration: none; transition: box-shadow 220ms cubic-bezier(0.32,0.72,0,1), transform 220ms cubic-bezier(0.32,0.72,0,1); } .ds-rcard:hover { box-shadow: var(--ds-shadow-md, 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.07)); transform: translateY(-1px); } .ds-rcard:hover .ds-rcard__title { color: var(--ds-blue, #007AFF); } .ds-rcard:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-rcard__cover { display: block; width: 100%; height: 4px; } .ds-rcard__cover--breakfast { background: var(--ds-orange, #FF9500); } .ds-rcard__cover--lunch { background: var(--ds-green, #34C759); } .ds-rcard__cover--dinner { background: var(--ds-blue, #007AFF); } .ds-rcard__cover--snack { background: var(--ds-purple, #AF52DE); } .ds-rcard__body { display: grid; gap: 6px; padding: 12px 14px 14px; align-content: start; } .ds-rcard__title { font-weight: 600; font-size: 15px; line-height: 1.3; transition: color 140ms; } .ds-rcard__meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-rcard__meta .is-rub { color: var(--ds-green, #34C759); }"
+  },
+  {
+   "name": "Recipe Hero Facts",
+   "kind": "custom",
+   "refersTo": "fact-tile",
+   "description": "Шапка рецепта: крошки с lucide-шевроном, H1 30/700, подводка, четыре плитки фактов (dt 11/600, dd 17/600 .num, «Продукты» зелёный), теги .chip--sm. Фон — градиент тинта слота в белый.",
+   "html": "<header class=\"ds-hero ds-hero--lunch\"><nav class=\"ds-crumbs\" aria-label=\"Путь\"><a href=\"#\">Рецепты</a><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg><a href=\"#\">Обед</a></nav><h1 class=\"ds-hero__title\">Борщ</h1><p class=\"ds-hero__lead\">Борщ на куриных бёдрах со свёклой, капустой и картофелем. Варится на два дня.</p><dl class=\"ds-facts\"><div><dt>Готовить</dt><dd class=\"ds-num\">70 мин</dd></div><div><dt>Порция</dt><dd class=\"ds-num\">546 ккал</dd></div><div><dt>Продукты</dt><dd class=\"ds-num is-rub\">≈ 77 ₽</dd></div><div><dt>Белок</dt><dd class=\"ds-num\">29 г</dd></div></dl></header>",
+   "css": ".ds-hero { --rp-tint: var(--ds-green-tint, rgba(52,199,89,0.10)); max-width: 560px; padding: 20px 20px 22px; display: grid; gap: 12px; border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-radius: var(--ds-radius-xl, 18px) var(--ds-radius-xl, 18px) 0 0; background: linear-gradient(180deg, var(--rp-tint) 0%, var(--ds-bg-elevated, #fff) 100%); font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-hero--breakfast { --rp-tint: var(--ds-orange-tint, rgba(255,149,0,0.12)); } .ds-hero--dinner { --rp-tint: var(--ds-blue-tint, rgba(0,122,255,0.10)); } .ds-hero--snack { --rp-tint: var(--ds-purple-tint, rgba(175,82,222,0.10)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-crumbs { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); } .ds-crumbs a { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); font-weight: 500; text-decoration: none; } .ds-crumbs a:hover { color: var(--ds-blue, #007AFF); } .ds-crumbs svg { color: var(--ds-label-quaternary, rgba(60,60,67,0.20)); } .ds-hero__title { font-size: 30px; font-weight: 700; letter-spacing: -0.022em; line-height: 1.12; margin: 0; max-width: 24ch; text-wrap: balance; } .ds-hero__lead { font-size: 16px; line-height: 1.45; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); margin: 0; max-width: 62ch; } .ds-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 4px 0 0; } .ds-facts div { padding: 10px 12px; border-radius: var(--ds-radius-md, 10px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-facts dt { font-size: 11px; font-weight: 600; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin: 0 0 2px; } .ds-facts dd { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; } .ds-facts .is-rub { color: var(--ds-green, #34C759); } @media (min-width: 560px) { .ds-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }"
+  },
+  {
+   "name": "Ingredient Rows + Step Ref",
+   "kind": "custom",
+   "refersTo": "recipe-sheet",
+   "description": "Нумерованные строки продуктов (26px | название + примечание | количество .num), кладовые серым, «по вкусу» словами; шаг с CSS-номером в кружке 30px и инлайн-ссылкой .steps__ref: слово с точечным подчёркиванием и надстрочным номером строки.",
+   "html": "<div class=\"ds-sheet\"><ol class=\"ds-ings\"><li class=\"ds-ings__row\" id=\"ing-1\"><span class=\"ds-ings__n ds-num\">1</span><span class=\"ds-ings__name\">Куриные бёдра<small>упаковка 900 г ≈ 276 ₽</small></span><span class=\"ds-ings__qty ds-num\">120 г</span></li><li class=\"ds-ings__row\" id=\"ing-2\"><span class=\"ds-ings__n ds-num\">2</span><span class=\"ds-ings__name\">Свёкла<small>≈ 49 ₽ за кг</small></span><span class=\"ds-ings__qty ds-num\">80 г</span></li><li class=\"ds-ings__row ds-ings__row--pantry\" id=\"ing-11\"><span class=\"ds-ings__n ds-num\">11</span><span class=\"ds-ings__name\">Лавровый лист</span><span class=\"ds-ings__qty\">по вкусу</span></li></ol><ol class=\"ds-steps\"><li class=\"ds-steps__item\"><p><a class=\"ds-steps__ref\" href=\"#ing-1\">Курицу<sup class=\"ds-num\">1</sup></a> залить 500 мл воды, довести до кипения, снять пену, варить 30 минут с <a class=\"ds-steps__ref\" href=\"#ing-11\">лавровым листом<sup class=\"ds-num\">11</sup></a>.</p></li><li class=\"ds-steps__item\"><p><a class=\"ds-steps__ref\" href=\"#ing-2\">Свёклу<sup class=\"ds-num\">2</sup></a> и морковь натереть, лук нарезать.</p></li></ol></div>",
+   "css": ".ds-sheet { max-width: 520px; padding: 8px 20px 16px; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-radius: var(--ds-radius-xl, 18px); font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); display: grid; gap: 22px; } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-ings, .ds-steps { list-style: none; margin: 0; padding: 0; } .ds-ings__row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; padding: 9px 0; border-top: 1px solid var(--ds-fill-4, rgba(116,116,128,0.08)); font-size: 16px; } .ds-ings__row:first-child { border-top: 0; } .ds-ings__n { font-size: 12px; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); } .ds-ings__name { line-height: 1.3; } .ds-ings__name small { display: block; font-size: 12px; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin-top: 1px; } .ds-ings__qty { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); white-space: nowrap; font-weight: 500; } .ds-ings__row--pantry .ds-ings__name { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-ings__row--pantry .ds-ings__qty { color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); } .ds-steps { counter-reset: step; } .ds-steps__item { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--ds-fill-4, rgba(116,116,128,0.08)); counter-increment: step; } .ds-steps__item:first-child { border-top: 0; } .ds-steps__item::before { content: counter(step); width: 30px; height: 30px; border-radius: 50%; background: var(--ds-fill-3, rgba(118,118,128,0.12)); font-size: 14px; font-weight: 600; display: grid; place-items: center; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); margin-top: 1px; } .ds-steps__item p { margin: 0; font-size: 17px; line-height: 1.5; } .ds-steps__ref { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--ds-label-quaternary, rgba(60,60,67,0.20)); } .ds-steps__ref sup { font-size: 11px; font-weight: 600; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin-left: 1px; line-height: 0; } .ds-steps__ref:hover { color: var(--ds-blue, #007AFF); border-bottom-color: var(--ds-blue, #007AFF); } .ds-steps__ref:hover sup { color: var(--ds-blue, #007AFF); }"
+  },
+  {
+   "name": "Side Panels",
+   "kind": "custom",
+   "refersTo": "panel",
+   "description": "Боковая колонка рецепта: тональные панели fill-4 без тени — таблица КБЖУ .nutri, «Стоимость» с зелёной ценой 26/600, и .panel--cta на blue-tint с единственной синей кнопкой страницы.",
+   "html": "<aside class=\"ds-aside\"><section class=\"ds-panel\"><h2 class=\"ds-panel__title\">Пищевая ценность</h2><p class=\"ds-panel__sub\">На порцию и доля от 2000 ккал</p><table class=\"ds-nutri\"><tr><th>Калории</th><td class=\"ds-num\">546 ккал</td><td class=\"ds-num ds-nutri__pct\">27%</td></tr><tr><th>Белки</th><td class=\"ds-num\">29 г</td><td class=\"ds-num ds-nutri__pct\">38%</td></tr><tr><th>На 100 г</th><td class=\"ds-num\">98 ккал</td><td></td></tr></table></section><section class=\"ds-panel\"><h2 class=\"ds-panel__title\">Стоимость</h2><p class=\"ds-panel__big ds-num\">≈ 77 ₽<small>за порцию</small></p><p class=\"ds-panel__sub\">Средние цены Росстата по России, август 2026. В магазине будет иначе.</p></section><section class=\"ds-panel ds-panel--cta\"><a class=\"ds-cta\" href=\"#\">Собрать неделю</a><p class=\"ds-panel__sub\">Планировщик добавит остальные приёмы пищи под бюджет и цель и посчитает список покупок.</p></section></aside>",
+   "css": ".ds-aside { max-width: 360px; display: grid; gap: 12px; font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-panel { padding: 14px 16px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-fill-4, rgba(116,116,128,0.08)); } .ds-panel__title { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-panel__sub { font-size: 13px; line-height: 1.45; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin: 0; } .ds-panel__big { font-size: 26px; font-weight: 600; margin: 4px 0 6px; color: var(--ds-green, #34C759); } .ds-panel__big small { display: block; font-size: 12px; font-weight: 500; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); font-family: var(--ds-font-sans, Inter, sans-serif); } .ds-panel--cta { display: grid; gap: 8px; background: var(--ds-blue-tint, rgba(0,122,255,0.10)); } .ds-nutri { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; } .ds-nutri th { text-align: left; font-weight: 500; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); padding: 6px 0; border-top: 1px solid var(--ds-fill-3, rgba(118,118,128,0.12)); } .ds-nutri td { padding: 6px 0 6px 8px; text-align: right; border-top: 1px solid var(--ds-fill-3, rgba(118,118,128,0.12)); white-space: nowrap; } .ds-nutri tr:first-child th, .ds-nutri tr:first-child td { border-top: 0; } .ds-nutri__pct { color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); width: 44px; } .ds-cta { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 16px; border-radius: var(--ds-radius-md, 10px); font-weight: 600; font-size: 16px; letter-spacing: -0.008em; color: #fff; text-decoration: none; background: linear-gradient(180deg, color-mix(in srgb, var(--ds-blue, #007AFF) 100%, white 6%), var(--ds-blue, #007AFF)); border: 1px solid color-mix(in srgb, var(--ds-blue, #007AFF) 92%, black 8%); box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 1px 2px rgba(0,122,255,0.28), 0 4px 12px rgba(0,122,255,0.22); } .ds-cta:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); }"
+  },
+  {
+   "name": "Catalog Filters",
+   "kind": "custom",
+   "refersTo": "filters",
+   "description": "<details> без JS: сводка 15/600 с CSS-уголком, счётчик активных фильтров синей пилюлей и «сбросить»; группы 96px | чипы .chip--sm, разделены fill-4.",
+   "html": "<details class=\"ds-filters\" open><summary class=\"ds-filters__summary\">Фильтры <span class=\"ds-filters__count ds-num\">2</span> <a class=\"ds-filters__reset\" href=\"#\">сбросить</a></summary><div class=\"ds-filters__group\"><div class=\"ds-filters__label\">Приём пищи</div><div class=\"ds-chips\"><a class=\"ds-chip ds-chip--sm\" href=\"#\">Завтрак</a><a class=\"ds-chip ds-chip--sm\" href=\"#\" aria-pressed=\"true\">Обед</a><a class=\"ds-chip ds-chip--sm\" href=\"#\">Ужин</a></div></div><div class=\"ds-filters__group\"><div class=\"ds-filters__label\">Время</div><div class=\"ds-chips\"><a class=\"ds-chip ds-chip--sm\" href=\"#\" aria-pressed=\"true\">до 20 мин</a><a class=\"ds-chip ds-chip--sm\" href=\"#\">до 40 мин</a></div></div></details>",
+   "css": ".ds-filters { max-width: 560px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); padding: 0 16px; font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1; } .ds-filters__summary { list-style: none; cursor: pointer; padding: 14px 0; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px; } .ds-filters__summary::-webkit-details-marker { display: none; } .ds-filters__summary::after { content: ''; margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--ds-label-tertiary, rgba(60,60,67,0.42)); border-bottom: 2px solid var(--ds-label-tertiary, rgba(60,60,67,0.42)); transform: rotate(45deg); transition: transform 140ms; } .ds-filters[open] .ds-filters__summary::after { transform: rotate(-135deg); } .ds-filters__count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--ds-blue, #007AFF); color: #fff; font-size: 12px; } .ds-filters__reset { font-size: 13px; font-weight: 500; color: var(--ds-blue, #007AFF); text-decoration: none; } .ds-filters__group { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px; align-items: start; padding: 10px 0 12px; border-top: 1px solid var(--ds-fill-4, rgba(116,116,128,0.08)); } .ds-filters__label { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); padding-top: 8px; } .ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border-radius: 9999px; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); color: var(--ds-label-primary, rgba(0,0,0,0.88)); font-size: 13px; font-weight: 500; text-decoration: none; } .ds-chip:hover { border-color: var(--ds-blue, #007AFF); color: var(--ds-blue, #007AFF); } .ds-chip[aria-pressed=\"true\"] { background: var(--ds-blue-tint, rgba(0,122,255,0.10)); border-color: var(--ds-blue, #007AFF); color: var(--ds-blue, #007AFF); box-shadow: 0 0 0 1px var(--ds-blue, #007AFF) inset; font-weight: 600; }"
+  },
+  {
+   "name": "Receipt Dish Row",
+   "kind": "custom",
+   "refersTo": "receipt",
+   "description": "Строка чека: название 16/600 ведёт, под ним слот · время · почему; справа колонка .num (≈ ₽ и ккал); кнопка замены 36px.",
+   "html": "<div class=\"ds-receipt\"><div class=\"ds-day-head\"><span class=\"ds-day-name\">ПН <small>21 сент</small></span><span class=\"ds-day-sum\"><span class=\"ds-num\">1767 ккал</span><span class=\"ds-num\">≈ 814 ₽</span></span></div><div class=\"ds-dish\"><button class=\"ds-dish__main\" aria-label=\"Овсянка с ягодами и мёдом: открыть рецепт\"><div class=\"ds-dish__title\">Овсянка с ягодами и мёдом</div><div class=\"ds-dish__why\"><span class=\"ds-dish__slot\">Завтрак</span><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/></svg> 10 мин <span>— в бюджете</span></div></button><div class=\"ds-dish__nums\"><b class=\"ds-num\">≈ 60 ₽</b><span class=\"ds-num\">340</span></div><button class=\"ds-dish__swap\" aria-label=\"Заменить: Овсянка с ягодами и мёдом\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/><path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/><path d=\"M8 16H3v5\"/></svg></button></div><div class=\"ds-dish ds-dish--leftover\"><button class=\"ds-dish__main\"><div class=\"ds-dish__title\">Курица карри с рисом</div><div class=\"ds-dish__why\"><span class=\"ds-dish__slot\">Обед</span>вчерашнее, готовить не нужно</div></button><div class=\"ds-dish__nums\"><b class=\"ds-num\">≈ 126 ₽</b><span class=\"ds-num\">713</span></div><span style=\"width:36px\" aria-hidden=\"true\"></span></div></div>",
+   "css": ".ds-receipt { max-width: 520px; padding: 14px 20px 10px; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-radius: var(--ds-radius-xl, 18px); box-shadow: var(--ds-shadow-md, 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.07)); font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; } .ds-day-name { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; } .ds-day-name small { font-weight: 500; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); letter-spacing: 0; margin-left: 8px; } .ds-day-sum { font-size: 13px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); display: inline-flex; gap: 10px; } .ds-dish { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 4px 8px; padding: 9px 0; border-top: 1px solid var(--ds-fill-4, rgba(116,116,128,0.08)); } .ds-dish:first-of-type { border-top: 0; } .ds-dish__main { min-width: 0; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; border-radius: 6px; } .ds-dish__main:hover .ds-dish__title { color: var(--ds-blue, #007AFF); } .ds-dish__main:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-dish__title { font-size: 16px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; transition: color 140ms; } .ds-dish__why { font-size: 12.5px; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin-top: 2px; line-height: 1.35; display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: center; } .ds-dish__slot { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); font-weight: 500; } .ds-dish__slot::after { content: '·'; margin-left: 6px; } .ds-dish__nums { text-align: right; font-size: 13px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); display: grid; gap: 2px; } .ds-dish__nums b { font-weight: 600; color: var(--ds-label-primary, rgba(0,0,0,0.88)); font-size: 14px; } .ds-dish__swap { width: 36px; height: 36px; border-radius: var(--ds-radius-md, 10px); border: 0; background: transparent; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); display: grid; place-items: center; cursor: pointer; transition: background 140ms, color 140ms, transform 140ms cubic-bezier(0.32,0.72,0,1); } .ds-dish__swap:hover { background: var(--ds-fill-3, rgba(118,118,128,0.12)); color: var(--ds-blue, #007AFF); } .ds-dish__swap:active { transform: rotate(-90deg) scale(0.9); } .ds-dish__swap:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-dish--leftover .ds-dish__title { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); font-weight: 500; }"
+  },
+  {
+   "name": "Tear Line",
+   "kind": "custom",
+   "refersTo": "receipt",
+   "description": "Линия отрыва: пунктир 2px, два выреза цвета грунта по краям, пилюля-кнопка по центру. Тянется вверх (порог 48px) или нажимается.",
+   "html": "<div class=\"ds-tear-wrap\"><div class=\"ds-tear\" role=\"separator\" aria-label=\"Линия отрыва: потяни вверх или нажми, чтобы оторвать список\"><i aria-hidden=\"true\"></i><button class=\"ds-tear__btn\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m15 11-1 9\"/><path d=\"m19 11-4-7\"/><path d=\"M2 11h20\"/><path d=\"m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4\"/><path d=\"M4.5 15.5h15\"/><path d=\"m5 11 4-7\"/><path d=\"m9 11 1 9\"/></svg> Оторвать список</button></div></div>",
+   "css": ".ds-tear-wrap { max-width: 520px; padding: 12px 0; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-radius: var(--ds-radius-xl, 18px); overflow: clip; font-family: var(--ds-font-sans, Inter, sans-serif); } .ds-tear { position: relative; height: 32px; margin: 0 -1px; display: flex; align-items: center; justify-content: center; touch-action: pan-x; cursor: grab; user-select: none; } .ds-tear::before { content: ''; position: absolute; left: 20px; right: 20px; top: 50%; border-top: 2px dashed var(--ds-separator-opaque, #D1D1D6); } .ds-tear::after, .ds-tear > i { content: ''; position: absolute; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: 50%; background: var(--ds-bg-base, #F2F2F7); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-tear::after { left: -10px; } .ds-tear > i { right: -10px; } .ds-tear__btn { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 9999px; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator-opaque, #D1D1D6); font: inherit; font-size: 13px; font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); cursor: pointer; transition: color 140ms, border-color 140ms; } .ds-tear__btn:hover { color: var(--ds-blue, #007AFF); border-color: var(--ds-blue, #007AFF); } .ds-tear__btn:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); }"
+  },
+  {
+   "name": "Shopping Item + Totals",
+   "kind": "custom",
+   "refersTo": "receipt",
+   "description": "Позиция списка с круглым role=checkbox (зелёный когда куплено, название зачёркнуто) и итог с чертой 2px и зелёной суммой.",
+   "html": "<div class=\"ds-list\"><div class=\"ds-list__cat\"><span>Овощи и зелень</span><span class=\"ds-num\">≈ 868 ₽</span></div><div class=\"ds-item ds-item--done\"><button role=\"checkbox\" aria-checked=\"true\" class=\"ds-item__check\" aria-label=\"Кабачок: куплено\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></button><div><div class=\"ds-item__name\">Кабачок</div><div class=\"ds-item__qty\"><span class=\"ds-num\">800 г</span></div></div><div class=\"ds-item__cost ds-num\">≈ 86 ₽</div></div><div class=\"ds-item\"><button role=\"checkbox\" aria-checked=\"false\" class=\"ds-item__check\" aria-label=\"Картофель: не куплено\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></button><div><div class=\"ds-item__name\">Картофель</div><div class=\"ds-item__qty\"><span class=\"ds-num\">3 кг</span></div></div><div class=\"ds-item__cost ds-num\">≈ 157 ₽</div></div><div class=\"ds-totals\"><div class=\"ds-totals__row ds-totals__row--main\"><span>Итого</span><span class=\"ds-num\">≈ 7 994 ₽</span></div><div class=\"ds-totals__row\"><span>Ориентир по бюджету на неделю</span><span class=\"ds-num\">7 280 ₽</span></div><p class=\"ds-totals__note\">Это оценка, не ценник: в магазине может отличаться.</p></div></div>",
+   "css": ".ds-list { max-width: 520px; padding: 8px 20px 0; background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-radius: var(--ds-radius-xl, 18px); font-family: var(--ds-font-sans, Inter, sans-serif); color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-feature-settings: 'tnum' 1, 'lnum' 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; } .ds-list__cat { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin: 10px 0 4px; } .ds-item { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 0 12px; padding: 7px 0; min-height: 40px; } .ds-item__check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ds-separator-opaque, #D1D1D6); background: var(--ds-bg-elevated, #fff); display: grid; place-items: center; color: transparent; cursor: pointer; padding: 0; transition: background 140ms, border-color 140ms, transform 140ms cubic-bezier(0.32,0.72,0,1); } .ds-item__check:active { transform: scale(0.9); } .ds-item__check:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-item__check[aria-checked=\"true\"] { background: var(--ds-green, #34C759); border-color: var(--ds-green, #34C759); color: #fff; } .ds-item__name { font-size: 15px; font-weight: 500; line-height: 1.3; } .ds-item__qty { font-size: 13px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-item__cost { font-size: 14px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); white-space: nowrap; } .ds-item--done .ds-item__name { text-decoration: line-through; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); } .ds-item--done .ds-item__cost, .ds-item--done .ds-item__qty { color: var(--ds-label-quaternary, rgba(60,60,67,0.20)); } .ds-totals { margin-top: 8px; padding: 14px 0 20px; border-top: 2px solid var(--ds-label-primary, rgba(0,0,0,0.88)); display: grid; gap: 6px; } .ds-totals__row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-totals__row .ds-num { white-space: nowrap; } .ds-totals__row--main { font-size: 20px; font-weight: 700; color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-totals__row--main .ds-num { color: var(--ds-green, #34C759); } .ds-totals__note { font-size: 12px; color: var(--ds-label-tertiary, rgba(60,60,67,0.42)); margin: 6px 0 0; line-height: 1.4; }"
+  },
+  {
+   "name": "Action Bar",
+   "kind": "nav",
+   "refersTo": "actionbar",
+   "description": "Фиксированная стеклянная панель внизу: ghost-иконка 48px, secondary и primary растянуты поровну. Только у квиза и чека; SSR-страницы, вход и кабинет без панели.",
+   "html": "<div class=\"ds-actionbar\"><div class=\"ds-actionbar__inner\"><button class=\"ds-ab-ghost\" aria-label=\"Распечатать\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\"/><path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\"/><rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\"/></svg></button><button class=\"ds-ab-btn ds-ab-secondary\">Поделиться</button><button class=\"ds-ab-btn ds-ab-primary\">В магазин</button></div></div>",
+   "css": ".ds-actionbar { padding: 10px 16px; background: var(--ds-bg-overlay, rgba(255,255,255,0.72)); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); font-family: var(--ds-font-sans, Inter, sans-serif); } .ds-actionbar__inner { max-width: 560px; margin: 0 auto; display: flex; gap: 8px; align-items: center; } .ds-ab-btn { flex: 1; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 600; font-size: 16px; letter-spacing: -0.008em; padding: 10px 16px; border-radius: var(--ds-radius-md, 10px); border: 1px solid transparent; cursor: pointer; transition: transform 140ms cubic-bezier(0.32,0.72,0,1), background 180ms, color 180ms; } .ds-ab-btn:active { transform: scale(0.97); } .ds-ab-btn:focus-visible, .ds-ab-ghost:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus, 0 0 0 4px rgba(0,122,255,0.22)); } .ds-ab-primary { color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--ds-blue, #007AFF) 100%, white 6%), var(--ds-blue, #007AFF)); border-color: color-mix(in srgb, var(--ds-blue, #007AFF) 92%, black 8%); box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 1px 2px rgba(0,122,255,0.28), 0 4px 12px rgba(0,122,255,0.22); } .ds-ab-secondary { color: var(--ds-label-primary, rgba(0,0,0,0.88)); background: var(--ds-bg-elevated, #fff); border-color: var(--ds-separator-opaque, #D1D1D6); box-shadow: 0 1px 2px rgba(0,0,0,0.04); } .ds-ab-secondary:hover { background: var(--ds-blue, #007AFF); color: #fff; border-color: var(--ds-blue, #007AFF); } .ds-ab-ghost { flex: 0 0 auto; width: 48px; height: 48px; padding: 0; display: grid; place-items: center; border: 0; border-radius: var(--ds-radius-md, 10px); background: transparent; color: var(--ds-label-primary, rgba(0,0,0,0.88)); cursor: pointer; } .ds-ab-ghost:hover { background: var(--ds-fill-3, rgba(118,118,128,0.12)); }"
+  },
+  {
+   "name": "Language Switch",
+   "kind": "nav",
+   "refersTo": "icon-button",
+   "description": "Три кода языка (ru/en/de) 11/700 uppercase на подложке fill-4, текущий залит bg-elevated с shadow-xs. Стоит в шапке между «Рецепты» и кнопкой кабинета; в занятой шапке на узком экране виден только текущий код, клик листает языки по кругу.",
+   "html": "<span class=\"ds-langsw\" role=\"group\" aria-label=\"Язык\"><button type=\"button\" lang=\"ru\">ru</button><button type=\"button\" lang=\"en\" aria-current=\"true\">en</button><button type=\"button\" lang=\"de\">de</button></span>",
+   "css": ".ds-langsw{display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:var(--ds-fill-4)}.ds-langsw button{min-width:26px;height:22px;padding:0 5px;border:0;border-radius:6px;background:transparent;color:var(--ds-label-secondary);font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}.ds-langsw button[aria-current=\"true\"]{background:var(--ds-bg-elevated);color:var(--ds-label-primary);box-shadow:var(--ds-shadow-xs)}"
+  }
+ ],
+ "narrative": {
+  "northStar": "«Чек» (seed cd59ffcb)",
+  "overview": "Визуальный мир унаследован от Rubby Design System (Apple HIG поверх Bootstrap 5.3), завендоренной в frontend/src/styles/design-system/. Все токены --ds-* — источник правды; этот файл описывает слой поверхности: как система легла на продукт «квиз → чек → рецепт» и какие локальные правила он к ней добавил. Локальные токены: --r-sheet-max 560px, --r-gutter 16px, --r-bar-h 64px, --r-tabular, --r-safe-bottom и вычисляемый --rp-tint.\n\nПродукт — не дашборд, а один непрерывный документ. Результат квиза печатается как чек; страница рецепта (SSR, тот же app.css) — тот же лист, устроенный как карточка товара: шапка с фактами, слева продукты и шаги, справа панель фактов, внизу похожие. Плотность высокая, воздух держится на разделителях. Единственный «бумажный» приём — линия отрыва.\n\nЦвет сдержан до предела: нейтрали Apple, синий только на одном действии и выборе, зелёный только на деньгах, тинт приёма пищи только как подложка. Числа — JetBrains Mono tnum через .num в React и в Go-шаблонах. Иконки — только lucide (react или инлайн-SVG), эмодзи запрещены. Топбар один и тот же в обоих каркасах.",
+  "keyCharacteristics": [
+   "Rubby DS как источник правды; поверхность добавляет только --r-*, --rp-tint и классы чека/квиза/рецепта.",
+   "Одна возвышенная белая карточка (--ds-bg-elevated) на сером грунте: чек, лист рецепта, карточка входа.",
+   "Синий = одно действие + выбор, зелёный = деньги, тинт слота = только подложка, красный = только ошибка/удаление.",
+   "Inter для текста, JetBrains Mono tnum для всех чисел через .num — и в React, и в Go-шаблонах.",
+   "Пружинная анимация --ds-ease-spring; единственный авторский момент — «печать» чека; на рецепте только reprint пересчитанных граммовок.",
+   "Каждая оценка в рублях несёт «≈»; цифра без «≈» — только целевой бюджет пользователя.",
+   "Один и тот же топбар в React и SSR: бренд · «Рецепты» · кабинет · тема."
+  ],
+  "rules": [
+   {
+    "name": "The Restrained Palette Rule",
+    "body": "На любом экране цвет несут максимум четыре вещи: одна синяя кнопка, синие выбранные элементы, зелёные деньги и тинт слота как подложка шапки/полоска карточки. Всё остальное — нейтрали. Новый экран, которому «нужен» оранжевый или фиолетовый текст, нарушает мир.",
+    "section": "colors"
+   },
+   {
+    "name": "The Green Is Money Rule",
+    "body": "Зелёный появляется только у сумм в рублях (шапка чека, «Итого», факт «Продукты», цена порции, ≈ ₽ на карточке) и у отметки «куплено». Не для успеха форм, не для кнопок, не для «в бюджете». Каждый ≈ ₽ вне чека несёт класс .is-rub.",
+    "section": "colors"
+   },
+   {
+    "name": "The One Blue CTA Rule",
+    "body": "На странице ровно один .btn-primary. На рецепте это «Собрать неделю» в .panel--cta; топбар, шапка и подвал держат только текстовые ссылки. Второе синее действие на экране — дефект, а не акцент.",
+    "section": "colors"
+   },
+   {
+    "name": "The Slot Tint Is Wash Rule",
+    "body": "Тинт приёма пищи — только фон: градиент --rp-tint → --ds-bg-elevated в шапке рецепта и полоска 4px на карточке. Никогда текст, рамка, иконка или кнопка.",
+    "section": "colors"
+   },
+   {
+    "name": "The Token-Only Rule",
+    "body": "Поверхность не пишет hex: каждый цвет — var(--ds-*). Единственные литералы — #fff на галочке купленного и на счётчике фильтров, rgba(0,0,0,0.38) у ::backdrop нижнего листа и #fff фона в @media print.",
+    "section": "colors"
+   },
+   {
+    "name": "The Mono Column Rule",
+    "body": "Число никогда не набирается Inter. Всё, что считается (₽, ккал, мин, г, мл, шт, %, Б/Ж/У, номера строк), оборачивается в .num и выравнивается по правому краю колонки. Исключение — «по вкусу»: это слово, не число.",
+    "section": "typography"
+   },
+   {
+    "name": "The Honest Numbers Rule",
+    "body": "Любая оценка в рублях выводится через approxRub() / rub и несёт «≈ » перед суммой. Без «≈» пишется только целевой бюджет пользователя; примечание итога и панель «Стоимость» объясняют метод.",
+    "section": "typography"
+   },
+   {
+    "name": "The Weight Leads Rule",
+    "body": "В строке ведёт вес, а не цвет: название 600/label-primary, всё вокруг — 500/label-secondary–tertiary. На рецепте: заголовок раздела 700, продукт 400, количество 500/secondary, номер 12/tertiary.",
+    "section": "typography"
+   },
+   {
+    "name": "The Step-Ref Rule",
+    "body": "Продукт в тексте шага помечается прямо в слове: <a class=\"steps__ref\" href=\"#ing-N\">слово<sup>N</sup></a> — точечное подчёркивание quaternary, номер надстрочно 11/600 моно tertiary, hover синий. Никаких чипов или списков продуктов под шагом; номер совпадает с .ings__n.",
+    "section": "typography"
+   },
+   {
+    "name": "The Russian Plural Rule",
+    "body": "Счётчики склоняются функцией plural(n, «рецепт», «рецепта», «рецептов»); «294 рецептов» — дефект копирайта, а не стиль.",
+    "section": "typography"
+   },
+   {
+    "name": "The One Sheet Rule",
+    "body": "На странице одна приподнятая поверхность — чек, лист рецепта или карточка входа. Внутри листа глубины нет: строки, продукты, шаги и панели разделяются линиями и тональными подложками --ds-fill-4, а не карточками в карточке.",
+    "section": "elevation"
+   },
+   {
+    "name": "The Ring Not Outline Rule",
+    "body": "Фокус — всегда --ds-shadow-focus через box-shadow, outline: none; выбранное состояние — 0 0 0 1px var(--ds-blue) inset поверх синей рамки. Двух колец одновременно не бывает.",
+    "section": "elevation"
+   },
+   {
+    "name": "The Sticky Aside Condition",
+    "body": ".rpage__aside получает position: sticky; top: 12px только при min-width: 1024px и min-height: 760px — где панель целиком помещается в окно. Вложенного overflow у панели нет; на низких окнах она скроллится с листом.",
+    "section": "layout"
+   },
+   {
+    "name": "The Unified Header Rule",
+    "body": "Топбар одинаков в React и SSR: бренд ReceiptText 22px синим + «Рацион» 17/700 · [нота 13/500] · «Рецепты» .pages-nav__link 14/600 · кабинет .theme-btn 36px (.is-user синий) · тема .theme-btn[data-theme-btn] 36px. Никаких .btn и вкладок в шапке.",
+    "section": "layout"
+   },
+   {
+    "name": "The Compact Card Rule",
+    "body": "Карточка рецепта без фото — полоска 4px цвета слота сверху, заголовок 15/600, мета-строка слот · мин · ккал · ≈ ₽ (зелёный). Никакой цветной обложки с текстом; hover — shadow-md и подъём на 1px.",
+    "section": "components"
+   }
+  ],
+  "dos": [
+   "Do брать каждый цвет, радиус, тень и easing из --ds-* (apple-tokens.scss); поверхность добавляет только --r-sheet-max, --r-gutter, --r-bar-h, --r-tabular, --r-safe-bottom и вычисляемый --rp-tint.",
+   "Do оборачивать любое число в .num (JetBrains Mono, tnum lnum) и выравнивать его по правому краю колонки — в React и в Go-шаблонах одинаково.",
+   "Do выводить оценки через approxRub() / rub — «≈ 7 994 ₽»; красить в --ds-green только их (.is-rub вне чека); без «≈» только целевой бюджет пользователя.",
+   "Do держать один .btn-primary на страницу и одну приподнятую поверхность (чек / лист рецепта / карточка входа); внутри листа разделять линиями --ds-fill-4 / --ds-separator и тональными панелями --ds-fill-4.",
+   "Do ставить тинт приёма пищи только как подложку: градиент шапки .rpage--{slot} и полоска 4px .rcard__cover--{slot}.",
+   "Do помечать продукт в тексте шага инлайн-ссылкой .steps__ref с надстрочным номером строки; нумерация шага — CSS-счётчик, продукта — .ings__n, номера совпадают.",
+   "Do давать интерактивам ≥44px (плитки 88, чипы 44, счётчик 44, опции 64, кнопки панели 48, поля 48; иконки топбара 36, порции 36, замена 36 и .chip--sm 34 — исключения внутри строки/шапки), :focus-visible с --ds-shadow-focus, роли radio/checkbox/progressbar/separator/listbox/group/search, aria-label на иконочных кнопках, aria-hidden на иконках, aria-labelledby на разделах листа.",
+   "Do использовать lucide (13–22px, strokeWidth 2–3) для любой пиктограммы: lucide-react в React, те же контуры инлайн-SVG в шаблонах; иконка перед текстом с зазором 5–6px.",
+   "Do писать по-русски, коротко и по делу: заголовки разделов одним словом («Продукты», «Как готовить», «Коротко», «Похожие», «Стоимость»), подписи объясняют метод, не хвалят; склонять счётчики через plural.",
+   "Do уважать prefers-reduced-motion, env(safe-area-inset-bottom) и тёмную тему: [data-theme] на <html> из localStorage[\"racion.theme\"] (один ключ и цикл в React и SSR), <meta name=\"color-scheme\"> и два theme-color; поверхность не переопределяет ни одного тёмного значения.",
+   "Do делать боковую панель рецепта липкой только при ≥1024px и min-height: 760px; иначе она скроллится с листом.",
+   "Do давать стилю печати снять топбар, панель, кнопки замены/отрыва и чекбоксы — чек печатается как чек."
+  ],
+  "donts": [
+   "Don't вводить hex или новые цвета в app.scss; не красить кнопки зелёным, не красить «в бюджете» / «дороже цели» — эти слова остаются label-tertiary; не использовать --ds-orange / --ds-purple как текст или рамку.",
+   "Don't ставить второй .btn-primary на страницу — ни в топбаре, ни в подвале, ни в шапке листа; навигация там только текстом и иконками.",
+   "Don't дробить результат на вкладки «Меню / Список / КБЖУ» или показывать фейковый лоадер — загрузка это skeleton внутри той же карточки.",
+   "Don't ставить эмодзи, иконочные шрифты, растровые иконки или системный шрифт вместо самохостных Inter / JetBrains Mono; в шаблонах — только инлайн-SVG.",
+   "Don't выносить слот приёма пищи («Завтрак») в эйрброу над названием блюда; на карточке рецепта слот — первое слово мета-строки, на странице рецепта — второе звено крошек.",
+   "Don't выводить продукты шага отдельным списком, чипами или в квадратных скобках — только .steps__ref внутри предложения.",
+   "Don't повторять в «Коротко» факты из плиток шапки; если сказать нечего — раздел не рендерится. Не писать «по вкусу» в .num и не выводить сотые грамма.",
+   "Don't делать вложенный скролл внутри чека или боковой панели рецепта; не прилипать панелью на окнах ниже 760px.",
+   "Don't рисовать цветную обложку с текстом у карточки без фото — только полоска 4px; не показывать ≈ ₽ серым.",
+   "Don't добавлять бумажные детали кроме линии отрыва: без зубчатых краёв, текстур, тени-«листка», перфорации.",
+   "Don't показывать линию отрыва на десктопе или в режиме магазина.",
+   "Don't заменять кольцо фокуса на outline и не совмещать кольцо фокуса с inset-кольцом выбора в одном box-shadow."
+  ],
+  "notCanonized": "Захваты .impeccable/review/r2-*.png сняты до правок: синяя кнопка «Собрать неделю» в топбаре, чипы-ссылки продуктов под шагом, цветные обложки карточек с текстом, «294 рецептов» и серый ≈ ₽ — это дефекты, исправленные в этом раунде, а не образцы; система записана по шаблонам и app.scss. Оставшийся `.pages__crumbs` (13px без шеврона) в app.scss не используется шаблонами и не является правилом."
+ }
+}

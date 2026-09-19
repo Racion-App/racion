@@ -1,0 +1,86 @@
+{{template "head" .}}
+<h1 class="pages__title">{{t .L "catalog.title"}}</h1>
+<p class="pages__lead">{{t .L "catalog.lead" .Total (plural .L .Total "catalog.recipe")}} <a class="pages__country" href="#country">{{t .L "catalog.prices.for" .CountryLabel .Country.Symbol}}</a></p>
+<form class="pages__search search" action="{{.P}}/recipes" method="get" role="search">
+  {{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input class="form-control" type="search" name="q" value="{{.Q}}" placeholder="{{t .L "catalog.placeholder"}}" aria-label="{{t .L "catalog.search"}}" autocomplete="off">
+</form>
+{{if .Collections}}
+<section class="colstrip" aria-label="{{t .L "coll.public.title"}}">
+  <div class="colstrip__head">
+    <div>
+      <h2 class="colstrip__title">{{t .L "coll.public.title"}}</h2>
+      <p class="colstrip__lead">{{t .L "coll.strip.lead"}}</p>
+    </div>
+    <a class="btn btn-soft btn-sm colstrip__all" href="{{.P}}/collections">{{t .L "coll.public.all" .CollectionsTotal}} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+  </div>
+  <div class="colstrip__row">
+    {{range .Collections}}<a class="colmini" href="{{.Href}}">
+      {{if .Cover}}<img class="colmini__img" src="{{.Cover}}" alt="" loading="lazy">{{else}}<span class="colmini__img colmini__img--empty" aria-hidden="true"></span>{{end}}
+      <span class="colmini__body"><b>{{.Name}}</b><small>{{.Count}} {{t $.L "recipes.n"}}</small></span>
+    </a>{{end}}
+    <a class="colmini colmini--more" href="{{.P}}/collections"><span class="colmini__body"><b>{{t .L "coll.strip.more"}}</b><small>{{.CollectionsTotal}}</small></span></a>
+  </div>
+</section>
+{{end}}
+<div class="catlayout">
+<aside class="catside" id="filters" aria-label="{{t .L "catalog.filters"}}">
+  <div class="catside__head">
+    <b>{{t .L "catalog.filters"}}{{if gt .ActiveCount 0}} <span class="filters__count num">{{.ActiveCount}}</span>{{end}}</b>
+    {{if gt .ActiveCount 0}}<a class="filters__reset" href="{{.ResetHref}}">{{t .L "catalog.reset"}}</a>{{end}}
+    <button type="button" class="catside__close" data-filters-close aria-label="{{t .L "close"}}">×</button>
+  </div>
+  <details class="catside__country" id="country">
+    <summary>{{t .L "catalog.prices"}}: <b>{{.CountryLabel}} · {{.Country.Symbol}}</b></summary>
+    <div class="chips">
+      {{range .Countries}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}} · {{.Symbol}}</a>{{end}}
+    </div>
+  </details>
+  {{range .Filters}}{{if ne .Param "slot"}}
+  <div class="filters__group">
+    <div class="filters__label">{{.Label}}</div>
+    <div class="chips">
+      {{range .Options}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}}</a>{{end}}
+    </div>
+  </div>
+  {{end}}{{end}}
+  <button type="button" class="btn btn-primary btn-lg catside__done" data-filters-close>{{t .L "catalog.show" .Total}}</button>
+</aside>
+<div class="catmain">
+<div class="catbar">
+  <nav class="cattabs" aria-label="{{t .L "filter.slot"}}">
+    {{range .SlotTabs}}<a class="cattabs__tab" href="{{.Href}}"{{if .On}} aria-current="page"{{end}}>{{.Label}}</a>{{end}}
+  </nav>
+  <button type="button" class="btn btn-soft catbar__filters" data-filters-open aria-controls="filters">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="8" x2="16" y1="12" y2="12"/><line x1="11" x2="13" y1="18" y2="18"/></svg>
+    {{t .L "catalog.filters"}}{{if gt .ActiveCount 0}} <span class="filters__count num">{{.ActiveCount}}</span>{{end}}
+  </button>
+</div>
+<h2 class="catsection"><span>{{.SectionTitle}}</span> <span class="catsection__n num">{{.Total}}</span></h2>
+{{if .Items}}
+<div class="rgrid">
+  {{range .Items}}{{template "card" .}}{{end}}
+</div>
+{{if .Community}}
+<section class="community" aria-labelledby="community">
+  <h2 id="community" class="community__title">{{t .L "catalog.community"}}</h2>
+  <p class="community__lead">{{t .L "catalog.community.lead"}}</p>
+  <div class="rgrid rgrid--tight">
+    {{range .Community}}{{template "card" .}}{{end}}
+  </div>
+</section>
+{{end}}
+{{if gt .Pages 1}}
+<nav class="pager" aria-label="{{t .L "catalog.page" .Page .Pages}}">
+  {{if .Prev}}<a class="pager__arrow" href="{{.Prev}}" aria-label="{{t .L "catalog.prev"}}" rel="prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>{{else}}<span class="pager__arrow is-off" aria-hidden="true"></span>{{end}}
+  {{range .Pager}}{{if .Gap}}<span class="pager__gap" aria-hidden="true">…</span>{{else}}<a class="pager__n num{{if .On}} is-on{{end}}" href="{{.Href}}"{{if .On}} aria-current="page"{{end}}>{{.N}}</a>{{end}}{{end}}
+  {{if .Next}}<a class="pager__arrow" href="{{.Next}}" aria-label="{{t .L "catalog.next"}}" rel="next"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>{{else}}<span class="pager__arrow is-off" aria-hidden="true"></span>{{end}}
+</nav>
+{{end}}
+{{else}}
+<div class="state"><div class="state__box"><h2>{{t .L "catalog.empty"}}</h2><p>{{t .L "catalog.empty.hint"}}</p><a class="btn btn-soft" href="{{.ResetHref}}">{{t .L "catalog.reset"}}</a></div></div>
+{{end}}
+</div>
+</div>
+{{template "foot" .}}

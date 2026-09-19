@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-09-18T09:27:26.039Z",
+        "reason": "Rubby design system (Apple HIG on Bootstrap) pins Inter — DESIGN.md typography tokens"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "var(--ds-ease-spring)",
+        "createdAt": "2026-09-18T09:27:26.127Z",
+        "reason": "design-system token ease-spring from .impeccable/design.json (Apple HIG spring), used for press feedback only"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "frontend/src/styles/app.scss"
+        ],
+        "createdAt": "2026-09-18T09:27:26.223Z",
+        "reason": "L802 is a CSS chevron drawn with two borders, not an accent; the 4px .rcard__cover strip is the DESIGN.md decision for photo-less cards"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "eq-wobble",
+        "createdAt": "2026-09-18T11:18:38.682Z",
+        "reason": "literal domain motion: mixer whisk wobbles on the selected equipment tile, documented in DESIGN.md (eq-wobble), stops under prefers-reduced-motion"
+      }
+    ]
+  }
+}

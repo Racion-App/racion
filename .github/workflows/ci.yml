@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run build
+
+  backend:
+    # Сборка требует базу рецептов из приватного сабмодуля Racion-App/data:
+    # в секрете DATA_TOKEN — fine-grained PAT с правом Contents: read на него.
+    # Без секрета (форки, внешние PR) задача пропускается.
+    runs-on: ubuntu-latest
+    env:
+      DATA_TOKEN: ${{ secrets.DATA_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.DATA_TOKEN != ''
+        with:
+          submodules: true
+          token: ${{ secrets.DATA_TOKEN }}
+      - uses: actions/setup-go@v5
+        if: env.DATA_TOKEN != ''
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: go vet ./...
+        if: env.DATA_TOKEN != ''
+        working-directory: backend
+      - run: go test ./...
+        if: env.DATA_TOKEN != ''
+        working-directory: backend
+      - run: go build ./cmd/...
+        if: env.DATA_TOKEN != ''
+        working-directory: backend

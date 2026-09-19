@@ -1,0 +1,144 @@
+// =============================================================================
+//  Apple Utilities — atomic helpers
+// =============================================================================
+
+// ── Focus-ring: только клавиатура (Apple-pattern) ────────────────────────────
+// Гасим browser-дефолтный outline когда фокус прилетел по клику мыши.
+// Keyboard-нав (Tab) — выдаёт focus-visible, кольцо по-прежнему рисуется.
+*:focus:not(:focus-visible) { outline: none !important; }
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.surface         { background: var(--ds-bg-elevated); border-radius: var(--ds-radius-lg); }
+.surface-grouped { background: var(--ds-bg-grouped);  border-radius: var(--ds-radius-lg); }
+
+.glass {
+  background: var(--ds-bg-overlay);
+  backdrop-filter: var(--ds-blur-md);
+  -webkit-backdrop-filter: var(--ds-blur-md);
+  border: 1px solid var(--ds-separator);
+}
+.glass-strong { backdrop-filter: var(--ds-blur-lg); -webkit-backdrop-filter: var(--ds-blur-lg); }
+
+.elev-0 { box-shadow: none; }
+.elev-1 { box-shadow: var(--ds-shadow-sm); }
+.elev-2 { box-shadow: var(--ds-shadow-md); }
+.elev-3 { box-shadow: var(--ds-shadow-lg); }
+.elev-4 { box-shadow: var(--ds-shadow-xl); }
+
+.radius-sm { border-radius: var(--ds-radius-sm); }
+.radius-md { border-radius: var(--ds-radius-md); }
+.radius-lg { border-radius: var(--ds-radius-lg); }
+.radius-xl { border-radius: var(--ds-radius-xl); }
+.radius-pill { border-radius: var(--ds-radius-pill); }
+
+.text-primary-apple   { color: var(--ds-label-primary); }
+.text-secondary-apple { color: var(--ds-label-secondary); }
+.text-tertiary        { color: var(--ds-label-tertiary); }
+.text-blue            { color: var(--ds-blue); }
+.text-green           { color: var(--ds-green); }
+.text-red             { color: var(--ds-red); }
+.text-orange          { color: var(--ds-orange); }
+.text-purple          { color: var(--ds-purple); }
+
+.bg-base     { background: var(--ds-bg-base); }
+.bg-elevated { background: var(--ds-bg-elevated); }
+.bg-grouped  { background: var(--ds-bg-grouped); }
+
+.divider     { height: 1px; background: var(--ds-separator); border: none; margin: var(--ds-space-4) 0; }
+
+.spinner-apple {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--ds-fill-1);
+  border-top-color: var(--ds-blue);
+  animation: spin 720ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// Compact inline spinner for buttons in busy state.
+.spinner-dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  vertical-align: -2px;
+  animation: spin 640ms linear infinite;
+}
+
+button[disabled].is-busy,
+button.is-busy[disabled] { opacity: 0.7; cursor: progress; }
+.card-apple.is-busy { opacity: 0.92; }
+
+// Хелпер-микшин для иконок
+.icon-tile {
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px; border-radius: var(--ds-radius-md);
+  background: var(--ds-fill-3); color: var(--ds-label-primary);
+
+  &--blue   { background: var(--ds-blue-tint);   color: var(--ds-blue); }
+  &--green  { background: var(--ds-green-tint);  color: var(--ds-green); }
+  &--red    { background: var(--ds-red-tint);    color: var(--ds-red); }
+  &--orange { background: var(--ds-orange-tint); color: var(--ds-orange); }
+  &--purple { background: var(--ds-purple-tint); color: var(--ds-purple); }
+}
+
+// ── Smooth animations ───────────────────────────────────────────────────────
+
+// Page-level cross-fade (View Transitions API — Chrome/Edge/Safari TP)
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: var(--ds-ease-spring);
+}
+
+// Fade + slide in for page sections (KPI tiles, cards, list rows)
+@keyframes ds-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-in,
+.stat-card,
+.card-apple,
+.empty-state {
+  animation: ds-fade-up 380ms var(--ds-ease-spring) both;
+}
+
+// List stagger — children appear one after another
+.stagger > * {
+  animation: ds-fade-up 380ms var(--ds-ease-spring) both;
+}
+.stagger > *:nth-child(1) { animation-delay:  20ms; }
+.stagger > *:nth-child(2) { animation-delay:  60ms; }
+.stagger > *:nth-child(3) { animation-delay: 100ms; }
+.stagger > *:nth-child(4) { animation-delay: 140ms; }
+.stagger > *:nth-child(5) { animation-delay: 180ms; }
+.stagger > *:nth-child(6) { animation-delay: 220ms; }
+.stagger > *:nth-child(7) { animation-delay: 260ms; }
+.stagger > *:nth-child(8) { animation-delay: 300ms; }
+
+// Smooth interaction defaults — apply to interactive surfaces
+a, button, .btn, .nav-link, .dropdown-item, .form-control, .form-select, [role="button"] {
+  transition:
+    background-color var(--ds-dur-fast) var(--ds-ease-standard),
+    color            var(--ds-dur-fast) var(--ds-ease-standard),
+    border-color     var(--ds-dur-fast) var(--ds-ease-standard),
+    box-shadow       var(--ds-dur-base) var(--ds-ease-spring),
+    transform        var(--ds-dur-fast) var(--ds-ease-spring);
+}
+
+// Reduced motion — respect OS preference
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

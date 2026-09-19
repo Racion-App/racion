@@ -1,0 +1,6 @@
+[submodule "backend/internal/seed/data"]
+	path = backend/internal/seed/data
+	url = https://github.com/Racion-App/data.git
+[submodule "frontend/public/images"]
+	path = frontend/public/images
+	url = https://github.com/Racion-App/media.git

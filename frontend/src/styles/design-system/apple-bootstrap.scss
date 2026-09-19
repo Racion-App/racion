@@ -1,0 +1,142 @@
+// =============================================================================
+//  Bootstrap 5.3 override → Apple HIG
+//  Подключается ПЕРЕД импортом bootstrap, чтобы переопределить SCSS-переменные
+//  через !default.
+// =============================================================================
+
+// ── Цветовая палитра ────────────────────────────────────────────────────────
+$primary:        #007AFF;
+$secondary:      #8E8E93;
+$success:        #34C759;
+$info:           #32ADE6;
+$warning:        #FF9500;
+$danger:         #FF3B30;
+$light:          #F2F2F7;
+$dark:           #1C1C1E;
+
+// ── Типографика ─────────────────────────────────────────────────────────────
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                          "Inter", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+$font-family-monospace:  ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+$font-size-base:         0.9375rem;  // 15px — Apple body
+$line-height-base:       1.47;
+$headings-font-weight:   650;
+$headings-letter-spacing: -0.014em;
+$body-color:             rgba(0, 0, 0, 0.88);
+$body-bg:                #F2F2F7;
+
+// ── Скругления (continuous corners) ─────────────────────────────────────────
+$border-radius:        10px;
+$border-radius-sm:     6px;
+$border-radius-lg:     14px;
+$border-radius-xl:     18px;
+$border-radius-2xl:    24px;
+$border-radius-pill:   9999px;
+
+// ── Кнопки ──────────────────────────────────────────────────────────────────
+$btn-font-weight:       600;
+$btn-padding-y:         0.55rem;
+$btn-padding-x:         1.1rem;
+$btn-padding-y-sm:      0.4rem;
+$btn-padding-x-sm:      0.85rem;
+$btn-padding-y-lg:      0.75rem;
+$btn-padding-x-lg:      1.5rem;
+$btn-border-radius:     10px;
+$btn-border-radius-sm:  8px;
+$btn-border-radius-lg:  12px;
+$btn-focus-width:       4px;
+$btn-focus-box-shadow:  0 0 0 4px rgba(0, 122, 255, 0.22);
+$btn-transition:        all 180ms cubic-bezier(0.32, 0.72, 0, 1);
+
+// ── Формы ───────────────────────────────────────────────────────────────────
+$input-padding-y:               0.55rem;
+$input-padding-x:               0.9rem;
+$input-border-radius:           10px;
+$input-border-color:            rgba(60, 60, 67, 0.24);
+$input-focus-border-color:      #007AFF;
+$input-focus-box-shadow:        0 0 0 4px rgba(0, 122, 255, 0.20);
+$input-bg:                      #FFFFFF;
+$input-placeholder-color:       rgba(60, 60, 67, 0.42);
+$form-label-font-weight:        600;
+$form-label-font-size:          0.8125rem;
+$form-label-color:              rgba(60, 60, 67, 0.78);
+
+// ── Карточки ────────────────────────────────────────────────────────────────
+$card-border-radius:    14px;
+$card-border-color:     transparent;
+$card-bg:               #FFFFFF;
+$card-box-shadow:       0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+$card-spacer-y:         1.25rem;
+$card-spacer-x:         1.25rem;
+$card-cap-bg:           transparent;
+
+// ── Modals ──────────────────────────────────────────────────────────────────
+$modal-content-border-radius: 18px;
+$modal-content-border-color:  transparent;
+$modal-content-box-shadow-xs: 0 6px 12px rgba(0,0,0,0.08), 0 32px 72px rgba(0,0,0,0.18);
+$modal-content-box-shadow-sm-up: 0 6px 12px rgba(0,0,0,0.08), 0 32px 72px rgba(0,0,0,0.18);
+$modal-backdrop-bg:           rgba(0, 0, 0, 0.34);
+$modal-backdrop-opacity:      1;
+
+// ── Dropdowns ───────────────────────────────────────────────────────────────
+$dropdown-border-radius: 12px;
+$dropdown-border-color:  transparent;
+$dropdown-box-shadow:    0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.10);
+$dropdown-padding-y:     0.4rem;
+$dropdown-item-padding-y: 0.45rem;
+$dropdown-item-padding-x: 0.85rem;
+$dropdown-link-hover-bg:  rgba(0, 122, 255, 0.10);
+$dropdown-link-hover-color: #007AFF;
+$dropdown-link-active-bg:   #007AFF;
+
+// ── Tables ──────────────────────────────────────────────────────────────────
+$table-cell-padding-y:    0.85rem;
+$table-cell-padding-x:    1rem;
+$table-th-font-weight:    600;
+$table-border-color:      rgba(60, 60, 67, 0.12);
+$table-hover-bg:          rgba(0, 122, 255, 0.04);
+
+// ── Nav / tabs ──────────────────────────────────────────────────────────────
+$nav-link-font-weight:    500;
+$nav-link-color:          rgba(60, 60, 67, 0.78);
+$nav-link-hover-color:    #007AFF;
+$nav-tabs-border-radius:  10px;
+$nav-pills-border-radius: 9999px;
+$nav-pills-link-active-bg: #007AFF;
+
+// ── Pagination ──────────────────────────────────────────────────────────────
+$pagination-border-radius: 10px;
+$pagination-color:         rgba(60, 60, 67, 0.78);
+$pagination-active-bg:     #007AFF;
+$pagination-active-border-color: #007AFF;
+
+// ── Badges ──────────────────────────────────────────────────────────────────
+$badge-font-weight:    600;
+$badge-padding-y:      0.3em;
+$badge-padding-x:      0.6em;
+$badge-border-radius:  8px;
+
+// ── Alerts ──────────────────────────────────────────────────────────────────
+$alert-border-radius: 12px;
+$alert-border-width:  0;
+$alert-padding-y:     0.85rem;
+$alert-padding-x:     1.1rem;
+
+// ── Tooltips & popovers ─────────────────────────────────────────────────────
+$tooltip-bg:           rgba(28, 28, 30, 0.92);
+$tooltip-color:        #FFFFFF;
+$tooltip-border-radius: 8px;
+$tooltip-padding-y:    0.45rem;
+$tooltip-padding-x:    0.7rem;
+
+// ── Spinner ─────────────────────────────────────────────────────────────────
+$spinner-border-width: 0.18em;
+
+// ── Box shadows ─────────────────────────────────────────────────────────────
+$box-shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.05);
+$box-shadow:    0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.07);
+$box-shadow-lg: 0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.10);
+
+// ── Transitions ─────────────────────────────────────────────────────────────
+$transition-base: all 220ms cubic-bezier(0.32, 0.72, 0, 1);
+$transition-fade: opacity 180ms cubic-bezier(0.32, 0.72, 0, 1);

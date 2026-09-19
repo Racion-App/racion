@@ -1,0 +1,152 @@
+{{template "head" .}}
+<article class="rpage rpage--{{.R.Slot}}">
+  <header class="rpage__hero">
+    <nav class="crumbs" aria-label="{{t .L "page.recipes"}}">
+      <a href="{{.P}}/recipes">{{t .L "page.recipes"}}</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      <a href="{{.SlotHref}}">{{.SlotCrumb}}</a>
+    </nav>
+    <h1 class="rpage__title">{{.Title}}</h1>
+    {{if .Description}}<p class="rpage__lead">{{.Description}}</p>{{end}}
+    <dl class="rpage__facts">
+      <div><dt>{{t .L "recipe.cook"}}</dt><dd class="num">{{t .L "recipe.min" .R.TimeMin}}</dd></div>
+      <div><dt>{{t .L "recipe.portion"}}</dt><dd class="num">{{t .L "recipe.kcal" (kcal .Kcal)}}</dd></div>
+      {{if .Priced}}<div><dt>{{t .L "recipe.products"}}</dt><dd class="num is-rub">≈ {{money .Country .Cost}}</dd></div>{{end}}
+      <div><dt>{{t .L "recipe.protein"}}</dt><dd class="num">{{t .L "recipe.g" (kcal .Protein)}}</dd></div>
+    </dl>
+    {{if .Tags}}<div class="rpage__tags">{{range .Tags}}<a class="chip chip--sm" href="{{.Href}}">{{.Label}}</a>{{end}}</div>{{end}}
+    <div class="social" data-recipe="{{.R.ID}}" data-auth="{{if .Viewer}}1{{end}}" data-login="{{.P}}/login" data-l-like="{{t .L "social.like"}}" data-l-unlike="{{t .L "social.unlike"}}" data-l-fav="{{t .L "social.fav"}}" data-l-unfav="{{t .L "social.unfav"}}" data-l-infav="{{t .L "social.infav"}}" data-l-copied="{{t .L "social.copied"}}">
+      {{if .Author}}<span class="social__by">{{t .L "recipe.by" .Author}}</span>{{end}}
+      <button type="button" class="social__btn" data-like aria-pressed="{{if .Stats.Liked}}true{{else}}false{{end}}" aria-label="{{if .Stats.Liked}}{{t .L "social.unlike"}}{{else}}{{t .L "social.like"}}{{end}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+        <span class="num" data-likes>{{.Stats.Likes}}</span>
+      </button>
+      <button type="button" class="social__btn" data-fav aria-pressed="{{if .Stats.Favorite}}true{{else}}false{{end}}" aria-label="{{if .Stats.Favorite}}{{t .L "social.unfav"}}{{else}}{{t .L "social.fav"}}{{end}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        <span data-fav-label>{{if .Stats.Favorite}}{{t .L "social.infav"}}{{else}}{{t .L "social.fav"}}{{end}}</span>
+      </button>
+      <a class="social__btn" href="#comments">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        <span class="num" data-comments-n>{{.Stats.Comments}}</span>
+      </a>
+      <button type="button" class="social__btn" data-share aria-label="{{t .L "social.share"}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+        <span>{{t .L "social.share"}}</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="rpage__cols">
+    <div class="rpage__main">
+      {{if .R.Image}}<img class="rpage__img" src="{{.R.Image}}" alt="{{.Title}}">{{end}}
+
+      <section class="rpage__section" aria-labelledby="ings">
+        <div class="rpage__section-head">
+          <h2 id="ings">{{t .L "recipe.products"}}</h2>
+          <div class="portions" role="group" aria-label="{{t .L "recipe.portions"}}">
+            <button type="button" class="counter__btn" data-portions="-1" aria-label="{{t .L "recipe.less"}}">−</button>
+            <output class="num" id="portions-out">1</output>
+            <button type="button" class="counter__btn" data-portions="1" aria-label="{{t .L "recipe.more"}}">+</button>
+          </div>
+        </div>
+        <ol class="ings" data-subs-title="{{t .L "subs.title"}}" data-subs-back="{{t .L "subs.back"}}" data-kcal="{{t .L "kcal"}}" data-u-g="{{t .L "unit.g"}}" data-u-kg="{{t .L "unit.kg"}}" data-u-ml="{{t .L "unit.ml"}}" data-u-l="{{t .L "unit.l"}}" data-u-pcs="{{t .L "unit.pcs"}}" data-dec="{{if eq .L "en"}}.{{else}},{{end}}">
+          {{range .Ings}}<li class="ings__row{{if .Pantry}} ings__row--pantry{{end}}" id="ing-{{.N}}">
+            <span class="ings__n num">{{.N}}</span>
+            <span class="ings__name">{{.Name}}{{if .Image}}<span class="pic"><button type="button" class="pic__btn" data-pic="{{.Image}}" aria-label="{{t $.L "ing.photo"}}" title="{{t $.L "ing.photo"}}" aria-expanded="false"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button></span>{{end}}<button type="button" class="ings__swap" data-sub="{{.ID}}" hidden aria-label="{{t $.L "subs.button"}}" title="{{t $.L "subs.button"}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg></button>{{if .PackNote}}<small>{{.PackNote}}</small>{{end}}</span>
+            {{if .ToTaste}}<span class="ings__qty">{{t $.L "unit.totaste"}}</span>{{else}}<span class="ings__qty num" data-amount="{{.Amount}}" data-unit="{{.Unit}}">{{qty $.L .Amount .Unit}}</span>{{end}}
+          </li>{{end}}
+        </ol>
+        <p class="rpage__note">{{t .L "recipe.pantry.note"}}</p>
+      </section>
+
+      <section class="rpage__section" aria-labelledby="steps">
+        <h2 id="steps">{{t .L "recipe.steps"}}</h2>
+        <ol class="steps">
+          {{range .Steps}}<li class="steps__item"><p>{{.HTML}}</p></li>{{end}}
+        </ol>
+      </section>
+
+      {{if .Facts}}<section class="rpage__section" aria-labelledby="about">
+        <h2 id="about">{{t .L "recipe.short"}}</h2>
+        <ul class="facts">{{range .Facts}}<li>{{.}}</li>{{end}}</ul>
+      </section>{{end}}
+
+      <section class="rpage__section comments" id="comments" aria-labelledby="cmt">
+        <div class="rpage__section-head">
+          <h2 id="cmt">{{t .L "social.comments"}} <span class="num comments__n" data-comments-n>{{.Stats.Comments}}</span></h2>
+        </div>
+        {{if .Viewer}}{{if .Viewer.Nick}}
+        <form class="comments__form" data-comment-form>
+          <div class="mdbar" role="toolbar" aria-label="{{t .L "md.toolbar"}}">
+            <button type="button" class="mdbar__btn" data-md="bold" title="{{t .L "md.bold"}}" aria-label="{{t .L "md.bold"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></svg></button>
+            <button type="button" class="mdbar__btn" data-md="italic" title="{{t .L "md.italic"}}" aria-label="{{t .L "md.italic"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg></button>
+            <button type="button" class="mdbar__btn" data-md="strike" title="{{t .L "md.strike"}}" aria-label="{{t .L "md.strike"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/></svg></button>
+            <span class="mdbar__sep" aria-hidden="true"></span>
+            <button type="button" class="mdbar__btn" data-md="list" title="{{t .L "md.list"}}" aria-label="{{t .L "md.list"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></button>
+            <button type="button" class="mdbar__btn" data-md="quote" title="{{t .L "md.quote"}}" aria-label="{{t .L "md.quote"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/></svg></button>
+            <button type="button" class="mdbar__btn" data-md="link" title="{{t .L "md.link"}}" aria-label="{{t .L "md.link"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            {{if .Photos}}<span class="mdbar__sep" aria-hidden="true"></span>
+            <label class="mdbar__btn comments__photo" data-comment-photo title="{{t .L "comment.photo"}}" aria-label="{{t .L "comment.photo"}}"><input type="file" accept="image/*"><span data-photo-label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></label>{{end}}
+          </div>
+          <textarea class="form-control" name="body" rows="3" maxlength="1000" placeholder="{{t .L "social.comment.ph"}}" aria-label="{{t .L "social.comment.ph"}}" required></textarea>
+          <div class="comments__actions">
+            <span class="comments__as">@{{.Viewer.Nick}} <span class="comments__md">· {{t .L "md.hint"}}</span></span>
+            <button type="submit" class="btn btn-primary btn-sm">{{t .L "social.send"}}</button>
+          </div>
+          <p class="comments__err" role="alert" hidden></p>
+        </form>
+        {{else}}<p class="comments__note">{{t .L "comment.nick"}} <a href="/me">{{t .L "social.tonick"}}</a></p>{{end}}
+        {{else}}<p class="comments__note"><a href="{{.P}}/login">{{t .L "social.login"}}</a> {{t .L "social.login.tail"}}</p>{{end}}
+        <ul class="comments__list" data-comments>
+          {{range .Comments}}<li class="comment" data-id="{{.ID}}">
+            <div class="comment__head">{{if .Avatar}}<img class="comment__ava" src="{{.Avatar}}" alt="">{{end}}<b>@{{.Nick}}</b><time class="comment__time" datetime="{{.CreatedAt}}">{{.When}}</time>{{if .Mine}}<button type="button" class="comment__del" data-del aria-label="{{t $.L "social.delete"}}">×</button>{{end}}</div>
+            <div class="comment__body">{{safeHTML .HTML}}</div>{{if .Image}}<img class="comment__img" src="{{.Image}}" alt="" loading="lazy">{{end}}
+          </li>{{end}}
+        </ul>
+        {{if not .Comments}}<p class="comments__empty" data-comments-empty>{{t .L "social.comments.empty"}}</p>{{end}}
+      </section>
+    </div>
+
+    <aside class="rpage__aside">
+      <section class="panel" aria-labelledby="nutri">
+        <h2 id="nutri" class="panel__title">{{t .L "recipe.nutri"}}</h2>
+        <p class="panel__sub">{{t .L "recipe.nutri.sub"}}</p>
+        <table class="nutri">
+          <tr><th>{{t .L "recipe.calories"}}</th><td class="num">{{t .L "recipe.kcal" (kcal .Kcal)}}</td><td class="num nutri__pct">{{.Pct.Kcal}}%</td></tr>
+          <tr><th>{{t .L "recipe.proteins"}}</th><td class="num">{{t .L "recipe.g" (kcal .Protein)}}</td><td class="num nutri__pct">{{.Pct.Protein}}%</td></tr>
+          <tr><th>{{t .L "recipe.fats"}}</th><td class="num">{{t .L "recipe.g" (kcal .Fat)}}</td><td class="num nutri__pct">{{.Pct.Fat}}%</td></tr>
+          <tr><th>{{t .L "recipe.carbs"}}</th><td class="num">{{t .L "recipe.g" (kcal .Carb)}}</td><td class="num nutri__pct">{{.Pct.Carb}}%</td></tr>
+          <tr><th>{{t .L "recipe.per100"}}</th><td class="num">{{t .L "recipe.kcal" (kcal .Per100)}}</td><td></td></tr>
+        </table>
+      </section>
+
+      {{if .Priced}}
+      <section class="panel" aria-labelledby="cost">
+        <h2 id="cost" class="panel__title">{{t .L "recipe.cost"}}</h2>
+        <p class="panel__big num">≈ {{money .Country .Cost}}<small>{{t .L "recipe.cost.portion"}}</small></p>
+        <p class="panel__sub">{{.CostNote}}</p>
+      </section>
+      {{end}}
+
+      <section class="panel" aria-labelledby="need">
+        <h2 id="need" class="panel__title">{{t .L "recipe.need"}}</h2>
+        <p class="panel__sub">{{if .Equipment}}{{range $i, $e := .Equipment}}{{if $i}}, {{end}}{{$e}}{{end}}{{else}}{{t .L "recipe.need.none"}}{{end}}</p>
+      </section>
+
+      <section class="panel panel--cta">
+        <a class="btn btn-primary btn-lg" href="/">{{t .L "recipe.cta"}}</a>
+        <p class="panel__sub">{{t .L "recipe.cta.sub"}}</p>
+      </section>
+    </aside>
+  </div>
+  {{if .Related}}
+  <section class="rpage__foot rpage__section" aria-labelledby="rel">
+    <div class="rpage__section-head">
+      <h2 id="rel">{{t .L "recipe.related"}}</h2>
+      <a class="rpage__more" href="{{.SlotHref}}">{{.AllLabel}}</a>
+    </div>
+    <div class="rgrid rgrid--tight">{{range .Related}}{{template "card" .}}{{end}}</div>
+  </section>
+  {{end}}
+</article>
+{{template "foot" .}}
