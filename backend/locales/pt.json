@@ -1132,5 +1132,8 @@
   "leave.title": "Estás a sair do Racion",
   "leave.text": "Este link de um comentário leva a outro site que não verificámos. Cuidado com dados pessoais e compras. Site:",
   "leave.go": "Abrir link",
-  "more": "Mais"
+  "more": "Mais",
+  "offer.promo": "Código promocional",
+  "offer.copy": "Copiar código",
+  "offer.open": "Abrir"
 }

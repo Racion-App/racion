@@ -1145,5 +1145,8 @@
   "leave.title": "Opouštíte Racion",
   "leave.text": "Tento odkaz z komentáře vede na jiný web, který jsme neprověřovali. Opatrně s osobními údaji a nákupy. Web:",
   "leave.go": "Otevřít odkaz",
-  "more": "Další"
+  "more": "Další",
+  "offer.promo": "Promo kód",
+  "offer.copy": "Zkopírovat kód",
+  "offer.open": "Otevřít"
 }

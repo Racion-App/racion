@@ -1145,5 +1145,8 @@
   "leave.title": "Opuszczasz Racion",
   "leave.text": "Ten link z komentarza prowadzi na inną stronę, której nie sprawdzaliśmy. Uważaj na dane osobowe i zakupy. Strona:",
   "leave.go": "Otwórz link",
-  "more": "Więcej"
+  "more": "Więcej",
+  "offer.promo": "Kod promocyjny",
+  "offer.copy": "Skopiuj kod",
+  "offer.open": "Otwórz"
 }

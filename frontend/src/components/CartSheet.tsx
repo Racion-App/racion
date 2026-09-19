@@ -4,6 +4,7 @@ import { Sheet } from "./Sheet";
 import { cartTargets, searchURL, type CartTarget } from "../lib/cart";
 import { track } from "../lib/analytics";
 import { partnersFor } from "../lib/partners";
+import { OfferCard, useOffer } from "./OfferCard";
 import { useT } from "../i18n";
 
 // «Собрать корзину»: выбор магазина или доставки, список ещё не купленного со ссылками на поиск
@@ -11,8 +12,9 @@ import { useT } from "../i18n";
 
 type Item = { id: string; name: string; qty: string };
 
-export function CartSheet({ open, onClose, storeCode, storeName, country, items, onToast }: { open: boolean; onClose: () => void; storeCode: string; storeName: string; country: string; items: Item[]; onToast: (s: string) => void }) {
+export function CartSheet({ open, onClose, storeCode, storeName, country, region, items, onToast }: { open: boolean; onClose: () => void; storeCode: string; storeName: string; country: string; region?: string; items: Item[]; onToast: (s: string) => void }) {
   const { t } = useT();
+  const offer = useOffer("cart", open ? country : undefined, region);
   const [extra, setExtra] = useState<CartTarget[]>([]);
   useEffect(() => {
     if (!open) return;
@@ -55,6 +57,7 @@ export function CartSheet({ open, onClose, storeCode, storeName, country, items,
         </div>
       )}
       {target?.affiliate && <p className="partner__note">{t("partner.ad")}</p>}
+      {offer && <OfferCard offer={offer} compact />}
       <ul className="cart__list">
         {items.map((i) => (
           <li key={i.id} className="cart__item">

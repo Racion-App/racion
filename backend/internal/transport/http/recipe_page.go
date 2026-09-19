@@ -266,6 +266,18 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		sideFor = strings.Join(kinds, ", ")
 	}
 	buy := s.svc.Partners.BuyLinks(r.Context(), pl.Country.Code, l, rc.Equipment)
+	// точечное предложение под технику и продукты этого рецепта, с учётом региона по IP
+	var offer *domain.Offer
+	{
+		oq := service.OfferQuery{Country: pl.Country.Code, Place: "recipe", Match: append([]string{}, rc.Equipment...)}
+		for _, in := range rc.Ingredients {
+			oq.Match = append(oq.Match, in.IngredientID)
+		}
+		s.fillRegion(r, &oq)
+		if picked := s.svc.Offers.Pick(r.Context(), oq, 1); len(picked) > 0 {
+			offer = &picked[0]
+		}
+	}
 	if rc.Batch {
 		facts = append(facts, i18n.T(l, "recipe.fact.batch"))
 	}
@@ -375,7 +387,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
 		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor, "Notes": notesPtr(rc.NotesFor(l)),
-		"Equipment": eq, "Buy": buy, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
+		"Equipment": eq, "Buy": buy, "Offer": offer, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "recipe.html", data); err != nil {

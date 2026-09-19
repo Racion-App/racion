@@ -106,6 +106,7 @@ type Repos struct {
 	Households  HouseholdRepo
 	Collections CollectionRepo
 	Partners    PartnerRepo
+	Offers      OfferRepo
 	APIKeys     APIKeyRepo
 }
 
@@ -129,6 +130,7 @@ type Services struct {
 	Subs         *Substitutes
 	Collections  *Collections
 	Partners     *Partners
+	Offers       *Offers
 	APIKeys      *APIKeys
 }
 
@@ -148,6 +150,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Family:      family,
 		Collections: NewCollections(repos.Collections, recipes),
 		Partners:    NewPartners(repos.Partners),
+		Offers:      NewOffers(repos.Offers),
 		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
 	}

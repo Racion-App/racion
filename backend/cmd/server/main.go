@@ -118,7 +118,7 @@ func main() {
 	services := service.New(service.Repos{
 		Users: store.Users, Sessions: store.Sessions, Plans: store.Plans, Dislikes: store.Dislikes, Checks: store.Checks,
 		Purchases: store.Purchases, Extras: store.Extras, UserRecipes: store.UserRecipes, Events: store.Events,
-		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners, APIKeys: store.APIKeys,
+		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners, Offers: store.Offers, APIKeys: store.APIKeys,
 	}, catalogRef, cfg.PushContact, cfg.BaseURL)
 	services.Admin = service.NewAdmin(store.Admin, store.Users, cfg.AdminEmails)
 	// замены продуктов: таблица из seed/data/substitutes.json

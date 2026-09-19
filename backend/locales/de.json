@@ -1163,5 +1163,8 @@
   "leave.title": "Du verlässt Racion",
   "leave.text": "Dieser Link aus einem Kommentar führt auf eine andere Seite, die wir nicht geprüft haben. Vorsicht mit persönlichen Daten und Käufen. Seite:",
   "leave.go": "Link öffnen",
-  "more": "Mehr"
+  "more": "Mehr",
+  "offer.promo": "Aktionscode",
+  "offer.copy": "Aktionscode kopieren",
+  "offer.open": "Öffnen"
 }

@@ -1132,5 +1132,8 @@
   "leave.title": "Sales de Racion",
   "leave.text": "Este enlace de un comentario lleva a otro sitio que no hemos revisado. Cuidado con tus datos personales y compras. Sitio:",
   "leave.go": "Abrir enlace",
-  "more": "Más"
+  "more": "Más",
+  "offer.promo": "Código promocional",
+  "offer.copy": "Copiar código",
+  "offer.open": "Abrir"
 }

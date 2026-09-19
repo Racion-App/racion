@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Repeat2, RotateCcw, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
+import { OfferCard, useOffer } from "../components/OfferCard";
 import { TopBar } from "../components/TopBar";
 import { RecipeSheet } from "../components/RecipeSheet";
 import { CartSheet } from "../components/CartSheet";
@@ -36,6 +37,8 @@ export function Plan() {
   const [recipeId, setRecipeId] = useState<string | null>(null);
   const [swapping, setSwapping] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
+  // одно точечное предложение над списком покупок (страна и регион плана)
+  const planOffer = useOffer("plan", plan?.country.code, plan?.priceSource.regionCode || undefined);
   // меню «ещё» в нижней панели на телефоне
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -664,6 +667,7 @@ export function Plan() {
               {plan.totals.items} {tn("items", plan.totals.items)}
             </span>
           </div>
+          {planOffer && <OfferCard offer={planOffer} compact />}
           {plan.shopping.map((g) => (
             <div className="list__group" key={g.category}>
               <div className="list__cat">
@@ -845,7 +849,7 @@ export function Plan() {
       )}
       <RecipeSheet recipeId={recipeId} portions={plan.portions} country={plan.country.code} onClose={() => setRecipeId(null)} />
       {user && <PlanChat planId={plan.id} open={chatOpen} onClose={() => setChatOpen(false)} onPlan={(p) => { setPlan(p); setToast(t("chat.applied")); }} />}
-      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} storeCode={plan.store.code} storeName={plan.store.name} country={plan.country.code} items={cartItems} onToast={setToast} />
+      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} storeCode={plan.store.code} storeName={plan.store.name} country={plan.country.code} region={plan.priceSource.regionCode || undefined} items={cartItems} onToast={setToast} />
 
       <div className="actionbar">
         <div className="actionbar__inner">

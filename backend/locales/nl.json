@@ -1131,5 +1131,8 @@
   "leave.title": "Je verlaat Racion",
   "leave.text": "Deze link uit een reactie gaat naar een andere site die wij niet hebben gecontroleerd. Wees voorzichtig met persoonsgegevens en aankopen. Site:",
   "leave.go": "Link openen",
-  "more": "Meer"
+  "more": "Meer",
+  "offer.promo": "Kortingscode",
+  "offer.copy": "Kortingscode kopiëren",
+  "offer.open": "Openen"
 }

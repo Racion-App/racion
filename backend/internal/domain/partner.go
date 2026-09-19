@@ -24,3 +24,26 @@ type APIKey struct {
 	LastUsedAt string `json:"lastUsedAt,omitempty"`
 	Key        string `json:"key,omitempty"`
 }
+
+// Offer — точечное рекламное предложение: товар или акция, показанные у корзины, в рецепте или в плане.
+// Regions — коды регионов и городов Росстата, пусто — вся страна; Match — id техники или продуктов,
+// при которых предложение уместно в рецепте. Promo — промокод для копирования.
+type Offer struct {
+	ID        string   `json:"id"`
+	Country   string   `json:"country"`
+	Regions   []string `json:"regions"`
+	Place     string   `json:"place"` // cart | recipe | plan
+	Match     []string `json:"match"`
+	Title     string   `json:"title"`
+	Body      string   `json:"body"`
+	CTA       string   `json:"cta"`
+	URL       string   `json:"url"`
+	Image     string   `json:"image"`
+	Promo     string   `json:"promo"`
+	Affiliate bool     `json:"affiliate"`
+	Erid      string   `json:"erid"`
+	StartsAt  *string  `json:"startsAt"` // YYYY-MM-DD или null
+	EndsAt    *string  `json:"endsAt"`
+	Active    bool     `json:"active"`
+	Priority  int      `json:"priority"`
+}

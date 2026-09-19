@@ -1131,5 +1131,8 @@
   "leave.title": "Tu quittes Racion",
   "leave.text": "Ce lien d’un commentaire mène vers un autre site que nous n’avons pas vérifié. Prudence avec tes données personnelles et tes achats. Site :",
   "leave.go": "Ouvrir le lien",
-  "more": "Plus"
+  "more": "Plus",
+  "offer.promo": "Code promo",
+  "offer.copy": "Copier le code promo",
+  "offer.open": "Ouvrir"
 }

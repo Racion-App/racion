@@ -170,6 +170,19 @@
           {{if (index .Buy 0).Erid}}<span class="partner__erid">erid: {{(index .Buy 0).Erid}}</span>{{end}}
         </div>
         {{end}}
+        {{with .Offer}}
+        <a class="offer" href="{{.URL}}" target="_blank" rel="sponsored nofollow noopener" data-offer-click="{{.ID}}">
+          {{if .Image}}<img class="offer__img" src="{{.Image}}" alt="" width="72" height="72" loading="lazy">{{end}}
+          <span class="offer__body">
+            <span class="offer__label">{{if .Affiliate}}{{t $.L "partner.ad"}}{{else}}{{t $.L "partner.need"}}{{end}}</span>
+            <b class="offer__title">{{.Title}}</b>
+            {{if .Body}}<span class="offer__text">{{.Body}}</span>{{end}}
+            {{if .Promo}}<span class="offer__promo">{{t $.L "offer.promo"}} <code>{{.Promo}}</code></span>{{end}}
+            <span class="offer__cta">{{if .CTA}}{{.CTA}}{{else}}{{t $.L "offer.open"}}{{end}}</span>
+            {{if .Erid}}<span class="partner__erid">erid: {{.Erid}}</span>{{end}}
+          </span>
+        </a>
+        {{end}}
       </section>
 
       <section class="panel panel--cta">

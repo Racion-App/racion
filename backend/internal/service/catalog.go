@@ -65,6 +65,19 @@ func ShortLabel(name string) string {
 	return strings.Join(out, " ")
 }
 
+// Regions — регионы и города Росстата (без федеральных округов) для таргетинга и геоподбора.
+func (c *Catalog) Regions() []planner.Region {
+	out := []planner.Region{}
+	if pb := c.catalog.Load().PriceBook(); pb != nil {
+		for _, rg := range pb.Regions {
+			if rg.Kind != "district" {
+				out = append(out, rg)
+			}
+		}
+	}
+	return out
+}
+
 // Meta — всё, что нужно квизу, на языке; geoCountry — страна посетителя, если известна.
 type Meta struct {
 	Lang           i18n.Lang              `json:"lang"`

@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView, ApiKey } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
 import { tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -118,6 +118,15 @@ export const api = {
   apiKeys: () => request<ApiKey[]>("/api/me/keys"),
   apiKeyCreate: (name: string) => request<ApiKey>("/api/me/keys", { method: "POST", body: JSON.stringify({ name }) }),
   apiKeyDelete: (id: string) => request<void>(`/api/me/keys/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  offers: (place: "cart" | "recipe" | "plan", country: string, region?: string, match?: string[]) => {
+    const q = new URLSearchParams({ place, country });
+    if (region) q.set("region", region);
+    if (match?.length) q.set("match", match.join(","));
+    return request<Offer[]>(`/api/offers?${q}`);
+  },
+  adminOffers: () => request<Offer[]>("/api/admin/offers"),
+  adminSaveOffer: (body: Offer) => request<Offer>("/api/admin/offers", { method: "POST", body: JSON.stringify(body) }),
+  adminDeleteOffer: (id: string) => request<void>(`/api/admin/offers/${encodeURIComponent(id)}`, { method: "DELETE" }),
   adminPartners: () => request<Partner[]>("/api/admin/partners"),
   adminSavePartner: (body: Partner) => request<Partner>("/api/admin/partners", { method: "POST", body: JSON.stringify(body) }),
   adminDeletePartner: (code: string) => request<void>(`/api/admin/partners/${encodeURIComponent(code)}`, { method: "DELETE" }),

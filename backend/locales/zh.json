@@ -1132,5 +1132,8 @@
   "leave.title": "你正在离开 Racion",
   "leave.text": "这条评论中的链接指向我们未审核的其他网站。请注意保护个人信息和谨慎购物。网站：",
   "leave.go": "打开链接",
-  "more": "更多"
+  "more": "更多",
+  "offer.promo": "优惠码",
+  "offer.copy": "复制优惠码",
+  "offer.open": "打开"
 }

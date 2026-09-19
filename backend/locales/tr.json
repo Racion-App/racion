@@ -1131,5 +1131,8 @@
   "leave.title": "Racion’dan ayrılıyorsunuz",
   "leave.text": "Yorumdaki bu bağlantı kontrol etmediğimiz başka bir siteye gidiyor. Kişisel verilerinize ve alışverişlerinize dikkat edin. Site:",
   "leave.go": "Bağlantıyı aç",
-  "more": "Daha fazla"
+  "more": "Daha fazla",
+  "offer.promo": "Promosyon kodu",
+  "offer.copy": "Kodu kopyala",
+  "offer.open": "Aç"
 }

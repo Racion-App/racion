@@ -5,6 +5,7 @@ import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
 import { AdminPartners } from "../components/AdminPartners";
+import { AdminOffers } from "../components/AdminOffers";
 import { AdminApi } from "../components/AdminApi";
 import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
@@ -143,7 +144,12 @@ export function Admin() {
         {tab === "recipes" && can("recipes") && <AdminRecipes equipment={meta?.equipment ?? []} photos={!!meta?.photos} ai={!!meta?.ai} onToast={setToast} editId={params.id} onOpen={(id) => nav(`/admin/recipes/${encodeURIComponent(id)}`)} onClose={() => nav("/admin/recipes")} />}
         {tab === "moderation" && can("moderation") && <AdminModeration onToast={setToast} />}
         {tab === "collections" && can("recipes") && <AdminCollections photos={!!meta?.photos} onToast={setToast} />}
-        {tab === "partners" && can("partners") && <AdminPartners onToast={setToast} />}
+        {tab === "partners" && can("partners") && (
+          <>
+            <AdminPartners onToast={setToast} />
+            <AdminOffers onToast={setToast} />
+          </>
+        )}
         {tab === "api" && can("recipes") && <AdminApi onToast={setToast} />}
         {err && <p className="error-inline">{err}</p>}
 
