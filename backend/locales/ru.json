@@ -1198,7 +1198,7 @@
   "admin.offers.body": "Текст",
   "admin.offers.cta": "Кнопка",
   "admin.offers.promo": "Промокод",
-  "admin.offers.image": "Картинка (https или /images/…)",
+  "admin.offers.image": "Картинка товара",
   "admin.offers.regions": "Регионы и города",
   "admin.offers.regions.hint": "Пусто — вся страна. Город совпадает и по своей области.",
   "admin.offers.regions.n": "регионов: {n}",
@@ -1216,5 +1216,13 @@
   "admin.offers.err.image": "Картинка: https://… или /images/…",
   "admin.offers.err.date": "Дата в формате ГГГГ-ММ-ДД",
   "admin.offers.err.erid": "Для рекламы в РФ нужен erid",
-  "account.plan.meta.occ": "{date} · {store} · {cost}"
+  "account.plan.meta.occ": "{date} · {store} · {cost}",
+  "admin.ads": "Реклама",
+  "admin.ads.enabled": "Показывать рекламу",
+  "admin.ads.on.hint": "Ссылки «где купить», доставки в корзине и предложения видны людям.",
+  "admin.ads.off.hint": "Сейчас выключено: на сайте нет ни партнёрских ссылок, ни предложений. Записи ниже можно готовить заранее.",
+  "admin.ads.on.toast": "Реклама включена",
+  "admin.ads.off.toast": "Реклама выключена",
+  "admin.offers": "Предложения",
+  "admin.partners.stores": "Партнёрские магазины"
 }

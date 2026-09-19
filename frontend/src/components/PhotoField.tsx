@@ -6,7 +6,7 @@ import { useT } from "../i18n";
 // Поле «фото»: превью, выбор файла с камеры или из галереи, загрузка на сервер (WebP в S3) и удаление.
 // Наружу отдаёт ссылку из нашего хранилища; сервер её проверяет при сохранении.
 
-export function PhotoField({ value, onChange, kind, round, label }: { value: string; onChange: (url: string, thumb: string) => void; kind: "recipe" | "comment" | "avatar"; round?: boolean; label?: string }) {
+export function PhotoField({ value, onChange, kind, round, label }: { value: string; onChange: (url: string, thumb: string) => void; kind: "recipe" | "comment" | "avatar" | "offer"; round?: boolean; label?: string }) {
   const { t } = useT();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);

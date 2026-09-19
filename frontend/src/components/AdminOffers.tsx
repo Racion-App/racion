@@ -5,6 +5,7 @@ import type { Offer } from "../lib/types";
 import { AList, ARow } from "./AdminList";
 import { useConfirm } from "./Confirm";
 import { OfferCard } from "./OfferCard";
+import { PhotoField } from "./PhotoField";
 import { useT } from "../i18n";
 import type { Meta } from "../lib/types";
 
@@ -152,10 +153,10 @@ function OfferForm({ initial, onSaved, onCancel }: { initial: Offer | null; onSa
         <span>URL</span>
         <input className="form-control" value={o.url} onChange={(e) => set({ url: e.target.value })} placeholder="https://…" required inputMode="url" />
       </label>
-      <label className="auth__field">
+      <div className="auth__field">
         <span>{t("admin.offers.image")}</span>
-        <input className="form-control" value={o.image} onChange={(e) => set({ image: e.target.value })} placeholder="https://…/product.webp" inputMode="url" />
-      </label>
+        <PhotoField value={o.image} onChange={(url) => set({ image: url })} kind="offer" />
+      </div>
       {o.country === "RU" && (
         <div className="auth__field">
           <span>{t("admin.offers.regions")}</span>

@@ -69,7 +69,7 @@ export const api = {
     request<User>(`/api/auth/login${plan ? `?plan=${plan}` : ""}`, { method: "POST", body: JSON.stringify({ email, password }) }),
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),
   // фото: multipart без Content-Type в заголовке (браузер поставит boundary сам)
-  upload: async (kind: "recipe" | "comment" | "avatar", file: File) => {
+  upload: async (kind: "recipe" | "comment" | "avatar" | "offer", file: File) => {
     const fd = new FormData();
     fd.append("file", file);
     let res: Response;
@@ -124,6 +124,8 @@ export const api = {
     if (match?.length) q.set("match", match.join(","));
     return request<Offer[]>(`/api/offers?${q}`);
   },
+  adminAds: () => request<{ enabled: boolean }>("/api/admin/ads"),
+  adminSetAds: (enabled: boolean) => request<{ enabled: boolean }>("/api/admin/ads", { method: "PUT", body: JSON.stringify({ enabled }) }),
   adminOffers: () => request<Offer[]>("/api/admin/offers"),
   adminSaveOffer: (body: Offer) => request<Offer>("/api/admin/offers", { method: "POST", body: JSON.stringify(body) }),
   adminDeleteOffer: (id: string) => request<void>(`/api/admin/offers/${encodeURIComponent(id)}`, { method: "DELETE" }),

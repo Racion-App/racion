@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"racion/internal/service"
 
 	"racion/internal/i18n"
 	"racion/internal/media"
@@ -12,6 +13,9 @@ import (
 func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 	u := requireUser(w, r)
 	if u == nil {
+		return
+	}
+	if r.URL.Query().Get("kind") == "offer" && s.requirePerm(w, r, service.PermPartners) == nil {
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, media.MaxUpload+64<<10)

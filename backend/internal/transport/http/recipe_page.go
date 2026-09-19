@@ -265,10 +265,11 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		}
 		sideFor = strings.Join(kinds, ", ")
 	}
-	buy := s.svc.Partners.BuyLinks(r.Context(), pl.Country.Code, l, rc.Equipment)
-	// точечное предложение под технику и продукты этого рецепта, с учётом региона по IP
+	var buy []service.BuyLink
 	var offer *domain.Offer
-	{
+	// реклама целиком под общим выключателем; предложение подбирается под технику и продукты рецепта с учётом региона по IP
+	if s.svc.Ads.Enabled(r.Context()) {
+		buy = s.svc.Partners.BuyLinks(r.Context(), pl.Country.Code, l, rc.Equipment)
 		oq := service.OfferQuery{Country: pl.Country.Code, Place: "recipe", Match: append([]string{}, rc.Equipment...)}
 		for _, in := range rc.Ingredients {
 			oq.Match = append(oq.Match, in.IngredientID)

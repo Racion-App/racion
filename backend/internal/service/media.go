@@ -35,7 +35,7 @@ func (m *Media) Upload(ctx context.Context, userID, kind string, r io.Reader) (m
 		return media.Photo{}, domain.Invalid("photo.off")
 	}
 	switch kind {
-	case "recipe", "comment", "avatar":
+	case "recipe", "comment", "avatar", "offer": // offer — картинка товара для рекламы, только админ (проверка в транспорте)
 	default:
 		return media.Photo{}, domain.Invalid("photo.bad")
 	}

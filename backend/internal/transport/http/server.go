@@ -91,6 +91,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/admin/partners", s.limited(s.lim.write, s.adminSavePartner))
 	mux.HandleFunc("DELETE /api/admin/partners/{code}", s.adminDeletePartner)
 	mux.HandleFunc("GET /api/offers", s.offers)
+	mux.HandleFunc("GET /api/admin/ads", s.adminAds)
+	mux.HandleFunc("PUT /api/admin/ads", s.adminAds)
 	mux.HandleFunc("GET /api/admin/offers", s.adminOffers)
 	mux.HandleFunc("POST /api/admin/offers", s.limited(s.lim.write, s.adminSaveOffer))
 	mux.HandleFunc("DELETE /api/admin/offers/{id}", s.adminDeleteOffer)

@@ -1670,3 +1670,11 @@ main.pages.is-loading {
   &__cta { display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; width: max-content; font-weight: 600; color: var(--ds-blue); text-decoration: none; }
   &--compact { margin: 8px 0 12px; }
   .partner__erid { margin-top: 2px; } }
+
+// Большой выключатель во вкладке «Реклама»: подпись с пояснением под ней
+.switch--big { padding: 14px 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  .switch__text { display: grid; gap: 2px; font-weight: 600; small { font-weight: 400; font-size: 13px; color: var(--ds-label-secondary); } } }
+.admin__h2 { margin: 24px 0 8px; font-size: 18px; font-weight: 700; }
+
+// Редактор комментария на фокусе — как обычное поле (ореол снят в design-system/apple-components.scss)
+.mdedit:focus { box-shadow: none; border-color: var(--ds-fill-1); outline: none; }

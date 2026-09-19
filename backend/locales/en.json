@@ -1180,7 +1180,7 @@
   "admin.offers.body": "Text",
   "admin.offers.cta": "Button",
   "admin.offers.promo": "Promo code",
-  "admin.offers.image": "Image (https or /images/…)",
+  "admin.offers.image": "Product image",
   "admin.offers.regions": "Regions and cities",
   "admin.offers.regions.hint": "Empty means the whole country. A city also matches its region.",
   "admin.offers.regions.n": "regions: {n}",
@@ -1198,5 +1198,13 @@
   "admin.offers.err.image": "Image: https://… or /images/…",
   "admin.offers.err.date": "Date as YYYY-MM-DD",
   "admin.offers.err.erid": "Ads in Russia need an erid",
-  "account.plan.meta.occ": "{date} · {store} · {cost}"
+  "account.plan.meta.occ": "{date} · {store} · {cost}",
+  "admin.ads": "Ads",
+  "admin.ads.enabled": "Show ads",
+  "admin.ads.on.hint": "Buy links, delivery services in the cart and offers are visible to people.",
+  "admin.ads.off.hint": "Off right now: the site shows no partner links and no offers. Entries below can be prepared in advance.",
+  "admin.ads.on.toast": "Ads are on",
+  "admin.ads.off.toast": "Ads are off",
+  "admin.offers": "Offers",
+  "admin.partners.stores": "Partner stores"
 }

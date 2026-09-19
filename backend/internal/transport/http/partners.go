@@ -18,6 +18,11 @@ func (s *Server) partners(w http.ResponseWriter, r *http.Request) {
 		pl, _ := s.localeFromPath(r)
 		country = pl.Country.Code
 	}
+	if !s.svc.Ads.Enabled(r.Context()) {
+		w.Header().Set("Cache-Control", "public, max-age=60")
+		writeJSON(w, 200, service.CountryView{Goods: []domain.Partner{}, Grocery: []domain.Partner{}, Queries: map[string]string{}})
+		return
+	}
 	v, err := s.svc.Partners.ForCountry(r.Context(), country)
 	if err != nil {
 		s.fail(w, r, err)
@@ -81,6 +86,10 @@ func (s *Server) offers(w http.ResponseWriter, r *http.Request) {
 	}
 	s.fillRegion(r, &oq)
 	w.Header().Set("Cache-Control", "private, max-age=60")
+	if !s.svc.Ads.Enabled(r.Context()) {
+		writeJSON(w, 200, []domain.Offer{})
+		return
+	}
 	writeJSON(w, 200, s.svc.Offers.Pick(r.Context(), oq, 1))
 }
 
@@ -141,4 +150,24 @@ func (s *Server) adminDeleteOffer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(204)
+}
+
+// Общий выключатель рекламы: GET → {enabled}, PUT {enabled} — только с правом partners.
+func (s *Server) adminAds(w http.ResponseWriter, r *http.Request) {
+	if s.requirePerm(w, r, service.PermPartners) == nil {
+		return
+	}
+	if r.Method == http.MethodPut {
+		var in struct {
+			Enabled bool `json:"enabled"`
+		}
+		if !decode(w, r, 1<<10, &in) {
+			return
+		}
+		if err := s.svc.Ads.SetEnabled(r.Context(), in.Enabled); err != nil {
+			s.fail(w, r, err)
+			return
+		}
+	}
+	writeJSON(w, 200, map[string]bool{"enabled": s.svc.Ads.Enabled(r.Context())})
 }

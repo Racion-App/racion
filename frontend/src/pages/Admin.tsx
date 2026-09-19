@@ -4,8 +4,7 @@ import { Activity, AlertTriangle, BookOpen, FolderOpen, KeyRound, ScrollText, Sh
 import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
-import { AdminPartners } from "../components/AdminPartners";
-import { AdminOffers } from "../components/AdminOffers";
+import { AdminAds } from "../components/AdminAds";
 import { AdminApi } from "../components/AdminApi";
 import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
@@ -127,7 +126,7 @@ export function Admin() {
           )}
           {can("partners") && (
             <button type="button" role="tab" className="chip" aria-pressed={tab === "partners"} aria-selected={tab === "partners"} onClick={() => setTab("partners")}>
-              <Store size={15} aria-hidden /> {t("admin.partners")}
+              <Store size={15} aria-hidden /> {t("admin.ads")}
             </button>
           )}
           {can("recipes") && (
@@ -144,12 +143,7 @@ export function Admin() {
         {tab === "recipes" && can("recipes") && <AdminRecipes equipment={meta?.equipment ?? []} photos={!!meta?.photos} ai={!!meta?.ai} onToast={setToast} editId={params.id} onOpen={(id) => nav(`/admin/recipes/${encodeURIComponent(id)}`)} onClose={() => nav("/admin/recipes")} />}
         {tab === "moderation" && can("moderation") && <AdminModeration onToast={setToast} />}
         {tab === "collections" && can("recipes") && <AdminCollections photos={!!meta?.photos} onToast={setToast} />}
-        {tab === "partners" && can("partners") && (
-          <>
-            <AdminPartners onToast={setToast} />
-            <AdminOffers onToast={setToast} />
-          </>
-        )}
+        {tab === "partners" && can("partners") && <AdminAds onToast={setToast} />}
         {tab === "api" && can("recipes") && <AdminApi onToast={setToast} />}
         {err && <p className="error-inline">{err}</p>}
 
