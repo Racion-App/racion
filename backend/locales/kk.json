@@ -1135,5 +1135,6 @@
   "more": "Тағы",
   "offer.promo": "Промокод",
   "offer.copy": "Промокодты көшіру",
-  "offer.open": "Өту"
+  "offer.open": "Өту",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

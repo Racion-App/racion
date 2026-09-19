@@ -1135,5 +1135,6 @@
   "more": "その他",
   "offer.promo": "プロモコード",
   "offer.copy": "プロモコードをコピー",
-  "offer.open": "開く"
+  "offer.open": "開く",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

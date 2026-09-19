@@ -105,10 +105,14 @@ func (r *Plans) ByUser(ctx context.Context, userID string) ([]domain.PlanSummary
 		}
 		var p planner.Plan
 		_ = json.Unmarshal(raw, &p)
-		out = append(out, domain.PlanSummary{
+		ps := domain.PlanSummary{
 			ID: id, Title: title, StartDate: p.Params.StartDate, Store: p.Store.Name, Cost: p.Totals.Cost, Country: planner.CountryOf(p.Params.Country), Portions: p.Portions,
-			CreatedAt: created.UTC().Format(time.RFC3339), Checked: checked, Items: p.Totals.Items, Shared: shared,
-		})
+			CreatedAt: created.UTC().Format(time.RFC3339), Checked: checked, Items: p.Totals.Items, Shared: shared, Occasion: p.Occasion,
+		}
+		if p.Occasion != nil && len(p.Days) > 0 {
+			ps.Date = p.Days[0].Date
+		}
+		out = append(out, ps)
 	}
 	return out, wrap("plans.by_user", rows.Err())
 }

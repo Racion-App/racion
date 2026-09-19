@@ -1148,5 +1148,6 @@
   "more": "Další",
   "offer.promo": "Promo kód",
   "offer.copy": "Zkopírovat kód",
-  "offer.open": "Otevřít"
+  "offer.open": "Otevřít",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

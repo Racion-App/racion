@@ -1134,5 +1134,6 @@
   "more": "Altro",
   "offer.promo": "Codice promo",
   "offer.copy": "Copia il codice",
-  "offer.open": "Apri"
+  "offer.open": "Apri",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

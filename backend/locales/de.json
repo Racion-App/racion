@@ -1166,5 +1166,6 @@
   "more": "Mehr",
   "offer.promo": "Aktionscode",
   "offer.copy": "Aktionscode kopieren",
-  "offer.open": "Öffnen"
+  "offer.open": "Öffnen",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

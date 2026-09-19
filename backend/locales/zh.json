@@ -1135,5 +1135,6 @@
   "more": "更多",
   "offer.promo": "优惠码",
   "offer.copy": "复制优惠码",
-  "offer.open": "打开"
+  "offer.open": "打开",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

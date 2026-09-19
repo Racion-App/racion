@@ -1215,5 +1215,6 @@
   "admin.offers.err.url": "Адрес: https://…",
   "admin.offers.err.image": "Картинка: https://… или /images/…",
   "admin.offers.err.date": "Дата в формате ГГГГ-ММ-ДД",
-  "admin.offers.err.erid": "Для рекламы в РФ нужен erid"
+  "admin.offers.err.erid": "Для рекламы в РФ нужен erid",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

@@ -1148,5 +1148,6 @@
   "more": "Ще",
   "offer.promo": "Промокод",
   "offer.copy": "Скопіювати промокод",
-  "offer.open": "Перейти"
+  "offer.open": "Перейти",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

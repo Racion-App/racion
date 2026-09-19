@@ -15,7 +15,7 @@ import { NotifyCard } from "../components/NotifyCard";
 import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { approx, weekRange } from "../lib/format";
+import { approx, dateShort, weekRange } from "../lib/format";
 import { track } from "../lib/analytics";
 import type { Family, Favorite, Meta, OwnRecipe, PlanSummary, Purchase } from "../lib/types";
 import { slotLabel } from "../lib/types";
@@ -48,7 +48,7 @@ export function Account() {
   const [familyDirty, setFamilyDirty] = useState(false);
   const [familySaving, setFamilySaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const { t, lang } = useT();
+  const { t, tn, lang } = useT();
   const approxRub = (v: number) => approx(v, undefined, lang);
   // Страна для цены своих рецептов: из последнего квиза, иначе по языку интерфейса.
   const countryCode = (user?.defaults as { country?: string } | undefined)?.country || langCountry(lang);
@@ -422,11 +422,11 @@ export function Account() {
               <div className="planrow" key={p.id}>
                 <Link to={`/plan/${p.id}`} className="planrow__main">
                   <span className="planrow__title">
-                    {p.title || t("plan.title", { range: weekRange(p.startDate, lang) })}
+                    {p.title || (p.occasion ? `${p.occasion.title} ${t("occ.for", { n: p.occasion.guests, guests: tn("guests", p.occasion.guests) })}` : t("plan.title", { range: weekRange(p.startDate, lang) }))}
                     {p.shared && <span className="dish__own">{t("plan.shared")}</span>}
                   </span>
                   <span className="planrow__meta">
-                    {t("account.plan.meta", { store: p.store, portions: p.portions, cost: approx(p.cost, p.country, lang) })}
+                    {p.occasion ? t("account.plan.meta.occ", { date: dateShort(p.date || p.startDate, lang), store: p.store, cost: approx(p.cost, p.country, lang) }) : t("account.plan.meta", { store: p.store, portions: p.portions, cost: approx(p.cost, p.country, lang) })}
                     {p.items > 0 && <> {t("account.plan.bought", { n: p.checked, total: p.items })}</>}
                   </span>
                 </Link>

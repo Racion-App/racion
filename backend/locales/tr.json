@@ -1134,5 +1134,6 @@
   "more": "Daha fazla",
   "offer.promo": "Promosyon kodu",
   "offer.copy": "Kodu kopyala",
-  "offer.open": "Aç"
+  "offer.open": "Aç",
+  "account.plan.meta.occ": "{date} · {store} · {cost}"
 }

@@ -73,6 +73,8 @@ type PlanSummary struct {
 	Checked   int             `json:"checked"`
 	Items     int             `json:"items"`
 	Shared    bool            `json:"shared"` // чужой план, к которому присоединились
+	Occasion  *planner.OccasionInfo `json:"occasion,omitempty"` // праздник вместо недели: в истории подписываем событием и датой
+	Date      string          `json:"date,omitempty"`     // день праздника
 }
 
 // CheckInput — отметка «куплено» по позиции списка.
