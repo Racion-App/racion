@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
+	"math"
 	"net/http"
+	"strconv"
 
 	"go.uber.org/zap"
 
+	"racion/internal/domain"
 	"racion/internal/i18n"
+	"racion/internal/planner"
 	"racion/internal/service"
 )
 
@@ -182,15 +186,105 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 	}
 	cover := col.CoverAuto
 	base := s.baseURL(r)
+	text := col.TextFor(string(pl.L))
+	// факты для шапки: число рецептов, разброс цены порции, времени и калорий
+	type fact struct{ Value, Label string }
+	var facts []fact
+	if len(cards) > 0 {
+		minC, maxC, minT, maxT, minK, maxK := cards[0].Cost, cards[0].Cost, cards[0].TimeMin, cards[0].TimeMin, cards[0].Kcal, cards[0].Kcal
+		for _, c := range cards[1:] {
+			minC, maxC = math.Min(minC, c.Cost), math.Max(maxC, c.Cost)
+			minT, maxT = min(minT, c.TimeMin), max(maxT, c.TimeMin)
+			minK, maxK = math.Min(minK, c.Kcal), math.Max(maxK, c.Kcal)
+		}
+		facts = append(facts, fact{strconv.Itoa(len(cards)), i18n.Plural(pl.L, len(cards), "catalog.recipe")})
+		if maxC > 0 {
+			facts = append(facts, fact{rangeLabel(formatMoney(pl.Country, minC), formatMoney(pl.Country, maxC)), i18n.T(pl.L, "coll.fact.cost")})
+		}
+		facts = append(facts, fact{rangeLabel(strconv.Itoa(minT), strconv.Itoa(maxT)) + " " + i18n.T(pl.L, "min"), i18n.T(pl.L, "coll.fact.time")})
+		facts = append(facts, fact{rangeLabel(strconv.Itoa(int(minK)), strconv.Itoa(int(maxK))), i18n.T(pl.L, "coll.fact.kcal")})
+	}
+	// рецепты по приёмам пищи в их порядке; одна группа — без заголовка группы, только счётчик
+	type group struct {
+		Key, Title string
+		Cards      []recipeCard
+	}
+	var groups []group
+	// праздничная подборка (большинство блюд с тегом festive) — по курсам стола: салаты, закуски, первое,
+	// горячее, десерт; обычная — по приёмам пищи
+	// признак стола: много салатов, закусок и десертов, а не блюд по приёмам пищи
+	table := 0
+	for _, rc := range recipes {
+		if hasTag(rc, "festive") || hasTag(rc, "salad") || hasTag(rc, "dessert") || rc.Slot == "snack" {
+			table++
+		}
+	}
+	if len(recipes) > 0 && table*10 >= len(recipes)*4 {
+		course := func(rc planner.Recipe) string {
+			switch {
+			case hasTag(rc, "salad"):
+				return "salads"
+			case hasTag(rc, "dessert") || hasTag(rc, "sweet") || hasTag(rc, "drink"):
+				return "desserts"
+			case hasTag(rc, "soup"):
+				return "soup"
+			case rc.Slot == "snack" || hasTag(rc, "nocook"):
+				return "starters"
+			}
+			return "mains"
+		}
+		byCourse := map[string][]recipeCard{}
+		for i, rc := range recipes {
+			k := course(rc)
+			byCourse[k] = append(byCourse[k], cards[i])
+		}
+		for _, k := range []string{"salads", "starters", "soup", "mains", "desserts"} {
+			if g := byCourse[k]; len(g) > 0 {
+				groups = append(groups, group{k, i18n.T(pl.L, "course."+k), g})
+			}
+		}
+	} else {
+		for _, slot := range []string{"breakfast", "lunch", "dinner", "snack"} {
+			var g []recipeCard
+			for _, c := range cards {
+				if c.Slot == slot {
+					g = append(g, c)
+				}
+			}
+			if len(g) > 0 {
+				groups = append(groups, group{slot, planner.SlotLabel(pl.L, slot), g})
+			}
+		}
+	}
+	if len(groups) == 1 {
+		groups[0].Title = i18n.T(pl.L, "coll.recipes.title")
+	}
+	// другие подборки — перелинковка
+	type colCard struct {
+		Name, Slug, Cover, Href string
+		Count                   int
+	}
+	var others []colCard
+	allCurated := s.svc.Collections.Curated(r.Context())
+	for _, oc := range allCurated {
+		if oc.ID == col.ID || !oc.Public {
+			continue
+		}
+		oc = oc.Localized(string(pl.L))
+		others = append(others, colCard{Name: oc.Name, Slug: oc.Slug, Cover: oc.CoverAuto, Href: pl.P + "/collection/" + oc.Slug, Count: len(oc.Recipes)})
+		if len(others) >= 6 {
+			break
+		}
+	}
 	var alts []altLink
 	for _, l := range i18n.Langs {
 		m := i18n.Meta(l)
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards)},
+		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
-		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID,
+		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "collection.html", data); err != nil {
@@ -253,7 +347,7 @@ func (s *Server) collectionsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // collectionLD — подборка как ItemList рецептов плюс хлебные крошки: поисковики и ассистенты видят состав целиком.
-func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []recipeCard) template.JS {
+func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []recipeCard, faq []domain.QA) template.JS {
 	items := make([]map[string]any, 0, len(cards))
 	for i, c := range cards {
 		items = append(items, map[string]any{"@type": "ListItem", "position": i + 1, "url": base + pl.P + "/recipe/" + c.ID, "name": c.Title})
@@ -261,6 +355,22 @@ func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []r
 	url := base + pl.P + "/collection/" + slug
 	list := map[string]any{"@type": "ItemList", "@id": url + "#list", "url": url, "name": name, "description": desc, "numberOfItems": len(cards), "itemListElement": items, "inLanguage": string(pl.L)}
 	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "coll.public.title"), base + pl.P + "/collections"}, {name, ""}})
-	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{list, crumbs}})
+	graph := []any{list, crumbs}
+	if len(faq) > 0 {
+		var qs []map[string]any
+		for _, x := range faq {
+			qs = append(qs, map[string]any{"@type": "Question", "name": x.Q, "acceptedAnswer": map[string]any{"@type": "Answer", "text": x.A}})
+		}
+		graph = append(graph, map[string]any{"@type": "FAQPage", "mainEntity": qs})
+	}
+	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": graph})
 	return template.JS(b)
+}
+
+// rangeLabel — «33–104» или одно значение, если границы совпали.
+func rangeLabel(a, b string) string {
+	if a == b {
+		return a
+	}
+	return a + "–" + b
 }

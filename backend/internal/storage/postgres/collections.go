@@ -16,7 +16,7 @@ func (r *Collections) List(ctx context.Context, userID string) ([]domain.Collect
 	return r.query(ctx, `WHERE c.user_id = $1 AND NOT c.curated`, userID)
 }
 
-const collCols = `c.id, c.name, c.created_at, c.public, c.curated, COALESCE(c.slug, ''), c.description, c.cover, COALESCE(u.nick, ''), c.name_i18n, c.description_i18n,
+const collCols = `c.id, c.name, c.created_at, c.public, c.curated, COALESCE(c.slug, ''), c.description, c.cover, COALESCE(u.nick, ''), c.name_i18n, c.description_i18n, c.seo,
 	COALESCE(array_agg(i.recipe_id ORDER BY i.added_at) FILTER (WHERE i.recipe_id IS NOT NULL), '{}')`
 
 func (r *Collections) query(ctx context.Context, where string, args ...any) ([]domain.Collection, error) {
@@ -29,7 +29,7 @@ func (r *Collections) query(ctx context.Context, where string, args ...any) ([]d
 	for rows.Next() {
 		var c domain.Collection
 		var t time.Time
-		if err := rows.Scan(&c.ID, &c.Name, &t, &c.Public, &c.Curated, &c.Slug, &c.Description, &c.Cover, &c.Author, &c.Names, &c.Descriptions, &c.Recipes); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &t, &c.Public, &c.Curated, &c.Slug, &c.Description, &c.Cover, &c.Author, &c.Names, &c.Descriptions, &c.SEO, &c.Recipes); err != nil {
 			return nil, wrap("collections.list", err)
 		}
 		c.CreatedAt = t.UTC().Format(time.RFC3339)

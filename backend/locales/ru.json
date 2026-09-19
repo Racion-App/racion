@@ -1166,5 +1166,12 @@
   "recipe.notes.swaps": "Чем заменить",
   "recipe.notes.mistakes": "Где ошибаются",
   "recipe.notes.keep": "Хранить и разогреть",
-  "recipe.notes.serve": "С чем подать"
+  "recipe.notes.serve": "С чем подать",
+  "coll.how": "Как пользоваться",
+  "coll.faq": "Вопросы",
+  "coll.others": "Другие подборки",
+  "coll.recipes.title": "Рецепты подборки",
+  "coll.fact.cost": "за порцию",
+  "coll.fact.time": "на готовку",
+  "coll.fact.kcal": "ккал на порцию"
 }

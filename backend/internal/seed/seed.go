@@ -377,6 +377,7 @@ func seedCollections(ctx context.Context, pool *pgxpool.Pool) error {
 		Public                         bool
 		Names, Descriptions            map[string]string
 		Recipes                        []string
+		SEO                            map[string]json.RawMessage `json:"seo"`
 	}
 	if err := json.Unmarshal(raw, &list); err != nil {
 		return fmt.Errorf("collections.json: %w", err)
@@ -389,11 +390,14 @@ func seedCollections(ctx context.Context, pool *pgxpool.Pool) error {
 			c.Descriptions = map[string]string{}
 		}
 		var id string
-		if err := pool.QueryRow(ctx, `INSERT INTO collections (user_id, name, description, cover, slug, public, curated, name_i18n, description_i18n)
-			VALUES (NULL, $1, $2, $3, $4, $5, true, $6, $7)
+		if c.SEO == nil {
+			c.SEO = map[string]json.RawMessage{}
+		}
+		if err := pool.QueryRow(ctx, `INSERT INTO collections (user_id, name, description, cover, slug, public, curated, name_i18n, description_i18n, seo)
+			VALUES (NULL, $1, $2, $3, $4, $5, true, $6, $7, $8)
 			ON CONFLICT (slug) WHERE slug IS NOT NULL DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, cover = EXCLUDED.cover,
-			public = EXCLUDED.public, curated = true, name_i18n = EXCLUDED.name_i18n, description_i18n = EXCLUDED.description_i18n
-			RETURNING id`, c.Name, c.Description, c.Cover, c.Slug, c.Public, c.Names, c.Descriptions).Scan(&id); err != nil {
+			public = EXCLUDED.public, curated = true, name_i18n = EXCLUDED.name_i18n, description_i18n = EXCLUDED.description_i18n, seo = EXCLUDED.seo
+			RETURNING id`, c.Name, c.Description, c.Cover, c.Slug, c.Public, c.Names, c.Descriptions, c.SEO).Scan(&id); err != nil {
 			return fmt.Errorf("collection %s: %w", c.Slug, err)
 		}
 		if _, err := pool.Exec(ctx, `DELETE FROM collection_items WHERE collection_id = $1`, id); err != nil {

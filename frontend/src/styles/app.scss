@@ -1584,3 +1584,32 @@ main.pages.is-loading {
 .notes__row { display: grid; gap: 4px; @media (min-width: 640px) { grid-template-columns: 160px minmax(0, 1fr); gap: 16px; }
   dt { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); letter-spacing: 0.01em; padding-top: 2px; }
   dd { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ds-label-primary); } }
+
+// Страница подборки: шапка с фактами и двумя кнопками, вступление колонкой текста, группы рецептов,
+// «Как пользоваться» и вопросы двумя колонками, другие подборки внизу
+.colhead--rich { align-items: start; margin-bottom: 8px;
+  .colhead__img { aspect-ratio: 4 / 3; }
+  .colhead__body { gap: 10px; padding-top: 4px; }
+  .colhead__title { font-size: 32px; @media (min-width: 720px) { font-size: 38px; } } }
+.colhead__eyebrow { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ds-label-tertiary); }
+.colhead__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; .btn { display: inline-flex; align-items: center; gap: 8px; }
+  .is-done { color: var(--ds-green); } }
+.colfacts { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 22px;
+  li { display: grid; gap: 1px; }
+  b { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  span { font-size: 12px; color: var(--ds-label-tertiary); } }
+.coltext { max-width: 640px; margin: 10px 0 0; padding-top: 14px; border-top: 1px solid var(--ds-separator); font-size: 15.5px; line-height: 1.55; color: var(--ds-label-secondary);
+  p { margin: 0 0 10px; } p:last-child { margin-bottom: 0; } }
+.colgroup { margin-top: 26px; .rpage__section-head h2 { display: flex; align-items: baseline; gap: 8px; } }
+.colhow { display: grid; gap: 28px; margin: 36px 0 8px; padding: 24px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  @media (min-width: 860px) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; padding: 28px 32px; }
+  h2 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.015em; }
+  &__col { display: grid; gap: 10px; align-content: start; font-size: 15.5px; line-height: 1.55; p { margin: 0; } .btn { justify-self: start; margin-top: 6px; } } }
+.faq { border-top: 1px solid var(--ds-separator); padding: 10px 0;
+  &:last-child { border-bottom: 1px solid var(--ds-separator); }
+  summary { cursor: pointer; font-weight: 600; font-size: 15.5px; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center;
+    &::-webkit-details-marker { display: none; }
+    &::after { content: "+"; font-size: 20px; line-height: 1; color: var(--ds-label-tertiary); flex: 0 0 auto; } }
+  &[open] summary::after { content: "–"; }
+  p { margin: 8px 0 0; color: var(--ds-label-secondary); } }
+.colstrip__row--wrap { display: flex; flex-wrap: wrap; gap: 8px; }

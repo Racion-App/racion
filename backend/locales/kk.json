@@ -1117,5 +1117,12 @@
   "recipe.notes.swaps": "Немен алмастыруға болады",
   "recipe.notes.mistakes": "Жиі кездесетін қателер",
   "recipe.notes.keep": "Сақтау және жылыту",
-  "recipe.notes.serve": "Немен беру"
+  "recipe.notes.serve": "Немен беру",
+  "coll.how": "Қалай пайдалану",
+  "coll.faq": "Сұрақтар",
+  "coll.others": "Басқа жинақтар",
+  "coll.recipes.title": "Жинақ рецепттері",
+  "coll.fact.cost": "бір порцияға",
+  "coll.fact.time": "дайындауға",
+  "coll.fact.kcal": "порцияға ккал"
 }

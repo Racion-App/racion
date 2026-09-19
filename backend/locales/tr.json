@@ -1116,5 +1116,12 @@
   "recipe.notes.swaps": "Yerine ne koyulur",
   "recipe.notes.mistakes": "Sık yapılan hatalar",
   "recipe.notes.keep": "Saklama ve ısıtma",
-  "recipe.notes.serve": "Yanında ne gider"
+  "recipe.notes.serve": "Yanında ne gider",
+  "coll.how": "Nasıl kullanılır",
+  "coll.faq": "Sorular",
+  "coll.others": "Diğer koleksiyonlar",
+  "coll.recipes.title": "Koleksiyondaki tarifler",
+  "coll.fact.cost": "porsiyon başına",
+  "coll.fact.time": "pişirme",
+  "coll.fact.kcal": "porsiyon başına kcal"
 }

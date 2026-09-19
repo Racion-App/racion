@@ -260,6 +260,29 @@ type Collection struct {
 	Names        map[string]string `json:"names,omitempty"`        // переводы названия по языкам (редакционные)
 	Descriptions map[string]string `json:"descriptions,omitempty"` // переводы описания
 	Author       string            `json:"author,omitempty"`       // ник владельца для публичной страницы
+	SEO          map[string]CollectionText `json:"seo,omitempty"`  // редакционный текст по языкам
+}
+
+// CollectionText — текст страницы подборки: вступление (абзацы), как пользоваться (абзацы), вопросы-ответы.
+type CollectionText struct {
+	Intro []string `json:"intro,omitempty"`
+	How   []string `json:"how,omitempty"`
+	FAQ   []QA     `json:"faq,omitempty"`
+}
+
+type QA struct {
+	Q string `json:"q"`
+	A string `json:"a"`
+}
+
+// TextFor — текст подборки на языке с запасом en → ru.
+func (c Collection) TextFor(lang string) CollectionText {
+	for _, code := range []string{lang, "en", "ru"} {
+		if t, ok := c.SEO[code]; ok && (len(t.Intro) > 0 || len(t.FAQ) > 0) {
+			return t
+		}
+	}
+	return CollectionText{}
 }
 
 // ── Админка ─────────────────────────────────────────────────────────────────

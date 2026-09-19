@@ -100,6 +100,12 @@
 })();
 
 // Каталог без перезагрузки: клик по стране, фильтру, странице и поиск подменяют <main> ответом сервера
+// «Поделиться» на страницах подборок: системный диалог или копирование адреса
+(function(){
+  var b=document.querySelector("[data-share-page]");if(!b)return;
+  b.addEventListener("click",function(){var url=location.origin+location.pathname;if(navigator.share){navigator.share({title:document.title,url:url}).catch(function(){});return}
+    navigator.clipboard.writeText(url).then(function(){b.classList.add("is-done");setTimeout(function(){b.classList.remove("is-done")},1500)})});
+})();
 // Метрика подключена inline в layout.html; живой каталог меняет адрес через pushState — сообщаем о просмотре
 (function(){
   if(!window.ym)return;var id=112818312;

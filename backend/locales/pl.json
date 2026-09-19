@@ -1130,5 +1130,12 @@
   "recipe.notes.swaps": "Zamienniki",
   "recipe.notes.mistakes": "Częste błędy",
   "recipe.notes.keep": "Przechowywanie i odgrzewanie",
-  "recipe.notes.serve": "Z czym podać"
+  "recipe.notes.serve": "Z czym podać",
+  "coll.how": "Jak korzystać",
+  "coll.faq": "Pytania",
+  "coll.others": "Inne kolekcje",
+  "coll.recipes.title": "Przepisy z kolekcji",
+  "coll.fact.cost": "za porcję",
+  "coll.fact.time": "gotowania",
+  "coll.fact.kcal": "kcal na porcję"
 }

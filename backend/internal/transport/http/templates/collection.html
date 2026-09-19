@@ -1,19 +1,64 @@
 {{template "head" .}}
-<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><span>{{t .L "coll.public.one"}}</span></nav>
-<header class="colhead">
-  {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512">{{end}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><a href="{{.P}}/collections">{{t .L "coll.public.title"}}</a><span>›</span><span>{{.Col.Name}}</span></nav>
+
+<header class="colhead colhead--rich">
+  {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512" fetchpriority="high">{{end}}
   <div class="colhead__body">
+    <p class="colhead__eyebrow">{{t .L "coll.public.one"}}{{if and .Col.Author (not .Col.Curated)}} · @{{.Col.Author}}{{end}}</p>
     <h1 class="colhead__title">{{.Col.Name}}</h1>
     {{if .Col.Description}}<p class="colhead__lead">{{.Col.Description}}</p>{{end}}
-    <p class="colhead__meta">{{len .Cards}} {{t .L "recipes.n"}}{{if and .Col.Author (not .Col.Curated)}} · @{{.Col.Author}}{{end}}</p>
-    <a class="btn btn-primary" href="{{.PlanHref}}">{{t .L "coll.week"}}</a>
+    {{if .Facts}}<ul class="colfacts">{{range .Facts}}<li><b class="num">{{.Value}}</b><span>{{.Label}}</span></li>{{end}}</ul>{{end}}
+    <div class="colhead__actions">
+      <a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{t .L "coll.week"}}</a>
+      <button type="button" class="btn btn-soft btn-lg" data-share-page aria-label="{{t .L "social.share"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg> {{t .L "social.share"}}</button>
+    </div>
+    {{if .Text.Intro}}<div class="coltext">{{range .Text.Intro}}<p>{{.}}</p>{{end}}</div>{{end}}
   </div>
 </header>
-{{if .Cards}}
-<div class="rgrid">
-  {{range .Cards}}{{template "card" .}}{{end}}
-</div>
+
+{{if .Groups}}
+{{range .Groups}}
+<section class="rpage__section colgroup" aria-labelledby="g-{{.Key}}">
+  <div class="rpage__section-head">
+    <h2 id="g-{{.Key}}">{{.Title}} <span class="catsection__n num">{{len .Cards}}</span></h2>
+  </div>
+  <div class="rgrid">{{range .Cards}}{{template "card" .}}{{end}}</div>
+</section>
+{{end}}
 {{else}}
 <div class="state"><div class="state__box"><h2>{{t .L "coll.items.empty.public"}}</h2></div></div>
+{{end}}
+
+{{if or .Text.How .Text.FAQ}}
+<section class="colhow" aria-labelledby="how">
+  {{if .Text.How}}
+  <div class="colhow__col">
+    <h2 id="how">{{t .L "coll.how"}}</h2>
+    {{range .Text.How}}<p>{{.}}</p>{{end}}
+    <a class="btn btn-primary" href="{{.PlanHref}}">{{t .L "coll.week"}}</a>
+  </div>
+  {{end}}
+  {{if .Text.FAQ}}
+  <div class="colhow__col">
+    <h2>{{t .L "coll.faq"}}</h2>
+    {{range .Text.FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+  </div>
+  {{end}}
+</section>
+{{end}}
+
+{{if .Others}}
+<section class="rpage__foot rpage__section" aria-labelledby="more-cols">
+  <div class="rpage__section-head">
+    <h2 id="more-cols">{{t .L "coll.others"}}</h2>
+    <a class="rpage__more" href="{{.P}}/collections">{{t .L "coll.public.all" .OthersTotal}}</a>
+  </div>
+  <div class="colstrip__row colstrip__row--wrap">
+    {{range .Others}}<a class="colmini" href="{{.Href}}">
+      {{if .Cover}}<img class="colmini__img" src="{{.Cover}}" alt="" loading="lazy">{{else}}<span class="colmini__img colmini__img--empty" aria-hidden="true"></span>{{end}}
+      <span class="colmini__body"><b>{{.Name}}</b><small>{{.Count}} {{t $.L "recipes.n"}}</small></span>
+    </a>{{end}}
+  </div>
+</section>
 {{end}}
 {{template "foot" .}}

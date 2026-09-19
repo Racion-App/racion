@@ -1116,5 +1116,12 @@
   "recipe.notes.swaps": "Sostituzioni",
   "recipe.notes.mistakes": "Errori comuni",
   "recipe.notes.keep": "Conservare e riscaldare",
-  "recipe.notes.serve": "Servire con"
+  "recipe.notes.serve": "Servire con",
+  "coll.how": "Come usarla",
+  "coll.faq": "Domande",
+  "coll.others": "Altre raccolte",
+  "coll.recipes.title": "Ricette della raccolta",
+  "coll.fact.cost": "a porzione",
+  "coll.fact.time": "di cottura",
+  "coll.fact.kcal": "kcal a porzione"
 }

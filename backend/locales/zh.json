@@ -1117,5 +1117,12 @@
   "recipe.notes.swaps": "可替换食材",
   "recipe.notes.mistakes": "常见错误",
   "recipe.notes.keep": "保存与加热",
-  "recipe.notes.serve": "搭配建议"
+  "recipe.notes.serve": "搭配建议",
+  "coll.how": "如何使用",
+  "coll.faq": "常见问题",
+  "coll.others": "更多合集",
+  "coll.recipes.title": "合集中的食谱",
+  "coll.fact.cost": "每份",
+  "coll.fact.time": "烹饪时间",
+  "coll.fact.kcal": "每份千卡"
 }

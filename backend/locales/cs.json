@@ -1130,5 +1130,12 @@
   "recipe.notes.swaps": "Náhrady",
   "recipe.notes.mistakes": "Časté chyby",
   "recipe.notes.keep": "Skladování a ohřev",
-  "recipe.notes.serve": "S čím podávat"
+  "recipe.notes.serve": "S čím podávat",
+  "coll.how": "Jak sbírku použít",
+  "coll.faq": "Otázky",
+  "coll.others": "Další sbírky",
+  "coll.recipes.title": "Recepty ve sbírce",
+  "coll.fact.cost": "za porci",
+  "coll.fact.time": "příprava",
+  "coll.fact.kcal": "kcal na porci"
 }

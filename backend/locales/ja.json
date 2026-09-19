@@ -1117,5 +1117,12 @@
   "recipe.notes.swaps": "代用できる材料",
   "recipe.notes.mistakes": "よくある失敗",
   "recipe.notes.keep": "保存と温め直し",
-  "recipe.notes.serve": "合わせるもの"
+  "recipe.notes.serve": "合わせるもの",
+  "coll.how": "使い方",
+  "coll.faq": "よくある質問",
+  "coll.others": "その他のコレクション",
+  "coll.recipes.title": "コレクションのレシピ",
+  "coll.fact.cost": "1人前あたり",
+  "coll.fact.time": "調理時間",
+  "coll.fact.kcal": "1人前のkcal"
 }

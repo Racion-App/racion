@@ -1148,5 +1148,12 @@
   "recipe.notes.swaps": "Ersatz",
   "recipe.notes.mistakes": "Häufige Fehler",
   "recipe.notes.keep": "Aufbewahren und aufwärmen",
-  "recipe.notes.serve": "Dazu passt"
+  "recipe.notes.serve": "Dazu passt",
+  "coll.how": "So nutzt du sie",
+  "coll.faq": "Fragen",
+  "coll.others": "Weitere Sammlungen",
+  "coll.recipes.title": "Rezepte der Sammlung",
+  "coll.fact.cost": "pro Portion",
+  "coll.fact.time": "Zubereitung",
+  "coll.fact.kcal": "kcal pro Portion"
 }

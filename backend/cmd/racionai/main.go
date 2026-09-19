@@ -24,6 +24,7 @@ import (
 	"syscall"
 
 	"racion/internal/ai"
+	"racion/internal/i18n"
 	"racion/locales"
 )
 
@@ -155,6 +156,8 @@ func main() {
 		err = genIngredients(ctx, client, langs)
 	case "notes":
 		err = genNotes(ctx, client, langs, *workers, *only, *limit, *force)
+	case "collections":
+		err = genCollectionText(ctx, client, langs, *only, *force)
 	default:
 		usage()
 	}
@@ -711,5 +714,155 @@ func genNotes(ctx context.Context, client *ai.Client, langs []string, workers in
 		return err
 	}
 	fmt.Printf("notes: готово %d, ошибок %d → %s\n", done, failed, path)
+	return nil
+}
+
+// genCollectionText — редакционный текст страниц подборок (вступление, как пользоваться, вопросы-ответы)
+// на языках -to → поле seo в internal/seed/data/collections.json. Ккал и цена порции считаются грубо
+// по ingredients.json (RU), чтобы у модели были цифры; на странице они всё равно берутся из каталога.
+func genCollectionText(ctx context.Context, client *ai.Client, langs []string, only string, force bool) error {
+	dir := filepath.Join("internal", "seed", "data")
+	type ing struct {
+		ID    string  `json:"id"`
+		Pack  float64 `json:"pack"`
+		Price float64 `json:"price"`
+		Kcal  float64 `json:"kcal"`
+	}
+	var ingf struct {
+		Items []ing `json:"items"`
+	}
+	raw, err := os.ReadFile(filepath.Join(dir, "ingredients.json"))
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(raw, &ingf); err != nil {
+		return err
+	}
+	ings := map[string]ing{}
+	for _, i := range ingf.Items {
+		ings[i.ID] = i
+	}
+	type rec struct {
+		ID          string              `json:"id"`
+		Title       string              `json:"title"`
+		Slot        string              `json:"slot"`
+		Time        int                 `json:"time"`
+		Ingredients [][]json.RawMessage `json:"ingredients"`
+	}
+	recs := map[string]rec{}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		n := e.Name()
+		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" || n == "recipes_notes.json" {
+			continue
+		}
+		var f struct {
+			Items []rec `json:"items"`
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, n))
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return fmt.Errorf("%s: %w", n, err)
+		}
+		for _, r := range f.Items {
+			recs[r.ID] = r
+		}
+	}
+	en := readRecipeFile(filepath.Join(dir, "recipes_i18n_en.json")).Items
+	slotNames := map[string]map[string]string{
+		"ru": {"breakfast": "завтрак", "lunch": "обед", "dinner": "ужин", "snack": "перекус"},
+		"en": {"breakfast": "breakfast", "lunch": "lunch", "dinner": "dinner", "snack": "snack"},
+	}
+	describe := func(r rec, lang string) string {
+		var kcal, cost float64
+		for _, pair := range r.Ingredients {
+			var id string
+			var amt float64
+			_ = json.Unmarshal(pair[0], &id)
+			_ = json.Unmarshal(pair[1], &amt)
+			if i, ok := ings[id]; ok {
+				kcal += i.Kcal * amt / 100
+				if i.Pack > 0 {
+					cost += i.Price * amt / i.Pack
+				}
+			}
+		}
+		title := r.Title
+		if lang == "en" {
+			if t, ok := en[r.ID]; ok && t.Title != "" {
+				title = t.Title
+			}
+		}
+		sn := slotNames[lang]
+		if sn == nil {
+			sn = slotNames["en"]
+		}
+		return fmt.Sprintf("%s — %s, %d min, %.0f kcal, %.0f RUB", title, sn[r.Slot], r.Time, kcal, cost)
+	}
+	path := filepath.Join(dir, "collections.json")
+	raw, err = os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var cols []map[string]any
+	if err := json.Unmarshal(raw, &cols); err != nil {
+		return err
+	}
+	onlySet := map[string]bool{}
+	for _, id := range strings.Split(only, ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			onlySet[id] = true
+		}
+	}
+	done, failed := 0, 0
+	for _, c := range cols {
+		slug, _ := c["slug"].(string)
+		if len(onlySet) > 0 && !onlySet[slug] {
+			continue
+		}
+		seo, _ := c["seo"].(map[string]any)
+		if seo == nil {
+			seo = map[string]any{}
+		}
+		names, _ := c["names"].(map[string]any)
+		descs, _ := c["descriptions"].(map[string]any)
+		ids, _ := c["recipes"].([]any)
+		for _, lang := range langs {
+			if _, ok := seo[lang]; ok && !force {
+				continue
+			}
+			in := ai.CollectionInput{Name: fmt.Sprint(c["name"]), Description: fmt.Sprint(c["description"]), Country: "RU", Button: i18n.T(i18n.Lang(lang), "coll.week")}
+			if lang != "ru" {
+				if n, ok := names[lang].(string); ok && n != "" {
+					in.Name = n
+				}
+				if d, ok := descs[lang].(string); ok && d != "" {
+					in.Description = d
+				}
+			}
+			for _, id := range ids {
+				if r, ok := recs[fmt.Sprint(id)]; ok {
+					in.Recipes = append(in.Recipes, describe(r, lang))
+				}
+			}
+			t, err := client.CollectionText(ctx, lang, in)
+			if err != nil {
+				failed++
+				fmt.Printf("  %s/%s: %v\n", slug, lang, err)
+				continue
+			}
+			seo[lang] = t
+			done++
+			fmt.Printf("  %s/%s\n", slug, lang)
+		}
+		c["seo"] = seo
+	}
+	out, _ := json.MarshalIndent(cols, "", " ")
+	if err := os.WriteFile(path, out, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("collections: готово %d, ошибок %d → %s\n", done, failed, path)
 	return nil
 }

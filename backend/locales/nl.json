@@ -1116,5 +1116,12 @@
   "recipe.notes.swaps": "Vervangingen",
   "recipe.notes.mistakes": "Veelgemaakte fouten",
   "recipe.notes.keep": "Bewaren en opwarmen",
-  "recipe.notes.serve": "Serveer met"
+  "recipe.notes.serve": "Serveer met",
+  "coll.how": "Zo gebruik je het",
+  "coll.faq": "Vragen",
+  "coll.others": "Meer collecties",
+  "coll.recipes.title": "Recepten in deze collectie",
+  "coll.fact.cost": "per portie",
+  "coll.fact.time": "bereiding",
+  "coll.fact.kcal": "kcal per portie"
 }

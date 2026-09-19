@@ -1130,5 +1130,12 @@
   "recipe.notes.swaps": "Чим замінити",
   "recipe.notes.mistakes": "Де помиляються",
   "recipe.notes.keep": "Зберігати й розігрівати",
-  "recipe.notes.serve": "З чим подати"
+  "recipe.notes.serve": "З чим подати",
+  "coll.how": "Як користуватися",
+  "coll.faq": "Запитання",
+  "coll.others": "Інші добірки",
+  "coll.recipes.title": "Рецепти добірки",
+  "coll.fact.cost": "за порцію",
+  "coll.fact.time": "на готування",
+  "coll.fact.kcal": "ккал на порцію"
 }

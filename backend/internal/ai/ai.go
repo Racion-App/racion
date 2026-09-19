@@ -395,3 +395,174 @@ func notesTooLong(n Notes) bool {
 	}
 	return false
 }
+
+// CollectionText — текст страницы подборки: вступление, как пользоваться, три вопроса-ответа.
+type CollectionText struct {
+	Intro Paragraphs `json:"intro"`
+	How   Paragraphs `json:"how"`
+	FAQ   QAList     `json:"faq"`
+}
+
+type QA struct {
+	Q string `json:"q"`
+	A string `json:"a"`
+}
+
+// QAList — вопросы-ответы: принимаем массив {q,a} или {question,answer}, либо объект «вопрос: ответ».
+type QAList []QA
+
+func (l *QAList) UnmarshalJSON(b []byte) error {
+	var arr []map[string]string
+	if err := json.Unmarshal(b, &arr); err == nil {
+		var out []QA
+		for _, m := range arr {
+			q := firstOf(m, "q", "question", "Q")
+			a := firstOf(m, "a", "answer", "A")
+			if q != "" && a != "" {
+				out = append(out, QA{q, a})
+			}
+		}
+		*l = out
+		return nil
+	}
+	var obj map[string]string
+	if err := json.Unmarshal(b, &obj); err != nil {
+		return err
+	}
+	// объект вида {"Вопрос1": …, "Ответ1": …} или {"q1": …, "a1": …}: пары по цифре в ключе
+	byNum := map[string]*QA{}
+	var order []string
+	var out []QA
+	for k, v := range obj {
+		num := strings.Map(func(r rune) rune {
+			if r >= '0' && r <= '9' {
+				return r
+			}
+			return -1
+		}, k)
+		lk := strings.ToLower(k)
+		isQ := strings.HasPrefix(lk, "q") || strings.Contains(lk, "вопрос") || strings.Contains(lk, "question")
+		isA := strings.HasPrefix(lk, "a") || strings.Contains(lk, "ответ") || strings.Contains(lk, "answer")
+		if num != "" && (isQ || isA) {
+			if byNum[num] == nil {
+				byNum[num] = &QA{}
+				order = append(order, num)
+			}
+			if isQ {
+				byNum[num].Q = v
+			} else {
+				byNum[num].A = v
+			}
+			continue
+		}
+		if k != "" && v != "" {
+			out = append(out, QA{k, v}) // «вопрос: ответ»
+		}
+	}
+	sort.Strings(order)
+	for _, n := range order {
+		if qa := byNum[n]; qa.Q != "" && qa.A != "" {
+			out = append(out, *qa)
+		}
+	}
+	*l = out
+	return nil
+}
+
+func firstOf(m map[string]string, keys ...string) string {
+	for _, k := range keys {
+		if v := strings.TrimSpace(m[k]); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// Paragraphs — модель отдаёт то массив абзацев, то одну строку с пустыми строками между абзацами; принимаем оба.
+type Paragraphs []string
+
+func (p *Paragraphs) UnmarshalJSON(b []byte) error {
+	var arr []string
+	if err := json.Unmarshal(b, &arr); err == nil {
+		*p = arr
+		return nil
+	}
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	var out []string
+	for _, part := range strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n\n") {
+		if part = strings.TrimSpace(part); part != "" {
+			out = append(out, part)
+		}
+	}
+	*p = out
+	return nil
+}
+
+// CollectionInput — что даём модели: название, подводка, список рецептов с приёмом, временем, ккал и ценой.
+type CollectionInput struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Recipes     []string `json:"recipes"` // «Овсянка с ягодами — завтрак, 10 мин, 340 ккал, 65 ₽»
+	Country     string   `json:"country"`
+	Button      string   `json:"-"` // подпись кнопки на странице (coll.week на языке)
+}
+
+const collectionSystem = `You write the editorial text for a recipe collection page, in %[1]s, for a meal-planning app that builds a weekly menu with store prices and a shopping list. Input: the collection name, its one-line lead, and its recipes with meal slot, cooking time, calories and cost per portion.
+Return JSON:
+- "intro": two paragraphs, 40–70 words each. First: who this collection is for and what problem it solves (a real situation: weekday evenings, guests on Saturday, a child's party). Second: what is inside — name 3–4 dishes from the list with a concrete detail each (time, price, what makes it easy).
+- "how": one or two paragraphs, 30–50 words each: how to use it — the button builds a week from these dishes and the planner fills the other meals; what to buy once for several dishes; what can be cooked ahead. Only claims that follow from the data.
+- "faq": exactly three questions a person would type into a search box about this topic, each with a 20–45 word answer grounded in the recipes (cost range, time range, what to swap, what keeps). Shape: [{"q": "…", "a": "…"}, {"q": "…", "a": "…"}, {"q": "…", "a": "…"}].
+The button on the page is called "%[2]s" and the app is called Racion (Рацион in Russian); do not use other names for them.
+House style (plain prose): address the reader as «ты» in Russian, imperative in English; facts with numbers from the input; no openers ("in today's world", "let's"), no closers ("enjoy", "bon appétit"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no lists of three for rhythm, no bureaucratic phrasing («является», «данный», «в рамках», "utilize", "leverage"). Plain text, no markdown, no headings inside fields.`
+
+// CollectionText — текст подборки на языке lang.
+func (c *Client) CollectionText(ctx context.Context, lang string, in CollectionInput) (CollectionText, error) {
+	user, _ := json.Marshal(in)
+	var out CollectionText
+	if err := c.JSON(ctx, fmt.Sprintf(collectionSystem, langName(lang), in.Button), string(user), &out); err != nil {
+		return out, err
+	}
+	if len(out.Intro) == 0 {
+		return out, errors.New("ai: empty collection text")
+	}
+	out.Intro = splitLong(out.Intro, 75)
+	out.How = splitLong(out.How, 60)
+	return out, nil
+}
+
+// splitLong — абзац длиннее limit слов делится на два по границе предложения ближе к середине.
+func splitLong(ps Paragraphs, limit int) Paragraphs {
+	var out Paragraphs
+	for _, p := range ps {
+		words := strings.Fields(p)
+		if len(words) <= limit {
+			out = append(out, p)
+			continue
+		}
+		mid := len(p) / 2
+		best := -1
+		for i := 0; i < len(p)-1; i++ {
+			if (p[i] == '.' || p[i] == '!' || p[i] == '?') && p[i+1] == ' ' {
+				if best < 0 || abs(i-mid) < abs(best-mid) {
+					best = i
+				}
+			}
+		}
+		if best < 0 {
+			out = append(out, p)
+			continue
+		}
+		out = append(out, strings.TrimSpace(p[:best+1]), strings.TrimSpace(p[best+1:]))
+	}
+	return out
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
