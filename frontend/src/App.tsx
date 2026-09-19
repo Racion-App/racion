@@ -8,6 +8,7 @@ const Account = lazy(() => import("./pages/Account").then((m) => ({ default: m.A
 const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
 const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
 const Occasion = lazy(() => import("./pages/Occasion").then((m) => ({ default: m.Occasion })));
+const Cook = lazy(() => import("./pages/Cook").then((m) => ({ default: m.Cook })));
 import { AuthProvider } from "./lib/auth";
 import { LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";
@@ -28,6 +29,7 @@ export function App() {
           <Route path="/admin/:tab" element={<Admin />} />
           <Route path="/admin/recipes/:id" element={<Admin />} />
           <Route path="/event/:id" element={<Occasion />} />
+          <Route path="/cook/:id" element={<Cook />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>

@@ -17,9 +17,11 @@ export const approx = (v: number, c: Country | undefined, lang?: Lang) => `≈ $
 
 export function qty(v: number, unit: string, lang: Lang = "ru"): string {
   const u = (k: string) => tStatic(`unit.${k}`);
-  if (unit === "pcs") return `${Math.round(v)} ${u("pcs")}`;
-  if (unit === "ml") return v >= 1000 ? `${trim(v / 1000, lang)} ${u("l")}` : `${Math.round(v)} ${u("ml")}`;
-  return v >= 1000 ? `${trim(v / 1000, lang)} ${u("kg")}` : `${Math.round(v)} ${u("g")}`;
+  // меньше грамма (перец, специи) — один знак после запятой, а не «0 г»
+  const small = (n: number) => (n > 0 && n < 1 ? n.toFixed(1).replace(".", decimalSep(lang)) : String(Math.round(n)));
+  if (unit === "pcs") return `${v > 0 && v < 1 ? trim(v, lang) : Math.round(v)} ${u("pcs")}`;
+  if (unit === "ml") return v >= 1000 ? `${trim(v / 1000, lang)} ${u("l")}` : `${small(v)} ${u("ml")}`;
+  return v >= 1000 ? `${trim(v / 1000, lang)} ${u("kg")}` : `${small(v)} ${u("g")}`;
 }
 
 function trim(v: number, lang: Lang) {

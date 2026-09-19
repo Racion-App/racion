@@ -1561,3 +1561,6 @@ main.pages.is-loading {
     &:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--ds-blue-tint), 0 1px 3px rgba(0, 0, 0, 0.25); }
     &:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--ds-blue-tint), 0 1px 3px rgba(0, 0, 0, 0.25); } } }
 .chips--quick { margin-top: 2px; }
+
+// «Готовить» в строке действий страницы рецепта: единственная primary-кнопка шапки, иконка шефа
+.social__cook { display: inline-flex; align-items: center; gap: 6px; margin-right: 4px; }
