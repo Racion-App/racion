@@ -1,0 +1,15 @@
+# racion.app: TLS от Let's Encrypt, HTTP → HTTPS сам, www → без www. Зона .app в HSTS-preload, поэтому
+# заголовок HSTS обязателен. Дальше — nginx фронтенда (статика, лимиты, боты для превью, /api → backend).
+{
+	email info@racion.app
+}
+
+racion.app {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	reverse_proxy frontend:80
+}
+
+www.racion.app {
+	redir https://racion.app{uri} permanent
+}
