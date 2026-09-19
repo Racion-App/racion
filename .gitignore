@@ -29,3 +29,4 @@ __pycache__/
 /scripts/
 .impeccable/hook.cache.json
 frontend/.impeccable/hook.cache.json
+/todo/
