@@ -13,7 +13,6 @@ type Config struct {
 	LogFormat       string // json | console
 	BaseURL         string // публичный адрес сайта для canonical и sitemap; пусто — из заголовков запроса
 	MetrikaID       string // счётчик Яндекс Метрики на SSR-страницах; пусто — не подключать
-	LegalOwner      string // кто предоставляет сервис — в условиях и политике
 	LegalEmail      string // почта для жалоб и вопросов о данных
 	PushContact     string // контакт оператора для VAPID (mailto:…), его видят push-сервисы
 	OpenAIKey       string // ключ OpenAI для переводов и улучшения рецептов; пусто — функции ИИ выключены
@@ -43,7 +42,6 @@ func Load() Config {
 		LogFormat:       env("LOG_FORMAT", "json"),
 		BaseURL:         env("BASE_URL", ""),
 		MetrikaID:       env("METRIKA_ID", ""),
-		LegalOwner:      env("LEGAL_OWNER", "Вадим Бобков"),
 		LegalEmail:      env("LEGAL_EMAIL", "info@racion.app"),
 		PushContact:     env("PUSH_CONTACT", "mailto:admin@racion.app"),
 		OpenAIKey:       env("OPENAI_API_KEY", ""),

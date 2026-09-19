@@ -1095,5 +1095,6 @@
   "legal.privacy.desc": "Welke gegevens Racion verzamelt, waarom, waar ze staan en hoe je ze verwijdert.",
   "auth.legal.pre": "Door je te registreren accepteer je de",
   "auth.legal.and": "en het",
-  "auth.consent": "Ik geef toestemming voor de verwerking van mijn gegevens, inclusief de allergieën, doelen en gezinssamenstelling die ik opgeef — alleen om het menu af te stemmen."
+  "auth.consent": "Ik geef toestemming voor de verwerking van mijn gegevens, inclusief de allergieën, doelen en gezinssamenstelling die ik opgeef — alleen om het menu af te stemmen.",
+  "filter.price.any": "alle"
 }

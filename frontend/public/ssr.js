@@ -146,6 +146,20 @@
     e.preventDefault();
     load(a.href,true,inPager?".rgrid":null);
   });
+  // ползунок цены: подпись меняется на ходу, запрос уходит при отпускании; крайнее правое = без ограничения
+  function money(v,sym,dec){var s=dec>0?v.toFixed(dec).replace(".",","):String(Math.round(v));return sym==="$"||sym==="£"?sym+s:s+" "+sym}
+  main.addEventListener("input",function(e){
+    var r=e.target;if(!r.matches("[data-price]"))return;
+    var out=main.querySelector("[data-price-out]"),v=Number(r.value);
+    if(out)out.textContent=v>=Number(r.max)?out.dataset.any:(out.dataset.upto||"").replace("{0}",money(v,r.dataset.symbol,Number(r.dataset.decimals)));
+  });
+  main.addEventListener("change",function(e){
+    var r=e.target;if(!r.matches("[data-price]"))return;
+    var u=new URL(location.href),v=Number(r.value);
+    if(v>=Number(r.max))u.searchParams.delete("price");else u.searchParams.set("price",String(v));
+    u.searchParams.delete("p");
+    load(u.toString(),true,null);
+  });
   main.addEventListener("submit",function(e){
     var f=e.target;if(!f.classList.contains("pages__search"))return;
     e.preventDefault();

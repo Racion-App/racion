@@ -1096,5 +1096,6 @@
   "legal.privacy.desc": "Racion 收集哪些数据、用途、存储位置以及如何删除。",
   "auth.legal.pre": "注册即表示你接受",
   "auth.legal.and": "和",
-  "auth.consent": "我同意处理我的数据，包括我填写的过敏、饮食目标和家庭成员信息——仅用于定制菜单。"
+  "auth.consent": "我同意处理我的数据，包括我填写的过敏、饮食目标和家庭成员信息——仅用于定制菜单。",
+  "filter.price.any": "不限"
 }

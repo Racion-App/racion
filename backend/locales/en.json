@@ -1127,5 +1127,6 @@
   "legal.privacy.desc": "What data Racion collects, why, where it is stored and how to delete it.",
   "auth.legal.pre": "By signing up you accept the",
   "auth.legal.and": "and",
-  "auth.consent": "I consent to processing my data, including the allergies, dietary goals and household I enter — only to tailor the menu."
+  "auth.consent": "I consent to processing my data, including the allergies, dietary goals and household I enter — only to tailor the menu.",
+  "filter.price.any": "any"
 }

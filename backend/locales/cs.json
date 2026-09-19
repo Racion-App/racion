@@ -1109,5 +1109,6 @@
   "legal.privacy.desc": "Jaké údaje Racion sbírá, proč, kde je ukládá a jak je smazat.",
   "auth.legal.pre": "Registrací přijímáte",
   "auth.legal.and": "a",
-  "auth.consent": "Souhlasím se zpracováním svých údajů včetně uvedených alergií, stravovacích cílů a složení domácnosti — pouze pro sestavení jídelníčku."
+  "auth.consent": "Souhlasím se zpracováním svých údajů včetně uvedených alergií, stravovacích cílů a složení domácnosti — pouze pro sestavení jídelníčku.",
+  "filter.price.any": "libovolná"
 }

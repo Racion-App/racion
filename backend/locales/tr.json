@@ -1095,5 +1095,6 @@
   "legal.privacy.desc": "Racion hangi verileri toplar, neden, nerede saklar ve nasıl silinir.",
   "auth.legal.pre": "Kaydolarak şunları kabul edersiniz:",
   "auth.legal.and": "ve",
-  "auth.consent": "Belirttiğim alerjiler, beslenme hedefleri ve hane bilgileri dahil verilerimin yalnızca menü uyarlaması için işlenmesine izin veriyorum."
+  "auth.consent": "Belirttiğim alerjiler, beslenme hedefleri ve hane bilgileri dahil verilerimin yalnızca menü uyarlaması için işlenmesine izin veriyorum.",
+  "filter.price.any": "fark etmez"
 }

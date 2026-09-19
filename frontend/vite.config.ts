@@ -18,6 +18,8 @@ export default defineConfig({
   },
   build: {
     sourcemap: false,
+    assetsInlineLimit: 0, // флаги flag-icons — отдельными SVG по запросу, а не 400 КБ data-URI в app.css
+
     rollupOptions: {
       output: {
         // Стабильные имена: страницы рецептов с бэкенда подключают /assets/app.css напрямую.

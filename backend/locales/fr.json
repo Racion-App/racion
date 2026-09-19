@@ -1095,5 +1095,6 @@
   "legal.privacy.desc": "Quelles données Racion collecte, pourquoi, où elles sont stockées et comment les supprimer.",
   "auth.legal.pre": "En vous inscrivant, vous acceptez les",
   "auth.legal.and": "et la",
-  "auth.consent": "J’accepte le traitement de mes données, y compris les allergies, objectifs et composition du foyer que j’indique — uniquement pour adapter le menu."
+  "auth.consent": "J’accepte le traitement de mes données, y compris les allergies, objectifs et composition du foyer que j’indique — uniquement pour adapter le menu.",
+  "filter.price.any": "indifférent"
 }

@@ -281,6 +281,15 @@ type filterView struct {
 		ID, Label, Href string
 		On              bool
 	}
+	Slider *priceSlider // у группы «цена» вместо чипов ползунок
+}
+
+// priceSlider — «не дороже N» одним движением: шкала от половины нижнего порога страны до двух верхних,
+// крайнее правое значение = без ограничения. Value — текущий порог (или Max, если фильтра нет).
+type priceSlider struct {
+	Min, Max, Step, Value float64
+	Label, Any, Symbol    string
+	Active                bool
 }
 
 // recipesPage — /recipes: каталог с фильтрами, умным поиском и постраничкой. Обычный HTML, без React.
@@ -310,6 +319,12 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			for _, o := range g.Options {
 				if o == v && !active.Has(g.Param, v) {
 					active[g.Param] = append(active[g.Param], v)
+				}
+			}
+			// цена — ползунок: любое число в валюте страны (порог «не дороже»)
+			if g.Param == "price" && len(active["price"]) == 0 {
+				if f, err := strconv.ParseFloat(v, 64); err == nil && f > 0 && f < 1e6 {
+					active["price"] = []string{strconv.FormatFloat(f, 'f', -1, 64)}
 				}
 			}
 		}
@@ -434,6 +449,36 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, g := range service.CatalogFilters {
 		fv := filterView{Param: g.Param, Label: i18n.T(pl.L, "filter."+g.Param)}
+		if g.Param == "price" {
+			lv := pl.Country.PriceLevels
+			sl := &priceSlider{Min: lv[0] / 2, Max: lv[2] * 2, Symbol: pl.Country.Symbol, Any: i18n.T(pl.L, "filter.price.any")}
+			sl.Step = 1
+			if pl.Country.Decimals > 0 {
+				sl.Step = 0.1
+			} else if sl.Max >= 1000 {
+				sl.Step = 10
+			} else if sl.Max >= 200 {
+				sl.Step = 5
+			}
+			sl.Value = sl.Max
+			if v := active["price"]; len(v) > 0 {
+				if idx, ok := map[string]int{"1": 0, "2": 1, "3": 2}[v[0]]; ok {
+					sl.Value = lv[idx]
+				} else if f, err := strconv.ParseFloat(v[0], 64); err == nil {
+					sl.Value = f
+				}
+				sl.Active = true
+				activeCount++
+				titleParts = append(titleParts, strings.ToLower(i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, sl.Value))))
+			}
+			sl.Label = i18n.T(pl.L, "filter.price.upto", formatMoney(pl.Country, sl.Value))
+			if !sl.Active {
+				sl.Label = sl.Any
+			}
+			fv.Slider = sl
+			views = append(views, fv)
+			continue
+		}
 		for _, o := range g.Options {
 			on := active.Has(g.Param, o)
 			label := filterLabel(pl, g.Param, o)
@@ -694,27 +739,33 @@ func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
-	fmt.Fprintf(w, `# Racion (Рацион)
+	fmt.Fprintf(w, `# Racion
 
-> Free weekly meal planner: seven questions (country and store, who eats, allergies, kitchen equipment, meals, budget) → seven days of dishes with real store prices and one shopping list rounded to packs. 15 languages, 22 countries, holiday tables, family weeks. No subscription.
+> Free weekly meal planner: seven questions (country and store, who eats, allergies, kitchen equipment, meals, budget) give seven days of dishes with real store prices and one shopping list rounded to packs. 15 languages, 22 countries, holiday tables, family weeks. No subscription.
 
-## Read
-- Recipes catalog (server-rendered HTML, schema.org Recipe JSON-LD on every recipe): %[1]s/recipes — other languages: %[1]s/en/recipes, %[1]s/de/recipes, …
-- Collections (schema.org ItemList): %[1]s/collections
-- Sitemap: %[1]s/sitemap.xml
-- Each recipe: name, description, ingredients with grams per portion, steps, kcal/protein/fat/carbs, estimated cost in the reader's country, equipment, tags.
+## Recipes
 
-## Do not fetch
-- /api/ (private JSON API), /plan/ (personal weekly plans), /me, /login, /admin
+- [Recipe catalog](%[1]s/recipes): server-rendered HTML, filters by meal, time, calories, price and equipment; every recipe page carries schema.org Recipe JSON-LD with ingredients per portion, steps, nutrition and estimated cost.
+- [English catalog](%[1]s/en/recipes), [German](%[1]s/de/recipes), [Spanish](%[1]s/es/recipes), [French](%[1]s/fr/recipes) — other languages follow the same pattern: /<code>/recipes.
+- [Collections](%[1]s/collections): curated sets (holiday tables, quick dinners, dacha and grill) as schema.org ItemList.
+- [Sitemap](%[1]s/sitemap.xml): all recipe and collection pages in every language.
+
+## Policies
+
+- [Terms of use](%[1]s/terms): recipes and photos are for personal, non-commercial use; no bulk copying or model training without permission.
+- [Privacy policy](%[1]s/privacy)
+- Do not fetch /api/, /plan/, /me, /login, /admin — private endpoints and personal plans.
 
 ## About
-- Source: https://github.com/Racion-App/racion (AGPL-3.0). Contact: info@racion.app
+
+- [Source code](https://github.com/Racion-App/racion) (AGPL-3.0)
+- Contact: info@racion.app
 `, base)
 }
 
 // Юридические страницы: условия и политика. Тексты — в legal.html на русском и английском; остальные языки
 // получают английскую версию (перевод юридического текста без юриста — хуже, чем понятный английский).
-var legalOwner, legalEmail string
+var legalEmail string
 
 const legalUpdated = "2026-09-19"
 
@@ -734,10 +785,6 @@ func (s *Server) legalPage(w http.ResponseWriter, r *http.Request) {
 	}
 	title := i18n.T(pl.L, "legal."+doc)
 	base := s.baseURL(r)
-	owner := legalOwner
-	if owner == "" {
-		owner = "владелец сервиса"
-	}
 	email := legalEmail
 	if email == "" {
 		email = "info@racion.app"
@@ -746,6 +793,6 @@ func (s *Server) legalPage(w http.ResponseWriter, r *http.Request) {
 	_ = pageTpl.ExecuteTemplate(w, "legal.html", map[string]any{
 		"Base": pageBase{Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "legal."+doc+".desc"), Canonical: base + pl.P + "/" + doc, OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/"+doc)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country,
-		"Title": title, "Doc": doc + "_" + textLang, "Updated": humanDate(pl.L, legalUpdated), "Other": other, "OtherTitle": i18n.T(pl.L, otherKey), "Owner": owner, "Email": email,
+		"Title": title, "Doc": doc + "_" + textLang, "Updated": humanDate(pl.L, legalUpdated), "Other": other, "OtherTitle": i18n.T(pl.L, otherKey), "Email": email,
 	})
 }

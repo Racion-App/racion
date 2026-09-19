@@ -1,11 +1,13 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Quiz } from "./pages/Quiz";
-import { Plan } from "./pages/Plan";
-import { Login } from "./pages/Login";
-import { Account } from "./pages/Account";
-import { Admin } from "./pages/Admin";
-import { NotFound } from "./pages/NotFound";
-import { Occasion } from "./pages/Occasion";
+// Квиз — в основном бандле (главная), остальные страницы подгружаются по маршруту: первый экран легче
+const Plan = lazy(() => import("./pages/Plan").then((m) => ({ default: m.Plan })));
+const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
+const Account = lazy(() => import("./pages/Account").then((m) => ({ default: m.Account })));
+const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
+const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
+const Occasion = lazy(() => import("./pages/Occasion").then((m) => ({ default: m.Occasion })));
 import { AuthProvider } from "./lib/auth";
 import { LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";
@@ -16,6 +18,7 @@ export function App() {
     <AuthProvider>
       <ConfirmProvider>
       <BrowserRouter>
+        <Suspense fallback={<div className="boot" role="status" aria-busy="true"><span className="boot__spin" /></div>}>
         <Routes>
           <Route path="/" element={<Quiz />} />
           <Route path="/plan/:id" element={<Plan />} />
@@ -27,6 +30,7 @@ export function App() {
           <Route path="/event/:id" element={<Occasion />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
       </ConfirmProvider>
     </AuthProvider>

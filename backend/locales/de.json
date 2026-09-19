@@ -1127,5 +1127,6 @@
   "legal.privacy.desc": "Welche Daten Racion erhebt, wozu, wo sie liegen und wie du sie löschst.",
   "auth.legal.pre": "Mit der Registrierung akzeptierst du die",
   "auth.legal.and": "und die",
-  "auth.consent": "Ich stimme der Verarbeitung meiner Daten zu, einschließlich der von mir angegebenen Allergien, Ernährungsziele und Haushaltsangaben — nur zur Menüplanung."
+  "auth.consent": "Ich stimme der Verarbeitung meiner Daten zu, einschließlich der von mir angegebenen Allergien, Ernährungsziele und Haushaltsangaben — nur zur Menüplanung.",
+  "filter.price.any": "beliebig"
 }

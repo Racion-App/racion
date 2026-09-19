@@ -40,14 +40,13 @@ type Deps struct {
 	Health   func() error // проверка живости хранилища для /healthz
 	BaseURL  string       // например https://racion.app; пусто — брать из запроса
 	Metrika  string       // id счётчика Яндекс Метрики для SSR-страниц
-	Owner    string       // владелец сервиса для условий и политики (LEGAL_OWNER)
 	Contact  string       // почта для юридических страниц (LEGAL_EMAIL)
 	Logs     *logger.Ring // последние записи лога для админки
 }
 
 func New(d Deps) http.Handler {
 	metrikaID = d.Metrika
-	legalOwner, legalEmail = d.Owner, d.Contact
+	legalEmail = d.Contact
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)

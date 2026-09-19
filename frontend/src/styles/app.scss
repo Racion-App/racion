@@ -765,7 +765,7 @@ a { text-underline-offset: 3px; }
   .filters__group { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 0; border: 0; }
   .filters__label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-label-tertiary); }
   &__done { display: none; }
-  @media (min-width: 900px) { position: sticky; top: 72px; max-height: calc(100dvh - 88px); overflow: auto; padding-right: 4px; scrollbar-width: thin; }
+  @media (min-width: 900px) { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow: auto; padding-right: 4px; scrollbar-width: thin; }
   @media (max-width: 899px) {
     display: none;
     &.is-open { display: grid; position: fixed; inset: 0; z-index: 60; background: var(--ds-bg-base); padding: 16px 16px calc(16px + var(--r-safe-bottom)); overflow: auto; overscroll-behavior: contain; animation: sheet-up var(--ds-dur-base) var(--ds-ease-standard); }
@@ -1545,3 +1545,7 @@ main.pages.is-loading {
   &__mark { border-radius: 11px; box-shadow: var(--ds-shadow-lg); }
   &__spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--ds-fill-3); border-top-color: var(--ds-blue); opacity: 0;
     animation: spin 0.8s linear infinite, fade-in var(--ds-dur-fast) 300ms forwards; } }
+
+// Ползунок цены в фильтрах: синяя дорожка до бегунка, подпись текущего порога справа от заголовка группы
+.filters__out { float: right; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--ds-label-primary); }
+.filters__range { width: 100%; margin: 6px 0 2px; accent-color: var(--ds-blue); height: 28px; cursor: pointer; }

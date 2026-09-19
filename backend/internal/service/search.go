@@ -3,6 +3,7 @@ package service
 import (
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -339,8 +340,13 @@ func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Cou
 	}
 	if v := f["price"]; len(v) > 0 {
 		cost, ok := c.catalog.Load().PortionCost(r, country.Code)
-		idx := map[string]int{"1": 0, "2": 1, "3": 2}[v[0]]
-		if ok && cost > country.PriceLevels[idx] {
+		limit := 0.0
+		if idx, legacy := map[string]int{"1": 0, "2": 1, "3": 2}[v[0]]; legacy {
+			limit = country.PriceLevels[idx]
+		} else {
+			limit, _ = strconv.ParseFloat(v[0], 64)
+		}
+		if ok && limit > 0 && cost > limit {
 			return false
 		}
 	}

@@ -39,10 +39,14 @@
   </details>
   {{range .Filters}}{{if ne .Param "slot"}}
   <div class="filters__group">
-    <div class="filters__label">{{.Label}}</div>
+    <div class="filters__label">{{.Label}}{{if .Slider}} <output class="filters__out num" data-price-out data-any="{{.Slider.Any}}" data-upto="{{t $.L "filter.price.upto" "{0}"}}">{{.Slider.Label}}</output>{{end}}</div>
+    {{if .Slider}}
+    <input class="filters__range" type="range" data-price min="{{.Slider.Min}}" max="{{.Slider.Max}}" step="{{.Slider.Step}}" value="{{.Slider.Value}}" data-symbol="{{.Slider.Symbol}}" data-decimals="{{$.Country.Decimals}}" aria-label="{{.Label}}">
+    {{else}}
     <div class="chips">
       {{range .Options}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}}</a>{{end}}
     </div>
+    {{end}}
   </div>
   {{end}}{{end}}
   <button type="button" class="btn btn-primary btn-lg catside__done" data-filters-close>{{t .L "catalog.show" .Total}}</button>
