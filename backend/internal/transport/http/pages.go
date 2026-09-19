@@ -843,13 +843,15 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 		{
 			"identifier": "urn:air:" + host + ":site:collections", "displayName": "Racion curated collections", "type": "text/html",
 			"url": base + "/collections", "description": "Curated recipe sets: holiday tables, quick dinners, dacha and grill, kids party — schema.org ItemList.",
+			"representativeQueries": []string{"new year table menu", "quick dinners for a week", "what to grill at the dacha"},
 		},
 		{
 			"identifier": "urn:air:" + host + ":doc:llms", "displayName": "Racion llms.txt", "type": "text/markdown",
 			"url": base + "/llms.txt", "description": "Site overview for language models: what to read, what not to fetch, usage terms.",
+			"representativeQueries": []string{"how to use racion.app data", "racion recipe usage terms"},
 		},
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
-	_ = json.NewEncoder(w).Encode(map[string]any{"entries": entries})
+	_ = json.NewEncoder(w).Encode(map[string]any{"specVersion": "1.0", "host": host, "entries": entries})
 }
