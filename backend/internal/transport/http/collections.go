@@ -148,6 +148,9 @@ func (s *Server) adminSaveCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	col, err := s.svc.Collections.SaveCurated(r.Context(), *u, in)
+	if err == nil && col.Public {
+		s.notifySearch("/collection/"+col.Slug, "/collections")
+	}
 	if err != nil {
 		s.fail(w, r, err)
 		return

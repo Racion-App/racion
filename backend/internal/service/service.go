@@ -3,6 +3,7 @@
 package service
 
 import (
+	"go.uber.org/zap"
 	"context"
 	"encoding/json"
 	"time"
@@ -132,6 +133,7 @@ type Services struct {
 	Partners     *Partners
 	Offers       *Offers
 	Ads          *Ads
+	IndexNow     *IndexNow
 	APIKeys      *APIKeys
 }
 
@@ -153,6 +155,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Partners:    NewPartners(repos.Partners),
 		Offers:      NewOffers(repos.Offers),
 		Ads:         NewAds(repos.Settings),
+		IndexNow:    NewIndexNow(repos.Settings, baseURL, zap.L().Named("indexnow")),
 		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
 	}

@@ -110,6 +110,9 @@ func (s *Server) adminSaveRecipesBatch(w http.ResponseWriter, r *http.Request) {
 	okN := 0
 	for _, rc := range in {
 		saved, err := s.svc.CatalogAdmin.Save(r.Context(), rc)
+		if err == nil {
+			s.notifySearch("/recipe/" + saved.ID)
+		}
 		if err != nil {
 			msg := err.Error()
 			var ve *domain.ValidationError

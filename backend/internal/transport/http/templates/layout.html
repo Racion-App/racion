@@ -11,7 +11,7 @@
 <meta name="description" content="{{.Base.Description}}">
 <link rel="canonical" href="{{.Base.Canonical}}">
 <link rel="ard" href="/.well-known/ard.json">
-{{if .Base.NoIndex}}<meta name="robots" content="noindex, nofollow">
+{{if .Base.NoIndex}}<meta name="robots" content="noindex">
 {{end}}{{range .Base.Alternates}}<link rel="alternate" hreflang="{{.Lang}}" href="{{.Href}}">
 {{end}}{{if .Base.Alternates}}<link rel="alternate" hreflang="x-default" href="{{(index .Base.Alternates 0).Href}}">{{end}}
 <meta property="og:title" content="{{.Base.Title}}">

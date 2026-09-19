@@ -543,11 +543,20 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	if q != "" {
 		title = "«" + q + "» — " + i18n.T(pl.L, "catalog.search") + " · " + i18n.T(pl.L, "page.brand")
 	}
+	// canonical без цены и валюты: те же рецепты в другой валюте — не отдельная страница; поиск и ценовые
+	// срезы не индексируем, чтобы не плодить почти одинаковые страницы
+	canon := service.ActiveFilters{}
+	for k, v := range active {
+		if k != "price" && k != "pmin" {
+			canon[k] = v
+		}
+	}
 	data := map[string]any{
 		"Base": pageBase{
 			Title:       title,
 			Description: i18n.T(pl.L, "catalog.meta", total, i18n.Plural(pl.L, total, "catalog.recipe")),
-			Canonical:   base + link(active, page),
+			Canonical:   base + link(canon, page),
+			NoIndex:     q != "" || len(active["price"]) > 0 || len(active["pmin"]) > 0,
 			OGImage:     brandOG(base, pl.L),
 			OGWide:      true,
 			JSONLD:      catalogLD(base, pl, title),
@@ -688,41 +697,6 @@ func (s *Server) errorPage(w http.ResponseWriter, r *http.Request, code int) {
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "Code": code,
 		"Title": i18n.T(pl.L, "page."+key+".title"), "Text": i18n.T(pl.L, "page."+key+".text"),
 	})
-}
-
-func (s *Server) sitemap(w http.ResponseWriter, r *http.Request) {
-	base := s.baseURL(r)
-	var b strings.Builder
-	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n")
-	fmt.Fprintf(&b, "<url><loc>%s/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n", base)
-	community, _ := s.svc.Moderation.Approved(r.Context(), 500)
-	curated := s.svc.Collections.Curated(r.Context())
-	for _, l := range i18n.Langs {
-		p := prefix(l)
-		fmt.Fprintf(&b, "<url><loc>%s%s/recipes</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n", base, p)
-		for _, g := range service.CatalogFilters[:3] {
-			for _, o := range g.Options {
-				fmt.Fprintf(&b, "<url><loc>%s%s/recipes?%s=%s</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>\n", base, p, g.Param, o)
-			}
-		}
-		for _, rc := range s.catalog.Recipes {
-			fmt.Fprintf(&b, "<url><loc>%s%s/recipe/%s</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n", base, p, rc.ID)
-		}
-		for _, col := range curated {
-			fmt.Fprintf(&b, "<url><loc>%s%s/collection/%s</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>\n", base, p, col.Slug)
-		}
-		for _, rc := range community {
-			fmt.Fprintf(&b, "<url><loc>%s%s/recipe/%s</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>\n", base, p, rc.ID)
-		}
-	}
-	b.WriteString("</urlset>\n")
-	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
-	_, _ = w.Write([]byte(b.String()))
-}
-
-func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	fmt.Fprintf(w, "User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /plan/\nDisallow: /me\nDisallow: /login\nSitemap: %s/sitemap.xml\n", s.baseURL(r))
 }
 
 // recipesAPI — тот же каталог в JSON для приложения (поиск, «больше не предлагать»).

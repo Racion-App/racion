@@ -50,6 +50,7 @@ func (s *Server) adminSaveRecipe(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.notifySearch("/recipe/"+rc.ID, "/recipes")
 	writeJSON(w, 200, rc)
 }
 
@@ -90,6 +91,9 @@ func (s *Server) adminDecide(w http.ResponseWriter, r *http.Request) {
 	}
 	if !decode(w, r, 4<<10, &in) {
 		return
+	}
+	if in.Approve {
+		s.notifySearch("/recipe/" + r.PathValue("id"))
 	}
 	if err := s.svc.Moderation.Decide(r.Context(), r.PathValue("id"), in.Approve, in.Note); err != nil {
 		s.fail(w, r, err)
