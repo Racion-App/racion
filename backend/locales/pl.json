@@ -1137,5 +1137,7 @@
   "coll.recipes.title": "Przepisy z kolekcji",
   "coll.fact.cost": "za porcję",
   "coll.fact.time": "gotowania",
-  "coll.fact.kcal": "kcal na porcję"
+  "coll.fact.kcal": "kcal na porcję",
+  "country.hint": "Ceny przepisów i planu pokażemy w walucie wybranego kraju.",
+  "dish.side": "Dodatek"
 }

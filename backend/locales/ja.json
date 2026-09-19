@@ -1124,5 +1124,7 @@
   "coll.recipes.title": "コレクションのレシピ",
   "coll.fact.cost": "1人前あたり",
   "coll.fact.time": "調理時間",
-  "coll.fact.kcal": "1人前のkcal"
+  "coll.fact.kcal": "1人前のkcal",
+  "country.hint": "レシピと献立の価格は、選んだ国の通貨で表示されます。",
+  "dish.side": "付け合わせ"
 }

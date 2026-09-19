@@ -1173,5 +1173,7 @@
   "coll.recipes.title": "Рецепты подборки",
   "coll.fact.cost": "за порцию",
   "coll.fact.time": "на готовку",
-  "coll.fact.kcal": "ккал на порцию"
+  "coll.fact.kcal": "ккал на порцию",
+  "country.hint": "Цены на рецептах и в плане покажем в валюте выбранной страны.",
+  "dish.side": "Гарнир"
 }

@@ -1155,5 +1155,7 @@
   "coll.recipes.title": "Rezepte der Sammlung",
   "coll.fact.cost": "pro Portion",
   "coll.fact.time": "Zubereitung",
-  "coll.fact.kcal": "kcal pro Portion"
+  "coll.fact.kcal": "kcal pro Portion",
+  "country.hint": "Preise in Rezepten und im Plan zeigen wir in der Währung des gewählten Landes.",
+  "dish.side": "Beilage"
 }

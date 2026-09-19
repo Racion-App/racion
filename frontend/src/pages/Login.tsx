@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -102,6 +103,7 @@ export function Login() {
         </p>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

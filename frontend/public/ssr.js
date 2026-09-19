@@ -14,6 +14,10 @@
   // выбор подменяет строку на месте (без сохранения), «вернуть» — обратно
   // «цены для России» → раскрыть фильтры и подвести к стране
   var ld=document.querySelector(".langdlg"),lb=document.querySelector("[data-lang-btn]");
+  // страна и валюта: тот же лист; ссылка ?country=XX сохраняет остальные параметры и сбрасывает страницу
+  var cd=document.querySelector(".countrydlg"),cb=document.querySelector("[data-country-btn]");
+  if(cd&&cb){cb.addEventListener("click",function(){cd.showModal()});var cc=cd.querySelector("[data-country-close]");if(cc)cc.addEventListener("click",function(){cd.close()});cd.addEventListener("click",function(e){if(e.target===cd)cd.close()});
+    cd.addEventListener("click",function(e){var a=e.target.closest("[data-country]");if(!a)return;e.preventDefault();var u=new URL(location.href);u.searchParams.set("country",a.dataset.country);u.searchParams.delete("p");location.href=u.toString()})}
   if(ld&&lb){lb.addEventListener("click",function(){ld.showModal()});var lb2=document.querySelector("[data-lang-btn2]");if(lb2)lb2.addEventListener("click",function(){ld.showModal()});var lc=ld.querySelector("[data-lang-close]");if(lc)lc.addEventListener("click",function(){ld.close()});ld.addEventListener("click",function(e){if(e.target===ld)ld.close()})}
   document.querySelectorAll(".langlist a[data-lang]").forEach(function(a){a.addEventListener("click",function(){
     try{localStorage.setItem("racion.lang",a.dataset.lang)}catch(e){}

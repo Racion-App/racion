@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CopyPlus, Flame, Info, Plus, Printer, RefreshCw, Repeat2, RotateCcw, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { RecipeSheet } from "../components/RecipeSheet";
 import { CartSheet } from "../components/CartSheet";
@@ -892,6 +893,7 @@ export function Plan() {
         </div>
       </div>
 
+      {!storeMode && <SiteFooter />}
       {toast && (
         <div className="toast" role="status">
           {toast}
@@ -980,7 +982,7 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, o
       {dish.side && (
         <div className="dish__side">
           <button type="button" className="dish__side-open" onClick={onOpenSide} aria-label={t("dish.open", { title: dish.side.title })}>
-            <span className="dish__side-plus" aria-hidden>+</span> {dish.side.title}
+            <span className="dish__side-tag">{t("dish.side")}</span> {dish.side.title}
             <span className="num dish__side-num">{dish.side.kcal} {t("kcal")}</span>
           </button>
           {onSwapSide && (

@@ -6,7 +6,7 @@ import { locales, localeMeta, useLang, useT } from "../i18n";
 // Кнопка-переводчик в шапке и лист выбора языка: флаг, название на самом языке, английское название,
 // у неполных переводов — процент. Список приходит из /api/locales, то есть из папки backend/locales.
 
-export function LangButton() {
+export function LangButton({ footer }: { footer?: boolean } = {}) {
   const { t, lang } = useT();
   const { setLang, auto } = useLang();
   const [open, setOpen] = useState(false);
@@ -14,10 +14,16 @@ export function LangButton() {
   const full = localeMeta("ru")?.keys ?? 0;
   return (
     <>
-      <button type="button" className="theme-btn theme-btn--lang" onClick={() => setOpen(true)} aria-label={t("lang")} title={`${t("lang")}: ${localeMeta(lang)?.name ?? lang}`}>
-        <Languages size={18} aria-hidden />
-        <span className={`fi fi-${localeMeta(lang)?.flag ?? "ru"} theme-btn__flag`} aria-hidden />
-      </button>
+      {footer ? (
+        <button type="button" className="sitefoot__lang" onClick={() => setOpen(true)}>
+          <span className={`fi fi-${localeMeta(lang)?.flag ?? "ru"}`} aria-hidden /> {localeMeta(lang)?.name ?? lang}
+        </button>
+      ) : (
+        <button type="button" className="theme-btn theme-btn--lang" onClick={() => setOpen(true)} aria-label={t("lang")} title={`${t("lang")}: ${localeMeta(lang)?.name ?? lang}`}>
+          <Languages size={18} aria-hidden />
+          <span className={`fi fi-${localeMeta(lang)?.flag ?? "ru"} theme-btn__flag`} aria-hidden />
+        </button>
+      )}
       <Sheet open={open} onClose={() => setOpen(false)} title={t("lang.title")} closeLabel={t("close")}>
         <h2>{t("lang.title")}</h2>
         <p className="bsheet__lead">{auto ? t("lang.auto") : t("lang.hint")}</p>

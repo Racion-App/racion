@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, ArrowRight, Baby, CalendarDays, Check, ChefHat, FolderOpen, Home, MapPin, Plus, RefreshCw, Search, Trash2, Unlock, User, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OccasionIcon } from "./Occasion";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { Select } from "../components/Select";
 import { StoreMark, WITH_LOGO } from "../components/StoreMark";
@@ -845,6 +846,7 @@ export function Quiz() {
           </section>
         )}
       </main>
+      <SiteFooter />
 
       <div className="actionbar">
         <div className="actionbar__inner">

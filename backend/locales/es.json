@@ -1124,5 +1124,7 @@
   "coll.recipes.title": "Recetas de la colección",
   "coll.fact.cost": "por ración",
   "coll.fact.time": "de cocina",
-  "coll.fact.kcal": "kcal por ración"
+  "coll.fact.kcal": "kcal por ración",
+  "country.hint": "Los precios de recetas y del plan se mostrarán en la moneda del país elegido.",
+  "dish.side": "Guarnición"
 }

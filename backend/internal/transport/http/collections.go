@@ -282,7 +282,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
+		"Base": pageBase{User: currentUser(r) != nil, Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}
@@ -333,7 +333,7 @@ func (s *Server) collectionsPage(w http.ResponseWriter, r *http.Request) {
 	}
 	base := s.baseURL(r)
 	data := map[string]any{
-		"Base": pageBase{Title: i18n.T(pl.L, "coll.public.title") + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "coll.public.lead"), Canonical: base + pl.P + "/collections", OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/collections")},
+		"Base": pageBase{User: currentUser(r) != nil, Title: i18n.T(pl.L, "coll.public.title") + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "coll.public.lead"), Canonical: base + pl.P + "/collections", OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/collections")},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true, "Collections": cols,
 	}
 	var buf bytes.Buffer

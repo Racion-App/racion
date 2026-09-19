@@ -1137,5 +1137,7 @@
   "coll.recipes.title": "Recepty ve sbírce",
   "coll.fact.cost": "za porci",
   "coll.fact.time": "příprava",
-  "coll.fact.kcal": "kcal na porci"
+  "coll.fact.kcal": "kcal na porci",
+  "country.hint": "Ceny receptů a plánu zobrazíme v měně zvolené země.",
+  "dish.side": "Příloha"
 }

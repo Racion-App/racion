@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Beer, Cake, Circle, Drumstick, Egg, Flower2, Ghost, Gift, Heart, Leaf, Minus, Plus, Sparkles, Sun, Users } from "lucide-react";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { Select } from "../components/Select";
 import { StoreMark } from "../components/StoreMark";
@@ -150,6 +151,7 @@ export function Occasion() {
           </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

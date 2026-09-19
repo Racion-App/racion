@@ -1123,5 +1123,7 @@
   "coll.recipes.title": "Koleksiyondaki tarifler",
   "coll.fact.cost": "porsiyon başına",
   "coll.fact.time": "pişirme",
-  "coll.fact.kcal": "porsiyon başına kcal"
+  "coll.fact.kcal": "porsiyon başına kcal",
+  "country.hint": "Tarif ve plan fiyatları seçtiğiniz ülkenin para biriminde gösterilir.",
+  "dish.side": "Garnitür"
 }

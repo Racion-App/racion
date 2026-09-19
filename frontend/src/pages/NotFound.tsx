@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { SearchX } from "lucide-react";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { useT } from "../i18n";
 
@@ -28,6 +29,7 @@ export function NotFound() {
           </div>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

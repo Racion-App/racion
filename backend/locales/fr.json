@@ -1123,5 +1123,7 @@
   "coll.recipes.title": "Recettes de la sélection",
   "coll.fact.cost": "par portion",
   "coll.fact.time": "de préparation",
-  "coll.fact.kcal": "kcal par portion"
+  "coll.fact.kcal": "kcal par portion",
+  "country.hint": "Les prix des recettes et du plan s’afficheront dans la monnaie du pays choisi.",
+  "dish.side": "Accompagnement"
 }

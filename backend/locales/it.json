@@ -1123,5 +1123,7 @@
   "coll.recipes.title": "Ricette della raccolta",
   "coll.fact.cost": "a porzione",
   "coll.fact.time": "di cottura",
-  "coll.fact.kcal": "kcal a porzione"
+  "coll.fact.kcal": "kcal a porzione",
+  "country.hint": "I prezzi di ricette e piano saranno mostrati nella valuta del paese scelto.",
+  "dish.side": "Contorno"
 }

@@ -1,11 +1,11 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { Image as ImageIcon } from "lucide-react";
 import { useT } from "../i18n";
 
-// Иконка «фото продукта» рядом с названием: по наведению или нажатию показывает картинку 160×160.
+// Миниатюра продукта рядом с названием: по наведению или нажатию раскрывается до 160×160.
 // Картинка живёт в портале с position: fixed — справа от иконки, если не помещается — слева; по вертикали
 // центрируется по иконке и прижимается к краям окна. Так она не накрывает ни свою строку, ни столбец цен.
+// Внутри <dialog> портал ведёт в сам диалог: top layer перекрывает body при любом z-index.
 
 const SIZE = 160;
 const GAP = 10;
@@ -34,9 +34,9 @@ export function IngredientPic({ src }: { src?: string }) {
   return (
     <>
       <button ref={ref} type="button" className="pic__btn" onClick={toggle} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-label={t("ing.photo")} title={t("ing.photo")} aria-expanded={!!pos}>
-        <ImageIcon size={13} aria-hidden />
+        <img className="pic__thumb" src={src} alt="" width={22} height={22} loading="lazy" decoding="async" />
       </button>
-      {pos && createPortal(<img className="pic__float" src={src} alt="" width={SIZE} height={SIZE} style={{ left: pos.x, top: pos.y }} />, document.body)}
+      {pos && createPortal(<img className="pic__float" src={src} alt="" width={SIZE} height={SIZE} style={{ left: pos.x, top: pos.y }} />, ref.current?.closest("dialog") ?? document.body)}
     </>
   );
 }

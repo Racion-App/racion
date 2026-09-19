@@ -31,6 +31,14 @@ var metrikaID string
 var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"ogLocale": ogLocale,
 	"metrika":  func() string { return metrikaID },
+	"lower":    strings.ToLower,
+	"countries": func(l i18n.Lang) []countryChoice {
+		out := make([]countryChoice, 0, len(planner.Countries))
+		for _, cy := range planner.Countries {
+			out = append(out, countryChoice{Code: cy.Code, Label: i18n.T(l, "country."+cy.Code), Symbol: cy.Symbol, Currency: cy.Currency})
+		}
+		return out
+	},
 	"t":        func(l i18n.Lang, key string, args ...any) string { return i18n.T(l, key, args...) },
 	"money":    formatMoney,
 	"qty":      formatQty,
@@ -236,6 +244,7 @@ type pageBase struct {
 	JSONLD      template.JS
 	Alternates  []altLink // hreflang
 	NoIndex     bool      // свой рецепт пользователя: поисковикам не показываем
+	User        bool      // есть сессия: иконка кабинета в шапке подсвечена, как в приложении
 }
 
 type altLink struct {
@@ -675,7 +684,7 @@ func (s *Server) errorPage(w http.ResponseWriter, r *http.Request, code int) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(code)
 	_ = pageTpl.ExecuteTemplate(w, "error.html", map[string]any{
-		"Base": pageBase{Title: i18n.T(pl.L, "page."+key+".title") + " — " + i18n.T(pl.L, "page.brand"), Canonical: s.baseURL(r) + r.URL.Path, NoIndex: true},
+		"Base": pageBase{User: currentUser(r) != nil, Title: i18n.T(pl.L, "page."+key+".title") + " — " + i18n.T(pl.L, "page.brand"), Canonical: s.baseURL(r) + r.URL.Path, NoIndex: true},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "Code": code,
 		"Title": i18n.T(pl.L, "page."+key+".title"), "Text": i18n.T(pl.L, "page."+key+".text"),
 	})
@@ -823,7 +832,7 @@ func (s *Server) legalPage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_ = pageTpl.ExecuteTemplate(w, "legal.html", map[string]any{
-		"Base": pageBase{Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "legal."+doc+".desc"), Canonical: base + pl.P + "/" + doc, OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/"+doc)},
+		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "legal."+doc+".desc"), Canonical: base + pl.P + "/" + doc, OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/"+doc)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country,
 		"Title": title, "Doc": doc + "_" + textLang, "Updated": humanDate(pl.L, legalUpdated), "Other": other, "OtherTitle": i18n.T(pl.L, otherKey), "Email": email,
 	})
@@ -855,3 +864,6 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	_ = json.NewEncoder(w).Encode(map[string]any{"specVersion": "1.0", "host": map[string]any{"displayName": "Racion", "identifier": "did:web:" + host, "documentationUrl": base + "/llms.txt", "logoUrl": base + "/icons/icon-512.png"}, "entries": entries})
 }
+
+// countryChoice — пункт переключателя страны в шапке серверных страниц.
+type countryChoice struct{ Code, Label, Symbol, Currency string }

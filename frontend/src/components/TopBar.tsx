@@ -38,7 +38,7 @@ export function TopBar({ right }: { right?: ReactNode }) {
         <ReceiptText size={22} strokeWidth={2.2} aria-hidden />
         {t("brand")}
       </Link>
-      <div className="topbar__right">
+      <div className="topbar__right pages-nav">
         {right}
         <a href={`${prefix}/recipes`} className="pages-nav__link">
           {t("nav.recipes")}

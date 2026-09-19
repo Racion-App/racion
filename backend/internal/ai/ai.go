@@ -360,7 +360,7 @@ Return JSON with five fields. HARD LIMIT: each field is at most two sentences an
 - "serve": one concrete pairing or occasion from everyday food.
 House style:
 - Address the reader informally and consistently in the singular (Russian: «ты» — «замени», «подавай», «храни»; never «вы», never impersonal «солят», «подают»). English: imperative.
-- Facts only: grams, degrees, minutes, what you see. No openers ("it is worth noting"), no closers ("enjoy"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no rhetorical questions, no jargon or abbreviations ("PP", "KBJU").
+- Facts only: grams, degrees, minutes, what you see. No em dashes (—) in English: use a period or a comma. No openers ("it is worth noting"), no closers ("enjoy"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no rhetorical questions, no jargon or abbreviations ("PP", "KBJU").
 - No bureaucratic phrasing (Russian: «осуществить», «является», «данный», «в рамках», «с целью»; English: "utilize", "leverage", "ensure").
 - Do not repeat the steps or the description; add what they do not say. Use only ingredients that are in the list or are truly common substitutes.`
 
@@ -512,11 +512,12 @@ type CollectionInput struct {
 
 const collectionSystem = `You write the editorial text for a recipe collection page, in %[1]s, for a meal-planning app that builds a weekly menu with store prices and a shopping list. Input: the collection name, its one-line lead, and its recipes with meal slot, cooking time, calories and cost per portion.
 Return JSON:
-- "intro": two paragraphs, 40–70 words each. First: who this collection is for and what problem it solves (a real situation: weekday evenings, guests on Saturday, a child's party). Second: what is inside — name 3–4 dishes from the list with a concrete detail each (time, price, what makes it easy).
+- "intro": two paragraphs, 40–70 words each. First: who this collection is for and what problem it solves (a real situation: weekday evenings, guests on Saturday, a child's party). Second: what is inside — name 3–4 dishes from the list with a concrete detail each (minutes, calories, what makes it easy).
+The page is shown in 22 countries with local prices, so NEVER write money amounts or currency names in any field; the cost figures in the input are only to tell cheap dishes from expensive ones — say "the cheapest dish here is X" or "X costs about twice as much as Y".
 - "how": one or two paragraphs, 30–50 words each: how to use it — the button builds a week from these dishes and the planner fills the other meals; what to buy once for several dishes; what can be cooked ahead. Only claims that follow from the data.
-- "faq": exactly three questions a person would type into a search box about this topic, each with a 20–45 word answer grounded in the recipes (cost range, time range, what to swap, what keeps). Shape: [{"q": "…", "a": "…"}, {"q": "…", "a": "…"}, {"q": "…", "a": "…"}].
+- "faq": exactly three questions a person would type into a search box about this topic, each with a 20–45 word answer grounded in the recipes (time range, what to cook ahead, what to swap, what keeps, which dishes are cheapest — without amounts). Shape: [{"q": "…", "a": "…"}, {"q": "…", "a": "…"}, {"q": "…", "a": "…"}].
 The button on the page is called "%[2]s" and the app is called Racion (Рацион in Russian); do not use other names for them.
-House style (plain prose): address the reader as «ты» in Russian, imperative in English; facts with numbers from the input; no openers ("in today's world", "let's"), no closers ("enjoy", "bon appétit"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no lists of three for rhythm, no bureaucratic phrasing («является», «данный», «в рамках», "utilize", "leverage"). Plain text, no markdown, no headings inside fields.`
+House style (plain prose): address the reader as «ты» in Russian, imperative in English; no em dashes (—) in English, use periods or commas; facts with numbers from the input; no openers ("in today's world", "let's"), no closers ("enjoy", "bon appétit"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no lists of three for rhythm, no bureaucratic phrasing («является», «данный», «в рамках», "utilize", "leverage"). Plain text, no markdown, no headings inside fields.`
 
 // CollectionText — текст подборки на языке lang.
 func (c *Client) CollectionText(ctx context.Context, lang string, in CollectionInput) (CollectionText, error) {

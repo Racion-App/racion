@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Activity, BookOpen, CalendarDays, ChefHat, Eye, Heart, Link2, LogOut, MessageCircle, Plus, ShoppingBag, ThumbsDown, ThumbsUp, Trash2, Upload, Users } from "lucide-react";
 import { FamilyEditor } from "../components/FamilyEditor";
+import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { OwnRecipeForm } from "../components/OwnRecipeForm";
 import { BudgetChart } from "../components/BudgetChart";
@@ -509,6 +510,7 @@ export function Account() {
           <NotifyCard onToast={setToast} />
         </section>
       </main>
+      <SiteFooter />
       {toast && (
         <div className="toast" role="status">
           {toast}

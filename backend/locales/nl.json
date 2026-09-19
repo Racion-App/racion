@@ -1123,5 +1123,7 @@
   "coll.recipes.title": "Recepten in deze collectie",
   "coll.fact.cost": "per portie",
   "coll.fact.time": "bereiding",
-  "coll.fact.kcal": "kcal per portie"
+  "coll.fact.kcal": "kcal per portie",
+  "country.hint": "Prijzen van recepten en het weekplan tonen we in de valuta van het gekozen land.",
+  "dish.side": "Bijgerecht"
 }

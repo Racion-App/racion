@@ -1124,5 +1124,7 @@
   "coll.recipes.title": "合集中的食谱",
   "coll.fact.cost": "每份",
   "coll.fact.time": "烹饪时间",
-  "coll.fact.kcal": "每份千卡"
+  "coll.fact.kcal": "每份千卡",
+  "country.hint": "食谱和计划中的价格将以所选国家的货币显示。",
+  "dish.side": "配菜"
 }
