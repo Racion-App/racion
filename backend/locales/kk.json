@@ -1103,5 +1103,13 @@
   "filter.price.min": "Ең төменгі баға",
   "filter.price.max": "Ең жоғары баға",
   "og.cta": "Рецептті ашу",
-  "og.cta.collection": "Жинақты ашу"
+  "og.cta.collection": "Жинақты ашу",
+  "dish.side.swap": "Басқа гарнир",
+  "recipe.side.fits": "Гарнир жарайды",
+  "recipe.side.for": "Тағамдарға гарнир",
+  "tag.side": "Гарнир",
+  "recipe.side.meat": "етке",
+  "recipe.side.poultry": "құс етіне",
+  "recipe.side.fish": "балыққа",
+  "recipe.side.any": "бәріне"
 }

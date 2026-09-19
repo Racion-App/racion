@@ -56,6 +56,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/plans", s.limited(s.lim.build, s.createPlan))
 	mux.HandleFunc("GET /api/plans/{id}", s.getPlan)
 	mux.HandleFunc("POST /api/plans/{id}/swap", s.limited(s.lim.build, s.swap))
+	mux.HandleFunc("POST /api/plans/{id}/side", s.limited(s.lim.build, s.swapSide))
 	mux.HandleFunc("POST /api/plans/{id}/chat", s.limited(s.lim.build, s.planChat))
 	mux.HandleFunc("POST /api/plans/{id}/skip", s.limited(s.lim.write, s.skipDay))
 	mux.HandleFunc("POST /api/plans/{id}/move", s.limited(s.lim.write, s.moveDish))

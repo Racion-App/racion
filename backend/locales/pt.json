@@ -1103,5 +1103,13 @@
   "filter.price.min": "Preço mínimo",
   "filter.price.max": "Preço máximo",
   "og.cta": "Ver receita",
-  "og.cta.collection": "Ver coleção"
+  "og.cta.collection": "Ver coleção",
+  "dish.side.swap": "Outro acompanhamento",
+  "recipe.side.fits": "Acompanhamento sugerido",
+  "recipe.side.for": "Acompanhamento para",
+  "tag.side": "Acompanhamento",
+  "recipe.side.meat": "para carne",
+  "recipe.side.poultry": "para aves",
+  "recipe.side.fish": "para peixe",
+  "recipe.side.any": "para tudo"
 }

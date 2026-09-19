@@ -1103,5 +1103,13 @@
   "filter.price.min": "最低价格",
   "filter.price.max": "最高价格",
   "og.cta": "查看食谱",
-  "og.cta.collection": "查看合集"
+  "og.cta.collection": "查看合集",
+  "dish.side.swap": "换个配菜",
+  "recipe.side.fits": "推荐配菜",
+  "recipe.side.for": "适合搭配",
+  "tag.side": "配菜",
+  "recipe.side.meat": "配肉类",
+  "recipe.side.poultry": "配禽类",
+  "recipe.side.fish": "配鱼类",
+  "recipe.side.any": "配任何主菜"
 }

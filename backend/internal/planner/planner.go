@@ -422,8 +422,11 @@ func (c *Catalog) pick(pool []Recipe, day int, slot string, portions float64, pr
 			s.score += 1.5
 		}
 
-		// калории под цель
+		// калории под цель; блюдо без гарнира оцениваем вместе с типичным гарниром
 		kcal, _, _, _ := c.Nutrition(r)
+		if NeedsSide(r) {
+			kcal += sideKcalTypical
+		}
 		s.kcal = kcal
 		if tg.kcal > 0 {
 			dev := (kcal - tg.kcal) / tg.kcal
@@ -628,6 +631,11 @@ func (c *Catalog) Localize(plan Plan, l i18n.Lang) Plan {
 		for j := range d.Dishes {
 			dish := &d.Dishes[j]
 			dish.Title = c.RecipeByID[dish.RecipeID].LocalTitle(l)
+			if dish.Side != nil {
+				side := *dish.Side
+				side.Title = c.RecipeByID[side.RecipeID].LocalTitle(l)
+				dish.Side = &side
+			}
 			dish.Why = c.renderWhy(dish.WhyCode, l)
 			if dish.Course != "" {
 				dish.Why = i18n.T(l, "course."+dish.Course)
@@ -737,7 +745,7 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 	pools := map[string][]Recipe{}
 	for _, s := range p.Slots {
 		for _, r := range c.Recipes {
-			if r.Slot == s && !isKidRecipe(r) && c.allowed(r, e) {
+			if r.Slot == s && !isKidRecipe(r) && !IsSide(r) && c.allowed(r, e) {
 				pools[s] = append(pools[s], r)
 			}
 		}
@@ -804,6 +812,14 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 			dish.Why, dish.WhyCode = c.why(sc, tg, lang)
 			if s.wanted != "" {
 				ct.wanted[s.wanted]++
+			}
+			if NeedsSide(r) && (slot == "lunch" || slot == "dinner") {
+				if side, ok := c.pickSide(r, e, tg.kcal-dish.Kcal, sideRecent(days, d), nil, pr, rng); ok {
+					c.attachSide(&dish, side, pr)
+					for _, ri := range side.Ingredients {
+						ct.need[ri.IngredientID] += ri.Amount * perSlot[slot] * mult
+					}
+				}
 			}
 			days[d].Dishes = append(days[d].Dishes, dish)
 			for _, ri := range r.Ingredients {
@@ -934,6 +950,17 @@ func (c *Catalog) finish(plan *Plan) {
 				need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
 				if !slices.Contains(usedIn[ri.IngredientID], title) {
 					usedIn[ri.IngredientID] = append(usedIn[ri.IngredientID], title)
+				}
+			}
+			if dish.Side != nil {
+				if sr, ok := c.RecipeByID[dish.Side.RecipeID]; ok {
+					st := sr.LocalTitle(lang)
+					for _, ri := range sr.Ingredients {
+						need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+						if !slices.Contains(usedIn[ri.IngredientID], st) {
+							usedIn[ri.IngredientID] = append(usedIn[ri.IngredientID], st)
+						}
+					}
 				}
 			}
 		}
@@ -1174,6 +1201,13 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 			for _, ri := range r.Ingredients {
 				ct.need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
 			}
+			if dish.Side != nil {
+				if sr, ok := c.RecipeByID[dish.Side.RecipeID]; ok {
+					for _, ri := range sr.Ingredients {
+						ct.need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+					}
+				}
+			}
 			if dish.WhyCode.Wanted != "" {
 				ct.wanted[dish.WhyCode.Wanted]++
 			}
@@ -1188,7 +1222,7 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 
 	pool := []Recipe{}
 	for _, r := range c.Recipes {
-		if r.Slot == slot && !isKidRecipe(r) && c.allowed(r, e) {
+		if r.Slot == slot && !isKidRecipe(r) && !IsSide(r) && c.allowed(r, e) {
 			pool = append(pool, r)
 		}
 	}
@@ -1206,6 +1240,11 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 	}
 	newDish.Batch = batch
 	newDish.Why, newDish.WhyCode = c.why(sc, tg, pr.lang)
+	if NeedsSide(s.r) && (slot == "lunch" || slot == "dinner") {
+		if side, ok := c.pickSide(s.r, e, tg.kcal-newDish.Kcal, sideRecent(plan.Days, day), nil, pr, rng); ok {
+			c.attachSide(&newDish, side, pr)
+		}
+	}
 	plan.Days[day].Dishes[di] = newDish
 
 	if pairDay >= 0 {

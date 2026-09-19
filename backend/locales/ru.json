@@ -1152,5 +1152,13 @@
   "filter.price.min": "Минимальная цена",
   "filter.price.max": "Максимальная цена",
   "og.cta": "Открыть рецепт",
-  "og.cta.collection": "Открыть подборку"
+  "og.cta.collection": "Открыть подборку",
+  "dish.side.swap": "Другой гарнир",
+  "recipe.side.fits": "Подойдёт гарнир",
+  "recipe.side.for": "Гарнир к блюдам",
+  "tag.side": "Гарнир",
+  "recipe.side.meat": "к мясу",
+  "recipe.side.poultry": "к птице",
+  "recipe.side.fish": "к рыбе",
+  "recipe.side.any": "ко всему"
 }

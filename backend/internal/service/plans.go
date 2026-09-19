@@ -126,6 +126,26 @@ func (p *Plans) Swap(ctx context.Context, id string, day int, slot string, lang 
 	return updated, nil
 }
 
+// SwapSide — другой гарнир к тому же блюду.
+func (p *Plans) SwapSide(ctx context.Context, id string, day int, slot string, lang i18n.Lang, viewer *domain.User) (planner.Plan, error) {
+	l, cat, err := p.load(ctx, id)
+	if err != nil {
+		return l.Plan, err
+	}
+	if !p.canEdit(ctx, id, l.ownerID, viewer) {
+		return l.Plan, domain.ErrForbidden
+	}
+	plan := cat.Localize(l.Plan, lang)
+	updated, err := cat.SwapSide(plan, day, slot)
+	if err != nil {
+		return plan, domain.Invalid(err.Error())
+	}
+	if err := p.plans.Save(ctx, updated); err != nil {
+		return plan, err
+	}
+	return updated, nil
+}
+
 // CreateOccasion — меню события на гостей вместо недели; сохраняется как обычный план.
 func (p *Plans) CreateOccasion(ctx context.Context, id string, params planner.Params, guests int, lang i18n.Lang, user *domain.User) (planner.Plan, error) {
 	o, ok := planner.OccasionByID(id)

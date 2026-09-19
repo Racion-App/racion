@@ -48,6 +48,22 @@ func (s *Server) swap(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, plan)
 }
 
+func (s *Server) swapSide(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Day  int    `json:"day"`
+		Slot string `json:"slot"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	plan, err := s.svc.Plans.SwapSide(r.Context(), r.PathValue("id"), body.Day, body.Slot, i18n.FromRequest(r), currentUser(r))
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	writeJSON(w, 200, plan)
+}
+
 func (s *Server) skipDay(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Day  int  `json:"day"`

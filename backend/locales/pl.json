@@ -1116,5 +1116,13 @@
   "filter.price.min": "Cena minimalna",
   "filter.price.max": "Cena maksymalna",
   "og.cta": "Otwórz przepis",
-  "og.cta.collection": "Otwórz kolekcję"
+  "og.cta.collection": "Otwórz kolekcję",
+  "dish.side.swap": "Inny dodatek",
+  "recipe.side.fits": "Pasujący dodatek",
+  "recipe.side.for": "Dodatek do",
+  "tag.side": "Dodatek",
+  "recipe.side.meat": "do mięsa",
+  "recipe.side.poultry": "do drobiu",
+  "recipe.side.fish": "do ryby",
+  "recipe.side.any": "do wszystkiego"
 }

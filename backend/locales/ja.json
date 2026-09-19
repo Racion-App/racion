@@ -1103,5 +1103,13 @@
   "filter.price.min": "最低価格",
   "filter.price.max": "最高価格",
   "og.cta": "レシピを見る",
-  "og.cta.collection": "コレクションを見る"
+  "og.cta.collection": "コレクションを見る",
+  "dish.side.swap": "別の付け合わせ",
+  "recipe.side.fits": "おすすめの付け合わせ",
+  "recipe.side.for": "付け合わせに合う料理",
+  "tag.side": "付け合わせ",
+  "recipe.side.meat": "肉料理に",
+  "recipe.side.poultry": "鶏肉料理に",
+  "recipe.side.fish": "魚料理に",
+  "recipe.side.any": "何にでも"
 }

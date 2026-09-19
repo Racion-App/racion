@@ -147,6 +147,14 @@
       </section>
     </aside>
   </div>
+  {{if .Sides}}
+  <section class="rpage__foot rpage__section" aria-labelledby="sides">
+    <div class="rpage__section-head">
+      <h2 id="sides">{{.SidesTitle}}{{if .SideFor}} <small class="rpage__sub">{{.SideFor}}</small>{{end}}</h2>
+    </div>
+    <div class="rgrid rgrid--tight">{{range .Sides}}{{template "card" .}}{{end}}</div>
+  </section>
+  {{end}}
   {{if .Related}}
   <section class="rpage__foot rpage__section" aria-labelledby="rel">
     <div class="rpage__section-head">

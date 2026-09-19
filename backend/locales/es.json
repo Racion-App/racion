@@ -1103,5 +1103,13 @@
   "filter.price.min": "Precio mínimo",
   "filter.price.max": "Precio máximo",
   "og.cta": "Ver receta",
-  "og.cta.collection": "Ver colección"
+  "og.cta.collection": "Ver colección",
+  "dish.side.swap": "Otra guarnición",
+  "recipe.side.fits": "Guarnición recomendada",
+  "recipe.side.for": "Guarnición para",
+  "tag.side": "Guarnición",
+  "recipe.side.meat": "para carne",
+  "recipe.side.poultry": "para aves",
+  "recipe.side.fish": "para pescado",
+  "recipe.side.any": "para todo"
 }

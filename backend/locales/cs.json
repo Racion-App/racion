@@ -1116,5 +1116,13 @@
   "filter.price.min": "Minimální cena",
   "filter.price.max": "Maximální cena",
   "og.cta": "Otevřít recept",
-  "og.cta.collection": "Otevřít sbírku"
+  "og.cta.collection": "Otevřít sbírku",
+  "dish.side.swap": "Jiná příloha",
+  "recipe.side.fits": "Vhodná příloha",
+  "recipe.side.for": "Příloha k",
+  "tag.side": "Příloha",
+  "recipe.side.meat": "k masu",
+  "recipe.side.poultry": "k drůbeži",
+  "recipe.side.fish": "k rybě",
+  "recipe.side.any": "ke všemu"
 }

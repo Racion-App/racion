@@ -1116,5 +1116,13 @@
   "filter.price.min": "Мінімальна ціна",
   "filter.price.max": "Максимальна ціна",
   "og.cta": "Відкрити рецепт",
-  "og.cta.collection": "Відкрити добірку"
+  "og.cta.collection": "Відкрити добірку",
+  "dish.side.swap": "Інший гарнір",
+  "recipe.side.fits": "Підійде гарнір",
+  "recipe.side.for": "Гарнір до страв",
+  "tag.side": "Гарнір",
+  "recipe.side.meat": "до м’яса",
+  "recipe.side.poultry": "до птиці",
+  "recipe.side.fish": "до риби",
+  "recipe.side.any": "до всього"
 }

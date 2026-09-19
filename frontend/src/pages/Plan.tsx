@@ -224,6 +224,23 @@ export function Plan() {
     }
   };
 
+  const swapSide = async (day: number, slot: string) => {
+    if (!plan || swapping) return;
+    const key = `${day}:${slot}`;
+    setSwapping(key);
+    try {
+      const updated = await api.swapSide(plan.id, day, slot);
+      setPlan(updated);
+      setFresh(key);
+      window.setTimeout(() => setFresh(null), 700);
+      track("side_swap", { day, slot });
+    } catch (e) {
+      setToast((e as Error).message);
+    } finally {
+      setSwapping(null);
+    }
+  };
+
   // Семья: ссылка с ?join=1 — вошедший получает неделю в кабинет и право менять блюда.
   const [joinDone, setJoinDone] = useState(false);
   useEffect(() => {
@@ -559,6 +576,8 @@ export function Plan() {
                   track("recipe_open", { id: dish.recipeId });
                 }}
                 onSwap={() => swap(day.index, dish.course ? `${dish.slot}#${di}` : dish.slot)}
+                onOpenSide={dish.side ? () => { setRecipeId(dish.side!.recipeId); track("recipe_open", { id: dish.side!.recipeId, side: true }); } : undefined}
+                onSwapSide={dish.side && !plan.occasion ? () => swapSide(day.index, dish.slot) : undefined}
                 onDislike={() => dislike(dish, day.index)}
                 ask={!!user && !dish.own && eaten(day.date, dish.slot)}
                 onFeedback={(liked) => {
@@ -893,7 +912,7 @@ function eaten(date: string, slot: string): boolean {
   return slot === "breakfast" ? h >= 11 : slot === "lunch" ? h >= 16 : h >= 19;
 }
 
-function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onDislike, ask, onFeedback, moving, onMove, slotKey: _slotKey }: { dish: Dish; cy: Country | undefined; fresh: boolean; busy: boolean; anyBusy: boolean; onOpen: () => void; onSwap: () => void; onDislike: () => void; ask?: boolean; onFeedback?: (liked: boolean) => void; moving?: "source" | "target" | "idle" | null; onMove?: () => void; slotKey?: string }) {
+function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, onSwapSide, onDislike, ask, onFeedback, moving, onMove, slotKey: _slotKey }: { dish: Dish; cy: Country | undefined; fresh: boolean; busy: boolean; anyBusy: boolean; onOpen: () => void; onSwap: () => void; onOpenSide?: () => void; onSwapSide?: () => void; onDislike: () => void; ask?: boolean; onFeedback?: (liked: boolean) => void; moving?: "source" | "target" | "idle" | null; onMove?: () => void; slotKey?: string }) {
   const { t, lang } = useT();
   const [answered, setAnswered] = useState<boolean | null>(null);
   return (
@@ -957,6 +976,19 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onDislike, as
             </button>
           )}
         </span>
+      )}
+      {dish.side && (
+        <div className="dish__side">
+          <button type="button" className="dish__side-open" onClick={onOpenSide} aria-label={t("dish.open", { title: dish.side.title })}>
+            <span className="dish__side-plus" aria-hidden>+</span> {dish.side.title}
+            <span className="num dish__side-num">{dish.side.kcal} {t("kcal")}</span>
+          </button>
+          {onSwapSide && (
+            <button type="button" className="dish__side-swap" onClick={onSwapSide} disabled={anyBusy} aria-label={t("dish.side.swap")} title={t("dish.side.swap")}>
+              <RefreshCw size={13} aria-hidden />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

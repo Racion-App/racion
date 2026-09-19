@@ -1567,3 +1567,14 @@ main.pages.is-loading {
 
 // Ссылки внутри текста различимы не только цветом: подчёркивание (согласие, cookies, юридические страницы)
 .consent__text a, .auth__legal a, .legal p a, .legal li a { text-decoration: underline; text-underline-offset: 2px; }
+
+// Гарнир под основным блюдом: «+ Гречка с маслом · 210 ккал» и маленькая кнопка «другой гарнир».
+// Строка входит в сетку блюда во всю ширину под названием, до чисел и действий не дотягивается.
+.dish__side { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin: -2px 0 2px; padding-left: 2px; font-size: 13.5px; color: var(--ds-label-secondary);
+  &-open { display: inline-flex; align-items: baseline; gap: 6px; padding: 2px 6px; margin-left: -6px; border: 0; background: transparent; color: inherit; font: inherit; border-radius: var(--ds-radius-sm); cursor: pointer; text-align: left; min-width: 0;
+    &:hover { background: var(--ds-fill-4); color: var(--ds-label-primary); } }
+  &-plus { color: var(--ds-blue); font-weight: 700; }
+  &-num { font-size: 12px; color: var(--ds-label-tertiary); white-space: nowrap; }
+  &-swap { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--ds-label-tertiary); cursor: pointer; flex: 0 0 auto;
+    &:hover { background: var(--ds-fill-3); color: var(--ds-blue); } &:disabled { opacity: 0.5; cursor: default; } } }
+.rpage__sub { font-size: 14px; font-weight: 500; color: var(--ds-label-tertiary); margin-left: 6px; }

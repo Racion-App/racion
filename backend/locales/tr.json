@@ -1102,5 +1102,13 @@
   "filter.price.min": "En düşük fiyat",
   "filter.price.max": "En yüksek fiyat",
   "og.cta": "Tarifi aç",
-  "og.cta.collection": "Koleksiyonu aç"
+  "og.cta.collection": "Koleksiyonu aç",
+  "dish.side.swap": "Başka garnitür",
+  "recipe.side.fits": "Uygun garnitür",
+  "recipe.side.for": "Şunlara garnitür",
+  "tag.side": "Garnitür",
+  "recipe.side.meat": "ete",
+  "recipe.side.poultry": "tavuğa",
+  "recipe.side.fish": "balığa",
+  "recipe.side.any": "her şeye"
 }

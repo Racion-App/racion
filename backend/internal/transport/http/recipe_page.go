@@ -235,6 +235,36 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	// «Коротко» — только то, чего нет в шапке и боковой панели.
 	var facts []string
 	eq := equipmentLabels(l, rc.Equipment)
+	// сочетаемость: к основному — гарниры, к гарниру — блюда и подпись «к мясу / птице / рыбе / ко всему»
+	var sides []recipeCard
+	sidesTitle, sideFor := "", ""
+	if planner.NeedsSide(rc) {
+		sidesTitle = i18n.T(l, "recipe.side.fits")
+		for i, x := range s.catalog.SidesFor(rc) {
+			if i >= 6 {
+				break
+			}
+			sides = append(sides, s.card(x, pl))
+		}
+	} else if planner.IsSide(rc) {
+		sidesTitle = i18n.T(l, "recipe.side.for")
+		for i, x := range s.catalog.MainsFor(rc) {
+			if i >= 6 {
+				break
+			}
+			sides = append(sides, s.card(x, pl))
+		}
+		var kinds []string
+		for _, k := range []string{"meat", "poultry", "fish"} {
+			if hasTag(rc, "for_"+k) {
+				kinds = append(kinds, i18n.T(l, "recipe.side."+k))
+			}
+		}
+		if len(kinds) == 0 {
+			kinds = []string{i18n.T(l, "recipe.side.any")}
+		}
+		sideFor = strings.Join(kinds, ", ")
+	}
 	buy := s.svc.Partners.BuyLinks(r.Context(), pl.Country.Code, l, rc.Equipment)
 	if rc.Batch {
 		facts = append(facts, i18n.T(l, "recipe.fact.batch"))
@@ -344,7 +374,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Pct":    map[string]int{"Kcal": int(math.Round(kcal / 20)), "Protein": int(math.Round(prot / 0.75)), "Fat": int(math.Round(fat / 0.7)), "Carb": int(math.Round(carb / 2.6))},
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
-		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags,
+		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor,
 		"Equipment": eq, "Buy": buy, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
 	var buf bytes.Buffer

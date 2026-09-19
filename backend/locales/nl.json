@@ -1102,5 +1102,13 @@
   "filter.price.min": "Minimumprijs",
   "filter.price.max": "Maximumprijs",
   "og.cta": "Recept openen",
-  "og.cta.collection": "Collectie openen"
+  "og.cta.collection": "Collectie openen",
+  "dish.side.swap": "Ander bijgerecht",
+  "recipe.side.fits": "Passend bijgerecht",
+  "recipe.side.for": "Bijgerecht bij",
+  "tag.side": "Bijgerecht",
+  "recipe.side.meat": "bij vlees",
+  "recipe.side.poultry": "bij gevogelte",
+  "recipe.side.fish": "bij vis",
+  "recipe.side.any": "bij alles"
 }

@@ -1134,5 +1134,13 @@
   "filter.price.min": "Minimum price",
   "filter.price.max": "Maximum price",
   "og.cta": "Open recipe",
-  "og.cta.collection": "Open collection"
+  "og.cta.collection": "Open collection",
+  "dish.side.swap": "Another side",
+  "recipe.side.fits": "Goes well with a side",
+  "recipe.side.for": "Side for",
+  "tag.side": "Side dish",
+  "recipe.side.meat": "for meat",
+  "recipe.side.poultry": "for poultry",
+  "recipe.side.fish": "for fish",
+  "recipe.side.any": "for anything"
 }

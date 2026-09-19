@@ -96,6 +96,7 @@ export type Dish = {
   course?: string; // событие: курс вместо приёма пищи
   why: string;
   whyCode?: unknown;
+  side?: { recipeId: string; title: string; timeMin: number; kcal: number; protein: number; fat: number; carb: number; cost: number }; // гарнир; итоги блюда — суммой с ним
 };
 
 export type Day = {

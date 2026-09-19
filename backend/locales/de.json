@@ -1134,5 +1134,13 @@
   "filter.price.min": "Mindestpreis",
   "filter.price.max": "Höchstpreis",
   "og.cta": "Rezept öffnen",
-  "og.cta.collection": "Sammlung öffnen"
+  "og.cta.collection": "Sammlung öffnen",
+  "dish.side.swap": "Andere Beilage",
+  "recipe.side.fits": "Passende Beilage",
+  "recipe.side.for": "Beilage zu",
+  "tag.side": "Beilage",
+  "recipe.side.meat": "zu Fleisch",
+  "recipe.side.poultry": "zu Geflügel",
+  "recipe.side.fish": "zu Fisch",
+  "recipe.side.any": "zu allem"
 }

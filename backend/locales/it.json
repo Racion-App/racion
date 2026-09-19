@@ -1102,5 +1102,13 @@
   "filter.price.min": "Prezzo minimo",
   "filter.price.max": "Prezzo massimo",
   "og.cta": "Apri la ricetta",
-  "og.cta.collection": "Apri la raccolta"
+  "og.cta.collection": "Apri la raccolta",
+  "dish.side.swap": "Altro contorno",
+  "recipe.side.fits": "Contorno consigliato",
+  "recipe.side.for": "Contorno per",
+  "tag.side": "Contorno",
+  "recipe.side.meat": "per la carne",
+  "recipe.side.poultry": "per il pollame",
+  "recipe.side.fish": "per il pesce",
+  "recipe.side.any": "per tutto"
 }

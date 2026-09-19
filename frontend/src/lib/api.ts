@@ -39,6 +39,8 @@ export const api = {
   getPlan: (id: string, lang?: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}${lang ? `?lang=${encodeURIComponent(lang)}` : ""}`),
   swap: (id: string, day: number, slot: string) =>
     request<Plan>(`/api/plans/${encodeURIComponent(id)}/swap`, { method: "POST", body: JSON.stringify({ day, slot }) }),
+  swapSide: (id: string, day: number, slot: string) =>
+    request<Plan>(`/api/plans/${encodeURIComponent(id)}/side`, { method: "POST", body: JSON.stringify({ day, slot }) }),
   skipDay: (id: string, day: number, skip: boolean) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/skip`, { method: "POST", body: JSON.stringify({ day, skip }) }),
   moveDish: (id: string, from: number, to: number, slot: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/move`, { method: "POST", body: JSON.stringify({ from, to, slot }) }),
   repeatPlan: (id: string, startDate?: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/repeat`, { method: "POST", body: JSON.stringify({ startDate: startDate ?? "" }) }),
