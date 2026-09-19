@@ -37,6 +37,7 @@ export type Meta = {
   ingredients: Labeled[];
   recipes: number;
   geoCountry: string; // страна по IP посетителя, если среди поддерживаемых; иначе ""
+  geoRegion?: string; // регион или город Росстата по IP (только для стран с регионами)
   ai?: boolean; // помощник (нейросеть) для своих рецептов включён на сервере
   photos?: boolean; // загрузка фото включена (есть S3)
 };

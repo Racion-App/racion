@@ -11,6 +11,8 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -22,8 +24,51 @@ import (
 
 const urlFmt = "https://download.db-ip.com/free/dbip-country-lite-%s.mmdb.gz"
 
+// База городов (DB-IP City Lite, ~130 МБ) в БД не кладём: лежит файлом в Dir и открывается через mmap.
+// Без неё определяется только страна.
+const cityURLFmt = "https://download.db-ip.com/free/dbip-city-lite-%s.mmdb.gz"
+
 type Resolver struct {
 	reader atomic.Pointer[maxminddb.Reader]
+	city   atomic.Pointer[maxminddb.Reader]
+	Dir    string // папка для файла базы городов; пусто — города не определяем
+}
+
+type cityRecord struct {
+	City struct {
+		Names map[string]string `maxminddb:"names"`
+	} `maxminddb:"city"`
+	Subdivisions []struct {
+		Names map[string]string `maxminddb:"names"`
+	} `maxminddb:"subdivisions"`
+	Country struct {
+		ISOCode string `maxminddb:"iso_code"`
+	} `maxminddb:"country"`
+}
+
+// Place — город и регион по IP (английские названия из базы) или пусто.
+type Place struct {
+	Country, Region, City string
+}
+
+func (g *Resolver) Place(ip string) Place {
+	r := g.city.Load()
+	if r == nil {
+		return Place{}
+	}
+	addr, err := netip.ParseAddr(strings.TrimSpace(ip))
+	if err != nil || addr.IsPrivate() || addr.IsLoopback() || addr.IsUnspecified() {
+		return Place{}
+	}
+	var rec cityRecord
+	if err := r.Lookup(addr).Decode(&rec); err != nil {
+		return Place{}
+	}
+	p := Place{Country: rec.Country.ISOCode, City: rec.City.Names["en"]}
+	if len(rec.Subdivisions) > 0 {
+		p.Region = rec.Subdivisions[0].Names["en"]
+	}
+	return p
 }
 
 type record struct {
@@ -111,6 +156,101 @@ func (g *Resolver) Start(ctx context.Context, pool *pgxpool.Pool, log *zap.Logge
 			}
 		}
 	}()
+	if g.Dir != "" {
+		go g.cityLoop(ctx, log)
+	}
+}
+
+// cityLoop держит файл базы городов свежим: открывает готовый, раз в месяц скачивает новый.
+func (g *Resolver) cityLoop(ctx context.Context, log *zap.Logger) {
+	path := filepath.Join(g.Dir, "dbip-city-lite.mmdb")
+	var fetched time.Time
+	if st, err := os.Stat(path); err == nil {
+		if r, err := maxminddb.Open(path); err == nil {
+			g.city.Store(r)
+			fetched = st.ModTime()
+			log.Info("geo city db loaded", zap.Int64("bytes", st.Size()), zap.String("fetched", fetched.Format("2006-01-02")))
+		}
+	}
+	sync := func() {
+		if g.city.Load() != nil && time.Since(fetched) < 30*24*time.Hour {
+			return
+		}
+		sctx, cancel := context.WithTimeout(ctx, 15*time.Minute)
+		defer cancel()
+		tmp := path + ".part"
+		if err := downloadTo(sctx, cityURLFmt, tmp, 512<<20); err != nil {
+			log.Warn("geo city db download failed", zap.Error(err))
+			return
+		}
+		r, err := maxminddb.Open(tmp)
+		if err != nil {
+			log.Warn("geo city db invalid", zap.Error(err))
+			_ = os.Remove(tmp)
+			return
+		}
+		r.Close()
+		if err := os.Rename(tmp, path); err != nil {
+			log.Warn("geo city db rename", zap.Error(err))
+			return
+		}
+		if r, err = maxminddb.Open(path); err == nil {
+			if old := g.city.Swap(r); old != nil {
+				old.Close()
+			}
+			fetched = time.Now()
+			log.Info("geo city db updated")
+		}
+	}
+	sync()
+	t := time.NewTicker(24 * time.Hour)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			sync()
+		}
+	}
+}
+
+// downloadTo — то же, что download, но потоком в файл (база городов слишком велика для памяти).
+func downloadTo(ctx context.Context, format, path string, limit int64) error {
+	now := time.Now()
+	var lastErr error
+	for _, m := range []time.Time{now, now.AddDate(0, -1, 0)} {
+		req, _ := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf(format, m.Format("2006-01")), nil)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if res.StatusCode != 200 {
+			res.Body.Close()
+			lastErr = fmt.Errorf("http %d", res.StatusCode)
+			continue
+		}
+		gz, err := gzip.NewReader(res.Body)
+		if err != nil {
+			res.Body.Close()
+			return err
+		}
+		f, err := os.Create(path)
+		if err != nil {
+			res.Body.Close()
+			return err
+		}
+		_, err = io.Copy(f, io.LimitReader(gz, limit))
+		f.Close()
+		res.Body.Close()
+		if err != nil {
+			_ = os.Remove(path)
+			return err
+		}
+		return nil
+	}
+	return lastErr
 }
 
 func (g *Resolver) load(b []byte) error {

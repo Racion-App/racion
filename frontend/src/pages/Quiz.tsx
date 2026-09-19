@@ -23,6 +23,7 @@ import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
 
 const KEY = "racion.quiz.v4";
 const COUNTRY_KEY = "racion.country.chosen"; // страна выбрана вручную, по IP не переопределяем
+const REGION_KEY = "racion.region.chosen"; // регион выбрали или убрали сами: по IP больше не подставляем
 const PREFILL_KEY = "racion.quiz.prefilled"; // id аккаунта, чьи ответы уже подставлены в черновик
 const STEPS = 7;
 
@@ -186,6 +187,27 @@ export function Quiz() {
       track("quiz_geo_country", { country: meta.geoCountry });
     }
   }, [meta]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Регион или город по IP: подставляем, пока поле пустое и человек его не трогал
+  useEffect(() => {
+    if (!meta?.geoRegion || p.region || meta.geoCountry !== p.country) return;
+    let chosen = false;
+    try {
+      chosen = localStorage.getItem(REGION_KEY) === "1";
+    } catch {
+      // приватный режим
+    }
+    if (chosen || !meta.regions.some((r) => r.code === meta.geoRegion)) return;
+    setP((prev) => ({ ...prev, region: meta.geoRegion! }));
+    track("quiz_geo_region", { region: meta.geoRegion });
+  }, [meta]); // eslint-disable-line react-hooks/exhaustive-deps
+  const regionChosen = () => {
+    try {
+      localStorage.setItem(REGION_KEY, "1");
+    } catch {
+      // приватный режим
+    }
+  };
 
   // Страна для SSR-страниц рецептов (цены в валюте): та же cookie читает бэкенд.
   useEffect(() => {
@@ -418,7 +440,7 @@ export function Quiz() {
               </label>
               {p.region ? (
                 <div className="chips">
-                  <button type="button" className="chip chip--remove" onClick={() => set({ region: "" })} aria-label={t("quiz.region.reset", { name: regionName(p.region) })}>
+                  <button type="button" className="chip chip--remove" onClick={() => { regionChosen(); set({ region: "" }); }} aria-label={t("quiz.region.reset", { name: regionName(p.region) })}>
                     <MapPin size={14} aria-hidden /> {regionName(p.region) || t("quiz.region.all")}
                     <X size={14} aria-hidden />
                   </button>
@@ -438,6 +460,7 @@ export function Quiz() {
                           role="option"
                           aria-selected={false}
                           onClick={() => {
+                            regionChosen();
                             set({ region: r.code });
                             setRegionQuery("");
                           }}

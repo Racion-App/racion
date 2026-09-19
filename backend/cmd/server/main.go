@@ -56,7 +56,7 @@ func main() {
 	log.Info("catalog", zap.Int("recipes", len(catalog.Recipes)), zap.Int("ingredients", len(catalog.Ingredients)), zap.Int("stores", len(catalog.StoreList)))
 
 	// Страна по IP: база DB-IP в БД, обновление раз в месяц в фоне.
-	geoResolver := &geo.Resolver{}
+	geoResolver := &geo.Resolver{Dir: cfg.GeoDir}
 	geoResolver.Start(ctx, pool, log.Named("geo"))
 
 	// Ценник Росстата: что есть в БД — сразу; обновление — в фоне, раз в сутки, без блокировки старта.

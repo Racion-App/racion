@@ -26,6 +26,7 @@ services:
       METRIKA_ID: ${VITE_METRIKA_ID:-}
       LEGAL_EMAIL: ${LEGAL_EMAIL:-}
       IMAGES_DIR: /images
+      GEO_DIR: /geo
       PUSH_CONTACT: ${PUSH_CONTACT:-mailto:admin@racion.app}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
@@ -44,6 +45,7 @@ services:
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-/media}
     volumes:
       - ./frontend/public/images:/images:ro   # фото блюд для карточек превью ссылок
+      - geodata:/geo                          # база городов DB-IP (~130 МБ), чтобы не качать при каждом деплое
     depends_on:
       db:
         condition: service_healthy
@@ -90,3 +92,4 @@ services:
 volumes:
   pgdata:
   miniodata:
+  geodata:

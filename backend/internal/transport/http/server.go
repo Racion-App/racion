@@ -327,6 +327,11 @@ func (s *Server) meta(w http.ResponseWriter, r *http.Request) {
 	country := planner.CountryOf(r.URL.Query().Get("country"))
 	m := s.svc.Catalog.Meta(lang, country, s.geoCountry(r))
 	m.GeoLang = geoLang(s.rawGeoCountry(r))
+	if s.geo != nil && country.HasRegions {
+		if pl := s.geo.Place(geo.ClientIP(r)); pl.Country == country.Code {
+			m.GeoRegion = planner.RegionByPlace(m.Regions, pl.Region, pl.City)
+		}
+	}
 	m.AI = s.svc.AI.Enabled()
 	m.Photos = s.svc.Media.Enabled()
 	writeJSON(w, 200, m)

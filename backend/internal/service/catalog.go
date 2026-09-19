@@ -85,6 +85,7 @@ type Meta struct {
 	Recipes        int                    `json:"recipes"`
 	GeoCountry     string                 `json:"geoCountry"`
 	GeoLang        string                 `json:"geoLang"` // язык по стране посетителя
+	GeoRegion      string                 `json:"geoRegion,omitempty"` // регион или город Росстата по IP: квиз подставит его сам
 	AI             bool                   `json:"ai"`      // помощник для своих рецептов включён
 	Photos         bool                   `json:"photos"`  // загрузка фото включена (есть S3)
 }
