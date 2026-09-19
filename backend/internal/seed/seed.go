@@ -304,9 +304,9 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 				r.Description = d.Description
 			}
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, keep_days, freeze) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, keep_days, can_freeze) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 			ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, slot=EXCLUDED.slot, time_min=EXCLUDED.time_min, equipment=EXCLUDED.equipment,
-			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n, keep_days=EXCLUDED.keep_days, freeze=EXCLUDED.freeze
+			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n, keep_days=EXCLUDED.keep_days, can_freeze=EXCLUDED.can_freeze
 			WHERE recipes.edited_at IS NULL`,
 			r.ID, r.Title, r.Slot, r.Time, r.Equipment, r.Tags, r.Batch, r.Steps, r.Image, r.Description, tr, r.Keep, r.Freeze); err != nil {
 			return fmt.Errorf("recipe %s: %w", r.ID, err)

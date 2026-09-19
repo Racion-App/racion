@@ -42,7 +42,7 @@ func loadCatalog(ctx context.Context, pool *pgxpool.Pool, prices *priceStore) (*
 	}
 	rows.Close()
 
-	rows, err = pool.Query(ctx, `SELECT id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, notes, keep_days, freeze FROM recipes WHERE NOT deleted ORDER BY id`)
+	rows, err = pool.Query(ctx, `SELECT id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, notes, keep_days, can_freeze FROM recipes WHERE NOT deleted ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
