@@ -3,7 +3,7 @@
 // (/api/plans/{id} и их отметки), чтобы на кассе без сети список открывался и отмечался.
 // Отметки, сделанные офлайн, приложение копит в localStorage и досылает, когда сеть вернётся.
 const VERSION = "racion-v4";
-const SHELL = ["/", "/assets/app.js", "/assets/app.css", "/theme.js", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png"];
+const SHELL = ["/", "/assets/app.js", "/assets/app.css", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png"];
 const PLAN_RE = /^\/api\/(plans\/[^/]+(\/checks|\/extras)?|locales(\/[a-z]{2})?|meta)(\?.*)?$/;
 
 self.addEventListener("install", (e) => {
@@ -24,7 +24,7 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   // скрипты и стили приложения без хеша в имени: сеть первой (после выкладки — свежие), кэш — только офлайн
-  if (url.pathname.startsWith("/assets/") || url.pathname === "/theme.js") {
+  if (url.pathname.startsWith("/assets/")) {
     e.respondWith(fetch(req).then((res) => { if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {}); } return res; }).catch(() => caches.match(req)));
     return;
   }
