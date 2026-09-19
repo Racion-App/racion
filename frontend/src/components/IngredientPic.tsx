@@ -1,4 +1,4 @@
-import { useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "../i18n";
 
@@ -52,6 +52,25 @@ export function IngredientPic({ src }: { src?: string }) {
   const leave = () => {
     if (by.current === "hover") hide();
   };
+  // Открытое фото гасим при прокрутке и при касании вне кнопки: иначе на телефоне оно «зависает»
+  // поверх текста, ведь фокус с кнопки никуда не уходит.
+  useEffect(() => {
+    if (!pos) return;
+    const shownAt = Date.now();
+    const off = (e: Event) => {
+      // фокус на кнопке сам чуть прокручивает страницу: прокрутку сразу после показа не считаем
+      if (e.type === "scroll" ? Date.now() - shownAt > 400 : !ref.current?.contains(e.target as Node)) hide();
+    };
+    const opts: AddEventListenerOptions = { passive: true, capture: true };
+    document.addEventListener("scroll", off, opts);
+    document.addEventListener("touchstart", off, opts);
+    document.addEventListener("pointerdown", off, opts);
+    return () => {
+      document.removeEventListener("scroll", off, opts);
+      document.removeEventListener("touchstart", off, opts);
+      document.removeEventListener("pointerdown", off, opts);
+    };
+  }, [pos]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       <button ref={ref} type="button" className="pic__btn" onClick={toggle} onMouseEnter={() => open("hover")} onMouseLeave={leave} onFocus={() => open("focus")} onBlur={hide} aria-label={t("ing.photo")} title={t("ing.photo")} aria-expanded={!!pos}>
