@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CookingPot, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, ChevronDown, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { OfferCard, useOffer } from "../components/OfferCard";
 import { TopBar } from "../components/TopBar";
@@ -40,6 +40,10 @@ export function Plan() {
   const [recipeId, setRecipeId] = useState<string | null>(null);
   const [swapping, setSwapping] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
+  // блок заготовок: свёрнут/развёрнут, итоги по всем дням заготовок
+  const [prepOpen, setPrepOpen] = useState(true);
+  const prepCount = plan?.prepDays?.reduce((n, pd) => n + pd.items.length, 0) ?? 0;
+  const prepTotal = plan?.prepDays?.reduce((n, pd) => n + pd.totalMin, 0) ?? 0;
   // одно точечное предложение над списком покупок (страна и регион плана)
   const planOffer = useOffer("plan", plan?.country.code, plan?.priceSource.regionCode || undefined);
   // меню «ещё» в нижней панели на телефоне
@@ -547,34 +551,52 @@ export function Plan() {
           </div>
         )}
         {plan.prepDays && plan.prepDays.length > 0 && !storeMode && (
-          <section className="prep" aria-label={t("prep.title")}>
-            <div className="prep__head">
-              <h2><CookingPot size={18} aria-hidden /> {t("prep.title")}</h2>
-              <span className="prep__hint">{t("quiz.prep." + (plan.params.prep || "none"))}</span>
+          <section className="day prep" aria-label={t("prep.title")}>
+            <div className="day__head">
+              <h2 className="day__name">
+                {t("prep.title")} <small>{t("prep.mode.short." + (plan.params.prep || "none"))}</small>
+              </h2>
+              <span className="day__sum">
+                <span><span className="num">{prepCount}</span> {tn("dishes", prepCount)}</span>
+                {prepTotal > 0 && <span><span className="num">{minutes(prepTotal)}</span> {t("prep.stove")}</span>}
+                <button type="button" className={"day__skip" + (prepOpen ? " is-on" : "")} onClick={() => setPrepOpen((v) => !v)} aria-expanded={prepOpen} aria-label={prepOpen ? t("collapse") : t("expand")} title={prepOpen ? t("collapse") : t("expand")}>
+                  <ChevronDown size={16} aria-hidden style={{ transform: prepOpen ? "rotate(180deg)" : undefined }} />
+                </button>
+              </span>
             </div>
-            {plan.prepDays.map((pd) => (
-              <div className="prep__day" key={pd.index}>
-                <div className="prep__dayhead">
-                  <b>{pd.label}</b> <span className="num">{dateShort(pd.date, lang)}</span>
-                  {pd.items.length > 0 && <span className="prep__total">{t("prep.total", { time: minutes(pd.totalMin) })}</span>}
+            {prepOpen && plan.prepDays.map((pd) => {
+              const items = [...pd.items].sort((x, y) => y.timeMin - x.timeMin);
+              return (
+                <div className="prep__session" key={pd.index}>
+                  <div className="prep__when">
+                    <b>{pd.label}</b> <small className="num">{dateShort(pd.date, lang)}</small>
+                    {items.length > 0 && pd.index === plan.prepDays![0].index && <span className="prep__order">{t("prep.order")}</span>}
+                  </div>
+                  {items.length === 0 ? (
+                    <p className="prep__empty">{t("prep.empty")}</p>
+                  ) : (
+                    <ol className="prep__rows">
+                      {items.map((it) => (
+                        <li key={it.recipeId} className="prep__row">
+                          <span className="prep__min num">{it.timeMin} {t("min")}</span>
+                          <button type="button" className="prep__title" onClick={() => setRecipeId(it.recipeId)}>
+                            {it.title}
+                            {it.side && <small> + {it.side}</small>}
+                          </button>
+                          <span className="prep__days" aria-label={t("prep.for", { days: it.forDays.map((d) => plan.days[d]?.label).join(", ") })}>
+                            {it.forDays.map((d) => <i key={d}>{plan.days[d]?.label}</i>)}
+                            {it.portions > (plan.slotPortions?.[Object.keys(plan.slotPortions)[0]] ?? plan.portions) && <em className="num">×{fmtPortions(it.portions)}</em>}
+                          </span>
+                          <span className={"prep__store" + (it.mode === "freezer" ? " is-freezer" : "")} title={t("prep.mode." + it.mode)} aria-label={t("prep.mode." + it.mode)}>
+                            {it.mode === "freezer" ? <Snowflake size={14} aria-hidden /> : <Refrigerator size={14} aria-hidden />}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
                 </div>
-                {pd.items.length === 0 ? (
-                  <p className="prep__empty">{t("prep.empty")}</p>
-                ) : (
-                  <ul className="prep__list">
-                    {pd.items.map((it) => (
-                      <li key={it.recipeId} className="prep__item">
-                        <button type="button" className="prep__open" onClick={() => setRecipeId(it.recipeId)}>{it.title}{it.side && <span className="prep__side"> + {it.side}</span>}</button>
-                        <span className="prep__meta">
-                          <span className="num">{it.timeMin} {t("min")}</span> · {t("prep.portions", { n: fmtPortions(it.portions) })} · {t("prep.for", { days: it.forDays.map((d) => plan.days[d]?.label.toLowerCase()).join(", ") })}
-                          {it.mode === "freezer" && <span className="prep__mode prep__mode--freezer"><Snowflake size={12} aria-hidden /> {t("prep.mode.freezer")}</span>}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </section>
         )}
         {plan.days.map((day) => (

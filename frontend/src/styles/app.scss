@@ -236,14 +236,14 @@ a { text-underline-offset: 3px; }
 }
 
 // Нижняя панель действий — одна на квиз и на план. В плане прибита к низу экрана; в квизе (--flow)
-// липнет к низу, пока прокрутка не дойдёт до её места перед подвалом, дальше едет со страницей.
+// просто стоит под шагом: без подложки и без прилипания (решение пользователя).
 .actionbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
   padding: 10px var(--r-gutter) calc(10px + var(--r-safe-bottom));
-  &--flow { position: sticky; left: auto; right: auto; margin: 0 calc(-1 * var(--r-gutter)); }
   background: var(--ds-bg-overlay);
   backdrop-filter: var(--ds-blur-md); -webkit-backdrop-filter: var(--ds-blur-md);
   border-top: 1px solid var(--ds-separator);
+  &--flow { position: static; padding: 8px 0 0; background: transparent; border-top: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
   &__inner { max-width: var(--r-sheet-max); margin: 0 auto; display: flex; gap: 8px; align-items: center; }
   .btn { min-height: 48px; flex: 1; font-size: 16px; }
   .btn-ghost { flex: 0 0 auto; width: 48px; padding: 0; }
@@ -1679,21 +1679,33 @@ main.pages.is-loading {
 // Редактор комментария на фокусе — как обычное поле (ореол снят в design-system/apple-components.scss)
 .mdedit:focus { box-shadow: none; border-color: var(--ds-blue); outline: none; }
 
-// Режим заготовок: блок «что готовить в день заготовки» над неделей и метка на блюде
-.prep { margin: 4px 0 12px; padding: 14px 16px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
-  &__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
-    h2 { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 700; svg { color: var(--ds-blue); } } }
-  &__hint { font-size: 13px; color: var(--ds-label-tertiary); }
-  &__day { padding: 10px 0; border-top: 1px solid var(--ds-separator); &:first-of-type { border-top: 0; } }
-  &__dayhead { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 15px; .num { color: var(--ds-label-tertiary); font-size: 13px; } }
-  &__total { margin-left: auto; font-size: 13px; color: var(--ds-label-secondary); }
-  &__empty { margin: 6px 0 0; font-size: 14px; color: var(--ds-label-secondary); }
-  &__list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
-  &__item { display: grid; gap: 2px; }
-  &__open { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 600; color: var(--ds-label-primary); text-align: left; cursor: pointer; &:hover { color: var(--ds-blue); } }
-  &__side { font-weight: 400; color: var(--ds-label-secondary); }
-  &__meta { font-size: 13px; color: var(--ds-label-secondary); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
-  &__mode { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 6px; font-size: 12px; background: var(--ds-fill-4);
-    &--freezer { color: var(--ds-blue); } } }
-.dish__prep { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; font-size: 12px; color: var(--ds-label-tertiary); white-space: nowrap;
+// Режим заготовок: секция чека перед неделей (как день), внутри по дню заготовки таблица «время · блюдо · дни · куда»
+.prep {
+  &__session { padding: 6px 0 4px; & + & { border-top: 1px solid var(--ds-separator); margin-top: 4px; } }
+  &__when { display: flex; align-items: baseline; gap: 8px; margin: 4px 0 6px; font-size: 14px; b { font-weight: 600; } small { font-size: 12.5px; color: var(--ds-label-tertiary); } }
+  &__order { margin-left: auto; font-size: 12.5px; color: var(--ds-label-tertiary); }
+  &__empty { margin: 0 0 6px; font-size: 14px; color: var(--ds-label-secondary); }
+  &__rows { list-style: none; margin: 0; padding: 0; }
+  &__row { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto 20px; align-items: center; gap: 4px 12px; padding: 7px 0; border-top: 1px solid var(--ds-separator);
+    &:first-child { border-top: 0; } }
+  &__min { font-size: 13px; color: var(--ds-label-tertiary); white-space: nowrap; }
+  &__title { border: 0; background: transparent; padding: 0; min-width: 0; font: inherit; font-size: 15px; font-weight: 500; line-height: 1.3; color: var(--ds-label-primary); text-align: left; cursor: pointer; overflow-wrap: anywhere;
+    &:hover { color: var(--ds-blue); } &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: 4px; }
+    small { font-weight: 400; color: var(--ds-label-secondary); } }
+  &__days { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+    i { font-style: normal; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ds-label-secondary); padding: 2px 6px; border-radius: 6px; background: var(--ds-fill-4); }
+    em { font-style: normal; font-size: 12px; color: var(--ds-label-tertiary); margin-left: 2px; } }
+  &__store { display: grid; place-items: center; color: var(--ds-label-quaternary); &.is-freezer { color: var(--ds-blue); } }
+  @media (max-width: 640px) {
+    .day__head { flex-wrap: wrap; }
+    .day__name small { display: block; margin-top: 2px; }
+    &__order { display: none; }
+    &__row { grid-template-columns: 48px minmax(0, 1fr) 20px; gap: 6px 10px; }
+    &__min { grid-column: 1; grid-row: 1; }
+    &__title { grid-column: 2; grid-row: 1; }
+    &__days { grid-column: 2; grid-row: 2; justify-self: start; }
+    &__store { grid-column: 3; grid-row: 1 / span 2; }
+  }
+}
+.dish__prep { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; color: var(--ds-label-tertiary); white-space: nowrap;
   &--freezer { color: var(--ds-blue); } &--fresh { color: var(--ds-green, #34c759); } }

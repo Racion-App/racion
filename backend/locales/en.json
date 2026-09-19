@@ -1225,5 +1225,12 @@
   "dish.prep.fridge": "batch cooked · reheat",
   "dish.prep.freezer": "from the freezer · thaw overnight",
   "dish.prep.fresh": "made fresh",
-  "prep.empty": "Nothing to cook that day: all the dishes for these days are quick."
+  "prep.empty": "Nothing to cook that day: all the dishes for these days are quick.",
+  "prep.stove": "at the stove",
+  "prep.order": "longest cooking first",
+  "collapse": "Collapse",
+  "expand": "Expand",
+  "prep.mode.short.none": "every day",
+  "prep.mode.short.one": "once a week",
+  "prep.mode.short.two": "twice a week"
 }
