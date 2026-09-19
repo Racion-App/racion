@@ -561,7 +561,6 @@
   "list.extras": "Your own",
   "list.title": "Shopping list",
   "md.bold": "Bold",
-  "md.hint": "Markdown supported",
   "md.italic": "Italic",
   "md.link": "Link",
   "md.list": "List",
@@ -1157,5 +1156,12 @@
   "coll.fact.time": "to cook",
   "coll.fact.kcal": "kcal per portion",
   "country.hint": "Recipe and plan prices will be shown in the currency of the country you pick.",
-  "dish.side": "Side"
+  "dish.side": "Side",
+  "md.link.url": "Link address",
+  "md.link.add": "Add",
+  "md.link.bad": "Enter an address like https://site.com/page",
+  "leave.title": "You are leaving Racion",
+  "leave.text": "This link from a comment goes to another site that we have not checked. Take care with personal data and purchases. Site:",
+  "leave.go": "Open link",
+  "more": "More"
 }

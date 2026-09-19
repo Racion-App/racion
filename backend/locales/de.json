@@ -561,7 +561,6 @@
   "list.extras": "Eigenes",
   "list.title": "Einkaufsliste",
   "md.bold": "Fett",
-  "md.hint": "Markdown wird unterstützt",
   "md.italic": "Kursiv",
   "md.link": "Link",
   "md.list": "Liste",
@@ -1157,5 +1156,12 @@
   "coll.fact.time": "Zubereitung",
   "coll.fact.kcal": "kcal pro Portion",
   "country.hint": "Preise in Rezepten und im Plan zeigen wir in der Währung des gewählten Landes.",
-  "dish.side": "Beilage"
+  "dish.side": "Beilage",
+  "md.link.url": "Linkadresse",
+  "md.link.add": "Hinzufügen",
+  "md.link.bad": "Adresse wie https://seite.de/seite eingeben",
+  "leave.title": "Du verlässt Racion",
+  "leave.text": "Dieser Link aus einem Kommentar führt auf eine andere Seite, die wir nicht geprüft haben. Vorsicht mit persönlichen Daten und Käufen. Seite:",
+  "leave.go": "Link öffnen",
+  "more": "Mehr"
 }

@@ -543,7 +543,6 @@
   "list.extras": "Le vôtre",
   "list.title": "Liste de courses",
   "md.bold": " Gras",
-  "md.hint": "Markdown pris en charge",
   "md.italic": "-Italique",
   "md.link": "Lien",
   "md.list": "Liste",
@@ -1125,5 +1124,12 @@
   "coll.fact.time": "de préparation",
   "coll.fact.kcal": "kcal par portion",
   "country.hint": "Les prix des recettes et du plan s’afficheront dans la monnaie du pays choisi.",
-  "dish.side": "Accompagnement"
+  "dish.side": "Accompagnement",
+  "md.link.url": "Adresse du lien",
+  "md.link.add": "Ajouter",
+  "md.link.bad": "Saisis une adresse comme https://site.fr/page",
+  "leave.title": "Tu quittes Racion",
+  "leave.text": "Ce lien d’un commentaire mène vers un autre site que nous n’avons pas vérifié. Prudence avec tes données personnelles et tes achats. Site :",
+  "leave.go": "Ouvrir le lien",
+  "more": "Plus"
 }

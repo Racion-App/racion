@@ -58,15 +58,16 @@
   var form=document.querySelector('[data-comment-form]'),list=document.querySelector('[data-comments]');
   function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function row(c){var li=document.createElement('li');li.className='comment';li.dataset.id=c.id;li.innerHTML='<div class="comment__head">'+(c.avatar?'<img class="comment__ava" src="'+esc(c.avatar)+'" alt="">':'')+'<b>@'+esc(c.nick)+'</b><time class="comment__time"></time>'+(c.mine?'<button type="button" class="comment__del" data-del aria-label="×">×</button>':'')+'</div><div class="comment__body">'+(c.html||esc(c.body))+'</div>'+(c.image?'<img class="comment__img" src="'+esc(c.image)+'" alt="">':'');return li}
-  // панель разметки: оборачивает выделение в **…**, *…*, ~~…~~, ставит «- » / «> » в начало строки, вставляет ссылку
-  var mdta=form&&form.querySelector('textarea');
-  if(form&&mdta){form.querySelectorAll('[data-md]').forEach(function(b){b.addEventListener('click',function(){var s=mdta.selectionStart,e=mdta.selectionEnd,v=mdta.value,sel=v.slice(s,e),kind=b.dataset.md,ins,cs,ce;
-    function wrap(m){ins=m+(sel||'')+m;cs=s+m.length;ce=cs+sel.length}
-    if(kind==='bold')wrap('**');else if(kind==='italic')wrap('*');else if(kind==='strike')wrap('~~');
-    else if(kind==='link'){var u=sel&&/^https?:\/\//.test(sel)?sel:'https://';ins='['+(sel&&!/^https?:\/\//.test(sel)?sel:'')+']('+u+')';cs=s+1;ce=cs+(sel&&!/^https?:\/\//.test(sel)?sel.length:0)}
-    else{var ls=v.lastIndexOf('\n',s-1)+1,pre=kind==='list'?'- ':'> ';var block=v.slice(ls,e);ins=block.split('\n').map(function(l){return l.startsWith(pre)?l.slice(pre.length):pre+l}).join('\n');s=ls;cs=s;ce=s+ins.length}
-    mdta.value=v.slice(0,s)+ins+v.slice(e);mdta.focus();mdta.setSelectionRange(cs,ce)})})}
+  // панель форматирования живёт в mdedit.js (contenteditable), textarea здесь только хранилище Markdown
   // фото к отзыву: грузим сразу при выборе, в комментарий уходит ссылка
+  // внешняя ссылка из комментария: сначала предупреждение, куда ведёт, потом переход в новой вкладке
+  var leave=document.querySelector('[data-leave]');
+  if(leave){document.addEventListener('click',function(e){var a=e.target.closest('.comment__body a[href]');if(!a)return;var u;try{u=new URL(a.href)}catch(x){return}
+      if(u.host===location.host||!/^https?:$/.test(u.protocol))return;e.preventDefault();
+      leave.querySelector('[data-leave-host]').textContent=u.host;leave.querySelector('[data-leave-url]').textContent=u.href.length>90?u.href.slice(0,87)+'…':u.href;leave.querySelector('[data-leave-go]').href=u.href;leave.showModal()});
+    leave.querySelectorAll('[data-leave-no]').forEach(function(b){b.addEventListener('click',function(){leave.close()})});
+    leave.querySelector('[data-leave-go]').addEventListener('click',function(){leave.close()});
+    leave.addEventListener('click',function(e){if(e.target===leave)leave.close()})}
   var photo=form&&form.querySelector('[data-comment-photo]'),photoURL='';
   if(photo){var pin=photo.querySelector('input'),plabel=photo.querySelector('[data-photo-label]'),ptext=plabel.innerHTML;pin.addEventListener('change',function(){var f=pin.files&&pin.files[0];if(!f)return;var fd=new FormData();fd.append('file',f);plabel.textContent='…';
     fetch('/api/uploads?kind=comment',{method:'POST',body:fd}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);return j})}).then(function(p){photoURL=p.url;plabel.innerHTML='<img src="'+esc(p.thumb)+'" alt="">'}).catch(function(x){plabel.innerHTML=ptext;toast(x.message)})})}

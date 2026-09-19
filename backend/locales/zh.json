@@ -544,7 +544,6 @@
   "list.extras": "自有项",
   "list.title": "购物清单",
   "md.bold": "加粗",
-  "md.hint": "支持 Markdown",
   "md.italic": "斜体",
   "md.link": "链接",
   "md.list": "列表",
@@ -1126,5 +1125,12 @@
   "coll.fact.time": "烹饪时间",
   "coll.fact.kcal": "每份千卡",
   "country.hint": "食谱和计划中的价格将以所选国家的货币显示。",
-  "dish.side": "配菜"
+  "dish.side": "配菜",
+  "md.link.url": "链接地址",
+  "md.link.add": "添加",
+  "md.link.bad": "请输入类似 https://site.com/page 的地址",
+  "leave.title": "你正在离开 Racion",
+  "leave.text": "这条评论中的链接指向我们未审核的其他网站。请注意保护个人信息和谨慎购物。网站：",
+  "leave.go": "打开链接",
+  "more": "更多"
 }

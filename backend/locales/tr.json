@@ -543,7 +543,6 @@
   "list.extras": "Kendi",
   "list.title": "Alışveriş Listesi",
   "md.bold": "Kalın",
-  "md.hint": "Markdown destekleniyor",
   "md.italic": "İtalik",
   "md.link": "Bağlantı",
   "md.list": "Liste",
@@ -1125,5 +1124,12 @@
   "coll.fact.time": "pişirme",
   "coll.fact.kcal": "porsiyon başına kcal",
   "country.hint": "Tarif ve plan fiyatları seçtiğiniz ülkenin para biriminde gösterilir.",
-  "dish.side": "Garnitür"
+  "dish.side": "Garnitür",
+  "md.link.url": "Bağlantı adresi",
+  "md.link.add": "Ekle",
+  "md.link.bad": "https://site.com/sayfa biçiminde bir adres girin",
+  "leave.title": "Racion’dan ayrılıyorsunuz",
+  "leave.text": "Yorumdaki bu bağlantı kontrol etmediğimiz başka bir siteye gidiyor. Kişisel verilerinize ve alışverişlerinize dikkat edin. Site:",
+  "leave.go": "Bağlantıyı aç",
+  "more": "Daha fazla"
 }

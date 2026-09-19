@@ -557,7 +557,6 @@
   "list.extras": "Swoje",
   "list.title": "Lista zakupów",
   "md.bold": "Pogrubienie",
-  "md.hint": "Obsługiwany Markdown",
   "md.italic": "Kursywa",
   "md.link": "Link",
   "md.list": "Lista",
@@ -1139,5 +1138,12 @@
   "coll.fact.time": "gotowania",
   "coll.fact.kcal": "kcal na porcję",
   "country.hint": "Ceny przepisów i planu pokażemy w walucie wybranego kraju.",
-  "dish.side": "Dodatek"
+  "dish.side": "Dodatek",
+  "md.link.url": "Adres linku",
+  "md.link.add": "Dodaj",
+  "md.link.bad": "Podaj adres w postaci https://strona.pl/podstrona",
+  "leave.title": "Opuszczasz Racion",
+  "leave.text": "Ten link z komentarza prowadzi na inną stronę, której nie sprawdzaliśmy. Uważaj na dane osobowe i zakupy. Strona:",
+  "leave.go": "Otwórz link",
+  "more": "Więcej"
 }

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CopyPlus, Flame, Info, Plus, Printer, RefreshCw, Repeat2, RotateCcw, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Repeat2, RotateCcw, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { RecipeSheet } from "../components/RecipeSheet";
@@ -36,6 +36,16 @@ export function Plan() {
   const [recipeId, setRecipeId] = useState<string | null>(null);
   const [swapping, setSwapping] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
+  // меню «ещё» в нижней панели на телефоне
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!moreOpen) return;
+    const off = (e: MouseEvent | TouchEvent) => { if (!moreRef.current?.contains(e.target as Node)) setMoreOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setMoreOpen(false); };
+    document.addEventListener("mousedown", off); document.addEventListener("touchstart", off); document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", off); document.removeEventListener("touchstart", off); document.removeEventListener("keydown", esc); };
+  }, [moreOpen]);
   const [toast, setToast] = useState<string | null>(null);
   // офлайн: полоска сверху и число недосланных отметок
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
@@ -856,35 +866,41 @@ export function Plan() {
             </>
           ) : (
             <>
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={() => {
-                  track("plan_print");
-                  window.print();
-                }}
-                aria-label={t("plan.print")}
-              >
-                <Printer size={20} aria-hidden />
-              </button>
-              {user && (
-                <button type="button" className="btn btn-ghost" onClick={invite} aria-label={t("plan.family.invite")} title={t("plan.family.invite")}>
-                  <Users size={20} aria-hidden />
-                </button>
-              )}
-              {user && (
-                <button type="button" className="btn btn-ghost" onClick={repeat} aria-label={t("plan.repeat")} title={t("plan.repeat.title")}>
-                  <CopyPlus size={20} aria-hidden />
-                </button>
-              )}
-              <button type="button" className="btn btn-ghost" onClick={share} aria-label={t("plan.share")} title={t("plan.share")}>
-                <Share2 size={20} aria-hidden />
-              </button>
-              {user && aiOn && (
-                <button type="button" className="btn btn-ghost actionbar__ai" onClick={() => { setChatOpen(true); track("plan_chat_open"); }} aria-label={t("chat.title")} title={t("chat.title")}>
-                  <Sparkles size={20} aria-hidden />
-                </button>
-              )}
+              {/* Инструменты: на широком экране иконки в ряд, на телефоне прячутся в меню «ещё», чтобы кнопка «В магазин» осталась с текстом */}
+              {(() => {
+                const tools: { key: string; icon: ReactNode; label: string; title?: string; cls?: string; on: () => void }[] = [
+                  { key: "print", icon: <Printer size={20} aria-hidden />, label: t("plan.print"), on: () => { track("plan_print"); window.print(); } },
+                ];
+                if (user) tools.push({ key: "invite", icon: <Users size={20} aria-hidden />, label: t("plan.family.invite"), on: invite });
+                if (user) tools.push({ key: "repeat", icon: <CopyPlus size={20} aria-hidden />, label: t("plan.repeat"), title: t("plan.repeat.title"), on: repeat });
+                tools.push({ key: "share", icon: <Share2 size={20} aria-hidden />, label: t("plan.share"), on: share });
+                if (user && aiOn) tools.push({ key: "ai", icon: <Sparkles size={20} aria-hidden />, label: t("chat.title"), cls: "actionbar__ai", on: () => { setChatOpen(true); track("plan_chat_open"); } });
+                return (
+                  <>
+                    <div className="actionbar__tools">
+                      {tools.map((x) => (
+                        <button key={x.key} type="button" className={"btn btn-ghost" + (x.cls ? " " + x.cls : "")} onClick={x.on} aria-label={x.label} title={x.title ?? x.label}>
+                          {x.icon}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="actionbar__more" ref={moreRef}>
+                      <button type="button" className="btn btn-ghost" onClick={() => setMoreOpen((v) => !v)} aria-label={t("more")} title={t("more")} aria-expanded={moreOpen} aria-haspopup="menu">
+                        <MoreHorizontal size={20} aria-hidden />
+                      </button>
+                      {moreOpen && (
+                        <div className="actionmenu" role="menu">
+                          {tools.map((x) => (
+                            <button key={x.key} type="button" role="menuitem" className={"actionmenu__item" + (x.cls ? " " + x.cls : "")} onClick={() => { setMoreOpen(false); x.on(); }}>
+                              {x.icon} {x.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
               <button type="button" className="btn btn-primary" onClick={() => setMode(true)}>
                 <ShoppingBasket size={18} aria-hidden /> {t("plan.toStore")}
               </button>

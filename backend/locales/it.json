@@ -543,7 +543,6 @@
   "list.extras": "Il tuo",
   "list.title": "Lista della spesa",
   "md.bold": "Grassetto",
-  "md.hint": "Markdown supportato",
   "md.italic": "Corsivo",
   "md.link": "Link",
   "md.list": "Elenco",
@@ -1125,5 +1124,12 @@
   "coll.fact.time": "di cottura",
   "coll.fact.kcal": "kcal a porzione",
   "country.hint": "I prezzi di ricette e piano saranno mostrati nella valuta del paese scelto.",
-  "dish.side": "Contorno"
+  "dish.side": "Contorno",
+  "md.link.url": "Indirizzo del link",
+  "md.link.add": "Aggiungi",
+  "md.link.bad": "Inserisci un indirizzo come https://sito.it/pagina",
+  "leave.title": "Stai lasciando Racion",
+  "leave.text": "Questo link da un commento porta a un altro sito che non abbiamo controllato. Attenzione ai dati personali e agli acquisti. Sito:",
+  "leave.go": "Apri il link",
+  "more": "Altro"
 }

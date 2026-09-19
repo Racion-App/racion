@@ -544,7 +544,6 @@
   "list.extras": "O seu próprio",
   "list.title": "Lista de compras",
   "md.bold": "Negrito",
-  "md.hint": "Markdown suportado",
   "md.italic": "Itálico",
   "md.link": "Link",
   "md.list": "Lista",
@@ -1126,5 +1125,12 @@
   "coll.fact.time": "de preparo",
   "coll.fact.kcal": "kcal por porção",
   "country.hint": "Os preços das receitas e do plano aparecem na moeda do país escolhido.",
-  "dish.side": "Acompanhamento"
+  "dish.side": "Acompanhamento",
+  "md.link.url": "Endereço do link",
+  "md.link.add": "Adicionar",
+  "md.link.bad": "Escreve um endereço como https://site.pt/pagina",
+  "leave.title": "Estás a sair do Racion",
+  "leave.text": "Este link de um comentário leva a outro site que não verificámos. Cuidado com dados pessoais e compras. Site:",
+  "leave.go": "Abrir link",
+  "more": "Mais"
 }

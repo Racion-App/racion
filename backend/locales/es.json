@@ -544,7 +544,6 @@
   "list.extras": "Propio",
   "list.title": "Lista de compras",
   "md.bold": "Negrita",
-  "md.hint": "Markdown soportado",
   "md.italic": "Cursiva",
   "md.link": "Enlace",
   "md.list": "Lista",
@@ -1126,5 +1125,12 @@
   "coll.fact.time": "de cocina",
   "coll.fact.kcal": "kcal por ración",
   "country.hint": "Los precios de recetas y del plan se mostrarán en la moneda del país elegido.",
-  "dish.side": "Guarnición"
+  "dish.side": "Guarnición",
+  "md.link.url": "Dirección del enlace",
+  "md.link.add": "Añadir",
+  "md.link.bad": "Escribe una dirección como https://sitio.es/pagina",
+  "leave.title": "Sales de Racion",
+  "leave.text": "Este enlace de un comentario lleva a otro sitio que no hemos revisado. Cuidado con tus datos personales y compras. Sitio:",
+  "leave.go": "Abrir enlace",
+  "more": "Más"
 }

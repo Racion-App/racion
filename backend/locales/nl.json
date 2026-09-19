@@ -543,7 +543,6 @@
   "list.extras": "Eigen toevoegingen",
   "list.title": "Boodschappenlijst",
   "md.bold": "Vet",
-  "md.hint": "Markdown ondersteund",
   "md.italic": "Cursief",
   "md.link": "Link",
   "md.list": "Lijst",
@@ -1125,5 +1124,12 @@
   "coll.fact.time": "bereiding",
   "coll.fact.kcal": "kcal per portie",
   "country.hint": "Prijzen van recepten en het weekplan tonen we in de valuta van het gekozen land.",
-  "dish.side": "Bijgerecht"
+  "dish.side": "Bijgerecht",
+  "md.link.url": "Linkadres",
+  "md.link.add": "Toevoegen",
+  "md.link.bad": "Voer een adres in zoals https://site.nl/pagina",
+  "leave.title": "Je verlaat Racion",
+  "leave.text": "Deze link uit een reactie gaat naar een andere site die wij niet hebben gecontroleerd. Wees voorzichtig met persoonsgegevens en aankopen. Site:",
+  "leave.go": "Link openen",
+  "more": "Meer"
 }

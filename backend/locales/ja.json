@@ -544,7 +544,6 @@
   "list.extras": "自分のもの",
   "list.title": "買い物リスト",
   "md.bold": "太字",
-  "md.hint": "Markdown対応",
   "md.italic": "イタリック",
   "md.link": "リンク",
   "md.list": "リスト",
@@ -1126,5 +1125,12 @@
   "coll.fact.time": "調理時間",
   "coll.fact.kcal": "1人前のkcal",
   "country.hint": "レシピと献立の価格は、選んだ国の通貨で表示されます。",
-  "dish.side": "付け合わせ"
+  "dish.side": "付け合わせ",
+  "md.link.url": "リンクのアドレス",
+  "md.link.add": "追加",
+  "md.link.bad": "https://site.jp/page の形式でアドレスを入力してください",
+  "leave.title": "Racion から移動します",
+  "leave.text": "このコメント内のリンクは、当方で確認していない外部サイトに移動します。個人情報や購入にはご注意ください。サイト：",
+  "leave.go": "リンクを開く",
+  "more": "その他"
 }

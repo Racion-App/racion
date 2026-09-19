@@ -557,7 +557,6 @@
   "list.extras": "Vlastní",
   "list.title": "Nákupní seznam",
   "md.bold": "Tučné",
-  "md.hint": "Podporovaný Markdown",
   "md.italic": "Kurzíva",
   "md.link": "Odkaz",
   "md.list": "Seznam",
@@ -1139,5 +1138,12 @@
   "coll.fact.time": "příprava",
   "coll.fact.kcal": "kcal na porci",
   "country.hint": "Ceny receptů a plánu zobrazíme v měně zvolené země.",
-  "dish.side": "Příloha"
+  "dish.side": "Příloha",
+  "md.link.url": "Adresa odkazu",
+  "md.link.add": "Přidat",
+  "md.link.bad": "Zadejte adresu ve tvaru https://web.cz/stranka",
+  "leave.title": "Opouštíte Racion",
+  "leave.text": "Tento odkaz z komentáře vede na jiný web, který jsme neprověřovali. Opatrně s osobními údaji a nákupy. Web:",
+  "leave.go": "Otevřít odkaz",
+  "more": "Další"
 }
