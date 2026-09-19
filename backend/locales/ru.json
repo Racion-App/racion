@@ -1160,5 +1160,11 @@
   "recipe.side.meat": "к мясу",
   "recipe.side.poultry": "к птице",
   "recipe.side.fish": "к рыбе",
-  "recipe.side.any": "ко всему"
+  "recipe.side.any": "ко всему",
+  "recipe.notes": "Советы",
+  "recipe.notes.why": "Почему так",
+  "recipe.notes.swaps": "Чем заменить",
+  "recipe.notes.mistakes": "Где ошибаются",
+  "recipe.notes.keep": "Хранить и разогреть",
+  "recipe.notes.serve": "С чем подать"
 }

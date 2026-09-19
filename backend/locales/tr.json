@@ -1110,5 +1110,11 @@
   "recipe.side.meat": "ete",
   "recipe.side.poultry": "tavuğa",
   "recipe.side.fish": "balığa",
-  "recipe.side.any": "her şeye"
+  "recipe.side.any": "her şeye",
+  "recipe.notes": "İpuçları",
+  "recipe.notes.why": "Neden böyle",
+  "recipe.notes.swaps": "Yerine ne koyulur",
+  "recipe.notes.mistakes": "Sık yapılan hatalar",
+  "recipe.notes.keep": "Saklama ve ısıtma",
+  "recipe.notes.serve": "Yanında ne gider"
 }

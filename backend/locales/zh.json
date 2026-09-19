@@ -1111,5 +1111,11 @@
   "recipe.side.meat": "配肉类",
   "recipe.side.poultry": "配禽类",
   "recipe.side.fish": "配鱼类",
-  "recipe.side.any": "配任何主菜"
+  "recipe.side.any": "配任何主菜",
+  "recipe.notes": "小贴士",
+  "recipe.notes.why": "为什么这样做",
+  "recipe.notes.swaps": "可替换食材",
+  "recipe.notes.mistakes": "常见错误",
+  "recipe.notes.keep": "保存与加热",
+  "recipe.notes.serve": "搭配建议"
 }

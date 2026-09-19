@@ -1111,5 +1111,11 @@
   "recipe.side.meat": "етке",
   "recipe.side.poultry": "құс етіне",
   "recipe.side.fish": "балыққа",
-  "recipe.side.any": "бәріне"
+  "recipe.side.any": "бәріне",
+  "recipe.notes": "Кеңестер",
+  "recipe.notes.why": "Неге осылай",
+  "recipe.notes.swaps": "Немен алмастыруға болады",
+  "recipe.notes.mistakes": "Жиі кездесетін қателер",
+  "recipe.notes.keep": "Сақтау және жылыту",
+  "recipe.notes.serve": "Немен беру"
 }

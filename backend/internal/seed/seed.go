@@ -141,7 +141,7 @@ func loadRecipes() ([]recipe, error) {
 	seen := map[string]string{}
 	for _, e := range entries {
 		n := e.Name()
-		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" {
+		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" || n == "recipes_notes.json" {
 			continue
 		}
 		part, err := load[recipe](n)
@@ -341,6 +341,19 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 			for _, id := range f.Items {
 				if _, err := tx.Exec(ctx, `UPDATE ingredients SET image = $2 WHERE id = $1`, id, "/images/ingredients/"+id+".webp"); err != nil {
 					return err
+				}
+			}
+		}
+	}
+	// заметки к рецептам по языкам (recipes_notes.json, cmd/racionai notes) — наши, обновляем всегда
+	if raw, err := data.ReadFile("data/recipes_notes.json"); err == nil {
+		var f struct {
+			Items map[string]map[string]planner.Notes `json:"items"`
+		}
+		if json.Unmarshal(raw, &f) == nil {
+			for id, notes := range f.Items {
+				if _, err := tx.Exec(ctx, `UPDATE recipes SET notes = $2 WHERE id = $1`, id, notes); err != nil {
+					return fmt.Errorf("notes %s: %w", id, err)
 				}
 			}
 		}

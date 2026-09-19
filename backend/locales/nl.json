@@ -1110,5 +1110,11 @@
   "recipe.side.meat": "bij vlees",
   "recipe.side.poultry": "bij gevogelte",
   "recipe.side.fish": "bij vis",
-  "recipe.side.any": "bij alles"
+  "recipe.side.any": "bij alles",
+  "recipe.notes": "Tips",
+  "recipe.notes.why": "Waarom zo",
+  "recipe.notes.swaps": "Vervangingen",
+  "recipe.notes.mistakes": "Veelgemaakte fouten",
+  "recipe.notes.keep": "Bewaren en opwarmen",
+  "recipe.notes.serve": "Serveer met"
 }

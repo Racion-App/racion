@@ -1111,5 +1111,11 @@
   "recipe.side.meat": "肉料理に",
   "recipe.side.poultry": "鶏肉料理に",
   "recipe.side.fish": "魚料理に",
-  "recipe.side.any": "何にでも"
+  "recipe.side.any": "何にでも",
+  "recipe.notes": "コツ",
+  "recipe.notes.why": "なぜこうするのか",
+  "recipe.notes.swaps": "代用できる材料",
+  "recipe.notes.mistakes": "よくある失敗",
+  "recipe.notes.keep": "保存と温め直し",
+  "recipe.notes.serve": "合わせるもの"
 }

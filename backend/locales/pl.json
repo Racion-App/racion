@@ -1124,5 +1124,11 @@
   "recipe.side.meat": "do mięsa",
   "recipe.side.poultry": "do drobiu",
   "recipe.side.fish": "do ryby",
-  "recipe.side.any": "do wszystkiego"
+  "recipe.side.any": "do wszystkiego",
+  "recipe.notes": "Porady",
+  "recipe.notes.why": "Dlaczego tak",
+  "recipe.notes.swaps": "Zamienniki",
+  "recipe.notes.mistakes": "Częste błędy",
+  "recipe.notes.keep": "Przechowywanie i odgrzewanie",
+  "recipe.notes.serve": "Z czym podać"
 }

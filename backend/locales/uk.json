@@ -1124,5 +1124,11 @@
   "recipe.side.meat": "до м’яса",
   "recipe.side.poultry": "до птиці",
   "recipe.side.fish": "до риби",
-  "recipe.side.any": "до всього"
+  "recipe.side.any": "до всього",
+  "recipe.notes": "Поради",
+  "recipe.notes.why": "Чому так",
+  "recipe.notes.swaps": "Чим замінити",
+  "recipe.notes.mistakes": "Де помиляються",
+  "recipe.notes.keep": "Зберігати й розігрівати",
+  "recipe.notes.serve": "З чим подати"
 }

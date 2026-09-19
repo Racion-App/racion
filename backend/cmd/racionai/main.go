@@ -81,6 +81,8 @@ func main() {
 	backend := fs.String("backend", "local", "local (прокси подписки ChatGPT на 127.0.0.1:10531) | codex (Codex CLI) | openai (API-ключ) | mistral | gemini | groq | openrouter | custom (AI_BASE_URL, AI_API_KEY)")
 	model := fs.String("model", "", "codex: модель (пусто — из ~/.codex/config.toml)")
 	effort := fs.String("effort", "low", "codex: model_reasoning_effort: minimal | low | medium")
+	only := fs.String("only", "", "notes: только эти id через запятую")
+	limit := fs.Int("limit", 0, "notes: не больше N рецептов за прогон (0 — все)")
 	_ = fs.Parse(os.Args[2:])
 	if *to == "" {
 		usage()
@@ -151,6 +153,8 @@ func main() {
 		err = genDetail(ctx, client, *workers)
 	case "ingredients":
 		err = genIngredients(ctx, client, langs)
+	case "notes":
+		err = genNotes(ctx, client, langs, *workers, *only, *limit, *force)
 	default:
 		usage()
 	}
@@ -250,7 +254,7 @@ func genRecipes(ctx context.Context, client *ai.Client, langs []string, workers 
 	entries, _ := os.ReadDir(dir)
 	for _, e := range entries {
 		n := e.Name()
-		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" {
+		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" || n == "recipes_notes.json" {
 			continue
 		}
 		var f struct {
@@ -364,7 +368,7 @@ func genDetail(ctx context.Context, client *ai.Client, workers int) error {
 	entries, _ := os.ReadDir(dir)
 	for _, e := range entries {
 		n := e.Name()
-		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" {
+		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" || n == "recipes_notes.json" {
 			continue
 		}
 		var f struct {
@@ -539,5 +543,173 @@ func genIngredients(ctx context.Context, client *ai.Client, langs []string) erro
 			return fmt.Errorf("%s: %w (файл сохранён частично, запустите ещё раз)", l, terr)
 		}
 	}
+	return nil
+}
+
+// genNotes — заметки к рецептам («Советы» на странице) на языках -to → internal/seed/data/recipes_notes.json
+// {items: {id: {lang: Notes}}}. Пишутся на каждом языке заново, не переводом. Возобновляемый: готовые
+// пары id+язык пропускаются (-force — переписать). Стиль — plain-prose, правила зашиты в промпт.
+func genNotes(ctx context.Context, client *ai.Client, langs []string, workers int, only string, limit int, force bool) error {
+	dir := filepath.Join("internal", "seed", "data")
+	type rec struct {
+		ID          string              `json:"id"`
+		Title       string              `json:"title"`
+		Description string              `json:"description"`
+		Slot        string              `json:"slot"`
+		Tags        []string            `json:"tags"`
+		Steps       []string            `json:"steps"`
+		Ingredients [][]json.RawMessage `json:"ingredients"`
+	}
+	var ingNames map[string]string
+	{
+		var f struct {
+			Items []struct {
+				ID, Name string
+			} `json:"items"`
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, "ingredients.json"))
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return err
+		}
+		ingNames = map[string]string{}
+		for _, i := range f.Items {
+			ingNames[i.ID] = i.Name
+		}
+	}
+	src := map[string]rec{}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		n := e.Name()
+		if !strings.HasPrefix(n, "recipes") || !strings.HasSuffix(n, ".json") || strings.HasPrefix(n, "recipes_i18n") || n == "recipes_detail.json" || n == "recipes_notes.json" {
+			continue
+		}
+		var f struct {
+			Items []rec `json:"items"`
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, n))
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return fmt.Errorf("%s: %w", n, err)
+		}
+		for _, r := range f.Items {
+			src[r.ID] = r
+		}
+	}
+	// подробные шаги важнее коротких
+	for id, d := range readRecipeFile(filepath.Join(dir, "recipes_detail.json")).Items {
+		if r, ok := src[id]; ok && len(d.Steps) > 0 {
+			r.Steps = d.Steps
+			if d.Description != "" {
+				r.Description = d.Description
+			}
+			src[id] = r
+		}
+	}
+	// английские тексты — для английских заметок вход даём на английском, если есть
+	en := readRecipeFile(filepath.Join(dir, "recipes_i18n_en.json")).Items
+	path := filepath.Join(dir, "recipes_notes.json")
+	var out struct {
+		Note  string                         `json:"_note"`
+		Items map[string]map[string]ai.Notes `json:"items"`
+	}
+	if raw, err := os.ReadFile(path); err == nil {
+		_ = json.Unmarshal(raw, &out)
+	}
+	if out.Items == nil {
+		out.Items = map[string]map[string]ai.Notes{}
+	}
+	out.Note = "Заметки к рецептам по языкам (раздел «Советы»): why / swaps / mistakes / keep / serve. Сделаны нейросетью через cmd/racionai notes по правилам plain-prose; правки приветствуются."
+	onlySet := map[string]bool{}
+	for _, id := range strings.Split(only, ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			onlySet[id] = true
+		}
+	}
+	type job struct{ id, lang string }
+	var jobs []job
+	ids := make([]string, 0, len(src))
+	for id := range src {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		if len(onlySet) > 0 && !onlySet[id] {
+			continue
+		}
+		for _, l := range langs {
+			if _, done := out.Items[id][l]; done && !force {
+				continue
+			}
+			jobs = append(jobs, job{id, l})
+		}
+	}
+	if limit > 0 && len(jobs) > limit {
+		jobs = jobs[:limit]
+	}
+	fmt.Printf("notes: рецептов %d, задач %d\n", len(src), len(jobs))
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, workers)
+	done, failed := 0, 0
+	save := func() error {
+		raw, _ := json.MarshalIndent(out, "", "  ")
+		return os.WriteFile(path, raw, 0o644)
+	}
+	for _, j := range jobs {
+		if ctx.Err() != nil {
+			break
+		}
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(j job) {
+			defer wg.Done()
+			defer func() { <-sem }()
+			r := src[j.id]
+			in := ai.NotesInput{RecipeText: ai.RecipeText{Title: r.Title, Description: r.Description, Steps: r.Steps}, Slot: r.Slot, Tags: r.Tags}
+			if j.lang == "en" {
+				if t, ok := en[j.id]; ok && t.Title != "" {
+					in.RecipeText = t
+				}
+			}
+			for _, pair := range r.Ingredients {
+				var id string
+				var amt float64
+				_ = json.Unmarshal(pair[0], &id)
+				_ = json.Unmarshal(pair[1], &amt)
+				name := ingNames[id]
+				if name == "" {
+					name = id
+				}
+				in.Ingredients = append(in.Ingredients, fmt.Sprintf("%s — %g", name, amt))
+			}
+			n, err := client.RecipeNotes(ctx, j.lang, in)
+			mu.Lock()
+			defer mu.Unlock()
+			if err != nil {
+				failed++
+				fmt.Printf("  %s/%s: %v\n", j.id, j.lang, err)
+				return
+			}
+			if out.Items[j.id] == nil {
+				out.Items[j.id] = map[string]ai.Notes{}
+			}
+			out.Items[j.id][j.lang] = n
+			done++
+			if done%10 == 0 {
+				_ = save()
+				fmt.Printf("  %d/%d\n", done, len(jobs))
+			}
+		}(j)
+	}
+	wg.Wait()
+	if err := save(); err != nil {
+		return err
+	}
+	fmt.Printf("notes: готово %d, ошибок %d → %s\n", done, failed, path)
 	return nil
 }

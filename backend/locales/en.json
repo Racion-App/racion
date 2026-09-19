@@ -1142,5 +1142,11 @@
   "recipe.side.meat": "for meat",
   "recipe.side.poultry": "for poultry",
   "recipe.side.fish": "for fish",
-  "recipe.side.any": "for anything"
+  "recipe.side.any": "for anything",
+  "recipe.notes": "Tips",
+  "recipe.notes.why": "Why it works",
+  "recipe.notes.swaps": "Substitutions",
+  "recipe.notes.mistakes": "Common mistakes",
+  "recipe.notes.keep": "Storing and reheating",
+  "recipe.notes.serve": "Serve with"
 }

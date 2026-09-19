@@ -53,6 +53,17 @@ type RecipeText struct {
 	Steps       []string `json:"steps"`
 }
 
+// Notes — короткие заметки к рецепту: по одному-двум предложениям на тему. Пустые поля не показываются.
+type Notes struct {
+	Why      string `json:"why,omitempty"`      // почему готовим так, а не иначе
+	Swaps    string `json:"swaps,omitempty"`    // чем заменить продукты
+	Mistakes string `json:"mistakes,omitempty"` // где чаще всего ошибаются
+	Keep     string `json:"keep,omitempty"`     // как хранить и разогреть
+	Serve    string `json:"serve,omitempty"`    // с чем подать
+}
+
+func (n Notes) Empty() bool { return n.Why == "" && n.Swaps == "" && n.Mistakes == "" && n.Keep == "" && n.Serve == "" }
+
 type RecipeIngredient struct {
 	IngredientID string  `json:"ingredientId"`
 	Amount       float64 `json:"amount"` // на 1 порцию
@@ -71,6 +82,7 @@ type Recipe struct {
 	Image       string                `json:"image"`            // URL картинки, пусто — нет фото
 	Description string                `json:"description"`      // 1–2 предложения для страницы рецепта
 	I18n        map[string]RecipeText `json:"i18n,omitempty"`   // en, de
+	Notes       map[string]Notes      `json:"notes,omitempty"`  // заметки по языкам
 	Own         bool                  `json:"own,omitempty"`    // рецепт пользователя, не из базы
 	Public      bool                  `json:"public,omitempty"` // свой рецепт открыт для всех по ссылке
 	OwnerID     string                `json:"-"`
@@ -396,4 +408,17 @@ func BudgetPresetsFor(l i18n.Lang, c Country) []BudgetPreset {
 		out[i] = BudgetPreset{ID: id, Label: i18n.T(l, "budget."+id), PerDay: c.Presets[i]}
 	}
 	return out
+}
+
+// NotesFor — заметки на языке с запасом en → ru (как Text).
+func (r Recipe) NotesFor(l i18n.Lang) Notes {
+	if n, ok := r.Notes[string(l)]; ok && !n.Empty() {
+		return n
+	}
+	for _, fb := range []string{"en", "ru"} {
+		if n, ok := r.Notes[fb]; ok && !n.Empty() {
+			return n
+		}
+	}
+	return Notes{}
 }

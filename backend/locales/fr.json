@@ -1110,5 +1110,11 @@
   "recipe.side.meat": "pour la viande",
   "recipe.side.poultry": "pour la volaille",
   "recipe.side.fish": "pour le poisson",
-  "recipe.side.any": "pour tout"
+  "recipe.side.any": "pour tout",
+  "recipe.notes": "Conseils",
+  "recipe.notes.why": "Pourquoi ainsi",
+  "recipe.notes.swaps": "Substitutions",
+  "recipe.notes.mistakes": "Erreurs fréquentes",
+  "recipe.notes.keep": "Conserver et réchauffer",
+  "recipe.notes.serve": "Servir avec"
 }

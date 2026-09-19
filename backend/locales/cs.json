@@ -1124,5 +1124,11 @@
   "recipe.side.meat": "k masu",
   "recipe.side.poultry": "k drůbeži",
   "recipe.side.fish": "k rybě",
-  "recipe.side.any": "ke všemu"
+  "recipe.side.any": "ke všemu",
+  "recipe.notes": "Tipy",
+  "recipe.notes.why": "Proč takto",
+  "recipe.notes.swaps": "Náhrady",
+  "recipe.notes.mistakes": "Časté chyby",
+  "recipe.notes.keep": "Skladování a ohřev",
+  "recipe.notes.serve": "S čím podávat"
 }

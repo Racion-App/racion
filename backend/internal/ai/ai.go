@@ -331,3 +331,67 @@ func langName(code string) string {
 	}
 	return code
 }
+
+// Notes — заметки к рецепту для страницы: пять коротких тем. Пишутся по правилам plain-prose
+// (github.com/dripips/plain-prose): без вводных, без штампов, без троек ради ритма, конкретика в граммах,
+// градусах и минутах, только продукты из рецепта. Каждая тема — одно-два предложения, 15–40 слов.
+type Notes struct {
+	Why      string `json:"why"`
+	Swaps    string `json:"swaps"`
+	Mistakes string `json:"mistakes"`
+	Keep     string `json:"keep"`
+	Serve    string `json:"serve"`
+}
+
+// NotesInput — что даём модели: рецепт целиком плюс список продуктов с граммовками.
+type NotesInput struct {
+	RecipeText
+	Ingredients []string `json:"ingredients"`
+	Slot        string   `json:"slot"`
+	Tags        []string `json:"tags"`
+}
+
+const notesSystem = `You write short practical notes for a home-cooking recipe page, in %[1]s, for a meal-planning app. Input: the recipe (title, description, steps, ingredients with amounts per portion, meal slot, tags).
+Return JSON with five fields. HARD LIMIT: each field is at most two sentences and at most 35 words; one sentence is often enough. Plain text, no markdown.
+- "why": one concrete reason a key step is done this way (temperature, order, cut, timing). Not praise.
+- "swaps": one or two substitutions for ingredients from the list, with the amount or the effect. Only common products people have at home; never invent products. If nothing sensible, empty string.
+- "mistakes": the single most common error with this dish and how to notice it by sight, smell or timing.
+- "keep": how many days it keeps in the fridge and how to reheat; say plainly if it should be eaten fresh. Mention the freezer only if it genuinely freezes well.
+- "serve": one concrete pairing or occasion from everyday food.
+House style:
+- Address the reader informally and consistently in the singular (Russian: «ты» — «замени», «подавай», «храни»; never «вы», never impersonal «солят», «подают»). English: imperative.
+- Facts only: grams, degrees, minutes, what you see. No openers ("it is worth noting"), no closers ("enjoy"), no exclamation marks, no emoji, no praise ("delicious", "perfect", "ideal"), no "not X but Y" templates, no rhetorical questions, no jargon or abbreviations ("PP", "KBJU").
+- No bureaucratic phrasing (Russian: «осуществить», «является», «данный», «в рамках», «с целью»; English: "utilize", "leverage", "ensure").
+- Do not repeat the steps or the description; add what they do not say. Use only ingredients that are in the list or are truly common substitutes.`
+
+// RecipeNotes — заметки на языке lang.
+func (c *Client) RecipeNotes(ctx context.Context, lang string, in NotesInput) (Notes, error) {
+	user, _ := json.Marshal(in)
+	var out Notes
+	if err := c.JSON(ctx, fmt.Sprintf(notesSystem, langName(lang)), string(user), &out); err != nil {
+		return out, err
+	}
+	if out.Why == "" && out.Swaps == "" && out.Mistakes == "" && out.Keep == "" && out.Serve == "" {
+		return out, errors.New("ai: empty notes")
+	}
+	// модель любит растекаться: поле длиннее 45 слов — попросить короче один раз
+	if notesTooLong(out) {
+		user2 := string(user) + `
+
+Your previous answer was too long. Rewrite: at most two sentences and 35 words per field; cut adjectives and repeated advice.`
+		var again Notes
+		if err := c.JSON(ctx, fmt.Sprintf(notesSystem, langName(lang)), user2, &again); err == nil && !notesTooLong(again) {
+			return again, nil
+		}
+	}
+	return out, nil
+}
+
+func notesTooLong(n Notes) bool {
+	for _, f := range []string{n.Why, n.Swaps, n.Mistakes, n.Keep, n.Serve} {
+		if len(strings.Fields(f)) > 45 {
+			return true
+		}
+	}
+	return false
+}

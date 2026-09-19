@@ -374,7 +374,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Pct":    map[string]int{"Kcal": int(math.Round(kcal / 20)), "Protein": int(math.Round(prot / 0.75)), "Fat": int(math.Round(fat / 0.7)), "Carb": int(math.Round(carb / 2.6))},
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
-		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor,
+		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor, "Notes": notesPtr(rc.NotesFor(l)),
 		"Equipment": eq, "Buy": buy, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
 	var buf bytes.Buffer
@@ -412,4 +412,12 @@ func kidMinAge(r planner.Recipe) int {
 		}
 	}
 	return 12
+}
+
+// notesPtr — nil для пустых заметок, чтобы шаблон не рисовал пустой раздел.
+func notesPtr(n planner.Notes) *planner.Notes {
+	if n.Empty() {
+		return nil
+	}
+	return &n
 }

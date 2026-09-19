@@ -67,6 +67,17 @@
         </ol>
       </section>
 
+      {{if .Notes}}<section class="rpage__section notes" aria-labelledby="notes">
+        <h2 id="notes">{{t .L "recipe.notes"}}</h2>
+        <dl class="notes__list">
+          {{if .Notes.Why}}<div class="notes__row"><dt>{{t .L "recipe.notes.why"}}</dt><dd>{{.Notes.Why}}</dd></div>{{end}}
+          {{if .Notes.Swaps}}<div class="notes__row"><dt>{{t .L "recipe.notes.swaps"}}</dt><dd>{{.Notes.Swaps}}</dd></div>{{end}}
+          {{if .Notes.Mistakes}}<div class="notes__row"><dt>{{t .L "recipe.notes.mistakes"}}</dt><dd>{{.Notes.Mistakes}}</dd></div>{{end}}
+          {{if .Notes.Keep}}<div class="notes__row"><dt>{{t .L "recipe.notes.keep"}}</dt><dd>{{.Notes.Keep}}</dd></div>{{end}}
+          {{if .Notes.Serve}}<div class="notes__row"><dt>{{t .L "recipe.notes.serve"}}</dt><dd>{{.Notes.Serve}}</dd></div>{{end}}
+        </dl>
+      </section>{{end}}
+
       {{if .Facts}}<section class="rpage__section" aria-labelledby="about">
         <h2 id="about">{{t .L "recipe.short"}}</h2>
         <ul class="facts">{{range .Facts}}<li>{{.}}</li>{{end}}</ul>

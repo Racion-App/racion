@@ -1111,5 +1111,11 @@
   "recipe.side.meat": "para carne",
   "recipe.side.poultry": "para aves",
   "recipe.side.fish": "para pescado",
-  "recipe.side.any": "para todo"
+  "recipe.side.any": "para todo",
+  "recipe.notes": "Consejos",
+  "recipe.notes.why": "Por qué así",
+  "recipe.notes.swaps": "Sustituciones",
+  "recipe.notes.mistakes": "Errores frecuentes",
+  "recipe.notes.keep": "Guardar y recalentar",
+  "recipe.notes.serve": "Con qué servir"
 }

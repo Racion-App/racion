@@ -1142,5 +1142,11 @@
   "recipe.side.meat": "zu Fleisch",
   "recipe.side.poultry": "zu Geflügel",
   "recipe.side.fish": "zu Fisch",
-  "recipe.side.any": "zu allem"
+  "recipe.side.any": "zu allem",
+  "recipe.notes": "Tipps",
+  "recipe.notes.why": "Warum so",
+  "recipe.notes.swaps": "Ersatz",
+  "recipe.notes.mistakes": "Häufige Fehler",
+  "recipe.notes.keep": "Aufbewahren und aufwärmen",
+  "recipe.notes.serve": "Dazu passt"
 }
