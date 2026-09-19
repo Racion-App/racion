@@ -74,7 +74,7 @@ export function PlanChat({ planId, open, onClose, onPlan }: { planId: string; op
         ))}
         {busy && (
           <div className="chat__msg chat__msg--ai chat__msg--busy" aria-live="polite">
-            <Sparkles size={14} className="spin" aria-hidden /> {t("chat.thinking")}
+            <Sparkles size={14} className="twinkle" aria-hidden /> {t("chat.thinking")}
           </div>
         )}
       </div>
