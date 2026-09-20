@@ -1,14 +1,27 @@
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Quiz } from "./pages/Quiz";
-// Квиз — в основном бандле (главная), остальные страницы подгружаются по маршруту: первый экран легче
-const Plan = lazy(() => import("./pages/Plan").then((m) => ({ default: m.Plan })));
-const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
-const Account = lazy(() => import("./pages/Account").then((m) => ({ default: m.Account })));
-const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
-const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
-const Occasion = lazy(() => import("./pages/Occasion").then((m) => ({ default: m.Occasion })));
-const Cook = lazy(() => import("./pages/Cook").then((m) => ({ default: m.Cook })));
+// Квиз — в основном бандле (главная), остальные страницы подгружаются по маршруту: первый экран легче.
+// Имена чанков постоянные, поэтому после выкладки открытая старая вкладка может получить чанк новой сборки
+// («does not provide an export named …»): тогда один раз перезагружаем страницу, дальше всё свежее.
+function page<T>(load: () => Promise<T>, pick: (m: T) => React.ComponentType): React.LazyExoticComponent<React.ComponentType> {
+  return lazy(() =>
+    load().then((m) => ({ default: pick(m) })).catch((e: unknown) => {
+      const key = "racion.chunk.reload";
+      let again = false;
+      try { again = sessionStorage.getItem(key) === "1"; if (!again) sessionStorage.setItem(key, "1"); } catch { /* приватный режим */ }
+      if (!again) { location.reload(); return new Promise<never>(() => undefined); }
+      throw e;
+    }),
+  );
+}
+const Plan = page(() => import("./pages/Plan"), (m) => m.Plan);
+const Login = page(() => import("./pages/Login"), (m) => m.Login);
+const Account = page(() => import("./pages/Account"), (m) => m.Account);
+const Admin = page(() => import("./pages/Admin"), (m) => m.Admin);
+const NotFound = page(() => import("./pages/NotFound"), (m) => m.NotFound);
+const Occasion = page(() => import("./pages/Occasion"), (m) => m.Occasion);
+const Cook = page(() => import("./pages/Cook"), (m) => m.Cook);
 import { AuthProvider } from "./lib/auth";
 import { LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";

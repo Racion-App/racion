@@ -15,11 +15,16 @@
     cs: ["Analytika", "Používáme Yandex Metrica a Google Analytics, abychom viděli, co funguje. Můžete odmítnout — služba funguje stejně.", "Povolit", "Jen nezbytné", "/cs/privacy", "Soukromí", "Rozumím"],
     pt: ["Análise", "Usamos Yandex Metrica e Google Analytics para ver o que funciona. Pode recusar — o serviço funciona igual.", "Permitir", "Só necessários", "/pt/privacy", "Privacidade", "Entendi"]
   };
+  // язык: выбранный в приложении → язык браузера → атрибут html (в index.html он всегда ru, поэтому последним)
   function lang() {
+    var s = "";
+    try { s = (localStorage.getItem("racion.lang") || "").replace(/"/g, ""); } catch (e) { /* приватный режим */ }
+    if (T[s]) return s;
     var m = document.documentElement.lang || "";
-    if (T[m]) return m;
-    var s = (localStorage.getItem("racion.lang") || "").replace(/"/g, "");
-    return T[s] ? s : "en";
+    if (T[m] && m !== "ru") return m;
+    var b = ((navigator.language || "").split("-")[0] || "").toLowerCase();
+    if (T[b]) return b;
+    return T[m] ? m : "en";
   }
   function set(v) { document.cookie = "racion_analytics=" + v + "; path=/; max-age=31536000; SameSite=Lax"; }
   function show(eu) {
