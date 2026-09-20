@@ -100,7 +100,9 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
         setState(st);
         await api.notifyTest();
       }
-      onToast(t(await pushTestResult()));
+      const result = await pushTestResult();
+      api.notifyTestResult(result.replace("notify.test.", "")).catch(() => undefined); // итог в лог сервера: видно, где обрыв
+      onToast(t(result));
     } catch (e) {
       onToast((e as Error).message);
     } finally {

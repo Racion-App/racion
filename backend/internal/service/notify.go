@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go.uber.org/zap"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -42,11 +43,13 @@ type Notifications struct {
 	pub, priv  string
 	send       func(ctx context.Context, sub domain.PushSubscription, n domain.Notification) (int, error)
 	digest     func(ctx context.Context) (recipes, collections int) // что нового за неделю; nil — дайджест не шлём
+	log        *zap.Logger
 }
 
 func NewNotifications(repo PushRepo, settings SettingsRepo, subscriber, baseURL string) *Notifications {
 	n := &Notifications{repo: repo, settings: settings, subscriber: subscriber, baseURL: strings.TrimRight(baseURL, "/")}
 	n.send = n.webpush
+	n.log = zap.L().Named("push")
 	return n
 }
 
@@ -277,6 +280,9 @@ func (n *Notifications) webpush(ctx context.Context, s domain.PushSubscription, 
 	defer res.Body.Close()
 	if res.StatusCode >= 300 {
 		return res.StatusCode, fmt.Errorf("push: http %d", res.StatusCode)
+	}
+	if msg.Tag == "test" {
+		n.log.Info("push test sent", zap.String("endpoint", s.Endpoint[:min(len(s.Endpoint), 40)]), zap.Int("status", res.StatusCode))
 	}
 	return res.StatusCode, nil
 }

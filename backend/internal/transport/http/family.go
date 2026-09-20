@@ -1,6 +1,7 @@
 package http
 
 import (
+	"go.uber.org/zap"
 	"net/http"
 
 	"racion/internal/domain"
@@ -85,6 +86,23 @@ func (s *Server) setNotifySettings(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	w.WriteHeader(204)
+}
+
+// notifyTestResult — устройство сообщает, чем кончилась проверка (shown/hidden/lost): виден обрыв цепочки
+func (s *Server) notifyTestResult(w http.ResponseWriter, r *http.Request) {
+	u := requireUser(w, r)
+	if u == nil {
+		return
+	}
+	var body struct {
+		Result string `json:"result"`
+		UA     string `json:"ua"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	s.log.Info("push test result", zap.String("user", u.ID), zap.String("result", body.Result), zap.String("ua", body.UA))
 	w.WriteHeader(204)
 }
 

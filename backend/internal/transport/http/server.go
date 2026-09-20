@@ -174,6 +174,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/me/notify", s.notifySettings)
 	mux.HandleFunc("PUT /api/me/notify", s.limited(s.lim.write, s.setNotifySettings))
 	mux.HandleFunc("POST /api/me/notify/test", s.limited(s.lim.auth, s.notifyTest))
+	mux.HandleFunc("POST /api/me/notify/test/result", s.notifyTestResult)
 	// страницы для людей и поисковиков
 	mux.HandleFunc("GET /recipes", s.recipesPage)
 	mux.HandleFunc("GET /recipe/{id}", s.recipePage)

@@ -167,6 +167,7 @@ export const api = {
   notify: () => request<{ settings: NotifySettings; devices: number }>("/api/me/notify"),
   setNotify: (s: NotifySettings) => request<void>("/api/me/notify", { method: "PUT", body: JSON.stringify(s) }),
   notifyTest: () => request<void>("/api/me/notify/test", { method: "POST" }),
+  notifyTestResult: (result: string) => request<void>("/api/me/notify/test/result", { method: "POST", body: JSON.stringify({ result, ua: navigator.userAgent }) }),
   // список: отметки и свои товары
   checks: (planId: string) => request<string[]>(`/api/plans/${planId}/checks`),
   setCheck: (planId: string, body: { itemId: string; checked: boolean; name?: string; qty?: string; cost?: number }) =>
