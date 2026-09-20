@@ -70,6 +70,7 @@ func (m *Mailer) Send(to, subject, text string) error {
 	} else {
 		c, err = smtp.Dial(addr)
 		if err == nil {
+			_ = c.Hello("racion.app") // вместо localhost по умолчанию: строгие серверы смотрят на HELO
 			if ok, _ := c.Extension("STARTTLS"); ok {
 				err = c.StartTLS(&tls.Config{ServerName: m.cfg.Host})
 			}
