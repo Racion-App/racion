@@ -1,8 +1,20 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 
+// Метка сборки: вшивается в бандл (__BUILD__) и пишется в dist/version.json. Приложение сверяет их и,
+// если на сервере версия новее, предлагает обновиться — иначе PWA на телефоне может неделями жить на старом коде.
+const BUILD = loadEnv("production", ".", "VITE_").VITE_BUILD || new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC";
+const versionFile = (): Plugin => ({
+  name: "racion-version",
+  apply: "build",
+  generateBundle() {
+    this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ build: BUILD }) });
+  },
+});
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), versionFile()],
+  define: { __BUILD__: JSON.stringify(BUILD) },
   css: {
     preprocessorOptions: {
       scss: {

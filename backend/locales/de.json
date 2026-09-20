@@ -1169,5 +1169,7 @@
   "offer.promo": "Aktionscode",
   "offer.copy": "Aktionscode kopieren",
   "offer.open": "Öffnen",
-  "account.plan.meta.occ": "{date} · {store} · {cost}"
+  "account.plan.meta.occ": "{date} · {store} · {cost}",
+  "update.ready": "Eine neue Version von Racion ist da",
+  "update.button": "Aktualisieren"
 }

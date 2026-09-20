@@ -1,14 +1,31 @@
 import { useEffect, useState } from "react";
 import { Bell, Download, Smartphone, WifiOff, Check } from "lucide-react";
 import { Sheet } from "./Sheet";
-import { canPrompt, dismissSuggest, installPlatform, isStandalone, onInstallChange, promptInstall } from "../lib/install";
+import { canPrompt, dismissSuggest, installPlatform, iosMajor, isStandalone, onInstallChange, promptInstall } from "../lib/install";
 import { track } from "../lib/analytics";
 import { useT } from "../i18n";
 
 // Лист «Установить Рацион»: три пользы, кнопка установки там, где браузер умеет ставить сам (Android, Chrome,
-// Edge), и пошаговая инструкция с рисунками для iPhone и прочих. Рисунки — свои схемы экрана, не чужие скриншоты.
+// Edge), и пошаговая инструкция для iPhone и прочих. Для iPhone — вырезки из настоящих экранов Safari с кольцом
+// на нужной кнопке (public/images/install), для остальных — схемы экрана. Если фото не загрузилось, схема.
 
-type Step = { text: string; art: "share" | "addhome" | "add" | "menu" | "installmenu" | "omnibox" | "confirm" };
+type Art = "share" | "addhome" | "add" | "menu" | "installmenu" | "omnibox" | "confirm";
+// shot: файл вырезки 4:5 и зоны-акценты в процентах от её ширины и высоты: [x, y, w, h] — рамка на строке
+// или кнопке; порядок зон — порядок нажатий
+type Zone = [number, number, number, number];
+type Step = { text: string; art: Art; shot?: { src: string; zones: Zone[] } };
+
+// Вырезка экрана с рамками на кнопках; при ошибке загрузки — схема
+function Shot({ step }: { step: Step }) {
+  const [broken, setBroken] = useState(false);
+  if (!step.shot || broken) return <Art kind={step.art} />;
+  return (
+    <span className="install__shot" aria-hidden>
+      <img src={step.shot.src} alt="" width="480" height="600" loading="lazy" decoding="async" onError={() => setBroken(true)} />
+      {step.shot.zones.map(([x, y, w, h], i) => <i key={i} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` }} />)}
+    </span>
+  );
+}
 
 // Схема телефона с одним акцентом: где нажимать
 function Art({ kind }: { kind: Step["art"] }) {
@@ -85,9 +102,17 @@ export function InstallSheet({ open, onClose }: { open: boolean; onClose: () => 
   const [done, setDone] = useState(isStandalone());
   useEffect(() => onInstallChange(() => { setPrompt(canPrompt()); setDone(isStandalone()); }), []);
   const platform = installPlatform();
+  const SHOTS = "/images/install/";
   const steps: Step[] =
     platform === "ios"
-      ? [{ text: t("install.ios.1"), art: "share" }, { text: t("install.ios.2"), art: "addhome" }, { text: t("install.ios.3"), art: "add" }]
+      ? [
+          // iOS 26: «Поделиться» внутри меню «…» справа внизу; раньше — отдельная кнопка в панели Safari
+          iosMajor() >= 26
+            ? { text: t("install.ios26.1"), art: "share", shot: { src: SHOTS + "ios-menu.webp", zones: [[76, 80, 18, 14], [20, 7.6, 58, 8.2]] } }
+            : { text: t("install.ios.1"), art: "share" },
+          { text: t("install.ios.2"), art: "addhome", shot: { src: SHOTS + "ios-addhome.webp", zones: [[1.5, 76.6, 92, 9]] } },
+          { text: t("install.ios.3"), art: "add", shot: { src: SHOTS + "ios-add.webp", zones: [[66, 5.5, 29, 9]] } },
+        ]
       : platform === "android"
         ? [{ text: t("install.android.1"), art: "menu" }, { text: t("install.android.2"), art: "installmenu" }, { text: t("install.android.3"), art: "confirm" }]
         : [{ text: t("install.desktop.1"), art: "omnibox" }, { text: t("install.desktop.2"), art: "confirm" }];
@@ -118,7 +143,7 @@ export function InstallSheet({ open, onClose }: { open: boolean; onClose: () => 
           <h3>{t("install.how")}</h3>
           <ol className="install__steps">
             {steps.map((s, i) => (
-              <li key={i}><Art kind={s.art} /><span><b className="num">{i + 1}</b>{s.text}</span></li>
+              <li key={i}><Shot step={s} /><span><b className="num">{i + 1}</b>{s.text}</span></li>
             ))}
           </ol>
           {platform !== "ios" && <p className="quiz__hint">{t("install.other")}</p>}

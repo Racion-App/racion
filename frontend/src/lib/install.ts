@@ -41,6 +41,13 @@ export function isIOS(): boolean {
   return /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
+// iosMajor — версия iOS из user agent (в iOS 26 Safari спрятал «Поделиться» в меню «…», инструкция другая)
+export function iosMajor(): number {
+  if (typeof navigator === "undefined") return 0;
+  const m = /OS (\d+)_/.exec(navigator.userAgent);
+  return m ? Number(m[1]) : 0;
+}
+
 export function isMobile(): boolean {
   if (typeof navigator === "undefined") return false;
   return /Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);

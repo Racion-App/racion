@@ -1276,6 +1276,7 @@
   "install.later": "Not now",
   "install.how": "How to install",
   "install.ios.1": "Tap Share at the bottom of Safari.",
+  "install.ios26.1": "Tap “…” at the bottom right of Safari, then “Share”.",
   "install.ios.2": "Choose “Add to Home Screen”.",
   "install.ios.3": "Tap Add. The icon appears next to your other apps.",
   "install.android.1": "Open the browser menu (three dots).",
@@ -1290,5 +1291,7 @@
   "offline.text": "This page cannot open offline. Your recent weeks and shopping lists are available in the app.",
   "offline.open": "Open the app",
   "offline.retry": "Try again",
-  "plan.offline.saved": "This week's recipes are saved for offline use"
+  "plan.offline.saved": "This week's recipes are saved for offline use",
+  "update.ready": "A new version of Racion is out",
+  "update.button": "Update"
 }

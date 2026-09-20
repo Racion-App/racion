@@ -12,6 +12,7 @@ const Cook = lazy(() => import("./pages/Cook").then((m) => ({ default: m.Cook })
 import { AuthProvider } from "./lib/auth";
 import { LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";
+import { UpdateBar } from "./components/UpdateBar";
 
 export function App() {
   return (
@@ -33,6 +34,7 @@ export function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
+        <UpdateBar />
       </BrowserRouter>
       </ConfirmProvider>
     </AuthProvider>
