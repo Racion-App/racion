@@ -78,7 +78,8 @@ export function Account() {
 
   useEffect(() => {
     if (!toast) return;
-    const t = window.setTimeout(() => setToast(null), 2000);
+    // длинные подсказки (итог проверки уведомлений) держим дольше: примерно 60 мс на символ
+    const t = window.setTimeout(() => setToast(null), Math.max(2000, Math.min(12000, toast.length * 60)));
     return () => window.clearTimeout(t);
   }, [toast]);
 

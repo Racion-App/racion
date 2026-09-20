@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
+import { Image as ImageIcon } from "lucide-react";
 import { useT } from "../i18n";
 
 // Миниатюра продукта рядом с названием: по наведению или нажатию раскрывается до 160×160.
@@ -23,7 +24,15 @@ export function IngredientPic({ src }: { src?: string }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const by = useRef<"hover" | "focus" | "click" | null>(null);
+  const [broken, setBroken] = useState(false); // фото не загрузилось (нет сети): показываем значок, а не «сломанную картинку»
   if (!src) return null;
+  if (broken) {
+    return (
+      <button type="button" className="pic__btn is-broken" aria-label={t("ing.photo")} title={t("ing.photo")} disabled>
+        <ImageIcon size={14} aria-hidden />
+      </button>
+    );
+  }
   const show = () => {
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
@@ -74,7 +83,7 @@ export function IngredientPic({ src }: { src?: string }) {
   return (
     <>
       <button ref={ref} type="button" className="pic__btn" onClick={toggle} onMouseEnter={() => open("hover")} onMouseLeave={leave} onFocus={() => open("focus")} onBlur={hide} aria-label={t("ing.photo")} title={t("ing.photo")} aria-expanded={!!pos}>
-        <img className="pic__thumb" src={src} alt="" width={22} height={22} loading="lazy" decoding="async" />
+        <img className="pic__thumb" src={src} alt="" width={22} height={22} loading="lazy" decoding="async" onError={() => setBroken(true)} />
       </button>
       {pos && createPortal(<img ref={openPopover} className="pic__float" popover="manual" src={src} alt="" width={SIZE} height={SIZE} style={{ left: pos.x, top: pos.y }} />, document.body)}
     </>

@@ -2,7 +2,7 @@
 // Кэш: оболочка приложения (index, скрипты, стили, шрифты, иконки) и последние открытые недели
 // (/api/plans/{id} и их отметки), чтобы на кассе без сети список открывался и отмечался.
 // Отметки, сделанные офлайн, приложение копит в localStorage и досылает, когда сеть вернётся.
-const VERSION = "racion-v5";
+const VERSION = "racion-v6";
 const SHELL = ["/", "/offline.html", "/theme.js", "/assets/app.js", "/assets/app.css", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/badge-72.png"];
 // маршруты приложения без сервера: их открывает SPA из кэша; остальное (рецепты, подборки) — страница «нет сети»
 const APP_RE = /^\/([a-z]{2}\/)?(plan\/|me|login|event\/|cook\/|$|\?)/;
@@ -52,6 +52,8 @@ self.addEventListener("push", (e) => {
   } catch (err) {
     if (e.data) data.body = e.data.text();
   }
+  // открытым вкладкам сообщаем, что пуш дошёл: кнопка «Проверить» в кабинете по этому понимает, где обрыв
+  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => list.forEach((c) => c.postMessage({ type: "push", tag: data.tag }))).catch(() => {});
   e.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,

@@ -70,3 +70,25 @@ export async function pushUnsubscribe(): Promise<PushState> {
   }
   return "off";
 }
+
+// pushTestResult ждёт проверочный пуш после запроса к серверу и возвращает ключ перевода с итогом:
+// уведомление показано; дошло до браузера, но система его не вывела; не дошло вовсе.
+export async function pushTestResult(): Promise<string> {
+  const reg = await navigator.serviceWorker.getRegistration("/");
+  if (!reg) return "notify.test.sent";
+  let arrived = false;
+  const onMsg = (e: MessageEvent) => { if (e.data?.type === "push" && e.data.tag === "test") arrived = true; };
+  navigator.serviceWorker.addEventListener("message", onMsg);
+  try {
+    for (let i = 0; i < 16; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      const shown = await reg.getNotifications({ tag: "test" }).catch(() => []);
+      if (shown.length) return "notify.test.sent";
+      // пуш пришёл, showNotification отработал, а в списке пусто: система (Windows, iOS) его не показала
+      if (arrived && i >= 5) return "notify.test.hidden";
+    }
+    return arrived ? "notify.test.hidden" : "notify.test.lost";
+  } finally {
+    navigator.serviceWorker.removeEventListener("message", onMsg);
+  }
+}

@@ -208,7 +208,12 @@
     img.src=b.dataset.pic;img.style.left=x+"px";img.style.top=y+"px";img.style.display="";try{if(!img.matches(":popover-open"))img.showPopover()}catch(e){img.style.display="block"}cur=b;shownAt=Date.now();b.setAttribute("aria-expanded","true")}
   function open(b,how){if(cur!==b||by!=="click")by=how;show(b)}
   function hide(){by=null;if(img){try{img.hidePopover()}catch(e){}img.style.display="none"}if(cur)cur.setAttribute("aria-expanded","false");cur=null}
-  var near=function(e){return e.target&&e.target.closest?e.target.closest(".pic__btn"):null};
+  var near=function(e){var b=e.target&&e.target.closest?e.target.closest(".pic__btn"):null;return b&&!b.disabled?b:null};
+  // фото не загрузилось (нет сети): вместо «сломанной картинки» браузера — значок, кнопка выключена
+  function broken(t){var b=t.closest(".pic__btn");if(!b||b.disabled)return;
+    b.classList.add("is-broken");b.disabled=true;b.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'}
+  document.addEventListener("error",function(e){var t=e.target;if(t&&t.classList&&t.classList.contains("pic__thumb"))broken(t)},true);
+  Array.prototype.forEach.call(document.querySelectorAll(".pic__thumb"),function(t){if(t.complete&&t.naturalWidth===0)broken(t)});
   document.addEventListener("mouseover",function(e){var b=near(e);if(b)open(b,"hover")});
   document.addEventListener("mouseout",function(e){var b=near(e);if(b&&!b.contains(e.relatedTarget)&&by==="hover")hide()});
   document.addEventListener("focusin",function(e){var b=near(e);if(b)open(b,"focus")});

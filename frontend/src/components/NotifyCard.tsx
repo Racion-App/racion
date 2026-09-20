@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Bell, BellOff, CalendarPlus, ChefHat, CookingPot, MessageCircleQuestion, ShoppingBasket, Smartphone, Sparkles, Sunrise } from "lucide-react";
 import { api } from "../lib/api";
-import { pushState, pushSubscribe, pushUnsubscribe, type PushState } from "../lib/push";
+import { pushState, pushSubscribe, pushTestResult, pushUnsubscribe, type PushState } from "../lib/push";
 import { isIOS, isStandalone } from "../lib/install";
 import type { NotifySettings } from "../lib/types";
 import { InstallSheet } from "./InstallSheet";
@@ -87,20 +87,24 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
     }
   };
 
-  // проверка: если push-сервис отверг старую подписку, сервер её удалил — переподписываемся и шлём ещё раз
+  // проверка: если push-сервис отверг старую подписку, сервер её удалил — переподписываемся и шлём ещё раз.
+  // Потом ждём до 8 секунд: service worker сообщает, что пуш дошёл, а getNotifications показывает, вывела ли
+  // его система. Так человек видит, где обрыв: сеть, браузер или настройки уведомлений на устройстве.
   const test = async () => {
+    setBusy(true);
     try {
-      await api.notifyTest();
-      onToast(t("notify.test.sent"));
-    } catch {
       try {
+        await api.notifyTest();
+      } catch {
         const st = await pushSubscribe();
         setState(st);
         await api.notifyTest();
-        onToast(t("notify.test.sent"));
-      } catch (e) {
-        onToast((e as Error).message);
       }
+      onToast(t(await pushTestResult()));
+    } catch (e) {
+      onToast((e as Error).message);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -133,7 +137,7 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
             {state === "on" ? <BellOff size={16} aria-hidden /> : <Bell size={16} aria-hidden />} {state === "on" ? t("notify.disable") : t("notify.enable")}
           </button>
           {state === "on" && (
-            <button type="button" className="btn btn-ghost" onClick={test}>
+            <button type="button" className="btn btn-ghost" onClick={test} disabled={busy}>
               {t("notify.test")}
             </button>
           )}
