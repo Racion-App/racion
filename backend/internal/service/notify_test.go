@@ -93,7 +93,7 @@ func TestReminders(t *testing.T) {
 	ctx := context.Background()
 	_ = n.Subscribe(ctx, "u1", domain.PushSubscription{Endpoint: "https://ok", P256dh: "k", Auth: "a", Lang: "ru"})
 	_ = n.Subscribe(ctx, "u1", domain.PushSubscription{Endpoint: "https://dead", P256dh: "k", Auth: "a", Lang: "ru"})
-	_ = n.SetSettings(ctx, "u1", domain.NotifySettings{ShopDay: 6, ShopHour: 18, Prep: true, Week: true, Tz: 180}) // суббота 18:00 по Москве
+	_ = n.SetSettings(ctx, "u1", domain.NotifySettings{ShopDay: 6, ShopHour: 18, Prep: true, PrepHour: 19, Week: true, Tz: 180}) // суббота 18:00 по Москве
 	// неделя с понедельника 21 сентября 2026; сейчас суббота 19 сентября 18:10 МСК = 15:10 UTC
 	repo.plans["u1"] = []domain.PlanReminderInfo{{ID: "p1", StartDate: "2026-09-21", Items: 40, Checked: 5, Dishes: map[string][]string{"2026-09-20": {"Сырники"}, "2026-09-21": {"Овсянка", "Борщ"}}}}
 	now := time.Date(2026, 9, 19, 15, 10, 0, 0, time.UTC)

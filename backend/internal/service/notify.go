@@ -1,6 +1,7 @@
 package service
 
 import (
+	"io"
 	"go.uber.org/zap"
 	"context"
 	"encoding/json"
@@ -256,19 +257,29 @@ func (n *Notifications) deliver(ctx context.Context, userID string, msg domain.N
 		return domain.ErrNotFound
 	}
 	var last error
+	alive := 0
 	for _, s := range subs {
 		code, err := n.send(ctx, s, msg)
 		// 404/410 — подписки больше нет; 403 — подписка на чужие ключи VAPID (старый сервер): тоже мёртвая
 		if code == http.StatusNotFound || code == http.StatusGone || code == http.StatusForbidden {
+			n.log.Warn("push subscription dropped", zap.String("endpoint", short(s.Endpoint)), zap.Int("status", code), zap.Error(err))
 			_ = n.repo.Delete(ctx, s.Endpoint)
 			continue
 		}
 		if err != nil {
 			last = err
+			continue
 		}
+		alive++
+	}
+	// все подписки оказались мёртвыми: для клиента это «устройств нет», он переподпишется и повторит
+	if alive == 0 && last == nil {
+		return domain.ErrNotFound
 	}
 	return last
 }
+
+func short(endpoint string) string { return endpoint[:min(len(endpoint), 48)] }
 
 func (n *Notifications) webpush(ctx context.Context, s domain.PushSubscription, msg domain.Notification) (int, error) {
 	body, _ := json.Marshal(msg)
@@ -279,10 +290,12 @@ func (n *Notifications) webpush(ctx context.Context, s domain.PushSubscription, 
 	}
 	defer res.Body.Close()
 	if res.StatusCode >= 300 {
-		return res.StatusCode, fmt.Errorf("push: http %d", res.StatusCode)
+		// push-сервисы объясняют отказ в теле (Apple: {"reason":"BadJwtToken"}), оно нужно в логе
+		body, _ := io.ReadAll(io.LimitReader(res.Body, 300))
+		return res.StatusCode, fmt.Errorf("push: http %d %s", res.StatusCode, strings.TrimSpace(string(body)))
 	}
 	if msg.Tag == "test" {
-		n.log.Info("push test sent", zap.String("endpoint", s.Endpoint[:min(len(s.Endpoint), 40)]), zap.Int("status", res.StatusCode))
+		n.log.Info("push test sent", zap.String("endpoint", short(s.Endpoint)), zap.Int("status", res.StatusCode))
 	}
 	return res.StatusCode, nil
 }

@@ -41,11 +41,14 @@ export function isIOS(): boolean {
   return /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
-// iosMajor — версия iOS из user agent (в iOS 26 Safari спрятал «Поделиться» в меню «…», инструкция другая)
+// iosMajor — версия iOS из user agent (в iOS 26 Safari спрятал «Поделиться» в меню «…», инструкция другая).
+// iOS 26 в user agent по-прежнему пишет «OS 18_7», настоящая версия только в «Version/26.x» — берём большее.
 export function iosMajor(): number {
   if (typeof navigator === "undefined") return 0;
-  const m = /OS (\d+)_/.exec(navigator.userAgent);
-  return m ? Number(m[1]) : 0;
+  const ua = navigator.userAgent;
+  const os = /OS (\d+)_/.exec(ua);
+  const ver = /Version\/(\d+)/.exec(ua);
+  return Math.max(os ? Number(os[1]) : 0, ver ? Number(ver[1]) : 0);
 }
 
 export function isMobile(): boolean {
