@@ -74,6 +74,43 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, u)
 }
 
+// forgot: письмо со ссылкой на смену пароля; всегда 204
+func (s *Server) forgot(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Email string `json:"email"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	if !s.lim.email.allow(strings.ToLower(strings.TrimSpace(body.Email))) {
+		tooMany(w, r)
+		return
+	}
+	if err := s.svc.Accounts.Forgot(r.Context(), body.Email, i18n.FromRequest(r)); err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	w.WriteHeader(204)
+}
+
+// reset: новый пароль по токену из письма, в ответ — пользователь и cookie сессии
+func (s *Server) reset(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	u, sess, err := s.svc.Accounts.Reset(r.Context(), body.Token, body.Password, r.URL.Query().Get("plan"))
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	setSessionCookie(w, r, sess)
+	writeJSON(w, 200, u)
+}
+
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	var c service.Credentials
 	if !decode(w, r, 8<<10, &c) {

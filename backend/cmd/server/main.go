@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"os/signal"
+	"racion/internal/mail"
 	"strings"
 	"syscall"
 	"time"
@@ -117,11 +118,13 @@ func main() {
 	// Каталог — через атомарную ссылку: админка после правки рецептов перечитывает его из БД и подменяет целиком.
 	catalogRef := planner.NewCatalogRef(catalog)
 	services := service.New(service.Repos{
-		Users: store.Users, Sessions: store.Sessions, Plans: store.Plans, Dislikes: store.Dislikes, Checks: store.Checks,
+		Users: store.Users, Resets: store.Resets, Sessions: store.Sessions, Plans: store.Plans, Dislikes: store.Dislikes, Checks: store.Checks,
 		Purchases: store.Purchases, Extras: store.Extras, UserRecipes: store.UserRecipes, Events: store.Events,
 		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners, Offers: store.Offers, APIKeys: store.APIKeys,
 	}, catalogRef, cfg.PushContact, cfg.BaseURL)
 	services.Admin = service.NewAdmin(store.Admin, store.Users, cfg.AdminEmails)
+	// письма: восстановление пароля; без MAIL_HOST письмо только в логе (локальный стенд)
+	services.Accounts.SetMailer(mail.New(mail.Config{Host: cfg.MailHost, Port: cfg.MailPort, User: cfg.MailUser, Pass: cfg.MailPass, From: cfg.MailFrom}, log.Named("mail")))
 	// замены продуктов: таблица из seed/data/substitutes.json
 	subsTable := map[string][]service.SubEntry{}
 	for id, list := range seed.Substitutes() {

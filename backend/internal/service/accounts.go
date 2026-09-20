@@ -1,6 +1,8 @@
 package service
 
 import (
+	"racion/internal/i18n"
+	"crypto/sha256"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -21,7 +23,10 @@ const SessionTTL = 90 * 24 * time.Hour
 // Accounts — регистрация, вход, профиль, нелюбимые рецепты, история покупок.
 type Accounts struct {
 	users     UserRepo
+	resets    ResetRepo
 	sessions  SessionRepo
+	mailer    Mailer // nil — письма не шлём (восстановление пароля недоступно)
+	baseURL   string
 	plans     PlanRepo
 	dislikes  DislikeRepo
 	purchases PurchaseRepo
@@ -91,6 +96,64 @@ func (a *Accounts) Login(ctx context.Context, c Credentials, claimPlan string) (
 	}
 	s, err := a.startSession(ctx, u.ID, claimPlan)
 	return u, s, err
+}
+
+// SetMailer подключает отправку писем
+func (a *Accounts) SetMailer(m Mailer) { a.mailer = m }
+
+const ResetTTL = time.Hour
+
+// Forgot шлёт письмо со ссылкой на смену пароля. Ответ одинаковый, есть адрес в базе или нет.
+func (a *Accounts) Forgot(ctx context.Context, email string, lang i18n.Lang) error {
+	email = strings.ToLower(strings.TrimSpace(email))
+	if email == "" || a.mailer == nil {
+		return nil
+	}
+	u, _, err := a.users.ByEmail(ctx, email)
+	if err != nil {
+		return nil // неизвестный адрес: молчим, чтобы по ответу нельзя было проверить, есть ли аккаунт
+	}
+	token := newToken()
+	if err := a.resets.Create(ctx, hashToken(token), u.ID, time.Now().Add(ResetTTL)); err != nil {
+		return err
+	}
+	link := a.baseURL + "/login?reset=" + token
+	if lang != "" && lang != "ru" {
+		link = a.baseURL + "/login?reset=" + token + "&lang=" + string(lang)
+	}
+	return a.mailer.Send(email, i18n.T(lang, "mail.reset.subject"), i18n.T(lang, "mail.reset.body", link))
+}
+
+// Reset меняет пароль по одноразовой ссылке и сразу открывает сессию.
+func (a *Accounts) Reset(ctx context.Context, token, password, claimPlan string) (domain.User, domain.Session, error) {
+	if len(token) != 64 || len(password) < 8 || len(password) > 200 {
+		return domain.User{}, domain.Session{}, domain.ErrBadInput
+	}
+	userID, err := a.resets.Take(ctx, hashToken(token))
+	if errors.Is(err, domain.ErrNotFound) {
+		return domain.User{}, domain.Session{}, domain.Invalid("auth.reset.bad")
+	}
+	if err != nil {
+		return domain.User{}, domain.Session{}, err
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return domain.User{}, domain.Session{}, domain.Internal("hash", err)
+	}
+	if err := a.users.SetPassword(ctx, userID, string(hash)); err != nil {
+		return domain.User{}, domain.Session{}, err
+	}
+	s, err := a.startSession(ctx, userID, claimPlan)
+	if err != nil {
+		return domain.User{}, domain.Session{}, err
+	}
+	u, err := a.sessions.UserByToken(ctx, s.Token)
+	return u, s, err
+}
+
+func hashToken(t string) string {
+	h := sha256.Sum256([]byte(t))
+	return hex.EncodeToString(h[:])
 }
 
 func (a *Accounts) startSession(ctx context.Context, userID, claimPlan string) (domain.Session, error) {

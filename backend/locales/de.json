@@ -1197,5 +1197,17 @@
   "install.desktop.2": "Bestätigen Sie. Racion öffnet sich in einem eigenen Fenster.",
   "app.version": "Version {v}",
   "app.reset": "Aktualisieren",
-  "notify.test.nodevice": "Der Push-Dienst hat das Abonnement dieses Geräts abgelehnt. Schalten Sie Benachrichtigungen aus und wieder ein; hilft das nicht, schreiben Sie an info@racion.app."
+  "notify.test.nodevice": "Der Push-Dienst hat das Abonnement dieses Geräts abgelehnt. Schalten Sie Benachrichtigungen aus und wieder ein; hilft das nicht, schreiben Sie an info@racion.app.",
+  "auth.forgot": "Passwort vergessen?",
+  "auth.forgot.title": "Neues Passwort",
+  "auth.forgot.lead": "Geben Sie die E-Mail-Adresse Ihrer Registrierung ein. Wir schicken einen Link zum Setzen eines neuen Passworts.",
+  "auth.forgot.send": "Link senden",
+  "auth.forgot.sent": "Falls es diese Adresse gibt, ist die E-Mail unterwegs. Der Link gilt eine Stunde; prüfen Sie auch den Spam-Ordner.",
+  "auth.reset.title": "Neues Passwort wählen",
+  "auth.reset.lead": "Nach dem Speichern sind Sie sofort angemeldet; andere Geräte müssen sich neu anmelden.",
+  "auth.reset.save": "Speichern und anmelden",
+  "auth.reset.bad": "Der Link ist abgelaufen oder wurde schon benutzt. Fordern Sie einen neuen an.",
+  "auth.back": "Zurück zur Anmeldung",
+  "mail.reset.subject": "Neues Passwort für Racion",
+  "mail.reset.body": "Hallo!\n\nJemand (hoffentlich Sie) möchte das Passwort auf racion.app ändern. Der Link gilt eine Stunde:\n\n{0}\n\nWaren Sie das nicht, ignorieren Sie diese E-Mail einfach: Ihr Passwort bleibt unverändert.\n\nRacion, info@racion.app"
 }

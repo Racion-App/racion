@@ -3,6 +3,7 @@
 package service
 
 import (
+	"strings"
 	"go.uber.org/zap"
 	"context"
 	"encoding/json"
@@ -17,6 +18,7 @@ import (
 
 type UserRepo interface {
 	Create(ctx context.Context, email, passwordHash, name string) (domain.User, error)
+	SetPassword(ctx context.Context, id, passwordHash string) error
 	ByEmail(ctx context.Context, email string) (domain.User, string, error)
 	SetName(ctx context.Context, id, name string) error
 	SetNick(ctx context.Context, id, nick string) error
@@ -24,6 +26,17 @@ type UserRepo interface {
 	SetRole(ctx context.Context, id, role string) error
 	NickOf(ctx context.Context, id string) (string, error)
 	SetDefaults(ctx context.Context, id string, defaults json.RawMessage) error
+}
+
+// ResetRepo — одноразовые токены восстановления пароля
+type ResetRepo interface {
+	Create(ctx context.Context, tokenHash, userID string, expires time.Time) error
+	Take(ctx context.Context, tokenHash string) (string, error)
+}
+
+// Mailer шлёт письма (восстановление пароля)
+type Mailer interface {
+	Send(to, subject, text string) error
 }
 
 type SessionRepo interface {
@@ -91,6 +104,7 @@ type EventRepo interface {
 // Repos — всё хранилище одним значением, чтобы собирать сервисы в одну строку.
 type Repos struct {
 	Users       UserRepo
+	Resets      ResetRepo
 	Sessions    SessionRepo
 	Plans       PlanRepo
 	Dislikes    DislikeRepo
@@ -143,7 +157,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 	social := &Social{repo: repos.Social, recipes: recipes}
 	family := &Family{repo: repos.Households}
 	return &Services{
-		Accounts:    &Accounts{users: repos.Users, sessions: repos.Sessions, plans: repos.Plans, dislikes: repos.Dislikes, purchases: repos.Purchases, catalog: catalog},
+		Accounts:    &Accounts{users: repos.Users, resets: repos.Resets, sessions: repos.Sessions, plans: repos.Plans, dislikes: repos.Dislikes, purchases: repos.Purchases, catalog: catalog, baseURL: strings.TrimRight(baseURL, "/")},
 		Plans:       &Plans{plans: repos.Plans, checks: repos.Checks, purchases: repos.Purchases, extras: repos.Extras, dislikes: repos.Dislikes, members: repos.PlanMembers, recipes: recipes, social: social, family: family, catalog: catalog, collections: NewCollections(repos.Collections, recipes)},
 		Recipes:     recipes,
 		Catalog:     &Catalog{catalog: catalog},

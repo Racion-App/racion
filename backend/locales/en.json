@@ -1312,5 +1312,17 @@
   "mock.cancel": "Cancel",
   "app.version": "Version {v}",
   "app.reset": "Update",
-  "notify.test.nodevice": "The push service rejected this device’s subscription. Turn notifications off and on again; if that does not help, write to info@racion.app."
+  "notify.test.nodevice": "The push service rejected this device’s subscription. Turn notifications off and on again; if that does not help, write to info@racion.app.",
+  "auth.forgot": "Forgot your password?",
+  "auth.forgot.title": "New password",
+  "auth.forgot.lead": "Enter the email you signed up with. We will send a link to set a new password.",
+  "auth.forgot.send": "Send the link",
+  "auth.forgot.sent": "If that address exists, the email is on its way. The link works for an hour; check your spam folder too.",
+  "auth.reset.title": "Choose a new password",
+  "auth.reset.lead": "You will be signed in right after saving; other devices will need to sign in again.",
+  "auth.reset.save": "Save and sign in",
+  "auth.reset.bad": "This link has expired or was already used. Request a new one.",
+  "auth.back": "Back to sign in",
+  "mail.reset.subject": "New password for Racion",
+  "mail.reset.body": "Hello!\n\nSomeone (we hope it was you) asked to change the password on racion.app. The link works for an hour:\n\n{0}\n\nIf it was not you, just ignore this email: your password stays the same.\n\nRacion, info@racion.app"
 }

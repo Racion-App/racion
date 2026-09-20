@@ -1076,6 +1076,7 @@ main.pages.is-loading {
 .auth__title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .auth__lead { color: var(--ds-label-secondary); margin: -6px 0 0; font-size: 15px; line-height: 1.45; }
 .auth__foot { font-size: 14px; color: var(--ds-label-secondary); margin: 0; }
+.auth__link { align-self: center; margin-top: 4px; border: 0; background: none; padding: 6px 8px; font: inherit; font-size: 15px; color: var(--ds-blue); cursor: pointer; border-radius: 8px; &:hover { background: var(--ds-blue-tint); } }
 .account__head { display: flex; align-items: center; gap: 14px; }
 .account__avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--ds-blue-tint); color: var(--ds-blue); font-weight: 700; font-size: 20px; flex: 0 0 auto; }
 .account__title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.15; }

@@ -65,6 +65,8 @@ export const api = {
   adminLogs: (level: string) => request<AdminLog[]>(`/api/admin/logs?level=${level}&n=300`),
   register: (email: string, password: string, name: string, plan?: string) =>
     request<User>(`/api/auth/register${plan ? `?plan=${plan}` : ""}`, { method: "POST", body: JSON.stringify({ email, password, name }) }),
+  forgot: (email: string) => request<void>("/api/auth/forgot", { method: "POST", body: JSON.stringify({ email }) }),
+  reset: (token: string, password: string, plan?: string) => request<User>("/api/auth/reset" + (plan ? `?plan=${plan}` : ""), { method: "POST", body: JSON.stringify({ token, password }) }),
   login: (email: string, password: string, plan?: string) =>
     request<User>(`/api/auth/login${plan ? `?plan=${plan}` : ""}`, { method: "POST", body: JSON.stringify({ email, password }) }),
   logout: () => request<void>("/api/auth/logout", { method: "POST" }),

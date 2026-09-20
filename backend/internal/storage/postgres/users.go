@@ -29,6 +29,37 @@ func (r *Users) ByEmail(ctx context.Context, email string) (domain.User, string,
 }
 
 // SetRole — роль аккаунта: "" | moderator | admin.
+// SetPassword меняет хеш пароля и закрывает все сессии: после сброса входить заново на каждом устройстве.
+func (r *Users) SetPassword(ctx context.Context, id, passwordHash string) error {
+	if _, err := r.pool.Exec(ctx, `UPDATE users SET password_hash = $2 WHERE id = $1`, id, passwordHash); err != nil {
+		return wrap("users.password", err)
+	}
+	_, err := r.pool.Exec(ctx, `DELETE FROM sessions WHERE user_id = $1`, id)
+	return wrap("users.password.sessions", err)
+}
+
+// ── Восстановление пароля ──────────────────────────────────────────────────
+
+type Resets struct{ pool *pgxpool.Pool }
+
+func NewResets(pool *pgxpool.Pool) *Resets { return &Resets{pool: pool} }
+
+func (r *Resets) Create(ctx context.Context, tokenHash, userID string, expires time.Time) error {
+	// один живой токен на пользователя: старые убираем
+	if _, err := r.pool.Exec(ctx, `DELETE FROM password_resets WHERE user_id = $1 OR expires_at < now()`, userID); err != nil {
+		return wrap("resets.clean", err)
+	}
+	_, err := r.pool.Exec(ctx, `INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1, $2, $3)`, tokenHash, userID, expires)
+	return wrap("resets.create", err)
+}
+
+// Take забирает токен: возвращает пользователя и удаляет запись, чтобы ссылка сработала один раз.
+func (r *Resets) Take(ctx context.Context, tokenHash string) (string, error) {
+	var userID string
+	err := r.pool.QueryRow(ctx, `DELETE FROM password_resets WHERE token_hash = $1 AND expires_at > now() RETURNING user_id::text`, tokenHash).Scan(&userID)
+	return userID, wrap("resets.take", err)
+}
+
 func (r *Users) SetRole(ctx context.Context, id, role string) error {
 	tag, err := r.pool.Exec(ctx, `UPDATE users SET role = $2 WHERE id = $1`, id, role)
 	if err != nil {

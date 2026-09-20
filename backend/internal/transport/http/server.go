@@ -126,6 +126,8 @@ func New(d Deps) http.Handler {
 	// аккаунт
 	mux.HandleFunc("POST /api/auth/register", s.limited(s.lim.auth, s.register))
 	mux.HandleFunc("POST /api/auth/login", s.limited(s.lim.auth, s.login))
+	mux.HandleFunc("POST /api/auth/forgot", s.limited(s.lim.auth, s.forgot))
+	mux.HandleFunc("POST /api/auth/reset", s.limited(s.lim.auth, s.reset))
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
 	mux.HandleFunc("GET /api/me", s.me)
 	mux.HandleFunc("PATCH /api/me", s.updateMe)

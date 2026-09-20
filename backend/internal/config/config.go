@@ -27,6 +27,11 @@ type Config struct {
 	AIOrder         string // порядок провайдеров через запятую: mistral,gemini,groq,openrouter,openai,local
 	AIModels        string // переопределить модели: mistral=ministral-14b-latest,gemini=gemini-2.5-flash
 	AdminEmails     string // почты администраторов через запятую: им открыта /admin
+	MailHost        string // SMTP для писем (восстановление пароля); пусто — письма только в лог
+	MailPort        string
+	MailUser        string
+	MailPass        string
+	MailFrom        string
 	S3Endpoint      string // minio:9000 или s3.example.com; пусто — фото выключены
 	S3AccessKey     string
 	S3SecretKey     string
@@ -58,6 +63,11 @@ func Load() Config {
 		AIOrder:         env("AI_ORDER", ""),
 		AIModels:        env("AI_MODELS", ""),
 		AdminEmails:     env("ADMIN_EMAILS", ""),
+		MailHost:        env("MAIL_HOST", ""),
+		MailPort:        env("MAIL_PORT", "587"),
+		MailUser:        env("MAIL_USER", ""),
+		MailPass:        env("MAIL_PASS", ""),
+		MailFrom:        env("MAIL_FROM", "Racion <info@racion.app>"),
 		S3Endpoint:      env("S3_ENDPOINT", ""),
 		S3AccessKey:     env("S3_ACCESS_KEY", ""),
 		S3SecretKey:     env("S3_SECRET_KEY", ""),
