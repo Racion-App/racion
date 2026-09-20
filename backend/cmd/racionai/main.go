@@ -30,6 +30,9 @@ import (
 
 // langMeta — что не переводится нейросетью: флаг, страна, правило числа, месяцы, форматы дат.
 var langMeta = map[string]map[string]any{
+	"de": {"name": "Deutsch", "english": "German", "flag": "de", "country": "DE", "plural": "one-other", "decimal": ",",
+		"months": []string{"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"},
+		"date":   "{d}. {month} {y}", "monthYear": "{month} {y}"},
 	"es": {"name": "Español", "english": "Spanish", "flag": "es", "country": "ES", "plural": "one-other", "decimal": ",",
 		"months": []string{"enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"},
 		"date":   "{d} de {month} de {y}", "monthYear": "{month} de {y}"},
