@@ -1311,5 +1311,21 @@
   "offline.retry": "Попробовать снова",
   "plan.offline.saved": "Рецепты недели сохранены для работы без сети",
   "update.ready": "Вышло обновление Рациона",
-  "update.button": "Обновить"
+  "update.button": "Обновить",
+  "mock.share": "Поделиться",
+  "mock.copy": "Скопировать",
+  "mock.voice": "Голосовой поиск",
+  "mock.bookmark": "Добавить в закладки",
+  "mock.favorite": "Добавить в Избранное",
+  "mock.find": "Найти на странице",
+  "mock.addhome": "Добавить на экран «Домой»",
+  "mock.addhome.title": "На экран «Домой»",
+  "mock.add": "Добавить",
+  "mock.webapp": "Открыть как веб-приложение",
+  "mock.newtab": "Новая вкладка",
+  "mock.bookmarks": "Закладки",
+  "mock.install": "Установить приложение",
+  "mock.install.q": "Установить приложение?",
+  "mock.install.ok": "Установить",
+  "mock.cancel": "Отмена"
 }

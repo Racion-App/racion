@@ -1752,16 +1752,52 @@ main.pages.is-loading {
   // внутри листа у <ol> свой счётчик-кружок: здесь шаги нумерует синий кружок в тексте
   .bsheet & > li { grid-template-columns: 90px minmax(0, 1fr); counter-increment: none; &::before { content: none; } }
   li { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4);
-    > span { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.4; }
-    b { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; background: var(--ds-blue); color: #fff; } } }
+    .install__text { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.4; }
+    .install__text b { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; background: var(--ds-blue); color: #fff; } } }
 .install__art { display: block; width: 90px; height: 120px; }
-// вырезка настоящего экрана 4:5 с кольцом на нужной кнопке
-.install__shot { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 10px; overflow: hidden; border: 1px solid var(--ds-separator); background: var(--ds-fill-3);
-  img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  i { position: absolute; border-radius: 8px; border: 2px solid var(--ds-blue); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(0, 122, 255, 0.45); } }
-// шаги с фото шире схем: 120px, чтобы текст на вырезке читался
-.install__steps li:has(.install__shot) { grid-template-columns: 120px minmax(0, 1fr); }
-.bsheet .install__steps > li:has(.install__shot) { grid-template-columns: 120px minmax(0, 1fr); }
+// Макеты экранов для инструкции: тёмный iOS/Android, 4:5, кегль 10px, всё в em. Синяя рамка — куда нажимать.
+.mock { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: 10px; overflow: hidden; background: #000; color: #fff; font-size: 10px; line-height: 1.2; font-weight: 500; letter-spacing: -0.01em; border: 1px solid var(--ds-separator); font-family: var(--ds-font);
+  svg { flex: none; }
+  &__hl { box-shadow: 0 0 0 2px #0a84ff, 0 0 0 3.5px rgba(255, 255, 255, 0.9); }
+  // фон страницы под панелями: смутные строки
+  &__page { position: absolute; inset: 0; background: #0b0b0d; &::before { content: ""; position: absolute; left: 1.2em; right: 1.2em; top: 1.4em; height: 2.2em; border-radius: 0.5em; background: #1c1c1e; } &::after { content: ""; position: absolute; left: 1.2em; right: 1.2em; top: 4.6em; height: 7em; border-radius: 0.6em; background: #151517; }
+    &--light { background: #f2f2f7; &::before { background: #fff; } &::after { background: #e9e9ee; } } }
+  &__row { display: flex; align-items: center; gap: 0.5em; padding: 0.45em 0.7em; border-radius: 0.6em; }
+  &__ico { display: inline-flex; color: #fff; }
+  &__txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  // строка, куда нажимать, читается целиком: до двух строк
+  &__hl .mock__txt { white-space: normal; overflow: visible; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  &__chev { margin-left: auto; opacity: 0.5; }
+  // всплывающее меню Safari (снизу) и Chrome (сверху справа)
+  &__menu { position: absolute; left: 0.9em; right: 0.9em; padding: 0.3em; border-radius: 1em; background: #2c2c2e; box-shadow: 0 0.8em 2em rgba(0, 0, 0, 0.5); display: grid; gap: 0.1em;
+    &--up { bottom: 4.6em; } &--right { top: 3.2em; left: 3em; right: 0.6em; } }
+  // нижняя панель Safari 26: адрес-капсула и круглая «…»
+  &__bar { position: absolute; left: 0.8em; right: 0.8em; bottom: 0.9em; display: flex; align-items: center; gap: 0.5em; }
+  &__pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.4em; height: 2.6em; padding: 0 0.8em; border-radius: 1.3em; background: #2c2c2e; white-space: nowrap; overflow: hidden; &--wide { height: 2.4em; } }
+  &__round { display: inline-grid; place-items: center; width: 2.6em; height: 2.6em; border-radius: 50%; background: #2c2c2e; &--sm { width: 2em; height: 2em; } }
+  // Safari 18: адрес сверху панели, ряд кнопок снизу
+  &__omni { position: absolute; left: 0.8em; right: 0.8em; bottom: 4.4em; }
+  &__tools { position: absolute; left: 0; right: 0; bottom: 0; height: 3.6em; padding: 0 1.2em; display: flex; align-items: center; justify-content: space-between; background: #1c1c1e; color: #0a84ff; }
+  &__tool { display: inline-grid; place-items: center; width: 2.2em; height: 2.2em; border-radius: 0.6em; }
+  // лист «Поделиться»: шапка с иконкой приложения и список
+  &__sheet { position: absolute; inset: 0.9em 0.6em 0; border-radius: 1em 1em 0 0; background: #1c1c1e; padding: 0.8em 0.6em; }
+  &__app { display: flex; align-items: center; gap: 0.6em; padding: 0.2em 0.4em 0.8em; span:last-child { display: grid; min-width: 0; } b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } small { font-size: 0.85em; color: rgba(235, 235, 245, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+  &__icon { flex: none; display: grid; align-content: center; gap: 0.25em; width: 2.6em; height: 2.6em; padding: 0 0.6em; border-radius: 0.7em; background: #007aff; i { display: block; height: 0.28em; border-radius: 0.2em; background: #fff; &:last-child { width: 60%; } } }
+  &__list { display: grid; gap: 0.1em; padding: 0.3em; border-radius: 0.9em; background: #2c2c2e; }
+  // диалог «На экран „Домой“»
+  &__dialog { position: absolute; inset: 0; background: #1c1c1e; padding: 0.8em 0.7em; }
+  &__dhead { display: flex; align-items: center; gap: 0.5em; margin-bottom: 1em; }
+  &__dtitle { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__btn { display: inline-flex; align-items: center; height: 2em; padding: 0 0.8em; border-radius: 1em; background: #0a84ff; color: #fff; font-weight: 600; white-space: nowrap; }
+  &__toggle { display: flex; align-items: center; justify-content: space-between; gap: 0.5em; margin-top: 0.8em; padding: 0.6em 0.7em; border-radius: 0.8em; background: #2c2c2e; span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } i { flex: none; width: 2.6em; height: 1.6em; border-radius: 0.8em; background: #30d158; position: relative; &::after { content: ""; position: absolute; right: 0.15em; top: 0.15em; width: 1.3em; height: 1.3em; border-radius: 50%; background: #fff; } } }
+  // Chrome (Android и ПК): адресная строка сверху
+  &__abar { position: absolute; left: 0; right: 0; top: 0; z-index: 1; height: 3.4em; padding: 0 0.7em; display: flex; align-items: center; gap: 0.5em; background: #1c1c1e; }
+  &__confirm { position: absolute; left: 0.8em; right: 0.8em; bottom: 0.8em; padding: 0.8em 0.7em 0.6em; border-radius: 1em; background: #2c2c2e; b { display: block; font-weight: 600; margin-bottom: 0.4em; } .mock__app { padding-bottom: 0.4em; } }
+  &__actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.7em; color: #0a84ff; font-weight: 600; font-size: 0.95em; }
+}
+// шаги с макетами: 140px, чтобы подписи внутри читались
+.install__steps li { grid-template-columns: 140px minmax(0, 1fr); }
+.bsheet .install__steps > li { grid-template-columns: 140px minmax(0, 1fr); }
 .install__actions { display: flex; gap: 10px; margin-top: 14px; .btn { flex: 1; } }
 .install__done { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 8px; color: var(--ds-green); font-weight: 600; }
 // день, к которому пришли из уведомления: подсветка на несколько секунд
