@@ -48,7 +48,9 @@ type Notifications struct {
 }
 
 func NewNotifications(repo PushRepo, settings SettingsRepo, subscriber, baseURL string) *Notifications {
-	n := &Notifications{repo: repo, settings: settings, subscriber: subscriber, baseURL: strings.TrimRight(baseURL, "/")}
+	// webpush-go сам добавляет «mailto:» ко всему, что не https-URL; с готовым «mailto:» выходит «mailto:mailto:…»,
+	// FCM это терпит, а Apple отвечает 403 BadJwtToken
+	n := &Notifications{repo: repo, settings: settings, subscriber: strings.TrimPrefix(subscriber, "mailto:"), baseURL: strings.TrimRight(baseURL, "/")}
 	n.send = n.webpush
 	n.log = zap.L().Named("push")
 	return n
