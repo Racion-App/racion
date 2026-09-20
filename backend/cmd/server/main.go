@@ -32,6 +32,7 @@ func main() {
 	cfg := config.Load()
 	ring := logger.NewRing(1000)
 	log := logger.WithRing(logger.New(cfg.LogLevel, cfg.LogFormat), ring)
+	zap.ReplaceGlobals(log) // сервисы без своего логгера (push, indexnow) пишут через zap.L()
 	defer func() { _ = log.Sync() }()
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

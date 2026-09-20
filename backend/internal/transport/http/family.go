@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"go.uber.org/zap"
 	"net/http"
 
@@ -112,6 +113,11 @@ func (s *Server) notifyTest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.svc.Notify.Test(r.Context(), u.ID, i18n.FromRequest(r)); err != nil {
+		// подписок нет или push-сервис их отверг: не «план не найден», а понятное объяснение
+		if errors.Is(err, domain.ErrNotFound) {
+			writeErr(w, 404, i18n.T(i18n.FromRequest(r), "notify.test.nodevice"))
+			return
+		}
 		s.fail(w, r, err)
 		return
 	}

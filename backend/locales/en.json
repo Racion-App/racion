@@ -1311,5 +1311,6 @@
   "mock.install.ok": "Install",
   "mock.cancel": "Cancel",
   "app.version": "Version {v}",
-  "app.reset": "Update"
+  "app.reset": "Update",
+  "notify.test.nodevice": "The push service rejected this device’s subscription. Turn notifications off and on again; if that does not help, write to info@racion.app."
 }

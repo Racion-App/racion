@@ -1196,5 +1196,6 @@
   "install.desktop.1": "Klicken Sie in der Adressleiste auf das Installationssymbol.",
   "install.desktop.2": "Bestätigen Sie. Racion öffnet sich in einem eigenen Fenster.",
   "app.version": "Version {v}",
-  "app.reset": "Aktualisieren"
+  "app.reset": "Aktualisieren",
+  "notify.test.nodevice": "Der Push-Dienst hat das Abonnement dieses Geräts abgelehnt. Schalten Sie Benachrichtigungen aus und wieder ein; hilft das nicht, schreiben Sie an info@racion.app."
 }
