@@ -4,6 +4,7 @@ import { AlertCircle, ArrowLeft, ArrowRight, Baby, CalendarDays, Check, ChefHat,
 import { Link } from "react-router-dom";
 import { OccasionIcon } from "./Occasion";
 import { SiteFooter } from "../components/SiteFooter";
+import { InstallNudge } from "../components/InstallSheet";
 import { TopBar } from "../components/TopBar";
 import { Select } from "../components/Select";
 import { StoreMark, WITH_LOGO } from "../components/StoreMark";
@@ -357,6 +358,7 @@ export function Quiz() {
   return (
     <div className="shell">
       <TopBar />
+      <InstallNudge />
       <Welcome />
       <main className="quiz">
         <div className="quiz__progress" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS} aria-valuenow={step} aria-label={t("quiz.step", { n: step, total: STEPS })}>

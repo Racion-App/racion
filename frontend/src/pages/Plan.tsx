@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, ChevronDown, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
+import { InstallNudge } from "../components/InstallSheet";
 import { OfferCard, useOffer } from "../components/OfferCard";
 import { TopBar } from "../components/TopBar";
 import { RecipeSheet } from "../components/RecipeSheet";
@@ -190,6 +191,32 @@ export function Plan() {
       setMode(true);
     }
   };
+
+  // Рецепты недели заранее в кэш service worker: лист рецепта и режим готовки открываются в магазине и на кухне без сети
+  useEffect(() => {
+    if (!plan || !("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
+    const ids = new Set<string>();
+    plan.days.forEach((d) => d.dishes.forEach((x) => { ids.add(x.recipeId); if (x.side) ids.add(x.side.recipeId); }));
+    const run = () => { ids.forEach((id) => { fetch(`/api/recipes/${encodeURIComponent(id)}`, { priority: "low" } as RequestInit).catch(() => undefined); }); };
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    const h = idle ? idle(run) : window.setTimeout(run, 3000);
+    return () => { if (!idle) window.clearTimeout(h as number); };
+  }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Переходы из уведомлений: ?mode=shop открывает список, ?day=YYYY-MM-DD прокручивает к дню, #prep — к заготовкам
+  const [focusDay, setFocusDay] = useState<string | null>(null);
+  useEffect(() => {
+    if (!plan) return;
+    if (sp.get("mode") === "shop") setStoreMode(true);
+    const day = sp.get("day");
+    const target = day ? document.getElementById("day-" + day) : location.hash === "#prep" ? document.querySelector(".prep") : null;
+    if (target) {
+      setFocusDay(day);
+      requestAnimationFrame(() => target.scrollIntoView({ block: "start", behavior: "smooth" }));
+      const off = setTimeout(() => setFocusDay(null), 4000);
+      return () => clearTimeout(off);
+    }
+  }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // «Переставить»: выбранная ячейка ждёт, куда её поменять; целевые ячейки того же приёма показывают «Сюда»
   const [moving, setMoving] = useState<{ day: number; slot: string } | null>(null);
@@ -442,6 +469,7 @@ export function Plan() {
           )
         }
       />
+      {!storeMode && <InstallNudge />}
       {(!online || pending > 0) && (
         <div className={"offline" + (online ? " offline--sync" : "")} role="status">
           <WifiOff size={15} aria-hidden /> {online ? t("offline.pending", { n: pending }) : t("offline.now")}
@@ -605,7 +633,7 @@ export function Plan() {
           </section>
         )}
         {plan.days.map((day) => (
-          <section className={"day" + (day.skipped ? " day--away" : "")} key={day.index} aria-label={`${day.label}, ${dateShort(day.date, lang)}`}>
+          <section className={"day" + (day.skipped ? " day--away" : "") + (focusDay === day.date ? " day--focus" : "")} id={"day-" + day.date} key={day.index} aria-label={`${day.label}, ${dateShort(day.date, lang)}`}>
             <div className="day__head">
               <h2 className="day__name">
                 {day.label} <small>{dateShort(day.date, lang)}</small>

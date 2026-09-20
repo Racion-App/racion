@@ -41,6 +41,7 @@ type Notifications struct {
 	baseURL    string
 	pub, priv  string
 	send       func(ctx context.Context, sub domain.PushSubscription, n domain.Notification) (int, error)
+	digest     func(ctx context.Context) (recipes, collections int) // что нового за неделю; nil — дайджест не шлём
 }
 
 func NewNotifications(repo PushRepo, settings SettingsRepo, subscriber, baseURL string) *Notifications {
@@ -97,7 +98,7 @@ func (n *Notifications) Settings(ctx context.Context, userID string) (domain.Not
 }
 
 func (n *Notifications) SetSettings(ctx context.Context, userID string, s domain.NotifySettings) error {
-	if s.ShopDay < 0 || s.ShopDay > 6 || s.ShopHour < 0 || s.ShopHour > 23 || s.Tz < -14*60 || s.Tz > 14*60 {
+	if s.ShopDay < 0 || s.ShopDay > 6 || s.ShopHour < -1 || s.ShopHour > 23 || s.Tz < -14*60 || s.Tz > 14*60 || s.TodayHour < 0 || s.TodayHour > 23 || s.PrepHour < 0 || s.PrepHour > 23 {
 		return domain.ErrBadInput
 	}
 	return n.repo.SetSettings(ctx, userID, s)
@@ -135,7 +136,7 @@ func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now t
 	}
 	sent := 0
 	// магазин: в выбранный день и час, для ближайшей недели, где ещё есть что купить
-	if int(local.Weekday()) == u.Settings.ShopDay && local.Hour() == u.Settings.ShopHour {
+	if u.Settings.ShopHour >= 0 && int(local.Weekday()) == u.Settings.ShopDay && local.Hour() == u.Settings.ShopHour {
 		for _, p := range plans {
 			if p.StartDate < local.AddDate(0, 0, -6).Format("2006-01-02") || p.StartDate > local.AddDate(0, 0, 7).Format("2006-01-02") {
 				continue
@@ -151,8 +152,41 @@ func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now t
 			break
 		}
 	}
+	// утром: что готовим сегодня; открывается план на сегодняшнем дне
+	if u.Settings.Today && local.Hour() == u.Settings.TodayHour {
+		for _, p := range plans {
+			dishes := p.Dishes[today]
+			if len(dishes) == 0 {
+				continue
+			}
+			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "today:"+p.ID+":"+today); ok {
+				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.today.title"), Body: strings.Join(dishes, " · "), URL: n.baseURL + "/plan/" + p.ID + "?day=" + today, Tag: "today"})
+				sent++
+			}
+			break
+		}
+	}
+	// заготовки: накануне вечером и утром в день заготовок
+	if u.Settings.PrepDay {
+		for _, p := range plans {
+			for _, pd := range p.PrepDays {
+				switch {
+				case pd.Date == tomorrow && local.Hour() == u.Settings.PrepHour:
+					if ok, _ := n.repo.MarkSent(ctx, u.UserID, "prepday-eve:"+p.ID+":"+pd.Date); ok {
+						n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.prepday.eve.title"), Body: i18n.T(lang, "push.prepday.body", pd.Items, minutesLabel(lang, pd.TotalMin)), URL: n.baseURL + "/plan/" + p.ID + "?mode=shop", Tag: "prepday"})
+						sent++
+					}
+				case pd.Date == today && local.Hour() == u.Settings.TodayHour:
+					if ok, _ := n.repo.MarkSent(ctx, u.UserID, "prepday:"+p.ID+":"+pd.Date); ok {
+						n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.prepday.title"), Body: i18n.T(lang, "push.prepday.body", pd.Items, minutesLabel(lang, pd.TotalMin)), URL: n.baseURL + "/plan/" + p.ID + "#prep", Tag: "prepday"})
+						sent++
+					}
+				}
+			}
+		}
+	}
 	// вечером: что готовим завтра
-	if u.Settings.Prep && local.Hour() == 19 {
+	if u.Settings.Prep && local.Hour() == u.Settings.PrepHour {
 		for _, p := range plans {
 			dishes := p.Dishes[tomorrow]
 			if len(dishes) == 0 {
@@ -178,6 +212,16 @@ func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now t
 				sent++
 			}
 			break
+		}
+	}
+	// пятница вечером: новые рецепты и подборки за неделю (только если что-то появилось)
+	if u.Settings.Digest && local.Weekday() == time.Friday && local.Hour() == 18 && n.digest != nil {
+		week := local.Format("2006-01-02")
+		if ok, _ := n.repo.MarkSent(ctx, u.UserID, "digest:"+week); ok {
+			if recipes, cols := n.digest(ctx); recipes+cols > 0 {
+				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.digest.title"), Body: i18n.T(lang, "push.digest.body", recipes, cols), URL: n.baseURL + "/collections", Tag: "digest"})
+				sent++
+			}
 		}
 	}
 	// воскресенье в полдень: на следующую неделю плана нет
@@ -234,4 +278,18 @@ func (n *Notifications) webpush(ctx context.Context, s domain.PushSubscription, 
 		return res.StatusCode, fmt.Errorf("push: http %d", res.StatusCode)
 	}
 	return res.StatusCode, nil
+}
+
+// SetDigest подключает подсчёт новинок за неделю для пятничного дайджеста.
+func (n *Notifications) SetDigest(f func(ctx context.Context) (int, int)) { n.digest = f }
+
+// minutesLabel — «4 ч 10 мин» на языке уведомления.
+func minutesLabel(l i18n.Lang, m int) string {
+	if m < 60 {
+		return i18n.T(l, "push.min", m)
+	}
+	if m%60 == 0 {
+		return i18n.T(l, "push.hours", m/60)
+	}
+	return i18n.T(l, "push.hoursMin", m/60, m%60)
 }

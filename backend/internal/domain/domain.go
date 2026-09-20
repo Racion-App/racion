@@ -183,16 +183,21 @@ type PushSubscription struct {
 // NotifySettings — напоминания: магазин в день недели и час (по местному времени, tz — смещение в минутах),
 // вечером «что готовим завтра», в воскресенье «собрать неделю».
 type NotifySettings struct {
-	ShopDay  int  `json:"shopDay"`  // 0 — воскресенье … 6 — суббота
-	ShopHour int  `json:"shopHour"` // 0…23
-	Prep     bool `json:"prep"`
-	Week     bool `json:"week"`
-	NoAsk    bool `json:"noAsk"` // не спрашивать вечером «как было?» (по умолчанию спрашиваем)
-	Tz       int  `json:"tz"`    // минуты к UTC, как -(new Date()).getTimezoneOffset()
+	ShopDay   int  `json:"shopDay"`   // 0 — воскресенье … 6 — суббота
+	ShopHour  int  `json:"shopHour"`  // 0…23, -1 — не напоминать о магазине
+	Today     bool `json:"today"`     // утром: что готовим сегодня
+	TodayHour int  `json:"todayHour"` // час утреннего напоминания
+	Prep      bool `json:"prep"`      // вечером: что готовим завтра
+	PrepHour  int  `json:"prepHour"`  // час вечернего напоминания
+	PrepDay   bool `json:"prepDay"`   // режим заготовок: накануне и утром дня заготовок
+	Week      bool `json:"week"`      // воскресенье: собрать следующую неделю
+	Digest    bool `json:"digest"`    // раз в неделю: новые рецепты и подборки
+	NoAsk     bool `json:"noAsk"`     // не спрашивать вечером «как было?» (по умолчанию спрашиваем)
+	Tz        int  `json:"tz"`        // минуты к UTC, как -(new Date()).getTimezoneOffset()
 }
 
 func DefaultNotify() NotifySettings {
-	return NotifySettings{ShopDay: 0, ShopHour: 12, Prep: true, Week: true, Tz: 180}
+	return NotifySettings{ShopDay: 0, ShopHour: 12, Today: true, TodayHour: 8, Prep: true, PrepHour: 19, PrepDay: true, Week: true, Digest: false, Tz: 180}
 }
 
 type NotifyUser struct {
@@ -206,8 +211,16 @@ type PlanReminderInfo struct {
 	StartDate string
 	Items     int
 	Checked   int
+	PrepDays  []PrepDayInfo // режим заготовок: дни готовки
 	Dishes    map[string][]string // дата → названия блюд
 	Dinner    map[string]DishRef  // дата → ужин (для вопроса «как было?»)
+}
+
+// PrepDayInfo — день заготовок для напоминаний: дата, число блюд и оценка времени у плиты.
+type PrepDayInfo struct {
+	Date     string
+	Items    int
+	TotalMin int
 }
 
 // DishRef — блюдо плана для уведомления.

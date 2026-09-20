@@ -177,6 +177,10 @@ func main() {
 	}
 
 	// Push: ключи VAPID и проход по напоминаниям раз в 10 минут.
+	services.Notify.SetDigest(func(ctx context.Context) (int, int) {
+		r, c, _ := store.Admin.NewSince(ctx, time.Now().AddDate(0, 0, -7))
+		return r, c
+	})
 	if err := services.Notify.Init(ctx); err != nil {
 		log.Warn("push init", zap.Error(err))
 	}

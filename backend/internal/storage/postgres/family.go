@@ -144,11 +144,21 @@ func (r *Push) PlansForReminders(ctx context.Context, userID string) ([]domain.P
 			Totals struct {
 				Items int `json:"items"`
 			} `json:"totals"`
+			PrepDays []struct {
+				Date     string `json:"date"`
+				Items    []any  `json:"items"`
+				TotalMin int    `json:"totalMin"`
+			} `json:"prepDays"`
 		}
 		if json.Unmarshal(raw, &pl) != nil {
 			continue
 		}
 		info := domain.PlanReminderInfo{ID: id, StartDate: pl.Params.StartDate, Items: pl.Totals.Items, Dishes: map[string][]string{}, Dinner: map[string]domain.DishRef{}}
+		for _, pd := range pl.PrepDays {
+			if len(pd.Items) > 0 {
+				info.PrepDays = append(info.PrepDays, domain.PrepDayInfo{Date: pd.Date, Items: len(pd.Items), TotalMin: pd.TotalMin})
+			}
+		}
 		for _, d := range pl.Days {
 			for _, x := range d.Dishes {
 				info.Dishes[d.Date] = append(info.Dishes[d.Date], x.Title)

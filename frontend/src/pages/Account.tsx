@@ -12,6 +12,7 @@ import { TranslationLine } from "../components/TranslationStatus";
 import { PhotoField } from "../components/PhotoField";
 import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
+import { InstallCard } from "../components/InstallSheet";
 import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -508,6 +509,7 @@ export function Account() {
             </button>
           </div>
           <NotifyCard onToast={setToast} />
+          <InstallCard />
         </section>
       </main>
       <SiteFooter />

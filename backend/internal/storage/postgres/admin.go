@@ -172,3 +172,14 @@ func deref(s *string) string {
 	}
 	return *s
 }
+
+// NewSince — сколько рецептов базы и публичных подборок появилось после момента t (для дайджеста).
+func (r *Admin) NewSince(ctx context.Context, t time.Time) (recipes, collections int, err error) {
+	if err = r.pool.QueryRow(ctx, `SELECT count(*) FROM recipes WHERE NOT deleted AND created_at > $1`, t).Scan(&recipes); err != nil {
+		return 0, 0, wrap("admin.new_recipes", err)
+	}
+	if err = r.pool.QueryRow(ctx, `SELECT count(*) FROM collections WHERE public AND curated AND created_at > $1`, t).Scan(&collections); err != nil {
+		return 0, 0, wrap("admin.new_collections", err)
+	}
+	return recipes, collections, nil
+}

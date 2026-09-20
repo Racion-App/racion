@@ -2,9 +2,11 @@
 // Кэш: оболочка приложения (index, скрипты, стили, шрифты, иконки) и последние открытые недели
 // (/api/plans/{id} и их отметки), чтобы на кассе без сети список открывался и отмечался.
 // Отметки, сделанные офлайн, приложение копит в localStorage и досылает, когда сеть вернётся.
-const VERSION = "racion-v4";
-const SHELL = ["/", "/assets/app.js", "/assets/app.css", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png"];
-const PLAN_RE = /^\/api\/(plans\/[^/]+(\/checks|\/extras)?|locales(\/[a-z]{2})?|meta)(\?.*)?$/;
+const VERSION = "racion-v5";
+const SHELL = ["/", "/offline.html", "/theme.js", "/assets/app.js", "/assets/app.css", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/badge-72.png"];
+// маршруты приложения без сервера: их открывает SPA из кэша; остальное (рецепты, подборки) — страница «нет сети»
+const APP_RE = /^\/([a-z]{2}\/)?(plan\/|me|login|event\/|cook\/|$|\?)/;
+const PLAN_RE = /^\/api\/(plans\/[^/]+(\/checks|\/extras)?|recipes\/[^/]+(\/subs|\/stats)?|me(\/plans)?|locales(\/[a-z]{2})?|meta)(\?.*)?$/;
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
@@ -20,7 +22,11 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== location.origin) return;
   // страницы приложения: сеть, при обрыве — оболочка из кэша (SPA сама покажет план из кэша)
   if (req.mode === "navigate") {
-    e.respondWith(fetch(req).then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put("/", copy)).catch(() => {}); return res; }).catch(() => caches.match("/")));
+    e.respondWith(
+      fetch(req)
+        .then((res) => { if (url.pathname === "/") { const copy = res.clone(); caches.open(VERSION).then((c) => c.put("/", copy)).catch(() => {}); } return res; })
+        .catch(() => (APP_RE.test(url.pathname + url.search) ? caches.match("/") : caches.match("/offline.html")).then((hit) => hit || caches.match("/"))),
+    );
     return;
   }
   // скрипты и стили приложения без хеша в имени: сеть первой (после выкладки — свежие), кэш — только офлайн
