@@ -8,6 +8,7 @@ declare const __BUILD__: string;
 export const BUILD = typeof __BUILD__ === "string" ? __BUILD__ : "dev";
 
 const FIRST_MS = 30_000;
+const FIRST_STANDALONE_MS = 3_000; // установленное приложение живёт неделями без перезагрузки: проверяем сразу
 const EVERY_MS = 15 * 60_000;
 const MIN_GAP_MS = 2 * 60_000;
 
@@ -38,11 +39,15 @@ export function startUpdateCheck(onUpdate: (build: string) => void): () => void 
       // без сети или сервер на выкладке — проверим в следующий раз
     }
   };
-  const t0 = window.setTimeout(check, FIRST_MS);
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+  const t0 = window.setTimeout(check, standalone ? FIRST_STANDALONE_MS : FIRST_MS);
   const iv = window.setInterval(check, EVERY_MS);
   const vis = () => { if (document.visibilityState === "visible") check(); };
   document.addEventListener("visibilitychange", vis);
-  return () => { stopped = true; window.clearTimeout(t0); window.clearInterval(iv); document.removeEventListener("visibilitychange", vis); };
+  // новый service worker активировался поверх старого: сборка точно новее
+  const onMsg = (e: MessageEvent) => { if (e.data?.type === "update" && !stopped && !latest) { latest = "sw"; onUpdate("sw"); } };
+  navigator.serviceWorker?.addEventListener("message", onMsg);
+  return () => { stopped = true; window.clearTimeout(t0); window.clearInterval(iv); document.removeEventListener("visibilitychange", vis); navigator.serviceWorker?.removeEventListener("message", onMsg); };
 }
 
 // applyUpdate: свежий service worker, пустые кэши, перезагрузка
@@ -53,11 +58,31 @@ export async function applyUpdate(): Promise<void> {
   } catch {
     // service worker не обязателен
   }
+  await clearCaches();
+  location.reload();
+}
+
+async function clearCaches(): Promise<void> {
   try {
     const keys = await caches.keys();
     await Promise.all(keys.map((k) => caches.delete(k)));
   } catch {
     // приватный режим
   }
-  location.reload();
+}
+
+// resetApp: кнопка «Обновить» в кабинете. Обновляет service worker (не снимает: вместе с ним пропала бы
+// push-подписка устройства), чистит кэши и грузит страницу заново мимо HTTP-кэша (метка в адресе).
+// Вход и настройки не трогаем: они в cookie и на сервере.
+export async function resetApp(): Promise<void> {
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration("/");
+    await reg?.update();
+  } catch {
+    // без service worker
+  }
+  await clearCaches();
+  const u = new URL(location.href);
+  u.searchParams.set("v", String(Date.now()));
+  location.replace(u.toString());
 }

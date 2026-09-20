@@ -1743,6 +1743,7 @@ main.pages.is-loading {
   > svg:first-child { color: var(--ds-blue); } > svg:last-child { color: var(--ds-label-tertiary); }
   &:hover { border-color: var(--ds-blue); } &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
 .install__card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+.install__card-ver { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; padding-top: 10px; border-top: 1px solid var(--ds-fill-4); small { color: var(--ds-label-tertiary); font-size: 12px; font-variant-numeric: tabular-nums; } }
   &-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ds-blue-tint); color: var(--ds-blue); }
   &-text { display: grid; gap: 1px; min-width: 0; b { font-size: 15px; font-weight: 600; } small { font-size: 13px; color: var(--ds-label-secondary); } }
   &-done { color: var(--ds-green); } }

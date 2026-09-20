@@ -1194,5 +1194,7 @@
   "install.android.2": "Wählen Sie „App installieren“ oder „Zum Startbildschirm hinzufügen“.",
   "install.android.3": "Bestätigen Sie. Das Symbol erscheint auf dem Startbildschirm.",
   "install.desktop.1": "Klicken Sie in der Adressleiste auf das Installationssymbol.",
-  "install.desktop.2": "Bestätigen Sie. Racion öffnet sich in einem eigenen Fenster."
+  "install.desktop.2": "Bestätigen Sie. Racion öffnet sich in einem eigenen Fenster.",
+  "app.version": "Version {v}",
+  "app.reset": "Aktualisieren"
 }

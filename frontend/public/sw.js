@@ -2,17 +2,35 @@
 // Кэш: оболочка приложения (index, скрипты, стили, шрифты, иконки) и последние открытые недели
 // (/api/plans/{id} и их отметки), чтобы на кассе без сети список открывался и отмечался.
 // Отметки, сделанные офлайн, приложение копит в localStorage и досылает, когда сеть вернётся.
-const VERSION = "racion-v6";
+const VERSION = "racion-v7";
 const SHELL = ["/", "/offline.html", "/theme.js", "/assets/app.js", "/assets/app.css", "/manifest.webmanifest", "/favicon.svg", "/fonts/InterVariable.woff2", "/fonts/JetBrainsMono-Medium.woff2", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/badge-72.png"];
 // маршруты приложения без сервера: их открывает SPA из кэша; остальное (рецепты, подборки) — страница «нет сети»
 const APP_RE = /^\/([a-z]{2}\/)?(plan\/|me|login|event\/|cook\/|$|\?)/;
 const PLAN_RE = /^\/api\/(plans\/[^/]+(\/checks|\/extras)?|recipes\/[^/]+(\/subs|\/stats)?|me(\/plans)?|locales(\/[a-z]{2})?|meta)(\?.*)?$/;
 
+// isUpdate: на момент установки уже был активный воркер, значит это новая сборка, а не первый заход
+let isUpdate = false;
 self.addEventListener("install", (e) => {
+  isUpdate = !!self.registration.active;
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => (isUpdate ? self.clients.matchAll({ type: "window" }) : []))
+      .then((list) => {
+        // старые окна на прежнем коде: скрытые перезагружаем сами, видимым сообщаем — приложение покажет «Вышло обновление»
+        for (const c of list) {
+          if (c.visibilityState === "hidden" && typeof c.navigate === "function") c.navigate(c.url).catch(() => {});
+          else c.postMessage({ type: "update" });
+        }
+      }),
+  );
+});
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "reload") self.clients.matchAll({ type: "window" }).then((list) => list.forEach((c) => c.navigate(c.url).catch(() => {})));
 });
 
 self.addEventListener("fetch", (e) => {

@@ -1327,5 +1327,7 @@
   "mock.install": "Установить приложение",
   "mock.install.q": "Установить приложение?",
   "mock.install.ok": "Установить",
-  "mock.cancel": "Отмена"
+  "mock.cancel": "Отмена",
+  "app.version": "Версия {v}",
+  "app.reset": "Обновить"
 }

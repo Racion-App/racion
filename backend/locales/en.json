@@ -1309,5 +1309,7 @@
   "mock.install": "Install app",
   "mock.install.q": "Install app?",
   "mock.install.ok": "Install",
-  "mock.cancel": "Cancel"
+  "mock.cancel": "Cancel",
+  "app.version": "Version {v}",
+  "app.reset": "Update"
 }

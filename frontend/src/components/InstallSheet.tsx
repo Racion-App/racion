@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Bell, Download, Smartphone, WifiOff, Check } from "lucide-react";
+import { Bell, Download, RefreshCw, Smartphone, WifiOff, Check } from "lucide-react";
+import { BUILD, resetApp } from "../lib/update";
 import { InstallMock, type MockKind } from "./InstallMock";
 import { Sheet } from "./Sheet";
 import { canPrompt, dismissSuggest, installPlatform, iosMajor, isStandalone, onInstallChange, promptInstall } from "../lib/install";
@@ -95,17 +96,23 @@ export function InstallNudge() {
   );
 }
 
-// Карточка в кабинете: установлено или нет, кнопка открывает лист
+// Карточка в кабинете: установлено или нет, кнопка открывает лист; ниже версия сборки и «Обновить» —
+// сброс кэша и service worker для телефонов, где приложение застряло на старом коде
 export function InstallCard() {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(isStandalone());
+  const [busy, setBusy] = useState(false);
   useEffect(() => onInstallChange(() => setDone(isStandalone())), []);
   return (
     <div className="account__card install__card">
       <span className="install__card-icon"><Smartphone size={18} aria-hidden /></span>
       <span className="install__card-text"><b>{t("install.card")}</b><small>{done ? t("install.installed") : t("install.card.sub")}</small></span>
       {done ? <Check size={18} className="install__card-done" aria-hidden /> : <button type="button" className="btn btn-soft btn-sm" onClick={() => setOpen(true)}>{t("install.button")}</button>}
+      <span className="install__card-ver">
+        <small>{t("app.version", { v: BUILD })}</small>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => { setBusy(true); resetApp(); }}><RefreshCw size={14} aria-hidden /> {t("app.reset")}</button>
+      </span>
       <InstallSheet open={open} onClose={() => setOpen(false)} />
     </div>
   );
