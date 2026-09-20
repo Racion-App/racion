@@ -579,7 +579,8 @@ a { text-underline-offset: 3px; }
 .tile__logo { display: flex; align-items: center; height: 28px; width: 100%; }
 // В тёмной теме у логотипов с тёмно-синим текстом (Лента, Metro) — белая подложка; рисованный знак Светофора в ней не нуждается.
 // В тёмной теме логотипы идут как есть, без подложек.
-.store-logo { display: block; height: 24px; width: 96px; max-width: 100%; object-fit: contain; object-position: left center; // фиксированный бокс: плитка не прыгает, пока логотип грузится (CLS) transition: transform var(--ds-dur-base) var(--ds-ease-spring); }
+// фиксированный бокс 96×24: плитка не прыгает, пока логотип грузится (CLS)
+.store-logo { display: block; height: 24px; width: 96px; max-width: 100%; object-fit: contain; object-position: left center; transition: transform var(--ds-dur-base) var(--ds-ease-spring); }
 .store-logo--drawn { display: inline-flex; align-items: center; gap: 6px; }
 .store-logo__text { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; color: var(--ds-label-primary); }
 // Монограмма сети без свободного логотипа: квадрат в фирменном цвете, две буквы белым
