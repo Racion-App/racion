@@ -255,7 +255,8 @@ func (n *Notifications) deliver(ctx context.Context, userID string, msg domain.N
 	var last error
 	for _, s := range subs {
 		code, err := n.send(ctx, s, msg)
-		if code == http.StatusNotFound || code == http.StatusGone {
+		// 404/410 — подписки больше нет; 403 — подписка на чужие ключи VAPID (старый сервер): тоже мёртвая
+		if code == http.StatusNotFound || code == http.StatusGone || code == http.StatusForbidden {
 			_ = n.repo.Delete(ctx, s.Endpoint)
 			continue
 		}

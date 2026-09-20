@@ -27,6 +27,14 @@ export async function pushState(): Promise<PushState> {
   }
 }
 
+function sameKey(a: ArrayBuffer | null | undefined, b: Uint8Array): boolean {
+  if (!a) return false;
+  const x = new Uint8Array(a);
+  if (x.length !== b.length) return false;
+  for (let i = 0; i < x.length; i++) if (x[i] !== b[i]) return false;
+  return true;
+}
+
 function toKey(base64: string): Uint8Array {
   const pad = "=".repeat((4 - (base64.length % 4)) % 4);
   const raw = atob((base64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
@@ -40,7 +48,14 @@ export async function pushSubscribe(): Promise<PushState> {
   if (perm !== "granted") return perm === "denied" ? "denied" : "off";
   const { key } = await api.pushKey();
   const reg = await registration();
-  const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(key) as BufferSource }));
+  const wanted = toKey(key);
+  let sub = await reg.pushManager.getSubscription();
+  // подписка от другого сервера (старые ключи VAPID): push-сервис ответит 403, поэтому переподписываемся
+  if (sub && !sameKey(sub.options.applicationServerKey, wanted)) {
+    await sub.unsubscribe().catch(() => undefined);
+    sub = null;
+  }
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: wanted as BufferSource });
   const j = sub.toJSON();
   await api.pushSubscribe({ endpoint: sub.endpoint, p256dh: j.keys?.p256dh ?? "", auth: j.keys?.auth ?? "" });
   return "on";

@@ -45,8 +45,22 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
   });
 
   useEffect(() => {
-    pushState().then(setState);
-    api.notify().then((r) => { setS({ ...r.settings, tz: -new Date().getTimezoneOffset() }); setDevices(r.devices ?? 0); }).catch(() => setS(null));
+    Promise.all([pushState(), api.notify()])
+      .then(async ([st, r]) => {
+        setS({ ...r.settings, tz: -new Date().getTimezoneOffset() });
+        setDevices(r.devices ?? 0);
+        // браузер подписан, а сервер это устройство не знает (сменились ключи или сервер): переподписываемся молча
+        if (st === "on" && (r.devices ?? 0) === 0) {
+          try {
+            st = await pushSubscribe();
+            setDevices(st === "on" ? 1 : 0);
+          } catch {
+            // покажем состояние как есть
+          }
+        }
+        setState(st);
+      })
+      .catch(() => { pushState().then(setState); setS(null); });
   }, []);
 
   const save = async (next: NotifySettings) => {
@@ -70,6 +84,23 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
       onToast((e as Error).message);
     } finally {
       setBusy(false);
+    }
+  };
+
+  // проверка: если push-сервис отверг старую подписку, сервер её удалил — переподписываемся и шлём ещё раз
+  const test = async () => {
+    try {
+      await api.notifyTest();
+      onToast(t("notify.test.sent"));
+    } catch {
+      try {
+        const st = await pushSubscribe();
+        setState(st);
+        await api.notifyTest();
+        onToast(t("notify.test.sent"));
+      } catch (e) {
+        onToast((e as Error).message);
+      }
     }
   };
 
@@ -102,7 +133,7 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
             {state === "on" ? <BellOff size={16} aria-hidden /> : <Bell size={16} aria-hidden />} {state === "on" ? t("notify.disable") : t("notify.enable")}
           </button>
           {state === "on" && (
-            <button type="button" className="btn btn-ghost" onClick={() => api.notifyTest().then(() => onToast(t("notify.test.sent"))).catch((e: Error) => onToast(e.message))}>
+            <button type="button" className="btn btn-ghost" onClick={test}>
               {t("notify.test")}
             </button>
           )}
