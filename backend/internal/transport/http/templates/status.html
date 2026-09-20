@@ -1,0 +1,44 @@
+{{template "head" .}}
+<article class="status">
+  <nav class="crumbs" aria-label="{{t .L "crumbs"}}"><a href="/">{{t .L "page.brand"}}</a><span aria-hidden="true">›</span><span>{{.Title}}</span></nav>
+
+  <section class="status__hero {{if .AllOK}}is-ok{{else}}is-bad{{end}}" aria-live="polite">
+    <span class="status__dot" aria-hidden="true"></span>
+    <div>
+      <h1>{{if .AllOK}}{{t .L "status.allok"}}{{else}}{{t .L "status.problem"}}{{end}}</h1>
+      <p>{{t .L "status.checked" .Checked}} · {{t .L "status.every"}}</p>
+    </div>
+  </section>
+
+  <section class="status__stats" aria-label="{{t .L "status.stats"}}">
+    <div class="status__stat"><b class="num">{{.Uptime30}}</b><small>{{t .L "status.uptime30"}}</small></div>
+    <div class="status__stat"><b class="num">{{.AvgMs}} <span>ms</span></b><small>{{t .L "status.avg"}}</small></div>
+    <div class="status__stat"><b>{{.Since}}</b><small>{{t .L "status.since"}}</small></div>
+    <div class="status__stat"><b class="num">{{.Recipes}}</b><small>{{t .L "status.recipes"}}</small></div>
+  </section>
+
+  <h2 class="status__h">{{t .L "status.components"}}</h2>
+  <ul class="status__list">
+    {{range .Comps}}
+    <li class="status__item {{if .OK}}is-ok{{else}}is-bad{{end}}">
+      <div class="status__row">
+        <span class="status__dot status__dot--sm" aria-hidden="true"></span>
+        <span class="status__name"><b>{{.Name}}</b><small>{{.Desc}}</small></span>
+        <span class="status__val">
+          {{if .OK}}{{t $.L "status.ok"}}{{else}}{{t $.L "status.down"}}{{end}}
+          {{if and .OK (not .Static)}}<small class="num">{{.Ms}} ms</small>{{end}}
+        </span>
+      </div>
+      {{if .Days}}
+      <div class="status__days" role="img" aria-label="{{t $.L "status.days30"}}: {{.Uptime}}">
+        {{range .Days}}<i class="is-{{.Class}}" title="{{.Title}}"></i>{{end}}
+      </div>
+      <div class="status__legend"><span>{{t $.L "status.days.ago"}}</span><span class="num">{{.Uptime}}</span><span>{{t $.L "status.today"}}</span></div>
+      {{end}}
+    </li>
+    {{end}}
+  </ul>
+
+  <p class="status__foot">{{t .L "status.foot"}} <a href="/api/status">/api/status</a> · <a href="mailto:info@racion.app">info@racion.app</a></p>
+</article>
+{{template "foot" .}}

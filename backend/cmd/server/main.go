@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"os/signal"
 	"racion/internal/mail"
@@ -158,7 +159,8 @@ func main() {
 		log.Warn("partners seed", zap.Error(err))
 	}
 	// Фото в S3/MinIO: без S3_ENDPOINT загрузка выключена, всё остальное работает
-	if mediaStore, err := media.New(media.Config{Endpoint: cfg.S3Endpoint, AccessKey: cfg.S3AccessKey, SecretKey: cfg.S3SecretKey, Bucket: cfg.S3Bucket, Secure: cfg.S3Secure, PublicURL: cfg.S3PublicURL}); err != nil {
+	mediaStore, err := media.New(media.Config{Endpoint: cfg.S3Endpoint, AccessKey: cfg.S3AccessKey, SecretKey: cfg.S3SecretKey, Bucket: cfg.S3Bucket, Secure: cfg.S3Secure, PublicURL: cfg.S3PublicURL})
+	if err != nil {
 		log.Warn("media", zap.Error(err))
 	} else if mediaStore != nil {
 		if err := mediaStore.Init(ctx); err != nil {
@@ -198,11 +200,24 @@ func main() {
 		}
 	})
 
+	// монитор для /status: база и почта каждую минуту, хранилище фото — если включено
+	monitor := service.NewHealth(postgres.NewHealth(pool), log.Named("health"))
+	monitor.AddCheck(service.Check{Key: "db", Fn: store.Ping})
+	if mediaStore != nil && services.Media != nil {
+		monitor.AddCheck(service.Check{Key: "storage", Fn: mediaStore.Ping})
+	}
+	if cfg.MailHost != "" {
+		monitor.AddCheck(service.Check{Key: "mail", Fn: service.TCPCheck(net.JoinHostPort(cfg.MailHost, cfg.MailPort)), Every: 5 * time.Minute})
+	}
+	monitor.AddStatic("push", services.Notify.PublicKey() != "", "")
+	monitor.AddStatic("search", services.IndexNow != nil && services.IndexNow.Key(ctx) != "", "")
+	go monitor.Run(ctx)
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
 		Handler: transport.New(transport.Deps{
 			Services: services, Log: log.Named("http"), Geo: geoResolver,
 			Health:  func() error { return store.Ping(context.Background()) },
+			Monitor: monitor,
 			BaseURL: cfg.BaseURL,
 			Metrika: cfg.MetrikaID, Contact: cfg.LegalEmail, Images: cfg.ImagesDir,
 			Logs: ring,

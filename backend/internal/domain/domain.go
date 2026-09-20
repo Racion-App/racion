@@ -62,19 +62,19 @@ type PlanRecord struct {
 }
 
 type PlanSummary struct {
-	ID        string          `json:"id"`
-	Title     string          `json:"title"`
-	StartDate string          `json:"startDate"`
-	Store     string          `json:"store"`
-	Cost      float64         `json:"cost"`
-	Country   planner.Country `json:"country"`
-	Portions  float64         `json:"portions"`
-	CreatedAt string          `json:"createdAt"`
-	Checked   int             `json:"checked"`
-	Items     int             `json:"items"`
-	Shared    bool            `json:"shared"` // чужой план, к которому присоединились
+	ID        string                `json:"id"`
+	Title     string                `json:"title"`
+	StartDate string                `json:"startDate"`
+	Store     string                `json:"store"`
+	Cost      float64               `json:"cost"`
+	Country   planner.Country       `json:"country"`
+	Portions  float64               `json:"portions"`
+	CreatedAt string                `json:"createdAt"`
+	Checked   int                   `json:"checked"`
+	Items     int                   `json:"items"`
+	Shared    bool                  `json:"shared"`             // чужой план, к которому присоединились
 	Occasion  *planner.OccasionInfo `json:"occasion,omitempty"` // праздник вместо недели: в истории подписываем событием и датой
-	Date      string          `json:"date,omitempty"`     // день праздника
+	Date      string                `json:"date,omitempty"`     // день праздника
 }
 
 // CheckInput — отметка «куплено» по позиции списка.
@@ -211,7 +211,7 @@ type PlanReminderInfo struct {
 	StartDate string
 	Items     int
 	Checked   int
-	PrepDays  []PrepDayInfo // режим заготовок: дни готовки
+	PrepDays  []PrepDayInfo       // режим заготовок: дни готовки
 	Dishes    map[string][]string // дата → названия блюд
 	Dinner    map[string]DishRef  // дата → ужин (для вопроса «как было?»)
 }
@@ -264,20 +264,20 @@ type CatalogRecipeInput struct {
 
 // Collection — папка рецептов пользователя.
 type Collection struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Recipes      []string          `json:"recipes"`
-	CreatedAt    string            `json:"createdAt"`
-	Public       bool              `json:"public"`
-	Curated      bool              `json:"curated"` // редакционная: видна в каталоге
-	Slug         string            `json:"slug,omitempty"`
-	Description  string            `json:"description"`
-	Cover        string            `json:"cover"`
-	CoverAuto    string            `json:"coverAuto,omitempty"`    // обложка по умолчанию: фото первого рецепта
-	Names        map[string]string `json:"names,omitempty"`        // переводы названия по языкам (редакционные)
-	Descriptions map[string]string `json:"descriptions,omitempty"` // переводы описания
-	Author       string            `json:"author,omitempty"`       // ник владельца для публичной страницы
-	SEO          map[string]CollectionText `json:"seo,omitempty"`  // редакционный текст по языкам
+	ID           string                    `json:"id"`
+	Name         string                    `json:"name"`
+	Recipes      []string                  `json:"recipes"`
+	CreatedAt    string                    `json:"createdAt"`
+	Public       bool                      `json:"public"`
+	Curated      bool                      `json:"curated"` // редакционная: видна в каталоге
+	Slug         string                    `json:"slug,omitempty"`
+	Description  string                    `json:"description"`
+	Cover        string                    `json:"cover"`
+	CoverAuto    string                    `json:"coverAuto,omitempty"`    // обложка по умолчанию: фото первого рецепта
+	Names        map[string]string         `json:"names,omitempty"`        // переводы названия по языкам (редакционные)
+	Descriptions map[string]string         `json:"descriptions,omitempty"` // переводы описания
+	Author       string                    `json:"author,omitempty"`       // ник владельца для публичной страницы
+	SEO          map[string]CollectionText `json:"seo,omitempty"`          // редакционный текст по языкам
 }
 
 // CollectionText — текст страницы подборки: вступление (абзацы), как пользоваться (абзацы), вопросы-ответы.
@@ -406,4 +406,12 @@ type TranslationStatus struct {
 	Enabled   bool          `json:"enabled"`
 	Items     []Translation `json:"items"`
 	Providers []string      `json:"providers"` // доступные сейчас provider/model
+}
+
+// HealthDay — доля удачных проверок компонента за день (страница /status)
+type HealthDay struct {
+	Component string
+	Day       time.Time
+	Total     int
+	OK        int
 }

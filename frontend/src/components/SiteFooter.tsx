@@ -40,6 +40,7 @@ export function SiteFooter() {
           <p>{t("page.foot")}</p>
           <a href={`${p}/terms`}>{t("legal.terms")}</a>
           <a href={`${p}/privacy`}>{t("legal.privacy")}</a>
+          <a href={`${p}/status`}>{t("status.title")}</a>
           <LangButton footer />
         </div>
       </nav>

@@ -66,6 +66,21 @@ func New(cfg Config) (*Store, error) {
 
 func (s *Store) Enabled() bool { return s != nil }
 
+// Ping — хранилище отвечает и бакет на месте (для страницы /status)
+func (s *Store) Ping(ctx context.Context) error {
+	if s == nil {
+		return nil
+	}
+	ok, err := s.cl.BucketExists(ctx, s.bucket)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("bucket %s missing", s.bucket)
+	}
+	return nil
+}
+
 // Init создаёт бакет и открывает чтение всем: ссылки на фото публичные, как и страницы рецептов.
 func (s *Store) Init(ctx context.Context) error {
 	if s == nil {
