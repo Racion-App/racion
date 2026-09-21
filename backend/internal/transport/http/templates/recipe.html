@@ -9,7 +9,7 @@
     <h1 class="rpage__title">{{.Title}}</h1>
     {{if .Description}}<p class="rpage__lead">{{.Description}}</p>{{end}}
     <dl class="rpage__facts">
-      <div><dt>{{t .L "recipe.cook"}}</dt><dd class="num">{{t .L "recipe.min" .R.TimeMin}}</dd></div>
+      <div><dt>{{t .L "recipe.cook"}}</dt><dd class="num">{{minutes .L .R.TimeMin}}</dd></div>
       <div><dt>{{t .L "recipe.portion"}}</dt><dd class="num">{{t .L "recipe.kcal" (kcal .Kcal)}}</dd></div>
       {{if .Priced}}<div><dt>{{t .L "recipe.products"}}</dt><dd class="num is-rub">≈ {{money .Country .Cost}}</dd></div>{{end}}
       <div><dt>{{t .L "recipe.protein"}}</dt><dd class="num">{{t .L "recipe.g" (kcal .Protein)}}</dd></div>

@@ -49,6 +49,7 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"add":      func(a, b int) int { return a + b },
 	"sub":      func(a, b int) int { return a - b },
 	"plural":   func(l i18n.Lang, n int, key string) string { return i18n.Plural(l, n, key) },
+	"minutes":  func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
 	"langMeta": func(l i18n.Lang) locales.Meta { return i18n.Meta(l) },
 }).ParseFS(templateFS, "templates/*.html"))
 
@@ -225,7 +226,7 @@ func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
 		ID: r.ID, Title: tx.Title, Slot: r.Slot, Slot_: planner.SlotLabel(pl.L, r.Slot), TimeMin: r.TimeMin,
 		Kcal: kcal, Cost: cost, Image: r.Image, Tags: r.Tags, Kid: hasTag(r, "kidmenu"), Desc: tx.Description,
 		Href:      pl.P + "/recipe/" + r.ID,
-		TimeLabel: i18n.T(pl.L, "recipe.min", r.TimeMin),
+		TimeLabel: i18n.Minutes(pl.L, r.TimeMin),
 		KcalLabel: i18n.T(pl.L, "recipe.kcal", strconv.Itoa(int(math.Round(kcal)))),
 	}
 	if priced && cost > 0 {

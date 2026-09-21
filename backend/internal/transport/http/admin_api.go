@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"sort"
@@ -8,6 +9,7 @@ import (
 
 	"racion/internal/domain"
 	"racion/internal/i18n"
+	"racion/internal/media"
 	"racion/internal/planner"
 	"racion/internal/service"
 )
@@ -48,10 +50,11 @@ func (s *Server) adminRecipeSchema(w http.ResponseWriter, r *http.Request) {
 			"batch":       "true, если блюдо удобно готовить на два дня",
 			"keep":        "режим заготовок: сколько дней готовое блюдо стоит в холодильнике (0 — есть свежим); без поля — по правилам",
 			"freeze":      "true, если готовое блюдо можно заморозить",
-			"image":       "оставить пустым — фото делаем сами",
+			"image":       "пусто — фото сделаем сами; иначе https-ссылка на картинку или data:image/…;base64 — сервер скачает и пережмёт в WebP (до 12 МБ). Файлом: POST /api/admin/recipes/{id}/photo, multipart-поле file",
 			"kcal":        "считается сервером по продуктам; ужин должен давать 500–800 ккал на порцию, обед 500–800, завтрак 350–550, перекус 150–300",
 		},
-		"batchEndpoint": "POST /api/admin/recipes/batch — массив рецептов, ответ построчно {id, ok, error}",
+		"batchEndpoint": "POST /api/admin/recipes/batch — массив рецептов, ответ построчно {id, ok, kcal, image, warn, error}",
+		"photoEndpoint": "POST /api/admin/recipes/{id}/photo — multipart-поле file (jpeg/png/webp до 12 МБ), ответ {id, image}",
 	})
 }
 
@@ -92,7 +95,7 @@ func (s *Server) adminSaveRecipesBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var in []domain.CatalogRecipeInput
-	if !decode(w, r, 4<<20, &in) {
+	if !decode(w, r, 64<<20, &in) { // фото могут прийти как data-URI
 		return
 	}
 	if len(in) == 0 || len(in) > 50 {
@@ -104,11 +107,15 @@ func (s *Server) adminSaveRecipesBatch(w http.ResponseWriter, r *http.Request) {
 		ID    string  `json:"id"`
 		OK    bool    `json:"ok"`
 		Kcal  float64 `json:"kcal,omitempty"`
+		Image string  `json:"image,omitempty"`
+		Warn  string  `json:"warn,omitempty"`
 		Error string  `json:"error,omitempty"`
 	}
 	out := make([]res, 0, len(in))
 	okN := 0
+	u := currentUser(r)
 	for _, rc := range in {
+		warn := s.importRecipeImage(r.Context(), u, &rc)
 		saved, err := s.svc.CatalogAdmin.Save(r.Context(), rc)
 		if err == nil {
 			s.notifySearch("/recipe/" + saved.ID)
@@ -124,9 +131,61 @@ func (s *Server) adminSaveRecipesBatch(w http.ResponseWriter, r *http.Request) {
 		}
 		okN++
 		kcal, _, _, _ := s.svc.Catalog.Base().Nutrition(saved)
-		out = append(out, res{ID: saved.ID, OK: true, Kcal: kcal})
+		out = append(out, res{ID: saved.ID, OK: true, Kcal: kcal, Image: saved.Image, Warn: warn})
 	}
 	writeJSON(w, 200, map[string]any{"ok": okN, "failed": len(in) - okN, "items": out})
+}
+
+// importRecipeImage — поле image в запросе может быть ссылкой на чужой сайт или data-URI: сервер скачивает,
+// пережимает и подставляет адрес нашего хранилища. Если не вышло, рецепт сохраняется без фото, а причина
+// уходит в warn — терять рецепт из-за картинки не надо.
+func (s *Server) importRecipeImage(ctx context.Context, u *domain.User, rc *domain.CatalogRecipeInput) string {
+	src := strings.TrimSpace(rc.Image)
+	if src == "" || strings.HasPrefix(src, "/") || s.svc.Media.Owns(src) {
+		return ""
+	}
+	if !s.svc.Media.Enabled() {
+		rc.Image = ""
+		return "photo storage is off"
+	}
+	p, err := s.svc.Media.Import(ctx, u.ID, "recipe", src)
+	if err != nil {
+		rc.Image = ""
+		var ve *domain.ValidationError
+		if errors.As(err, &ve) {
+			return "photo: " + i18n.T(i18n.EN, ve.Key)
+		}
+		return "photo: " + err.Error()
+	}
+	rc.Image = p.URL
+	return ""
+}
+
+// adminRecipePhoto — файл фото для существующего рецепта базы: multipart-поле file → {id, image}.
+func (s *Server) adminRecipePhoto(w http.ResponseWriter, r *http.Request) {
+	u := s.requirePerm(w, r, service.PermRecipes)
+	if u == nil {
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, media.MaxUpload+64<<10)
+	f, _, err := r.FormFile("file")
+	if err != nil {
+		writeErr(w, 400, i18n.T(i18n.FromRequest(r), "photo.bad"))
+		return
+	}
+	defer f.Close()
+	p, err := s.svc.Media.Upload(r.Context(), u.ID, "recipe", f)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	rc, err := s.svc.CatalogAdmin.SetImage(r.Context(), r.PathValue("id"), p.URL)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	s.notifySearch("/recipe/" + rc.ID)
+	writeJSON(w, 200, map[string]string{"id": rc.ID, "image": rc.Image})
 }
 
 // --- ключи API (только для тех, кто может править каталог)

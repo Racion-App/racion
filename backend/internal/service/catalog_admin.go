@@ -88,6 +88,19 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 	return rc, nil
 }
 
+// SetImage — фото у существующего рецепта базы; остальные поля не трогаются.
+func (a *CatalogAdmin) SetImage(ctx context.Context, id, url string) (planner.Recipe, error) {
+	rc, ok := a.catalog.Load().RecipeByID[id]
+	if !ok {
+		return planner.Recipe{}, domain.ErrNotFound
+	}
+	rc.Image = url
+	if err := a.repo.Save(ctx, rc, false); err != nil {
+		return rc, err
+	}
+	return rc, a.reload(ctx)
+}
+
 func (a *CatalogAdmin) Delete(ctx context.Context, id string) error {
 	if _, ok := a.catalog.Load().RecipeByID[id]; !ok {
 		return domain.ErrNotFound

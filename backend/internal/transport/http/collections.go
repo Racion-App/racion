@@ -222,7 +222,11 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		if maxC > 0 {
 			facts = append(facts, fact{rangeLabel(formatMoney(pl.Country, minC), formatMoney(pl.Country, maxC)), i18n.T(pl.L, "coll.fact.cost")})
 		}
-		facts = append(facts, fact{rangeLabel(strconv.Itoa(minT), strconv.Itoa(maxT)) + " " + i18n.T(pl.L, "min"), i18n.T(pl.L, "coll.fact.time")})
+		timeRange := rangeLabel(strconv.Itoa(minT), strconv.Itoa(maxT)) + " " + i18n.T(pl.L, "min")
+		if maxT >= 60 {
+			timeRange = i18n.Minutes(pl.L, minT) + " – " + i18n.Minutes(pl.L, maxT)
+		}
+		facts = append(facts, fact{timeRange, i18n.T(pl.L, "coll.fact.time")})
 		facts = append(facts, fact{rangeLabel(strconv.Itoa(int(minK)), strconv.Itoa(int(maxK))), i18n.T(pl.L, "coll.fact.kcal")})
 	}
 	// готовые меню: блюда по id из подборки, итоги на человека — сумма цены и калорий порций, время как сумма
@@ -255,7 +259,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		if cost > 0 {
 			mv.Money = formatMoney(pl.Country, cost)
 		}
-		mv.Time = strconv.Itoa(mins) + " " + i18n.T(pl.L, "min")
+		mv.Time = i18n.Minutes(pl.L, mins)
 		mv.Kcal = strconv.Itoa(int(kcal))
 		menus = append(menus, mv)
 	}

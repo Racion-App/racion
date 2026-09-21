@@ -22,7 +22,7 @@ const PROMPT = (key: string) => `Ты добавляешь рецепты в б�
 4. POST /api/admin/recipes/batch с массивом до 50 рецептов. В ответе построчно {id, ok, kcal, error}. Ошибки исправь и отправь только неудавшиеся.
 5. В конце дай мне таблицу: id, название, ккал, статус.
 
-Поле image не заполняй. Тексты — на русском, переводы сделает сервер.
+Поле image: пусто, если фото нет; если у тебя есть картинка блюда — https-ссылка на неё или data:image/…;base64, сервер скачает и пережмёт сам. Файл для уже добавленного рецепта: POST /api/admin/recipes/{id}/photo, multipart-поле file. Тексты — на русском, переводы сделает сервер.
 
 Вот блюда, которые нужно добавить:
 - …`;
@@ -33,7 +33,8 @@ const ENDPOINTS: [string, string, string][] = [
   ["GET", "/api/admin/recipes?q=", "поиск по каталогу, до 40"],
   ["GET", "/api/admin/recipes/{id}", "рецепт целиком"],
   ["POST", "/api/admin/recipes", "один рецепт: создать (свой id или пустой) или обновить"],
-  ["POST", "/api/admin/recipes/batch", "массив до 50; ответ {ok, failed, items:[{id, ok, kcal, error}]}"],
+  ["POST", "/api/admin/recipes/batch", "массив до 50; ответ {ok, failed, items:[{id, ok, kcal, image, warn, error}]}"],
+  ["POST", "/api/admin/recipes/{id}/photo", "фото файлом: multipart-поле file (jpeg/png/webp до 12 МБ) → {id, image}"],
   ["DELETE", "/api/admin/recipes/{id}", "удалить"],
   ["GET / POST / DELETE", "/api/admin/collections[/{id}]", "редакционные подборки: name, slug, description, public, recipes[], names{}, descriptions{}"],
   ["GET / POST / DELETE", "/api/admin/partners[/{code}]", "партнёрские магазины"],
@@ -47,7 +48,7 @@ const EXAMPLE = `{
   "equipment": ["oven"], "tags": ["meat", "protein"],
   "steps": ["Духовку разогреть до 200 °C.", "Смешать мёд, горчицу, чеснок, соль и перец; обмазать бёдра.", "Запекать 35–40 минут до 74 °C внутри."],
   "ingredients": [{ "ingredientId": "chicken_thigh", "amount": 220 }, { "ingredientId": "honey", "amount": 10 }, { "ingredientId": "rice", "amount": 70 }],
-  "image": ""
+  "image": "https://example.com/photo.jpg"
 }`;
 
 export function AdminApi({ onToast }: { onToast: (s: string) => void }) {
@@ -154,7 +155,7 @@ export function AdminApi({ onToast }: { onToast: (s: string) => void }) {
         <h2 className="admin__h2">Рецепт</h2>
         <p className="admin__hint">Название 2–80 знаков, подводка до 300, время 1–600 минут, 1–20 шагов до 500 знаков, 1–30 продуктов с amount на одну порцию. Ккал считает сервер — гарнир входит в состав, иначе ужин выйдет на 300 ккал.</p>
         <pre className="apidoc__pre">{EXAMPLE}</pre>
-        <p className="admin__hint">Фото у новых рецептов нет — генерируем пакетом из репозитория ops. Переводы: <code>go run ./cmd/racionai recipes -to en,de,… -only id1,id2</code>. Добавленное через API живёт в базе сервера и деплоем не перетирается.</p>
+        <p className="admin__hint">Фото: в поле <code>image</code> можно передать ссылку или base64, сервер скачает и пережмёт в WebP; файлом — <code>POST /api/admin/recipes/{"{id}"}/photo</code>. Без фото рецепт сохранится, картинку сгенерируем пакетом из репозитория ops. Переводы: <code>go run ./cmd/racionai recipes -to en,de,… -only id1,id2</code>. Добавленное через API живёт в базе сервера и деплоем не перетирается.</p>
       </div>
     </section>
   );

@@ -1,9 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
+	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -70,4 +75,43 @@ func (m *Media) allow(userID string) bool {
 	}
 	m.usage[userID] = append(keep, now)
 	return true
+}
+
+// Import — фото по ссылке или data-URI (для API: скрипт отдаёт адрес картинки или base64, сервер сам
+// скачивает и пережимает). Ссылки в наше хранилище возвращаются как есть.
+func (m *Media) Import(ctx context.Context, userID, kind, src string) (media.Photo, error) {
+	src = strings.TrimSpace(src)
+	if m.Owns(src) {
+		return media.Photo{URL: src}, nil
+	}
+	if strings.HasPrefix(src, "data:") {
+		comma := strings.IndexByte(src, ',')
+		if comma < 0 {
+			return media.Photo{}, domain.Invalid("photo.bad")
+		}
+		raw, err := base64.StdEncoding.DecodeString(src[comma+1:])
+		if err != nil {
+			return media.Photo{}, domain.Invalid("photo.bad")
+		}
+		return m.Upload(ctx, userID, kind, bytes.NewReader(raw))
+	}
+	if !strings.HasPrefix(src, "http://") && !strings.HasPrefix(src, "https://") {
+		return media.Photo{}, domain.Invalid("photo.bad")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 25*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, src, nil)
+	if err != nil {
+		return media.Photo{}, domain.Invalid("photo.bad")
+	}
+	req.Header.Set("User-Agent", "Racion/1.0 (+https://racion.app)")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return media.Photo{}, fmt.Errorf("photo fetch: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return media.Photo{}, fmt.Errorf("photo fetch: http %d", resp.StatusCode)
+	}
+	return m.Upload(ctx, userID, kind, io.LimitReader(resp.Body, media.MaxUpload+1))
 }

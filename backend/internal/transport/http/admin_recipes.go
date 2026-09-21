@@ -42,7 +42,11 @@ func (s *Server) adminSaveRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var in domain.CatalogRecipeInput
-	if !decode(w, r, 128<<10, &in) {
+	if !decode(w, r, 16<<20, &in) { // с data-URI фото запрос большой
+		return
+	}
+	if warn := s.importRecipeImage(r.Context(), currentUser(r), &in); warn != "" {
+		writeErr(w, 400, warn)
 		return
 	}
 	rc, err := s.svc.CatalogAdmin.Save(r.Context(), in)

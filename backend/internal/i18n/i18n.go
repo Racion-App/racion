@@ -129,6 +129,18 @@ func fmtArg(v any) string {
 	return fmt.Sprint(v)
 }
 
+// Minutes — длительность как в приложении: «40 мин», «2 ч», «2 ч 30 мин».
+func Minutes(l Lang, m int) string {
+	if m < 60 {
+		return T(l, "recipe.min", m)
+	}
+	h, r := m/60, m%60
+	if r == 0 {
+		return T(l, "hours", h)
+	}
+	return T(l, "hoursMin", h, r)
+}
+
 // PluralForm — one | few | many по правилу языка.
 func PluralForm(l Lang, n int) string {
 	switch Meta(l).Plural {
