@@ -1336,5 +1336,10 @@
   "why.wanted": "vous avez demandé : {0}",
   "auth.via": "Ou continuer avec",
   "auth.via.one": "Continuer avec {name}",
-  "auth.oauth.error": "La connexion via ce service a échoué. Réessayez ou utilisez votre e-mail."
+  "auth.oauth.error": "La connexion via ce service a échoué. Réessayez ou utilisez votre e-mail.",
+  "admin.recipe.hidden": "masqué",
+  "admin.recipe.publish": "Publier",
+  "admin.recipe.hide": "Masquer",
+  "admin.recipe.published": "Recette publiée",
+  "admin.recipe.hidden.done": "Recette masquée"
 }

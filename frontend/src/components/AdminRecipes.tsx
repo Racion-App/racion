@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Plus, Search, Sparkles, Trash2, Undo2, X } from "lucide-react";
+import { Eye, EyeOff, Plus, Search, Sparkles, Trash2, Undo2, X } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 import { api, ApiError } from "../lib/api";
 import type { AdminRecipe, CatalogRecipeInput, IngredientRef, Labeled } from "../lib/types";
@@ -79,14 +79,31 @@ export function AdminRecipes({ equipment, photos, ai, onToast, editId, onOpen, o
             media={r.image ? <img className="alist__thumb" src={r.image} alt="" loading="lazy" /> : <span className={"alist__thumb alist__thumb--" + r.slot} aria-hidden />}
             title={r.title}
             meta={`${slotLabel(lang, r.slot)} · ${r.timeMin} ${t("min")} · ${r.ingredients.length} ${t("admin.recipe.ings")} · ${r.steps.length} ${t("admin.recipe.steps")}${r.batch ? ` · ${t("admin.recipe.batch.short")}` : ""}`}
-            tags={r.tags.length > 0 && r.tags.map((tg) => <span key={tg} className="tagchip">{tg}</span>)}
+            tags={(r.hidden || r.tags.length > 0) && <>{r.hidden && <span className="tagchip tagchip--warn">{t("admin.recipe.hidden")}</span>}{r.tags.map((tg) => <span key={tg} className="tagchip">{tg}</span>)}</>}
             onClick={() => onOpen(r.id)}
             right={
               <a className="alist__id" href={`/recipe/${encodeURIComponent(r.id)}`} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>
                 {r.id}
               </a>
             }
-            actions={
+            actions={<>
+              <button
+                type="button"
+                className="planrow__del"
+                aria-label={r.hidden ? t("admin.recipe.publish") : t("admin.recipe.hide")}
+                title={r.hidden ? t("admin.recipe.publish") : t("admin.recipe.hide")}
+                onClick={async () => {
+                  try {
+                    await api.adminPublishRecipe(r.id, !!r.hidden);
+                    onToast(r.hidden ? t("admin.recipe.published") : t("admin.recipe.hidden.done"));
+                    void load(q);
+                  } catch (e) {
+                    onToast((e as Error).message);
+                  }
+                }}
+              >
+                {r.hidden ? <Eye size={16} aria-hidden /> : <EyeOff size={16} aria-hidden />}
+              </button>
               <button
                 type="button"
                 className="planrow__del"
@@ -104,7 +121,7 @@ export function AdminRecipes({ equipment, photos, ai, onToast, editId, onOpen, o
               >
                 <Trash2 size={16} aria-hidden />
               </button>
-            }
+            </>}
           />
         ))}
       </AList>

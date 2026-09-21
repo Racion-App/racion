@@ -245,6 +245,9 @@ func (c *Catalog) effective(p Params) effective {
 
 // allowed — проходит ли рецепт фильтры пользователя.
 func (c *Catalog) allowed(r Recipe, e effective) bool {
+	if r.Hidden {
+		return false
+	}
 	for _, eq := range r.Equipment {
 		if !hasEquipment(e.Equipment, eq) {
 			return false

@@ -1336,5 +1336,10 @@
   "why.wanted": "u vroeg om {0}",
   "auth.via": "Of ga verder met",
   "auth.via.one": "Ga verder met {name}",
-  "auth.oauth.error": "Inloggen via die dienst is mislukt. Probeer opnieuw of gebruik je e-mail."
+  "auth.oauth.error": "Inloggen via die dienst is mislukt. Probeer opnieuw of gebruik je e-mail.",
+  "admin.recipe.hidden": "verborgen",
+  "admin.recipe.publish": "Publiceren",
+  "admin.recipe.hide": "Verbergen",
+  "admin.recipe.published": "Recept gepubliceerd",
+  "admin.recipe.hidden.done": "Recept verborgen"
 }

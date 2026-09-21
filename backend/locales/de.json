@@ -1368,5 +1368,10 @@
   "status.foot": "Dieselben Daten als JSON:",
   "auth.via": "Oder anmelden mit",
   "auth.via.one": "Anmelden mit {name}",
-  "auth.oauth.error": "Die Anmeldung über den Dienst hat nicht geklappt. Versuchen Sie es erneut oder nutzen Sie die E-Mail."
+  "auth.oauth.error": "Die Anmeldung über den Dienst hat nicht geklappt. Versuchen Sie es erneut oder nutzen Sie die E-Mail.",
+  "admin.recipe.hidden": "verborgen",
+  "admin.recipe.publish": "Veröffentlichen",
+  "admin.recipe.hide": "Verbergen",
+  "admin.recipe.published": "Rezept veröffentlicht",
+  "admin.recipe.hidden.done": "Rezept verborgen"
 }

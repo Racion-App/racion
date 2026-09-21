@@ -1337,5 +1337,10 @@
   "why.wanted": "conforme você pediu: {0}",
   "auth.via": "Ou continuar com",
   "auth.via.one": "Continuar com {name}",
-  "auth.oauth.error": "Não foi possível entrar com esse serviço. Tente de novo ou use o e-mail."
+  "auth.oauth.error": "Não foi possível entrar com esse serviço. Tente de novo ou use o e-mail.",
+  "admin.recipe.hidden": "oculto",
+  "admin.recipe.publish": "Publicar",
+  "admin.recipe.hide": "Ocultar",
+  "admin.recipe.published": "Receita publicada",
+  "admin.recipe.hidden.done": "Receita oculta"
 }

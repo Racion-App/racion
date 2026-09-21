@@ -260,6 +260,7 @@ type CatalogRecipeInput struct {
 	Steps       []string                   `json:"steps"`
 	Ingredients []planner.RecipeIngredient `json:"ingredients"`
 	Image       string                     `json:"image"`
+	Hidden      *bool                      `json:"hidden,omitempty"` // nil — не менять (новый через API: скрыт, из формы админки: виден)
 }
 
 // Collection — папка рецептов пользователя.

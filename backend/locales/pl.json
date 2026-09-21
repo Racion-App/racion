@@ -1350,5 +1350,10 @@
   "why.wanted": "według twoich życzeń: {0}",
   "auth.via": "Albo zaloguj się przez",
   "auth.via.one": "Zaloguj się przez {name}",
-  "auth.oauth.error": "Logowanie przez tę usługę nie powiodło się. Spróbuj ponownie albo użyj e-maila."
+  "auth.oauth.error": "Logowanie przez tę usługę nie powiodło się. Spróbuj ponownie albo użyj e-maila.",
+  "admin.recipe.hidden": "ukryty",
+  "admin.recipe.publish": "Opublikuj",
+  "admin.recipe.hide": "Ukryj",
+  "admin.recipe.published": "Przepis opublikowany",
+  "admin.recipe.hidden.done": "Przepis ukryty"
 }

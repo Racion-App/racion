@@ -274,6 +274,9 @@ func (f ActiveFilters) Has(param, id string) bool {
 
 // Matches — проходит ли рецепт все активные фильтры.
 func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Country) bool {
+	if r.Hidden {
+		return false
+	}
 	if v := f["slot"]; len(v) > 0 && r.Slot != v[0] {
 		return false
 	}

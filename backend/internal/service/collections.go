@@ -150,7 +150,7 @@ func (c *Collections) BySlug(ctx context.Context, slug string) (domain.Collectio
 	col = c.withCovers(ctx, []domain.Collection{col})[0]
 	out := make([]planner.Recipe, 0, len(col.Recipes))
 	for _, rid := range col.Recipes {
-		if rc, err := c.recipes.Find(ctx, rid); err == nil && (!rc.Own || rc.Status == StatusApproved) {
+		if rc, err := c.recipes.Find(ctx, rid); err == nil && !rc.Hidden && (!rc.Own || rc.Status == StatusApproved) {
 			out = append(out, rc)
 		}
 	}

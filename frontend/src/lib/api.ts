@@ -51,6 +51,7 @@ export const api = {
   adminRecipe: (id: string) => request<AdminRecipe>(`/api/admin/recipes/${encodeURIComponent(id)}`),
   adminSaveRecipe: (body: CatalogRecipeInput) => request<AdminRecipe>("/api/admin/recipes", { method: "POST", body: JSON.stringify(body) }),
   adminDeleteRecipe: (id: string) => request<void>(`/api/admin/recipes/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  adminPublishRecipe: (id: string, publish: boolean) => request<{ id: string; hidden: boolean }>(`/api/admin/recipes/${encodeURIComponent(id)}/publish`, { method: publish ? "POST" : "DELETE" }),
   adminModeration: () => request<{ queue: ModerationItem[]; recent: ModerationItem[] }>("/api/admin/moderation"),
   adminDecide: (id: string, approve: boolean, note: string) => request<void>(`/api/admin/moderation/${encodeURIComponent(id)}`, { method: "POST", body: JSON.stringify({ approve, note }) }),
   adminSetRole: (id: string, role: string) => request<void>(`/api/admin/users/${encodeURIComponent(id)}/role`, { method: "PUT", body: JSON.stringify({ role }) }),

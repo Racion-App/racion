@@ -1336,5 +1336,10 @@
   "why.wanted": "istediğiniz gibi: {0}",
   "auth.via": "Ya da şununla devam et",
   "auth.via.one": "{name} ile devam et",
-  "auth.oauth.error": "Bu servisle giriş yapılamadı. Tekrar deneyin ya da e-posta kullanın."
+  "auth.oauth.error": "Bu servisle giriş yapılamadı. Tekrar deneyin ya da e-posta kullanın.",
+  "admin.recipe.hidden": "gizli",
+  "admin.recipe.publish": "Yayınla",
+  "admin.recipe.hide": "Gizle",
+  "admin.recipe.published": "Tarif yayınlandı",
+  "admin.recipe.hidden.done": "Tarif gizlendi"
 }

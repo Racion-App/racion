@@ -50,6 +50,7 @@ func (s *Server) adminRecipeSchema(w http.ResponseWriter, r *http.Request) {
 			"batch":       "true, если блюдо удобно готовить на два дня",
 			"keep":        "режим заготовок: сколько дней готовое блюдо стоит в холодильнике (0 — есть свежим); без поля — по правилам",
 			"freeze":      "true, если готовое блюдо можно заморозить",
+			"hidden":      "по умолчанию true: рецепт создаётся скрытым (нет в планировщике, каталоге, поиске и sitemap) до вычитки; открыть: POST /api/admin/recipes/{id}/publish или hidden:false",
 			"image":       "пусто — фото сделаем сами; иначе https-ссылка на картинку или data:image/…;base64 — сервер скачает и пережмёт в WebP (до 12 МБ). Файлом: POST /api/admin/recipes/{id}/photo, multipart-поле file",
 			"kcal":        "считается сервером по продуктам; ужин должен давать 500–800 ккал на порцию, обед 500–800, завтрак 350–550, перекус 150–300",
 		},
@@ -114,7 +115,11 @@ func (s *Server) adminSaveRecipesBatch(w http.ResponseWriter, r *http.Request) {
 	out := make([]res, 0, len(in))
 	okN := 0
 	u := currentUser(r)
+	hidden := true
 	for _, rc := range in {
+		if rc.Hidden == nil {
+			rc.Hidden = &hidden // загрузки через API лежат скрытыми до вычитки, фото и переводов
+		}
 		warn := s.importRecipeImage(r.Context(), u, &rc)
 		saved, err := s.svc.CatalogAdmin.Save(r.Context(), rc)
 		if err == nil {
@@ -159,6 +164,22 @@ func (s *Server) importRecipeImage(ctx context.Context, u *domain.User, rc *doma
 	}
 	rc.Image = p.URL
 	return ""
+}
+
+// adminRecipePublish — снять скрытие с рецепта базы; DELETE — снова спрятать.
+func (s *Server) adminRecipePublish(w http.ResponseWriter, r *http.Request) {
+	if s.requirePerm(w, r, service.PermRecipes) == nil {
+		return
+	}
+	rc, err := s.svc.CatalogAdmin.SetHidden(r.Context(), r.PathValue("id"), r.Method == http.MethodDelete)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	if !rc.Hidden {
+		s.notifySearch("/recipe/"+rc.ID, "/recipes")
+	}
+	writeJSON(w, 200, map[string]any{"id": rc.ID, "hidden": rc.Hidden})
 }
 
 // adminRecipePhoto — файл фото для существующего рецепта базы: multipart-поле file → {id, image}.

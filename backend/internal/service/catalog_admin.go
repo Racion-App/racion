@@ -77,7 +77,15 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 		}
 		isNew = true
 	} else {
-		rc.I18n = c.RecipeByID[rc.ID].I18n // переводы не трогаем
+		old := c.RecipeByID[rc.ID]
+		rc.I18n = old.I18n // переводы не трогаем
+		rc.Notes = old.Notes
+		if in.Hidden == nil {
+			rc.Hidden = old.Hidden
+		}
+	}
+	if in.Hidden != nil {
+		rc.Hidden = *in.Hidden
 	}
 	if err := a.repo.Save(ctx, rc, isNew); err != nil {
 		return rc, err
@@ -86,6 +94,19 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 		return rc, err
 	}
 	return rc, nil
+}
+
+// SetHidden — показать или спрятать рецепт базы.
+func (a *CatalogAdmin) SetHidden(ctx context.Context, id string, hidden bool) (planner.Recipe, error) {
+	rc, ok := a.catalog.Load().RecipeByID[id]
+	if !ok {
+		return planner.Recipe{}, domain.ErrNotFound
+	}
+	rc.Hidden = hidden
+	if err := a.repo.Save(ctx, rc, false); err != nil {
+		return rc, err
+	}
+	return rc, a.reload(ctx)
 }
 
 // SetImage — фото у существующего рецепта базы; остальные поля не трогаются.

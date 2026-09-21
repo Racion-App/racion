@@ -159,7 +159,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	}
 	rememberCountry(w, r)
 	rc, err := s.svc.Recipes.Find(r.Context(), r.PathValue("id"))
-	if err != nil {
+	if err != nil || (rc.Hidden && !s.canEditCatalog(r)) {
 		s.notFoundPage(w, r)
 		return
 	}
@@ -232,7 +232,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	seen := map[string]bool{rc.ID: true}
 	for pass := 0; pass < 2 && len(related) < 4; pass++ {
 		for _, x := range s.catalog.Recipes {
-			if len(related) >= 4 || seen[x.ID] || x.Slot != rc.Slot || hasTag(x, "kidmenu") != kid {
+			if len(related) >= 4 || seen[x.ID] || x.Hidden || x.Slot != rc.Slot || hasTag(x, "kidmenu") != kid {
 				continue
 			}
 			sameMain := len(x.Ingredients) > 0 && x.Ingredients[0].IngredientID == main

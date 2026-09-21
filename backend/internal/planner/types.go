@@ -129,6 +129,7 @@ type Recipe struct {
 	Description string                `json:"description"`      // 1–2 предложения для страницы рецепта
 	I18n        map[string]RecipeText `json:"i18n,omitempty"`   // en, de
 	Notes       map[string]Notes      `json:"notes,omitempty"`  // заметки по языкам
+	Hidden      bool                  `json:"hidden,omitempty"` // рецепт базы скрыт до обработки: не в планировщике, каталоге, поиске и sitemap
 	Own         bool                  `json:"own,omitempty"`    // рецепт пользователя, не из базы
 	Public      bool                  `json:"public,omitempty"` // свой рецепт открыт для всех по ссылке
 	OwnerID     string                `json:"-"`

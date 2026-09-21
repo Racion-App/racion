@@ -155,6 +155,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/admin/recipes", s.limited(s.lim.write, s.adminSaveRecipe))
 	mux.HandleFunc("POST /api/admin/recipes/batch", s.limited(s.lim.write, s.adminSaveRecipesBatch))
 	mux.HandleFunc("POST /api/admin/recipes/{id}/photo", s.limited(s.lim.write, s.adminRecipePhoto))
+	mux.HandleFunc("POST /api/admin/recipes/{id}/publish", s.limited(s.lim.write, s.adminRecipePublish))
+	mux.HandleFunc("DELETE /api/admin/recipes/{id}/publish", s.limited(s.lim.write, s.adminRecipePublish))
 	mux.HandleFunc("GET /api/admin/recipes/schema", s.adminRecipeSchema)
 	mux.HandleFunc("GET /api/admin/ingredients", s.adminIngredients)
 	mux.HandleFunc("GET /api/me/keys", s.apiKeys)

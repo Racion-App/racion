@@ -9,6 +9,12 @@ import (
 
 // Админка: рецепты базы (право recipes), модерация своих рецептов (moderation), роли (roles).
 
+// canEditCatalog — админ или модератор с правом на рецепты базы (скрытые страницы видны только им).
+func (s *Server) canEditCatalog(r *http.Request) bool {
+	u := currentUser(r)
+	return u != nil && s.svc.Admin.Can(u, service.PermRecipes)
+}
+
 func (s *Server) requirePerm(w http.ResponseWriter, r *http.Request, perm string) *domain.User {
 	u := currentUser(r)
 	if u == nil || !s.svc.Admin.Can(u, perm) {

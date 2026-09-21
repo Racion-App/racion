@@ -1859,3 +1859,4 @@ main.pages.is-loading {
     &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--ds-separator); } }
   &__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
   &__btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; font-weight: 600; text-decoration: none; svg { flex: 0 0 auto; } } }
+.tagchip--warn { background: color-mix(in srgb, var(--ds-orange) 18%, transparent); color: var(--ds-orange); }

@@ -60,6 +60,9 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		url("/collection/"+col.Slug, "weekly", "0.7")
 	}
 	for _, rc := range s.catalog.Recipes {
+		if rc.Hidden {
+			continue
+		}
 		url("/recipe/"+rc.ID, "monthly", "0.7")
 	}
 	for _, rc := range community {

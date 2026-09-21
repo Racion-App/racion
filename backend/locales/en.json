@@ -1363,5 +1363,10 @@
   "status.foot": "Same data as JSON:",
   "auth.via": "Or continue with",
   "auth.via.one": "Continue with {name}",
-  "auth.oauth.error": "Sign-in with that service failed. Try again or use your email."
+  "auth.oauth.error": "Sign-in with that service failed. Try again or use your email.",
+  "admin.recipe.hidden": "hidden",
+  "admin.recipe.publish": "Publish",
+  "admin.recipe.hide": "Hide",
+  "admin.recipe.published": "Recipe published",
+  "admin.recipe.hidden.done": "Recipe hidden"
 }

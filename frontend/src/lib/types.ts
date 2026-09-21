@@ -252,7 +252,7 @@ export type AdminOverview = {
   top: { stores: { key: string; count: number }[] | null; recipes: { key: string; count: number }[] | null };
 };
 export type AdminUser = { id: string; email: string; name: string; createdAt: string; plans: number; lastSeen?: string; role: string };
-export type AdminRecipe = { id: string; title: string; description: string; slot: string; timeMin: number; batch: boolean; equipment: string[]; tags: string[]; steps: string[]; ingredients: OwnIngredient[]; image: string };
+export type AdminRecipe = { id: string; title: string; description: string; slot: string; timeMin: number; batch: boolean; equipment: string[]; tags: string[]; steps: string[]; ingredients: OwnIngredient[]; image: string; hidden?: boolean };
 export type CatalogRecipeInput = Omit<AdminRecipe, "id"> & { id: string };
 export type ModerationItem = AdminRecipe & { author?: string; status?: string; note?: string; submittedAt?: string };
 export type AdminError = { at: string; sid: string; message: string; url: string; stack: string; ua: string };

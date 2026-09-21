@@ -1381,5 +1381,10 @@
   "status.foot": "Те же данные в JSON:",
   "auth.via": "Или войдите через",
   "auth.via.one": "Войти через {name}",
-  "auth.oauth.error": "Войти через внешний сервис не получилось. Попробуйте ещё раз или войдите по почте."
+  "auth.oauth.error": "Войти через внешний сервис не получилось. Попробуйте ещё раз или войдите по почте.",
+  "admin.recipe.hidden": "скрыт",
+  "admin.recipe.publish": "Опубликовать",
+  "admin.recipe.hide": "Скрыть",
+  "admin.recipe.published": "Рецепт опубликован",
+  "admin.recipe.hidden.done": "Рецепт скрыт"
 }
