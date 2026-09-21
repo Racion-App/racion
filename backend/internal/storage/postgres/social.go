@@ -80,9 +80,19 @@ func (r *Social) Stats(ctx context.Context, recipeID, userID string) (domain.Rec
 		(SELECT count(*) FROM recipe_comments WHERE recipe_id = $1),
 		(SELECT count(*) FROM recipe_favorites WHERE recipe_id = $1),
 		$2 <> '' AND EXISTS (SELECT 1 FROM recipe_likes WHERE recipe_id = $1 AND user_id::text = $2),
-		$2 <> '' AND EXISTS (SELECT 1 FROM recipe_favorites WHERE recipe_id = $1 AND user_id::text = $2)`, recipeID, userID).
-		Scan(&s.Likes, &s.Comments, &s.Favorites, &s.Liked, &s.Favorite)
+		$2 <> '' AND EXISTS (SELECT 1 FROM recipe_favorites WHERE recipe_id = $1 AND user_id::text = $2),
+		COALESCE((SELECT avg(stars) FROM recipe_ratings WHERE recipe_id = $1), 0),
+		(SELECT count(*) FROM recipe_ratings WHERE recipe_id = $1),
+		COALESCE((SELECT stars FROM recipe_ratings WHERE recipe_id = $1 AND voter = $2), 0)`, recipeID, userID).
+		Scan(&s.Likes, &s.Comments, &s.Favorites, &s.Liked, &s.Favorite, &s.Rating, &s.Ratings, &s.MyRating)
 	return s, wrap("social.stats", err)
+}
+
+// Rate — оценка 1–5 от посетителя; повторная оценка заменяет прежнюю.
+func (r *Social) Rate(ctx context.Context, recipeID, voter string, stars int) error {
+	_, err := r.pool.Exec(ctx, `INSERT INTO recipe_ratings (recipe_id, voter, stars) VALUES ($1, $2, $3)
+		ON CONFLICT (recipe_id, voter) DO UPDATE SET stars = EXCLUDED.stars, created_at = now()`, recipeID, voter, stars)
+	return wrap("social.rate", err)
 }
 
 // LikeCounts — лайки для набора рецептов (карточки каталога).

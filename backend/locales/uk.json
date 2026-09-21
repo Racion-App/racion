@@ -1357,5 +1357,11 @@
   "admin.recipe.published": "Рецепт опубліковано",
   "admin.recipe.hidden.done": "Рецепт приховано",
   "foot.cook": "Що приготувати",
-  "foot.cook.all": "Усі добірки"
+  "foot.cook.all": "Усі добірки",
+  "social.rate": "Оцінити",
+  "social.rated": "Дякуємо за оцінку",
+  "social.ratings.one": "оцінка",
+  "social.ratings.few": "оцінки",
+  "social.ratings.many": "оцінок",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

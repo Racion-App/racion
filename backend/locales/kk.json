@@ -1344,5 +1344,11 @@
   "admin.recipe.published": "Рецепт жарияланды",
   "admin.recipe.hidden.done": "Рецепт жасырылды",
   "foot.cook": "Не пісіруге болады",
-  "foot.cook.all": "Барлық топтамалар"
+  "foot.cook.all": "Барлық топтамалар",
+  "social.rate": "Бағалау",
+  "social.rated": "Бағаңызға рахмет",
+  "social.ratings.one": "баға",
+  "social.ratings.few": "баға",
+  "social.ratings.many": "баға",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

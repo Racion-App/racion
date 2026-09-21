@@ -54,6 +54,12 @@
   box.querySelector('[data-like]').addEventListener('click',function(){if(!auth)return needLogin();var on=this.getAttribute('aria-pressed')!=='true';api(on?'PUT':'DELETE','/api/recipes/'+id+'/like').then(paint).catch(function(e){toast(e.message)})});
   var favBtn=box.querySelector('[data-fav]');favBtn.dataset.on=favBtn.querySelector('[data-fav-label]').textContent;
   favBtn.addEventListener('click',function(){if(!auth)return needLogin();var on=this.getAttribute('aria-pressed')!=='true';api(on?'PUT':'DELETE','/api/recipes/'+id+'/favorite').then(function(st){paint(st);favBtn.querySelector('[data-fav-label]').textContent=st.favorite?(L.lInfav||'✓'):L.lFav}).catch(function(e){toast(e.message)})});
+  var rating=box.querySelector('[data-rating]');
+  if(rating){var stars=rating.querySelectorAll('[data-star]'),meta=rating.querySelector('[data-rating-meta]');
+    function paintStars(n){stars.forEach(function(b){b.classList.toggle('is-on',+b.dataset.star<=n)})}
+    function plural(n){var m=n%10,h=n%100;if(rating.dataset.lFew&&m>=2&&m<=4&&(h<10||h>=20))return rating.dataset.lFew;if(m===1&&h!==11)return rating.dataset.lOne;return rating.dataset.lMany}
+    stars.forEach(function(b){b.addEventListener('mouseenter',function(){paintStars(+b.dataset.star)});b.addEventListener('mouseleave',function(){paintStars(+rating.querySelector('.rating__stars').dataset.my)});
+      b.addEventListener('click',function(){var n=+b.dataset.star;api('POST','/api/recipes/'+id+'/rating',{stars:n}).then(function(st){rating.querySelector('.rating__stars').dataset.my=st.myRating||Math.round(st.rating);paintStars(+rating.querySelector('.rating__stars').dataset.my);meta.textContent=st.rating.toFixed(1)+' · '+st.ratings+' '+plural(st.ratings);toast(rating.dataset.lThanks)}).catch(function(e){toast(e.message)})})});}
   box.querySelector('[data-share]').addEventListener('click',function(){var url=location.origin+location.pathname;if(navigator.share){navigator.share({title:document.title,url:url}).catch(function(){});return}navigator.clipboard.writeText(url).then(function(){toast(L.lCopied)})});
   var form=document.querySelector('[data-comment-form]'),list=document.querySelector('[data-comments]');
   function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}

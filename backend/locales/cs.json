@@ -1357,5 +1357,11 @@
   "admin.recipe.published": "Recept zveřejněn",
   "admin.recipe.hidden.done": "Recept skryt",
   "foot.cook": "Co uvařit",
-  "foot.cook.all": "Všechny sbírky"
+  "foot.cook.all": "Všechny sbírky",
+  "social.rate": "Ohodnotit",
+  "social.rated": "Díky za hodnocení",
+  "social.ratings.one": "hodnocení",
+  "social.ratings.few": "hodnocení",
+  "social.ratings.many": "hodnocení",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

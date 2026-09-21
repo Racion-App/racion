@@ -1448,5 +1448,11 @@
   "menu.pp.intro": "Ein Erwachsener mit dem Ziel, sich gut zu ernähren: eine ausgewogene Woche mit Getreide, Gemüse, Fisch und Hähnchen, nichts Frittiertes und nichts Süßes zum Frühstück. Jedes Gericht hat Eiweiß, Fett und Kohlenhydrate gezählt.",
   "menu.budget.h1": "Günstiges Wochenmenü mit Rezepten",
   "menu.budget.title": "Günstiges Wochenmenü für zwei mit Rezepten und Einkaufsliste für {0}",
-  "menu.budget.intro": "Zwei Erwachsene mit einem Budget ein Drittel unter dem Üblichen: der Planer baut die Woche auf Getreide, Hähnchen, Eiern und Saisongemüse, ohne Eiweiß zu verlieren oder Portionen zu kürzen. So sieht eine Woche aus, wenn man das Geld zählt."
+  "menu.budget.intro": "Zwei Erwachsene mit einem Budget ein Drittel unter dem Üblichen: der Planer baut die Woche auf Getreide, Hähnchen, Eiern und Saisongemüse, ohne Eiweiß zu verlieren oder Portionen zu kürzen. So sieht eine Woche aus, wenn man das Geld zählt.",
+  "social.rate": "Bewerten",
+  "social.rated": "Danke für die Bewertung",
+  "social.ratings.one": "Bewertung",
+  "social.ratings.few": "Bewertungen",
+  "social.ratings.many": "Bewertungen",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

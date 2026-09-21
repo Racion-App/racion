@@ -1344,5 +1344,11 @@
   "admin.recipe.published": "菜谱已发布",
   "admin.recipe.hidden.done": "菜谱已隐藏",
   "foot.cook": "做什么菜",
-  "foot.cook.all": "全部合集"
+  "foot.cook.all": "全部合集",
+  "social.rate": "评分",
+  "social.rated": "感谢评分",
+  "social.ratings.one": "个评分",
+  "social.ratings.few": "个评分",
+  "social.ratings.many": "个评分",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

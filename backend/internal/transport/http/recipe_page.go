@@ -365,6 +365,10 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		ld["suitableForDiet"] = diets
 	}
 	crumbs := breadcrumbLD([][2]string{{i18n.T(l, "page.brand"), base + "/"}, {i18n.T(l, "catalog.title"), base + pl.P + "/recipes"}, {planner.SlotLabel(l, rc.Slot), base + pl.P + "/recipes?slot=" + rc.Slot}, {tx.Title, ""}})
+	stats := s.svc.Social.Stats(r.Context(), rc.ID, viewerOrVoter(r))
+	if stats.Ratings >= 3 { // рейтинг в сниппет только когда за ним стоят реальные голоса
+		ld["aggregateRating"] = map[string]any{"@type": "AggregateRating", "ratingValue": fmt.Sprintf("%.1f", stats.Rating), "ratingCount": stats.Ratings, "bestRating": 5, "worstRating": 1}
+	}
 	ldJSON, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{ld, crumbs}})
 	slotHref := pl.P + "/recipes?slot=" + rc.Slot
 	slotCrumb := planner.SlotLabel(l, rc.Slot)
@@ -375,7 +379,6 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		allLabel = i18n.T(l, "recipe.all.kids")
 	}
 	viewer := currentUser(r)
-	stats := s.svc.Social.Stats(r.Context(), rc.ID, viewerID(r))
 	comments, _ := s.svc.Social.Comments(r.Context(), rc.ID, viewerID(r))
 	type commentView struct {
 		domain.Comment
@@ -414,7 +417,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	}
 	data := map[string]any{
 		"InCollections": inCols, "Topics": s.topicsFor(rc, l, pl.P),
-		"Viewer": viewer, "Stats": stats, "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
+		"Viewer": viewer, "Stats": stats, "StarsOn": starsOn(stats), "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
 		"Base": pageBase{User: currentUser(r) != nil, Title: tx.Title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
 			Alternates: s.alternates(r, "/recipe/"+rc.ID), NoIndex: rc.Own},
 		"L": l, "P": pl.P, "Country": pl.Country,
@@ -461,6 +464,14 @@ func kidMinAge(r planner.Recipe) int {
 		}
 	}
 	return 12
+}
+
+// starsOn — сколько звёзд закрасить: своя оценка, а без неё округлённая средняя.
+func starsOn(st domain.RecipeStats) int {
+	if st.MyRating > 0 {
+		return st.MyRating
+	}
+	return int(math.Round(st.Rating))
 }
 
 // notesPtr — nil для пустых заметок, чтобы шаблон не рисовал пустой раздел.

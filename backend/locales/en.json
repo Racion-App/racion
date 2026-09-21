@@ -1443,5 +1443,11 @@
   "menu.pp.intro": "One adult with the goal of eating well: a balanced week with grains, vegetables, fish and chicken, nothing deep-fried and nothing sweet for breakfast. Every dish has its protein, fat and carbs counted.",
   "menu.budget.h1": "Budget weekly menu with recipes",
   "menu.budget.title": "Budget weekly menu for two with recipes and a shopping list for {0}",
-  "menu.budget.intro": "Two adults with a budget a third below usual: the planner builds the week on grains, chicken, eggs and seasonal vegetables without losing protein or cutting servings. This is what a week looks like when you count the money."
+  "menu.budget.intro": "Two adults with a budget a third below usual: the planner builds the week on grains, chicken, eggs and seasonal vegetables without losing protein or cutting servings. This is what a week looks like when you count the money.",
+  "social.rate": "Rate it",
+  "social.rated": "Thanks for rating",
+  "social.ratings.one": "rating",
+  "social.ratings.few": "ratings",
+  "social.ratings.many": "ratings",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

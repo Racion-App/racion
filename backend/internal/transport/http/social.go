@@ -1,8 +1,11 @@
 package http
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"racion/internal/i18n"
 	"racion/internal/service"
@@ -15,6 +18,51 @@ func viewerID(r *http.Request) string {
 		return u.ID
 	}
 	return ""
+}
+
+const voterCookie = "racion_voter"
+
+// voterID — кто оценивает: пользователь по id, гость по cookie (ставится при первой оценке).
+func voterID(w http.ResponseWriter, r *http.Request) string {
+	if u := currentUser(r); u != nil {
+		return u.ID
+	}
+	if c, err := r.Cookie(voterCookie); err == nil && len(c.Value) >= 16 && len(c.Value) <= 64 {
+		return "g:" + c.Value
+	}
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	v := hex.EncodeToString(b)
+	http.SetCookie(w, &http.Cookie{Name: voterCookie, Value: v, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode,
+		Secure: r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https"), MaxAge: 3600 * 24 * 365})
+	return "g:" + v
+}
+
+// viewerOrVoter — для чтения статистики: своя оценка видна и гостю по cookie.
+func viewerOrVoter(r *http.Request) string {
+	if u := currentUser(r); u != nil {
+		return u.ID
+	}
+	if c, err := r.Cookie(voterCookie); err == nil {
+		return "g:" + c.Value
+	}
+	return ""
+}
+
+// rateRecipe — POST /api/recipes/{id}/rating {stars}: оценка 1–5, гостям тоже можно.
+func (s *Server) rateRecipe(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Stars int `json:"stars"`
+	}
+	if !decode(w, r, 1<<10, &in) {
+		return
+	}
+	st, err := s.svc.Social.Rate(r.Context(), voterID(w, r), r.PathValue("id"), in.Stars)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	writeJSON(w, 200, st)
 }
 
 func (s *Server) setLike(on bool) http.HandlerFunc {

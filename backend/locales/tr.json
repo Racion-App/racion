@@ -1343,5 +1343,11 @@
   "admin.recipe.published": "Tarif yayınlandı",
   "admin.recipe.hidden.done": "Tarif gizlendi",
   "foot.cook": "Ne pişirmeli",
-  "foot.cook.all": "Tüm koleksiyonlar"
+  "foot.cook.all": "Tüm koleksiyonlar",
+  "social.rate": "Puanla",
+  "social.rated": "Puan için teşekkürler",
+  "social.ratings.one": "puan",
+  "social.ratings.few": "puan",
+  "social.ratings.many": "puan",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

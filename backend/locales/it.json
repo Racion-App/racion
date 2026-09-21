@@ -1343,5 +1343,11 @@
   "admin.recipe.published": "Ricetta pubblicata",
   "admin.recipe.hidden.done": "Ricetta nascosta",
   "foot.cook": "Cosa cucinare",
-  "foot.cook.all": "Tutte le raccolte"
+  "foot.cook.all": "Tutte le raccolte",
+  "social.rate": "Vota",
+  "social.rated": "Grazie per il voto",
+  "social.ratings.one": "voto",
+  "social.ratings.few": "voti",
+  "social.ratings.many": "voti",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

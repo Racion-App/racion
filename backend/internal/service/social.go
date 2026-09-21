@@ -21,6 +21,7 @@ type SocialRepo interface {
 	Unfavorite(ctx context.Context, userID, recipeID string) error
 	Favorites(ctx context.Context, userID string) ([]string, error)
 	Stats(ctx context.Context, recipeID, userID string) (domain.RecipeStats, error)
+	Rate(ctx context.Context, recipeID, voter string, stars int) error
 	LikeCounts(ctx context.Context) (map[string]int, error)
 	Comments(ctx context.Context, recipeID string, limit int) ([]domain.Comment, error)
 	AddComment(ctx context.Context, recipeID, userID, body, image string) (int64, error)
@@ -153,6 +154,20 @@ func (s *Social) Favorites(ctx context.Context, userID string) ([]planner.Recipe
 func (s *Social) Stats(ctx context.Context, recipeID, userID string) domain.RecipeStats {
 	st, _ := s.repo.Stats(ctx, recipeID, userID)
 	return st
+}
+
+// Rate — оценка рецепта 1–5; voter — id пользователя или cookie гостя.
+func (s *Social) Rate(ctx context.Context, voter, recipeID string, stars int) (domain.RecipeStats, error) {
+	if stars < 1 || stars > 5 || voter == "" {
+		return domain.RecipeStats{}, domain.Invalid("social.rating.bad")
+	}
+	if err := s.exists(ctx, recipeID); err != nil {
+		return domain.RecipeStats{}, err
+	}
+	if err := s.repo.Rate(ctx, recipeID, voter, stars); err != nil {
+		return domain.RecipeStats{}, err
+	}
+	return s.Stats(ctx, recipeID, voter), nil
 }
 
 func (s *Social) LikeCounts(ctx context.Context) map[string]int {

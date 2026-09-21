@@ -50,6 +50,13 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"sub":      func(a, b int) int { return a - b },
 	"plural":   func(l i18n.Lang, n int, key string) string { return i18n.Plural(l, n, key) },
 	"minutes":  func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
+	"seq": func(n int) []int {
+		out := make([]int, n)
+		for i := range out {
+			out[i] = i + 1
+		}
+		return out
+	},
 	"langMeta": func(l i18n.Lang) locales.Meta { return i18n.Meta(l) },
 	"featured": func(l i18n.Lang, p string) []FootLink { return featuredLinks(l, p) },
 }).ParseFS(templateFS, "templates/*.html"))

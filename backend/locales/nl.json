@@ -1343,5 +1343,11 @@
   "admin.recipe.published": "Recept gepubliceerd",
   "admin.recipe.hidden.done": "Recept verborgen",
   "foot.cook": "Wat koken",
-  "foot.cook.all": "Alle collecties"
+  "foot.cook.all": "Alle collecties",
+  "social.rate": "Beoordeel",
+  "social.rated": "Bedankt voor je beoordeling",
+  "social.ratings.one": "beoordeling",
+  "social.ratings.few": "beoordelingen",
+  "social.ratings.many": "beoordelingen",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

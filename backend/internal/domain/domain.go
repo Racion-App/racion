@@ -143,11 +143,14 @@ type HouseholdAccount struct {
 // ── Лайки, избранное, комментарии ──────────────────────────────────────────
 
 type RecipeStats struct {
-	Likes     int  `json:"likes"`
-	Comments  int  `json:"comments"`
-	Favorites int  `json:"favorites"` // сколько людей добавили в избранное
-	Liked     bool `json:"liked"`
-	Favorite  bool `json:"favorite"`
+	Likes     int     `json:"likes"`
+	Comments  int     `json:"comments"`
+	Favorites int     `json:"favorites"` // сколько людей добавили в избранное
+	Liked     bool    `json:"liked"`
+	Favorite  bool    `json:"favorite"`
+	Rating    float64 `json:"rating"`   // средняя оценка 1–5, 0 — оценок нет
+	Ratings   int     `json:"ratings"`  // сколько оценок
+	MyRating  int     `json:"myRating"` // оценка этого посетителя, 0 — не ставил
 }
 
 type Comment struct {

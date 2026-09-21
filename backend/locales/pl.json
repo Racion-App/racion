@@ -1357,5 +1357,11 @@
   "admin.recipe.published": "Przepis opublikowany",
   "admin.recipe.hidden.done": "Przepis ukryty",
   "foot.cook": "Co ugotować",
-  "foot.cook.all": "Wszystkie kolekcje"
+  "foot.cook.all": "Wszystkie kolekcje",
+  "social.rate": "Oceń",
+  "social.rated": "Dziękujemy za ocenę",
+  "social.ratings.one": "ocena",
+  "social.ratings.few": "oceny",
+  "social.ratings.many": "ocen",
+  "social.rating.bad": "Rating must be 1 to 5"
 }

@@ -94,6 +94,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/recipes", s.recipesAPI)
 	mux.HandleFunc("GET /api/recipes/{id}", s.recipe)
 	mux.HandleFunc("GET /api/recipes/{id}/stats", s.recipeStats)
+	mux.HandleFunc("POST /api/recipes/{id}/rating", s.limited(s.lim.write, s.rateRecipe))
 	mux.HandleFunc("PUT /api/recipes/{id}/like", s.limited(s.lim.write, s.setLike(true)))
 	mux.HandleFunc("DELETE /api/recipes/{id}/like", s.setLike(false))
 	mux.HandleFunc("PUT /api/recipes/{id}/favorite", s.limited(s.lim.write, s.setFavorite(true)))
