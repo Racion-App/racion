@@ -1860,3 +1860,11 @@ main.pages.is-loading {
   &__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
   &__btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; font-weight: 600; text-decoration: none; svg { flex: 0 0 auto; } } }
 .tagchip--warn { background: color-mix(in srgb, var(--ds-orange) 18%, transparent); color: var(--ds-orange); }
+
+// Страница «Меню на неделю»: шапка без фото, неделя карточками по дням, строки без миниатюр
+.colhead--noimg { .colhead__body { max-width: 760px; } @media (min-width: 720px) { grid-template-columns: 1fr; } }
+.menus--week { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.menu__item--noimg { grid-template-columns: 64px minmax(0, 1fr) auto; }
+.menu__slot { font-size: 12px; color: var(--ds-label-tertiary); }
+.menu__name small { color: var(--ds-label-tertiary); font-weight: 400; }
+.menu__foot--groups { border-top: 0; padding-top: 0; gap: 8px 18px; }

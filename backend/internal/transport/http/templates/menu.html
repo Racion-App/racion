@@ -1,0 +1,63 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="/">{{t .L "page.brand"}}</a><span>›</span><span>{{.H1}}</span></nav>
+
+<header class="colhead colhead--rich colhead--noimg">
+  <div class="colhead__body">
+    <p class="colhead__eyebrow">{{t .L "menu.eyebrow"}}</p>
+    <h1 class="colhead__title">{{.H1}}</h1>
+    <ul class="colfacts">
+      <li><b class="num">{{.Week}}</b><span>{{t .L "menu.fact.week" .People}}</span></li>
+      <li><b class="num">{{.PerDay}}</b><span>{{t .L "menu.fact.day"}}</span></li>
+      <li><b class="num">{{.KcalDay}}</b><span>{{t .L "menu.fact.kcal"}}</span></li>
+      <li><b class="num">{{.Items}}</b><span>{{t .L "menu.fact.items"}}</span></li>
+    </ul>
+    <div class="coltext">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+    <div class="colhead__actions">
+      <a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{t .L "menu.cta"}}</a>
+    </div>
+  </div>
+</header>
+
+<section class="rpage__section" aria-labelledby="week">
+  <div class="rpage__section-head"><h2 id="week">{{t .L "menu.week.title" .StartDate}}</h2></div>
+  <div class="menus menus--week">
+    {{range .Days}}<article class="menu">
+      <header class="menu__head"><h3 class="menu__title">{{.Label}}</h3><p class="menu__note"><span class="num">{{.Money}}</span> · <span class="num">{{.Kcal}}</span> {{t $.L "kcal"}} · <span class="num">{{.Cook}}</span></p></header>
+      <ol class="menu__list">
+        {{range .Dishes}}<li><a class="menu__item menu__item--noimg" href="{{.Href}}">
+          <span class="menu__slot">{{.Slot}}</span>
+          <span class="menu__name">{{.Title}}{{if .Leftover}} <small>{{t $.L "menu.leftover"}}</small>{{else if .Batch}} <small>{{t $.L "menu.batch"}}</small>{{end}}</span>
+          <span class="menu__meta num">{{.Time}} · {{.Money}}</span>
+        </a></li>{{end}}
+      </ol>
+    </article>{{end}}
+  </div>
+</section>
+
+{{if .Groups}}
+<section class="rpage__section" aria-labelledby="list">
+  <div class="rpage__section-head"><h2 id="list">{{t .L "menu.list.title" .Items}}</h2></div>
+  <div class="menu__foot menu__foot--groups">{{range .Groups}}<span>{{.Label}}: <b class="num">{{.Items}}</b> · <span class="num">{{.Money}}</span></span>{{end}}</div>
+  <p class="rpage__note">{{t .L "menu.list.note"}}</p>
+</section>
+{{end}}
+
+<section class="colhow" aria-label="{{t .L "coll.faq"}}">
+  <div class="colhow__col">
+    <h2>{{t .L "coll.how"}}</h2>
+    <p>{{t .L "menu.how1"}}</p>
+    <p>{{t .L "menu.how2"}}</p>
+  </div>
+  <div class="colhow__col">
+    <h2>{{t .L "coll.faq"}}</h2>
+    {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+  </div>
+</section>
+
+{{if .Others}}
+<section class="rpage__section colothers" aria-labelledby="more-menus">
+  <div class="rpage__section-head"><h2 id="more-menus">{{t .L "menu.others"}}</h2></div>
+  <div class="rpage__tags">{{range .Others}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
+</section>
+{{end}}
+{{template "foot" .}}

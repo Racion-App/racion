@@ -66,6 +66,9 @@ func New(d Deps) http.Handler {
 				}
 			}
 		}
+		if topicLang(l) { // недельные меню и «из продуктов» есть только на ru/en/de
+			out = append(out, FootLink{Name: i18n.T(l, "menu.family-4.h1"), Href: p + "/menu/family-4"}, FootLink{Name: i18n.T(l, "cook.hub.title"), Href: p + "/recipes/from"})
+		}
 		return out
 	}
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth}
@@ -117,8 +120,9 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("DELETE /api/admin/offers/{id}", s.adminDeleteOffer)
 	mux.HandleFunc("DELETE /api/admin/collections/{id}", s.adminDeleteCollection)
 	mux.HandleFunc("GET /collection/{slug}", s.collectionPage)
-	mux.HandleFunc("GET /cook", s.cookHubPage)
-	mux.HandleFunc("GET /cook/{slug}", s.cookPage)
+	mux.HandleFunc("GET /recipes/from", s.cookHubPage)
+	mux.HandleFunc("GET /recipes/from/{slug}", s.cookPage)
+	mux.HandleFunc("GET /menu/{slug}", s.menuPage)
 	mux.HandleFunc("GET /collections", s.collectionsPage)
 	// превью ссылок для ботов мессенджеров на страницы приложения (nginx проксирует сюда по User-Agent)
 	mux.HandleFunc("GET /og/", s.ogHome)
@@ -221,8 +225,9 @@ func New(d Deps) http.Handler {
 		mux.HandleFunc("GET /"+string(l)+"/recipe/{id}", s.recipePage)
 		mux.HandleFunc("GET /"+string(l)+"/collection/{slug}", s.collectionPage)
 		mux.HandleFunc("GET /"+string(l)+"/collections", s.collectionsPage)
-		mux.HandleFunc("GET /"+string(l)+"/cook", s.cookHubPage)
-		mux.HandleFunc("GET /"+string(l)+"/cook/{slug}", s.cookPage)
+		mux.HandleFunc("GET /"+string(l)+"/recipes/from", s.cookHubPage)
+		mux.HandleFunc("GET /"+string(l)+"/recipes/from/{slug}", s.cookPage)
+		mux.HandleFunc("GET /"+string(l)+"/menu/{slug}", s.menuPage)
 		mux.HandleFunc("GET /"+string(l)+"/terms", s.legalPage)
 		mux.HandleFunc("GET /"+string(l)+"/privacy", s.legalPage)
 		mux.HandleFunc("GET /"+string(l)+"/status", s.statusPage)

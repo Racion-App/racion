@@ -69,10 +69,13 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s%s"/>`, base, path)
 			b.WriteString("<changefreq>weekly</changefreq><priority>0.7</priority></url>\n")
 		}
-		urlTopics("/cook")
+		for _, m := range menuPresets {
+			urlTopics("/menu/" + m.Slug)
+		}
+		urlTopics("/recipes/from")
 		for _, t := range topics {
 			if len(s.topicRecipes(t)) >= 4 {
-				urlTopics("/cook/" + t.Slug)
+				urlTopics("/recipes/from/" + t.Slug)
 			}
 		}
 	}
@@ -97,7 +100,7 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 // Clean-param для Яндекса: параметры страны и цены не создают отдельных страниц каталога.
 func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
-	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\n"
+	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /recipes/from/\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)

@@ -44,6 +44,7 @@ export function SiteFooter() {
           <div className="sitefoot__col">
             <h3>{t("foot.cook")}</h3>
             {featured.map((c) => <a key={c.slug} href={`${p}/collection/${c.slug}`}>{c.name}</a>)}
+            {["ru", "en", "de"].includes(lang) && <><a href={`${p}/menu/family-4`}>{t("menu.family-4.h1")}</a><a href={`${p}/recipes/from`}>{t("cook.hub.title")}</a></>}
             <a href={`${p}/collections`}>{t("foot.cook.all")}</a>
           </div>
         )}

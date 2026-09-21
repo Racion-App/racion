@@ -19,7 +19,7 @@ import (
 	"racion/internal/planner"
 )
 
-// Страницы «Что приготовить из …»: /cook/{slug} и /{lang}/cook/{slug}. Собираются из каталога по продуктам темы:
+// Страницы «Что приготовить из …»: /recipes/from/{slug} и /{lang}/recipes/from/{slug}. Собираются из каталога по продуктам темы:
 // группы по приёмам пищи, разрезы по способу готовки, факты, текст и FAQ из данных. Языки: ru, en, de —
 // у остальных нет своих названий продуктов, и страница вышла бы наполовину английской.
 
@@ -300,13 +300,13 @@ func (s *Server) cookPage(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if c := len(s.topicRecipes(o)); c >= 4 {
-			others = append(others, topicLink{o.Name[string(l)], pl.P + "/cook/" + o.Slug, c})
+			others = append(others, topicLink{o.Name[string(l)], pl.P + "/recipes/from/" + o.Slug, c})
 		}
 	}
 	var alts []altLink
 	for _, al := range topicLangs {
 		m := i18n.Meta(al)
-		alts = append(alts, altLink{Lang: string(al), Href: base + prefix(al) + "/cook/" + t.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
+		alts = append(alts, altLink{Lang: string(al), Href: base + prefix(al) + "/recipes/from/" + t.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	title := i18n.T(l, "cook.title", of, n, i18n.Plural(l, n, "catalog.recipe"))
 	desc := i18n.T(l, "cook.desc", n, i18n.Plural(l, n, "catalog.recipe"), of, bySlot["breakfast"], bySlot["lunch"], bySlot["dinner"], bySlot["snack"])
@@ -316,7 +316,7 @@ func (s *Server) cookPage(w http.ResponseWriter, r *http.Request) {
 		ldCards = ldCards[:100]
 	}
 	data := map[string]any{
-		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/cook/" + t.Slug,
+		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipes/from/" + t.Slug,
 			OGImage: topicOG(base, cover, l), OGType: "article", OGWide: cover == "", Alternates: alts, JSONLD: topicLD(base, pl, h1, desc, t.Slug, ldCards, faq)},
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"H1": h1, "Name": name, "Cover": cover, "Facts": facts, "Intro": intro, "Groups": groups, "Cuts": cuts, "FAQ": faq, "Others": others,
@@ -362,16 +362,16 @@ func (s *Server) cookHubPage(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		cover := s.topicCover(t, rs)
-		items = append(items, item{t.Name[string(l)], t.Of[string(l)], pl.P + "/cook/" + t.Slug, cover, len(rs)})
+		items = append(items, item{t.Name[string(l)], t.Of[string(l)], pl.P + "/recipes/from/" + t.Slug, cover, len(rs)})
 		total += len(rs)
 	}
 	var alts []altLink
 	for _, al := range topicLangs {
 		m := i18n.Meta(al)
-		alts = append(alts, altLink{Lang: string(al), Href: base + prefix(al) + "/cook", Name: m.Name, English: m.English, Flag: m.Flag})
+		alts = append(alts, altLink{Lang: string(al), Href: base + prefix(al) + "/recipes/from", Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{User: currentUser(r) != nil, Title: i18n.T(l, "cook.hub.title") + " — " + i18n.T(l, "page.brand"), Description: i18n.T(l, "cook.hub.desc", len(items)), Canonical: base + pl.P + "/cook", OGImage: brandOG(base, l), OGWide: true, Alternates: alts},
+		"Base": pageBase{User: currentUser(r) != nil, Title: i18n.T(l, "cook.hub.title") + " — " + i18n.T(l, "page.brand"), Description: i18n.T(l, "cook.hub.desc", len(items)), Canonical: base + pl.P + "/recipes/from", OGImage: brandOG(base, l), OGWide: true, Alternates: alts},
 		"L":    l, "P": pl.P, "Country": pl.Country, "NavRecipes": true, "Items": items, "Total": len(items),
 	}
 	var buf bytes.Buffer
@@ -390,9 +390,9 @@ func topicLD(base string, pl pageLocale, name, desc, slug string, cards []recipe
 	for i, c := range cards {
 		items = append(items, map[string]any{"@type": "ListItem", "position": i + 1, "url": base + pl.P + "/recipe/" + c.ID, "name": c.Title})
 	}
-	u := base + pl.P + "/cook/" + slug
+	u := base + pl.P + "/recipes/from/" + slug
 	list := map[string]any{"@type": "ItemList", "@id": u + "#list", "url": u, "name": name, "description": desc, "numberOfItems": len(cards), "itemListElement": items, "inLanguage": string(pl.L)}
-	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "cook.hub.title"), base + pl.P + "/cook"}, {name, ""}})
+	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "cook.hub.title"), base + pl.P + "/recipes/from"}, {name, ""}})
 	graph := []any{list, crumbs}
 	if len(faq) > 0 {
 		var qs []map[string]any
@@ -413,7 +413,7 @@ func (s *Server) topicsFor(rc planner.Recipe, l i18n.Lang, p string) []FootLink 
 	var out []FootLink
 	for _, t := range topics {
 		if s.topicAmount(t, rc) >= 40 {
-			out = append(out, FootLink{Name: i18n.T(l, "cook.h1", t.Of[string(l)]), Href: p + "/cook/" + t.Slug})
+			out = append(out, FootLink{Name: i18n.T(l, "cook.h1", t.Of[string(l)]), Href: p + "/recipes/from/" + t.Slug})
 		}
 		if len(out) >= 4 {
 			break

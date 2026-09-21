@@ -1,5 +1,5 @@
 {{template "head" .}}
-<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><a href="{{.P}}/cook">{{t .L "cook.hub.title"}}</a><span>›</span><span>{{.Name}}</span></nav>
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><a href="{{.P}}/recipes/from">{{t .L "cook.hub.title"}}</a><span>›</span><span>{{.Name}}</span></nav>
 
 <header class="colhead colhead--rich">
   {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512" fetchpriority="high">{{end}}
@@ -48,7 +48,7 @@
 <section class="rpage__section colothers" aria-labelledby="more-topics">
   <div class="rpage__section-head">
     <h2 id="more-topics">{{t .L "cook.others"}}</h2>
-    <a class="rpage__more" href="{{.P}}/cook">{{t .L "cook.hub.title"}}</a>
+    <a class="rpage__more" href="{{.P}}/recipes/from">{{t .L "cook.hub.title"}}</a>
   </div>
   <div class="rpage__tags">{{range .Others}}<a class="chip" href="{{.Href}}">{{.Name}} <span class="num">{{.Count}}</span></a>{{end}}</div>
 </section>
