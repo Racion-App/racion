@@ -414,6 +414,8 @@
   "coll.delete.text": "Les recettes restent dans la base, seul le dossier disparaît.",
   "coll.empty": "Pas encore de collections",
   "coll.fact.cost": "par portion",
+  "coll.menu.per": "par personne",
+  "coll.menus": "Menus prêts",
   "coll.fact.kcal": "kcal par portion",
   "coll.fact.time": "de préparation",
   "coll.faq": "Questions",

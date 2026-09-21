@@ -414,6 +414,8 @@
   "coll.delete.text": "Le ricette restano nella base, sparisce solo la cartella.",
   "coll.empty": "Ancora nessuna raccolta",
   "coll.fact.cost": "a porzione",
+  "coll.menu.per": "a persona",
+  "coll.menus": "Menù pronti",
   "coll.fact.kcal": "kcal a porzione",
   "coll.fact.time": "di cottura",
   "coll.faq": "Domande",

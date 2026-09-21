@@ -428,6 +428,8 @@
   "coll.delete.text": "Recepty zůstávají v databázi, zmizí jen složka.",
   "coll.empty": "Zatím žádné kolekce",
   "coll.fact.cost": "za porci",
+  "coll.menu.per": "na osobu",
+  "coll.menus": "Hotová menu",
   "coll.fact.kcal": "kcal na porci",
   "coll.fact.time": "příprava",
   "coll.faq": "Otázky",

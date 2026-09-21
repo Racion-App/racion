@@ -415,6 +415,8 @@
   "coll.delete.text": "As receitas ficam na base, só a pasta some.",
   "coll.empty": "Ainda não há coleções",
   "coll.fact.cost": "por porção",
+  "coll.menu.per": "por pessoa",
+  "coll.menus": "Menus prontos",
   "coll.fact.kcal": "kcal por porção",
   "coll.fact.time": "de preparo",
   "coll.faq": "Perguntas",

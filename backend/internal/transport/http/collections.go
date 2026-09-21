@@ -22,6 +22,14 @@ var mergedCollections = map[string]string{
 	"quick-dinners": "quick20",
 }
 
+// pageTitle — заголовок вкладки: редакционный, если задан, иначе имя подборки.
+func pageTitle(custom, name string) string {
+	if custom != "" {
+		return custom
+	}
+	return name
+}
+
 // Коллекции рецептов пользователя.
 
 func (s *Server) myCollections(w http.ResponseWriter, r *http.Request) {
@@ -217,6 +225,40 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		facts = append(facts, fact{rangeLabel(strconv.Itoa(minT), strconv.Itoa(maxT)) + " " + i18n.T(pl.L, "min"), i18n.T(pl.L, "coll.fact.time")})
 		facts = append(facts, fact{rangeLabel(strconv.Itoa(int(minK)), strconv.Itoa(int(maxK))), i18n.T(pl.L, "coll.fact.kcal")})
 	}
+	// готовые меню: блюда по id из подборки, итоги на человека — сумма цены и калорий порций, время как сумма
+	type menuView struct {
+		Title, Note, Money, Time, Kcal string
+		Cards                          []recipeCard
+	}
+	byID := map[string]recipeCard{}
+	for _, c := range cards {
+		byID[c.ID] = c
+	}
+	var menus []menuView
+	for _, m := range text.Menus {
+		mv := menuView{Title: m.Title, Note: m.Note}
+		var cost, kcal float64
+		var mins int
+		for _, id := range m.Recipes {
+			c, ok := byID[id]
+			if !ok {
+				continue
+			}
+			mv.Cards = append(mv.Cards, c)
+			cost += c.Cost
+			kcal += c.Kcal
+			mins += c.TimeMin
+		}
+		if len(mv.Cards) == 0 {
+			continue
+		}
+		if cost > 0 {
+			mv.Money = formatMoney(pl.Country, cost)
+		}
+		mv.Time = strconv.Itoa(mins) + " " + i18n.T(pl.L, "min")
+		mv.Kcal = strconv.Itoa(int(kcal))
+		menus = append(menus, mv)
+	}
 	// рецепты по приёмам пищи в их порядке; одна группа — без заголовка группы, только счётчик
 	type group struct {
 		Key, Title string
@@ -315,9 +357,9 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	data := map[string]any{
-		"Base": pageBase{User: currentUser(r) != nil, Title: col.Name + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
+		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitle(text.Title, col.Name) + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
-		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
+		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "collection.html", data); err != nil {

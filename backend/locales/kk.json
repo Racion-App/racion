@@ -415,6 +415,8 @@
   "coll.delete.text": "Рецепттер базада қалады, тек қалта жойылады.",
   "coll.empty": "Әзірге жинақ жоқ",
   "coll.fact.cost": "бір порцияға",
+  "coll.menu.per": "бір адамға",
+  "coll.menus": "Дайын мәзірлер",
   "coll.fact.kcal": "порцияға ккал",
   "coll.fact.time": "дайындауға",
   "coll.faq": "Сұрақтар",

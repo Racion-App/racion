@@ -282,9 +282,18 @@ type Collection struct {
 
 // CollectionText — текст страницы подборки: вступление (абзацы), как пользоваться (абзацы), вопросы-ответы.
 type CollectionText struct {
-	Intro []string `json:"intro,omitempty"`
-	How   []string `json:"how,omitempty"`
-	FAQ   []QA     `json:"faq,omitempty"`
+	Title string           `json:"title,omitempty"` // заголовок вкладки, если должен отличаться от имени: «Что приготовить маме на 8 Марта: меню и 60 рецептов»
+	Intro []string         `json:"intro,omitempty"`
+	Menus []CollectionMenu `json:"menus,omitempty"` // готовые наборы блюд из подборки: «Завтрак в постель», «Стол на шестерых»
+	How   []string         `json:"how,omitempty"`
+	FAQ   []QA             `json:"faq,omitempty"`
+}
+
+// CollectionMenu — готовое меню внутри подборки; итоги по цене, времени и калориям считает страница.
+type CollectionMenu struct {
+	Title   string   `json:"title"`
+	Note    string   `json:"note,omitempty"`
+	Recipes []string `json:"recipes"`
 }
 
 type QA struct {
@@ -295,7 +304,7 @@ type QA struct {
 // TextFor — текст подборки на языке с запасом en → ru.
 func (c Collection) TextFor(lang string) CollectionText {
 	for _, code := range []string{lang, "en", "ru"} {
-		if t, ok := c.SEO[code]; ok && (len(t.Intro) > 0 || len(t.FAQ) > 0) {
+		if t, ok := c.SEO[code]; ok && (len(t.Intro) > 0 || len(t.FAQ) > 0 || len(t.Menus) > 0) {
 			return t
 		}
 	}

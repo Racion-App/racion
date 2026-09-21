@@ -415,6 +415,8 @@
   "coll.delete.text": "Die Rezepte bleiben, nur der Ordner verschwindet.",
   "coll.empty": "Noch keine Sammlungen",
   "coll.fact.cost": "pro Portion",
+  "coll.menu.per": "pro Person",
+  "coll.menus": "Fertige Menüs",
   "coll.fact.kcal": "kcal pro Portion",
   "coll.fact.time": "Zubereitung",
   "coll.faq": "Fragen",

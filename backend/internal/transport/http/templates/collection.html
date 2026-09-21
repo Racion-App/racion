@@ -16,6 +16,32 @@
   </div>
 </header>
 
+{{if .Menus}}
+<section class="rpage__section" aria-labelledby="menus">
+  <div class="rpage__section-head"><h2 id="menus">{{t .L "coll.menus"}}</h2></div>
+  <div class="menus">
+    {{range .Menus}}<article class="menu">
+      <header class="menu__head">
+        <h3 class="menu__title">{{.Title}}</h3>
+        {{if .Note}}<p class="menu__note">{{.Note}}</p>{{end}}
+      </header>
+      <ol class="menu__list">
+        {{range .Cards}}<li><a class="menu__item" href="{{.Href}}">
+          {{if .Image}}<img class="menu__img" src="{{.Image}}" alt="" loading="lazy" width="56" height="56">{{else}}<span class="menu__img menu__img--empty" aria-hidden="true"></span>{{end}}
+          <span class="menu__name">{{.Title}}</span>
+          <span class="menu__meta num">{{.TimeLabel}}{{if .Money}} · {{.Money}}{{end}}</span>
+        </a></li>{{end}}
+      </ol>
+      <footer class="menu__foot">
+        <span><span class="num">{{len .Cards}}</span> {{plural $.L (len .Cards) "catalog.recipe"}}</span>
+        {{if .Money}}<span><b class="num">{{.Money}}</b> {{t $.L "coll.menu.per"}}</span>{{end}}
+        <span class="num">{{.Time}}</span>
+      </footer>
+    </article>{{end}}
+  </div>
+</section>
+{{end}}
+
 {{if .Groups}}
 {{range .Groups}}
 <section class="rpage__section colgroup" aria-labelledby="g-{{.Key}}">

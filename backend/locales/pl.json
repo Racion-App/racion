@@ -428,6 +428,8 @@
   "coll.delete.text": "Przepisy zostają w bazie, znika tylko folder.",
   "coll.empty": "Nie ma jeszcze kolekcji",
   "coll.fact.cost": "za porcję",
+  "coll.menu.per": "na osobę",
+  "coll.menus": "Gotowe menu",
   "coll.fact.kcal": "kcal na porcję",
   "coll.fact.time": "gotowania",
   "coll.faq": "Pytania",

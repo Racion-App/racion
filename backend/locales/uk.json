@@ -428,6 +428,8 @@
   "coll.delete.text": "Рецепти залишаються в базі, зникає лише тека.",
   "coll.empty": "Колекцій поки немає",
   "coll.fact.cost": "за порцію",
+  "coll.menu.per": "на людину",
+  "coll.menus": "Готові меню",
   "coll.fact.kcal": "ккал на порцію",
   "coll.fact.time": "на готування",
   "coll.faq": "Запитання",

@@ -415,6 +415,8 @@
   "coll.delete.text": "レシピはデータベースに残り、フォルダだけが消えます。",
   "coll.empty": "コレクションはまだありません",
   "coll.fact.cost": "1人前あたり",
+  "coll.menu.per": "1人あたり",
+  "coll.menus": "おすすめ献立",
   "coll.fact.kcal": "1人前のkcal",
   "coll.fact.time": "調理時間",
   "coll.faq": "よくある質問",

@@ -415,6 +415,8 @@
   "coll.delete.text": "菜谱仍保留在菜谱库中，只删除这个文件夹。",
   "coll.empty": "还没有合集",
   "coll.fact.cost": "每份",
+  "coll.menu.per": "每人",
+  "coll.menus": "套餐推荐",
   "coll.fact.kcal": "每份千卡",
   "coll.fact.time": "烹饪时间",
   "coll.faq": "常见问题",

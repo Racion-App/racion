@@ -1155,6 +1155,8 @@
   "coll.others": "More collections",
   "coll.recipes.title": "Recipes in this collection",
   "coll.fact.cost": "per portion",
+  "coll.menu.per": "per person",
+  "coll.menus": "Ready menus",
   "coll.fact.time": "to cook",
   "coll.fact.kcal": "kcal per portion",
   "country.hint": "Recipe and plan prices will be shown in the currency of the country you pick.",

@@ -415,6 +415,8 @@
   "coll.delete.text": "Las recetas se quedan en la base, solo desaparece la carpeta.",
   "coll.empty": "Aún no hay colecciones",
   "coll.fact.cost": "por ración",
+  "coll.menu.per": "por persona",
+  "coll.menus": "Menús listos",
   "coll.fact.kcal": "kcal por ración",
   "coll.fact.time": "de cocina",
   "coll.faq": "Preguntas",

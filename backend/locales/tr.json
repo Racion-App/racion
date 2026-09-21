@@ -414,6 +414,8 @@
   "coll.delete.text": "Tarifler veritabanında kalır, yalnızca klasör silinir.",
   "coll.empty": "Henüz koleksiyon yok",
   "coll.fact.cost": "porsiyon başına",
+  "coll.menu.per": "kişi başı",
+  "coll.menus": "Hazır menüler",
   "coll.fact.kcal": "porsiyon başına kcal",
   "coll.fact.time": "pişirme",
   "coll.faq": "Sorular",

@@ -414,6 +414,8 @@
   "coll.delete.text": "De recepten blijven in de database, alleen de map verdwijnt.",
   "coll.empty": "Nog geen collecties",
   "coll.fact.cost": "per portie",
+  "coll.menu.per": "per persoon",
+  "coll.menus": "Kant-en-klare menu's",
   "coll.fact.kcal": "kcal per portie",
   "coll.fact.time": "bereiding",
   "coll.faq": "Vragen",
