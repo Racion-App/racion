@@ -1334,5 +1334,8 @@
   "why.leftover": "前日の余り物",
   "why.lighter": "目標より軽い",
   "why.pricier": "予算オーバー、でも種類が豊富",
-  "why.wanted": "ご希望どおり: {0}"
+  "why.wanted": "ご希望どおり: {0}",
+  "auth.via": "または次で続行",
+  "auth.via.one": "{name}で続行",
+  "auth.oauth.error": "そのサービスでのログインに失敗しました。もう一度試すか、メールでログインしてください。"
 }

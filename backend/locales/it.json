@@ -1333,5 +1333,8 @@
   "why.leftover": "avanzi di ieri",
   "why.lighter": "più leggero del previsto",
   "why.pricier": "oltre il budget, ma maggiore varietà",
-  "why.wanted": "hai richiesto: {0}"
+  "why.wanted": "hai richiesto: {0}",
+  "auth.via": "Oppure continua con",
+  "auth.via.one": "Continua con {name}",
+  "auth.oauth.error": "L'accesso con quel servizio non è riuscito. Riprova o usa l'e-mail."
 }

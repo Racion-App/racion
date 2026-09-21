@@ -1333,5 +1333,8 @@
   "why.leftover": "restjes van gisteren",
   "why.lighter": "minder calorieën dan doelwaarde",
   "why.pricier": "boven budget, maar meer variatie",
-  "why.wanted": "u vroeg om {0}"
+  "why.wanted": "u vroeg om {0}",
+  "auth.via": "Of ga verder met",
+  "auth.via.one": "Ga verder met {name}",
+  "auth.oauth.error": "Inloggen via die dienst is mislukt. Probeer opnieuw of gebruik je e-mail."
 }

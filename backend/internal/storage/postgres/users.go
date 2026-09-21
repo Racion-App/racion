@@ -20,6 +20,21 @@ func (r *Users) Create(ctx context.Context, email, passwordHash, name string) (d
 	return u, wrap("users.create", err)
 }
 
+// ByOAuth — пользователь по внешнему аккаунту (провайдер + id в нём).
+func (r *Users) ByOAuth(ctx context.Context, provider, providerID string) (domain.User, error) {
+	var u domain.User
+	err := r.pool.QueryRow(ctx, `SELECT u.id, u.email, u.name, COALESCE(u.nick, ''), u.avatar, u.role, u.defaults FROM oauth_accounts o JOIN users u ON u.id = o.user_id
+		WHERE o.provider = $1 AND o.provider_id = $2`, provider, providerID).Scan(&u.ID, &u.Email, &u.Name, &u.Nick, &u.Avatar, &u.Role, &u.Defaults)
+	return u, wrap("users.by_oauth", err)
+}
+
+// LinkOAuth — привязать внешний аккаунт к пользователю.
+func (r *Users) LinkOAuth(ctx context.Context, provider, providerID, userID, email string) error {
+	_, err := r.pool.Exec(ctx, `INSERT INTO oauth_accounts (provider, provider_id, user_id, email) VALUES ($1, $2, $3, $4)
+		ON CONFLICT (provider, provider_id) DO UPDATE SET user_id = EXCLUDED.user_id, email = EXCLUDED.email`, provider, providerID, userID, email)
+	return wrap("users.link_oauth", err)
+}
+
 // ByEmail возвращает пользователя и хеш пароля для входа.
 func (r *Users) ByEmail(ctx context.Context, email string) (domain.User, string, error) {
 	var u domain.User

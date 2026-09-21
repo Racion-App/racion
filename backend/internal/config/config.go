@@ -38,42 +38,63 @@ type Config struct {
 	S3Bucket        string
 	S3Secure        bool   // https к хранилищу
 	S3PublicURL     string // база публичных ссылок на фото: /media (nginx → MinIO) или адрес CDN
+	OAuth           OAuth
 	ShutdownTimeout time.Duration
+}
+
+// OAuth — ключи входа через внешние сервисы; пустая пара выключает провайдера.
+type OAuth struct {
+	VKID, VKSecret         string
+	YandexID, YandexSecret string
+	GoogleID, GoogleSecret string
+	GitHubID, GitHubSecret string
+	AppleClientID          string // Services ID вида app.racion.web
+	AppleTeamID            string
+	AppleKeyID             string
+	AppleKey               string // содержимое .p8 одной строкой с
+
 }
 
 func Load() Config {
 	return Config{
-		DatabaseURL:     env("DATABASE_URL", "postgres://racion:racion@localhost:5432/racion?sslmode=disable"),
-		HTTPAddr:        env("HTTP_ADDR", ":8080"),
-		LogLevel:        env("LOG_LEVEL", "info"),
-		LogFormat:       env("LOG_FORMAT", "json"),
-		BaseURL:         env("BASE_URL", ""),
-		MetrikaID:       env("METRIKA_ID", ""),
-		LegalEmail:      env("LEGAL_EMAIL", "info@racion.app"),
-		ImagesDir:       env("IMAGES_DIR", "../frontend/public/images"),
-		GeoDir:          env("GEO_DIR", os.TempDir()),
-		PushContact:     env("PUSH_CONTACT", "mailto:admin@racion.app"),
-		OpenAIKey:       env("OPENAI_API_KEY", ""),
-		OpenAIModel:     env("OPENAI_MODEL", "gpt-5-nano"),
-		MistralKey:      env("MISTRAL_API_KEY", ""),
-		GeminiKey:       env("GEMINI_API_KEY", ""),
-		GroqKey:         env("GROQ_API_KEY", ""),
-		OpenRouterKey:   env("OPENROUTER_API_KEY", ""),
-		LocalAIURL:      env("LOCAL_AI_URL", ""),
-		AIOrder:         env("AI_ORDER", ""),
-		AIModels:        env("AI_MODELS", ""),
-		AdminEmails:     env("ADMIN_EMAILS", ""),
-		MailHost:        env("MAIL_HOST", ""),
-		MailPort:        env("MAIL_PORT", "587"),
-		MailUser:        env("MAIL_USER", ""),
-		MailPass:        env("MAIL_PASS", ""),
-		MailFrom:        env("MAIL_FROM", "Racion <info@racion.app>"),
-		S3Endpoint:      env("S3_ENDPOINT", ""),
-		S3AccessKey:     env("S3_ACCESS_KEY", ""),
-		S3SecretKey:     env("S3_SECRET_KEY", ""),
-		S3Bucket:        env("S3_BUCKET", "racion"),
-		S3Secure:        env("S3_SECURE", "") == "1",
-		S3PublicURL:     env("S3_PUBLIC_URL", "/media"),
+		DatabaseURL:   env("DATABASE_URL", "postgres://racion:racion@localhost:5432/racion?sslmode=disable"),
+		HTTPAddr:      env("HTTP_ADDR", ":8080"),
+		LogLevel:      env("LOG_LEVEL", "info"),
+		LogFormat:     env("LOG_FORMAT", "json"),
+		BaseURL:       env("BASE_URL", ""),
+		MetrikaID:     env("METRIKA_ID", ""),
+		LegalEmail:    env("LEGAL_EMAIL", "info@racion.app"),
+		ImagesDir:     env("IMAGES_DIR", "../frontend/public/images"),
+		GeoDir:        env("GEO_DIR", os.TempDir()),
+		PushContact:   env("PUSH_CONTACT", "mailto:admin@racion.app"),
+		OpenAIKey:     env("OPENAI_API_KEY", ""),
+		OpenAIModel:   env("OPENAI_MODEL", "gpt-5-nano"),
+		MistralKey:    env("MISTRAL_API_KEY", ""),
+		GeminiKey:     env("GEMINI_API_KEY", ""),
+		GroqKey:       env("GROQ_API_KEY", ""),
+		OpenRouterKey: env("OPENROUTER_API_KEY", ""),
+		LocalAIURL:    env("LOCAL_AI_URL", ""),
+		AIOrder:       env("AI_ORDER", ""),
+		AIModels:      env("AI_MODELS", ""),
+		AdminEmails:   env("ADMIN_EMAILS", ""),
+		MailHost:      env("MAIL_HOST", ""),
+		MailPort:      env("MAIL_PORT", "587"),
+		MailUser:      env("MAIL_USER", ""),
+		MailPass:      env("MAIL_PASS", ""),
+		MailFrom:      env("MAIL_FROM", "Racion <info@racion.app>"),
+		S3Endpoint:    env("S3_ENDPOINT", ""),
+		S3AccessKey:   env("S3_ACCESS_KEY", ""),
+		S3SecretKey:   env("S3_SECRET_KEY", ""),
+		S3Bucket:      env("S3_BUCKET", "racion"),
+		S3Secure:      env("S3_SECURE", "") == "1",
+		S3PublicURL:   env("S3_PUBLIC_URL", "/media"),
+		OAuth: OAuth{
+			VKID: env("OAUTH_VK_ID", ""), VKSecret: env("OAUTH_VK_SECRET", ""),
+			YandexID: env("OAUTH_YANDEX_ID", ""), YandexSecret: env("OAUTH_YANDEX_SECRET", ""),
+			GoogleID: env("OAUTH_GOOGLE_ID", ""), GoogleSecret: env("OAUTH_GOOGLE_SECRET", ""),
+			GitHubID: env("OAUTH_GITHUB_ID", ""), GitHubSecret: env("OAUTH_GITHUB_SECRET", ""),
+			AppleClientID: env("OAUTH_APPLE_CLIENT_ID", ""), AppleTeamID: env("OAUTH_APPLE_TEAM_ID", ""), AppleKeyID: env("OAUTH_APPLE_KEY_ID", ""), AppleKey: env("OAUTH_APPLE_KEY", ""),
+		},
 		ShutdownTimeout: 10 * time.Second,
 	}
 }

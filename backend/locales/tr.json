@@ -1333,5 +1333,8 @@
   "why.leftover": "dün kalanlar",
   "why.lighter": "hedefe göre daha hafif",
   "why.pricier": "bütçeyi aşıyor, ancak daha çeşitli",
-  "why.wanted": "istediğiniz gibi: {0}"
+  "why.wanted": "istediğiniz gibi: {0}",
+  "auth.via": "Ya da şununla devam et",
+  "auth.via.one": "{name} ile devam et",
+  "auth.oauth.error": "Bu servisle giriş yapılamadı. Tekrar deneyin ya da e-posta kullanın."
 }

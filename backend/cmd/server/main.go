@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os/signal"
 	"racion/internal/mail"
+	"racion/internal/oauth"
 	"strings"
 	"syscall"
 	"time"
@@ -125,6 +126,14 @@ func main() {
 	}, catalogRef, cfg.PushContact, cfg.BaseURL)
 	services.Admin = service.NewAdmin(store.Admin, store.Users, cfg.AdminEmails)
 	// письма: восстановление пароля; без MAIL_HOST письмо только в логе (локальный стенд)
+	oauthReg := oauth.New(oauth.Config(cfg.OAuth))
+	if en := oauthReg.Enabled(); len(en) > 0 {
+		log.Info("oauth on", zap.Strings("providers", en))
+	}
+	services.Accounts.SetAvatarImporter(func(ctx context.Context, userID, src string) (string, error) {
+		p, err := services.Media.Import(ctx, userID, "avatar", src)
+		return p.URL, err
+	})
 	services.Accounts.SetMailer(mail.New(mail.Config{Host: cfg.MailHost, Port: cfg.MailPort, User: cfg.MailUser, Pass: cfg.MailPass, From: cfg.MailFrom}, log.Named("mail")))
 	// замены продуктов: таблица из seed/data/substitutes.json
 	subsTable := map[string][]service.SubEntry{}
@@ -218,6 +227,7 @@ func main() {
 			Services: services, Log: log.Named("http"), Geo: geoResolver,
 			Health:  func() error { return store.Ping(context.Background()) },
 			Monitor: monitor,
+			OAuth:   oauthReg,
 			BaseURL: cfg.BaseURL,
 			Metrika: cfg.MetrikaID, Contact: cfg.LegalEmail, Images: cfg.ImagesDir,
 			Logs: ring,

@@ -16,6 +16,7 @@ import (
 	"racion/internal/geo"
 	"racion/internal/i18n"
 	"racion/internal/logger"
+	"racion/internal/oauth"
 	"racion/internal/planner"
 	"racion/internal/service"
 	"racion/locales"
@@ -30,6 +31,7 @@ type Server struct {
 	monitor   *service.Health
 	lim       *limits
 	logs      *logger.Ring
+	oauth     *oauth.Registry
 	publicURL string // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
 }
 
@@ -38,20 +40,21 @@ type Deps struct {
 	Services *service.Services
 	Log      *zap.Logger
 	Geo      *geo.Resolver
-	Health   func() error // проверка живости хранилища для /healthz
+	Health   func() error    // проверка живости хранилища для /healthz
 	Monitor  *service.Health // страница /status
-	BaseURL  string       // например https://racion.app; пусто — брать из запроса
-	Metrika  string       // id счётчика Яндекс Метрики для SSR-страниц
-	Contact  string       // почта для юридических страниц (LEGAL_EMAIL)
-	Images   string       // каталог с фото блюд (том фронтенда) для карточек превью
-	Logs     *logger.Ring // последние записи лога для админки
+	BaseURL  string          // например https://racion.app; пусто — брать из запроса
+	Metrika  string          // id счётчика Яндекс Метрики для SSR-страниц
+	Contact  string          // почта для юридических страниц (LEGAL_EMAIL)
+	Images   string          // каталог с фото блюд (том фронтенда) для карточек превью
+	Logs     *logger.Ring    // последние записи лога для админки
+	OAuth    *oauth.Registry
 }
 
 func New(d Deps) http.Handler {
 	metrikaID = d.Metrika
 	legalEmail = d.Contact
 	imagesDir = d.Images
-	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs}
+	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)
 	mux.HandleFunc("GET /api/meta", s.meta)
@@ -128,6 +131,10 @@ func New(d Deps) http.Handler {
 	// аккаунт
 	mux.HandleFunc("POST /api/auth/register", s.limited(s.lim.auth, s.register))
 	mux.HandleFunc("POST /api/auth/login", s.limited(s.lim.auth, s.login))
+	mux.HandleFunc("GET /api/auth/providers", s.oauthProviders)
+	mux.HandleFunc("GET /api/auth/oauth/{provider}/start", s.limited(s.lim.auth, s.oauthStart))
+	mux.HandleFunc("GET /api/auth/oauth/{provider}/callback", s.oauthCallback)
+	mux.HandleFunc("POST /api/auth/oauth/{provider}/callback", s.oauthCallback)
 	mux.HandleFunc("POST /api/auth/forgot", s.limited(s.lim.auth, s.forgot))
 	mux.HandleFunc("POST /api/auth/reset", s.limited(s.lim.auth, s.reset))
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
@@ -208,7 +215,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/locales/{code}", s.localeFile)
 	mux.HandleFunc("GET /sitemap.xml", s.sitemap)
 	mux.HandleFunc("GET /sitemap/{file}", s.sitemapLang) // /sitemap/ru.xml … по языку
-	mux.HandleFunc("GET /{file}", s.indexNowKey) // /<key>.txt в корне: ключ IndexNow действует на весь сайт только из корня
+	mux.HandleFunc("GET /{file}", s.indexNowKey)         // /<key>.txt в корне: ключ IndexNow действует на весь сайт только из корня
 	mux.HandleFunc("GET /robots.txt", s.robots)
 	return s.withLogging(s.withRecover(s.withHeaders(s.withLimit(s.withUser(mux)))))
 }

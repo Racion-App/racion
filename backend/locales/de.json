@@ -1365,5 +1365,8 @@
   "status.c.push.desc": "Schlüssel der Push-Dienste sind eingerichtet",
   "status.c.search": "Suchindexierung",
   "status.c.search.desc": "Suchmaschinen erfahren von neuen Rezepten",
-  "status.foot": "Dieselben Daten als JSON:"
+  "status.foot": "Dieselben Daten als JSON:",
+  "auth.via": "Oder anmelden mit",
+  "auth.via.one": "Anmelden mit {name}",
+  "auth.oauth.error": "Die Anmeldung über den Dienst hat nicht geklappt. Versuchen Sie es erneut oder nutzen Sie die E-Mail."
 }

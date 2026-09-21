@@ -1334,5 +1334,8 @@
   "why.leftover": "昨天的剩菜",
   "why.lighter": "热量低于目标",
   "why.pricier": "超出预算，但更有品种",
-  "why.wanted": "您要求的：{0}"
+  "why.wanted": "您要求的：{0}",
+  "auth.via": "或使用以下方式登录",
+  "auth.via.one": "使用{name}登录",
+  "auth.oauth.error": "通过该服务登录失败。请重试或使用邮箱登录。"
 }

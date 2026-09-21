@@ -1360,5 +1360,8 @@
   "status.c.push.desc": "Push service keys are configured",
   "status.c.search": "Search indexing",
   "status.c.search.desc": "Search engines learn about new recipes",
-  "status.foot": "Same data as JSON:"
+  "status.foot": "Same data as JSON:",
+  "auth.via": "Or continue with",
+  "auth.via.one": "Continue with {name}",
+  "auth.oauth.error": "Sign-in with that service failed. Try again or use your email."
 }

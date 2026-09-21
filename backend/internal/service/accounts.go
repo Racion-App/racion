@@ -32,7 +32,11 @@ type Accounts struct {
 	purchases PurchaseRepo
 	catalog   *planner.CatalogRef
 	mediaOwns func(url string) bool // ссылка ведёт в наше хранилище фото
+	importPic func(ctx context.Context, userID, src string) (string, error) // аватар от внешнего сервиса → наше хранилище
 }
+
+// SetAvatarImporter — как забирать аватар у провайдера входа (CSP не пускает чужие картинки).
+func (a *Accounts) SetAvatarImporter(f func(ctx context.Context, userID, src string) (string, error)) { a.importPic = f }
 
 type Credentials struct {
 	Email    string `json:"email"`
@@ -84,11 +88,56 @@ func (a *Accounts) Register(ctx context.Context, c Credentials, claimPlan string
 	return u, s, err
 }
 
+// OAuthProfile — что рассказал внешний сервис.
+type OAuthProfile struct {
+	Provider, ID, Email, Name, Avatar string
+}
+
+// LoginOAuth — вход через внешний сервис: знакомый аккаунт → сессия; незнакомый с известной почтой →
+// привязка к существующему пользователю; иначе новый пользователь без пароля (его можно задать через
+// «забыли пароль»). Без почты от провайдера — служебный адрес, который человек потом меняет в кабинете.
+func (a *Accounts) LoginOAuth(ctx context.Context, pr OAuthProfile, claimPlan string) (domain.User, domain.Session, error) {
+	if pr.ID == "" {
+		return domain.User{}, domain.Session{}, domain.Invalid("auth.oauth.failed")
+	}
+	u, err := a.users.ByOAuth(ctx, pr.Provider, pr.ID)
+	if errors.Is(err, domain.ErrNotFound) {
+		email := strings.ToLower(strings.TrimSpace(pr.Email))
+		if _, perr := mail.ParseAddress(email); perr != nil {
+			email = pr.Provider + "-" + pr.ID + "@login.racion.app"
+		}
+		u, _, err = a.users.ByEmail(ctx, email)
+		if errors.Is(err, domain.ErrNotFound) {
+			name := strings.TrimSpace(pr.Name)
+			if len(name) > 80 {
+				name = name[:80]
+			}
+			u, err = a.users.Create(ctx, email, "", name)
+			if err == nil && pr.Avatar != "" && a.importPic != nil {
+				if url, perr := a.importPic(ctx, u.ID, pr.Avatar); perr == nil && url != "" {
+					_ = a.users.SetAvatar(ctx, u.ID, url)
+					u.Avatar = url
+				}
+			}
+		}
+		if err != nil {
+			return domain.User{}, domain.Session{}, err
+		}
+		if err := a.users.LinkOAuth(ctx, pr.Provider, pr.ID, u.ID, email); err != nil {
+			return domain.User{}, domain.Session{}, err
+		}
+	} else if err != nil {
+		return domain.User{}, domain.Session{}, err
+	}
+	s, err := a.startSession(ctx, u.ID, claimPlan)
+	return u, s, err
+}
+
 // Login проверяет пароль и открывает сессию. Неверная почта и неверный пароль неразличимы.
 func (a *Accounts) Login(ctx context.Context, c Credentials, claimPlan string) (domain.User, domain.Session, error) {
 	c.Email = strings.ToLower(strings.TrimSpace(c.Email))
 	u, hash, err := a.users.ByEmail(ctx, c.Email)
-	if errors.Is(err, domain.ErrNotFound) || (err == nil && bcrypt.CompareHashAndPassword([]byte(hash), []byte(c.Password)) != nil) {
+	if errors.Is(err, domain.ErrNotFound) || (err == nil && (hash == "" || bcrypt.CompareHashAndPassword([]byte(hash), []byte(c.Password)) != nil)) {
 		return domain.User{}, domain.Session{}, domain.ErrUnauthorized
 	}
 	if err != nil {

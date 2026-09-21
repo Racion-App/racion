@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
+import { OAuthButtons } from "../components/OAuthButtons";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { track } from "../lib/analytics";
@@ -22,9 +23,9 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const { t } = useT();
+  const [error, setError] = useState<string | null>(sp.get("error") === "oauth" ? t("auth.oauth.error") : null);
+  const [busy, setBusy] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -117,6 +118,7 @@ export function Login() {
           {planId && <p className="auth__foot">{t("auth.planSaved")}</p>}
         </form>
         )}
+        {(mode === "login" || mode === "register") && <OAuthButtons plan={planId} next={safeNext || undefined} />}
         <p className="auth__foot">
           {t("auth.noAccount", { link: "\u0000" }).split("\u0000")[0]}
           <Link to="/">{t("auth.noAccount.link")}</Link>

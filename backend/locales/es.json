@@ -1334,5 +1334,8 @@
   "why.leftover": "sobras de ayer",
   "why.lighter": "más ligero que la meta",
   "why.pricier": "supera el presupuesto, pero hay más variedad",
-  "why.wanted": "pediste: {0}"
+  "why.wanted": "pediste: {0}",
+  "auth.via": "O continuar con",
+  "auth.via.one": "Continuar con {name}",
+  "auth.oauth.error": "No se pudo iniciar sesión con ese servicio. Inténtalo de nuevo o usa tu correo."
 }

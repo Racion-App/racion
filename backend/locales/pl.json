@@ -1347,5 +1347,8 @@
   "why.leftover": "wczorajsze resztki",
   "why.lighter": "lżejsze niż norma",
   "why.pricier": "ponad budżet, ale większa różnorodność",
-  "why.wanted": "według twoich życzeń: {0}"
+  "why.wanted": "według twoich życzeń: {0}",
+  "auth.via": "Albo zaloguj się przez",
+  "auth.via.one": "Zaloguj się przez {name}",
+  "auth.oauth.error": "Logowanie przez tę usługę nie powiodło się. Spróbuj ponownie albo użyj e-maila."
 }

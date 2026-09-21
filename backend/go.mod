@@ -5,6 +5,7 @@ go 1.26.0
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
 	github.com/gen2brain/webp v0.6.4
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/minio/minio-go/v7 v7.3.0
 	github.com/oschwald/maxminddb-golang/v2 v2.6.0
@@ -19,7 +20,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect

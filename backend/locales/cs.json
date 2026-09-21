@@ -1347,5 +1347,8 @@
   "why.leftover": "včerejší zbytek",
   "why.lighter": "lehčí než stanovená norma",
   "why.pricier": "nad rozpočet, ale větší rozmanitost",
-  "why.wanted": "požadovali jste: {0}"
+  "why.wanted": "požadovali jste: {0}",
+  "auth.via": "Nebo pokračovat přes",
+  "auth.via.one": "Pokračovat přes {name}",
+  "auth.oauth.error": "Přihlášení přes tuto službu se nezdařilo. Zkuste to znovu nebo použijte e-mail."
 }

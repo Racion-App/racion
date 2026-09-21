@@ -1852,3 +1852,10 @@ main.pages.is-loading {
 .install__done { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 8px; color: var(--ds-green); font-weight: 600; }
 // день, к которому пришли из уведомления: подсветка на несколько секунд
 .day--focus { animation: reprint 2.4s var(--ds-ease-standard); }
+
+// Вход через внешние сервисы: разделитель «или» и ряд кнопок с монограммами
+.oauth { display: grid; gap: 12px; margin-top: 16px;
+  &__sep { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ds-label-tertiary);
+    &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--ds-separator); } }
+  &__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+  &__btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; font-weight: 600; text-decoration: none; svg { flex: 0 0 auto; } } }

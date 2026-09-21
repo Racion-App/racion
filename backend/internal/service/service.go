@@ -26,6 +26,8 @@ type UserRepo interface {
 	SetRole(ctx context.Context, id, role string) error
 	NickOf(ctx context.Context, id string) (string, error)
 	SetDefaults(ctx context.Context, id string, defaults json.RawMessage) error
+	ByOAuth(ctx context.Context, provider, providerID string) (domain.User, error)
+	LinkOAuth(ctx context.Context, provider, providerID, userID, email string) error
 }
 
 // ResetRepo — одноразовые токены восстановления пароля
