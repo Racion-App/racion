@@ -149,6 +149,7 @@ func (s *Server) importRecipeImage(ctx context.Context, u *domain.User, rc *doma
 		rc.Image = ""
 		return "photo storage is off"
 	}
+	s.svc.Media.SetUnlimited(u.ID) // правки каталога — только админы и ключи API: квота на фото не нужна
 	p, err := s.svc.Media.Import(ctx, u.ID, "recipe", src)
 	if err != nil {
 		rc.Image = ""
@@ -201,6 +202,7 @@ func (s *Server) adminRecipePhoto(w http.ResponseWriter, r *http.Request) {
 	if u == nil {
 		return
 	}
+	s.svc.Media.SetUnlimited(u.ID)
 	r.Body = http.MaxBytesReader(w, r.Body, media.MaxUpload+64<<10)
 	f, _, err := r.FormFile("file")
 	if err != nil {

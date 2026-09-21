@@ -21,13 +21,24 @@ import (
 const uploadsPerHour = 40
 
 type Media struct {
-	store *media.Store
-	mu    sync.Mutex
-	usage map[string][]time.Time
+	store     *media.Store
+	mu        sync.Mutex
+	usage     map[string][]time.Time
+	unlimited map[string]bool // админы и владельцы ключей API: без квоты на загрузки
+}
+
+// SetUnlimited — снять квоту на загрузки с пользователя (админ или запрос с ключом API).
+func (m *Media) SetUnlimited(userID string) {
+	if m == nil {
+		return
+	}
+	m.mu.Lock()
+	m.unlimited[userID] = true
+	m.mu.Unlock()
 }
 
 func NewMedia(store *media.Store) *Media {
-	return &Media{store: store, usage: map[string][]time.Time{}}
+	return &Media{store: store, usage: map[string][]time.Time{}, unlimited: map[string]bool{}}
 }
 
 func (m *Media) Enabled() bool { return m != nil && m.store.Enabled() }
@@ -62,6 +73,9 @@ func (m *Media) Upload(ctx context.Context, userID, kind string, r io.Reader) (m
 func (m *Media) allow(userID string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.unlimited[userID] {
+		return true
+	}
 	now := time.Now()
 	keep := m.usage[userID][:0]
 	for _, t := range m.usage[userID] {

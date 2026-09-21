@@ -18,6 +18,9 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("kind") == "offer" && s.requirePerm(w, r, service.PermPartners) == nil {
 		return
 	}
+	if s.unlimited(r) {
+		s.svc.Media.SetUnlimited(u.ID)
+	}
 	r.Body = http.MaxBytesReader(w, r.Body, media.MaxUpload+64<<10)
 	f, _, err := r.FormFile("file")
 	if err != nil {
