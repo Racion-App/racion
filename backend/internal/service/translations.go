@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -51,6 +52,7 @@ type Translations struct {
 	catalog    *planner.CatalogRef
 	catTexts   CatalogI18n
 	reload     func(ctx context.Context) error
+	mu         sync.Mutex
 	dirty      bool
 	lastReload time.Time
 }
@@ -91,6 +93,8 @@ func (t *Translations) EnqueueCatalogMissing(ctx context.Context) (int, error) {
 }
 
 func (t *Translations) maybeReload(ctx context.Context, force bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	if !t.dirty || t.reload == nil || (!force && time.Since(t.lastReload) < 2*time.Minute) {
 		return
 	}
@@ -202,12 +206,22 @@ func (t *Translations) kick() {
 }
 
 // Run — воркер: берёт следующую задачу, переводит, пишет статус. Без свободного провайдера ждёт минуту.
+// translationWorkers — параллельных переводов; лимит провайдера держит пул (reserve), а один перевод ждёт ответа ~30 с.
+const translationWorkers = 3
+
 func (t *Translations) Run(ctx context.Context) {
 	if !t.Enabled() {
 		return
 	}
 	// зависшие «running» после перезапуска — обратно в очередь
 	_ = t.repo.ResetStale(ctx, 10*time.Minute)
+	for i := 1; i < translationWorkers; i++ {
+		go t.loop(ctx)
+	}
+	t.loop(ctx)
+}
+
+func (t *Translations) loop(ctx context.Context) {
 	for {
 		did, err := t.step(ctx)
 		if ctx.Err() != nil {
@@ -290,7 +304,9 @@ func (t *Translations) step(ctx context.Context) (bool, error) {
 		if err := t.catTexts.SetI18n(ctx, recipeID, lang, text); err != nil {
 			return false, err
 		}
+		t.mu.Lock()
 		t.dirty = true
+		t.mu.Unlock()
 		t.maybeReload(ctx, false)
 	} else if err := t.texts.SetI18n(ctx, recipeID, lang, text); err != nil {
 		return false, err

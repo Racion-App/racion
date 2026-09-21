@@ -24,10 +24,12 @@ func (r *Translations) Enqueue(ctx context.Context, recipeID string, langs []str
 	return nil
 }
 
-// Next — самая старая задача в очереди.
+// Next — самая старая задача в очереди; сразу помечается running, чтобы параллельные воркеры не взяли одну и ту же.
 func (r *Translations) Next(ctx context.Context) (string, string, bool, error) {
 	var id, lang string
-	err := r.pool.QueryRow(ctx, `SELECT recipe_id, lang FROM recipe_translations WHERE status = 'queued' ORDER BY updated_at LIMIT 1`).Scan(&id, &lang)
+	err := r.pool.QueryRow(ctx, `UPDATE recipe_translations SET status = 'running', updated_at = now()
+		WHERE (recipe_id, lang) = (SELECT recipe_id, lang FROM recipe_translations WHERE status = 'queued' ORDER BY updated_at LIMIT 1 FOR UPDATE SKIP LOCKED)
+		RETURNING recipe_id, lang`).Scan(&id, &lang)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", "", false, nil
