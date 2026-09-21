@@ -788,7 +788,8 @@ body.catside-open { overflow: hidden; }
   &__n { font-size: 14px; font-weight: 500; color: var(--ds-label-tertiary); } }
 .colcard { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: var(--ds-radius-lg); overflow: hidden; background: var(--ds-fill-3); color: #fff; text-decoration: none; scroll-snap-align: start; box-shadow: var(--ds-shadow-xs);
   &__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; &--empty { background: linear-gradient(135deg, var(--ds-blue), var(--ds-purple)); } }
-  &__body { position: absolute; inset: auto 0 0; padding: 32px 14px 12px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.72)); display: grid; gap: 2px; b { font-size: 16px; font-weight: 700; } small { font-size: 12px; opacity: 0.85; } }
+  // Затемнение начинается выше подписи, чтобы заголовок не тонул в светлых фото; тень страхует на самых ярких
+  &__body { position: absolute; inset: auto 0 0; padding: 48px 14px 12px; background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0.86) 100%); display: grid; gap: 2px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); b { font-size: 16px; font-weight: 700; } small { font-size: 12px; opacity: 0.92; } }
   &:hover { opacity: 1; .colcard__img { transform: scale(1.03); } } .colcard__img { transition: transform var(--ds-dur-base) var(--ds-ease-standard); } }
 // Переводы подборки в админ-форме: сворачиваемый блок, строка на язык — флаг, имя, название, описание
 .admin__i18n { border: 1px solid var(--ds-separator); border-radius: var(--ds-radius-md); padding: 10px 14px;
@@ -1690,7 +1691,9 @@ main.pages.is-loading {
     &::after { content: "+"; font-size: 20px; line-height: 1; color: var(--ds-label-tertiary); flex: 0 0 auto; } }
   &[open] summary::after { content: "–"; }
   p { margin: 8px 0 0; color: var(--ds-label-secondary); } }
-.colstrip__row--wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+// «Другие подборки» внизу страницы подборки: сечение без карточки, только линия сверху
+.colothers { border-top: 1px solid var(--ds-separator); padding-top: 20px; margin-top: 8px; }
+.colstrip__row--wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; .colmini { width: auto; } }
 
 // Страна и валюта в шапке: флаг страны и знак валюты в одной кнопке
 .theme-btn--country { width: auto; padding: 0 9px 0 8px; gap: 5px; display: inline-flex; align-items: center;

@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"go.uber.org/zap"
@@ -15,6 +16,11 @@ import (
 	"racion/internal/planner"
 	"racion/internal/service"
 )
+
+// Подборки, влитые в более полные: старый адрес ведёт на новый, чтобы не держать две страницы на один запрос.
+var mergedCollections = map[string]string{
+	"quick-dinners": "quick20",
+}
 
 // Коллекции рецептов пользователя.
 
@@ -177,6 +183,10 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rememberCountry(w, r)
+	if to, ok := mergedCollections[r.PathValue("slug")]; ok {
+		http.Redirect(w, r, pl.P+"/collection/"+to, http.StatusMovedPermanently)
+		return
+	}
 	col, recipes, err := s.svc.Collections.BySlug(r.Context(), r.PathValue("slug"))
 	if err != nil {
 		s.notFoundPage(w, r)
@@ -269,13 +279,33 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 	}
 	var others []colCard
 	allCurated := s.svc.Collections.Curated(r.Context())
+	// сначала подборки с общими рецептами (они ближе по теме), потом остальные по порядку
+	mine := map[string]bool{}
+	for _, id := range col.Recipes {
+		mine[id] = true
+	}
+	type scored struct {
+		c     domain.Collection
+		share int
+	}
+	var cand []scored
 	for _, oc := range allCurated {
 		if oc.ID == col.ID || !oc.Public {
 			continue
 		}
-		oc = oc.Localized(string(pl.L))
+		n := 0
+		for _, id := range oc.Recipes {
+			if mine[id] {
+				n++
+			}
+		}
+		cand = append(cand, scored{oc, n})
+	}
+	sort.SliceStable(cand, func(i, j int) bool { return cand[i].share > cand[j].share })
+	for _, sc := range cand {
+		oc := sc.c.Localized(string(pl.L))
 		others = append(others, colCard{Name: oc.Name, Slug: oc.Slug, Cover: oc.CoverAuto, Href: pl.P + "/collection/" + oc.Slug, Count: len(oc.Recipes)})
-		if len(others) >= 6 {
+		if len(others) >= 8 {
 			break
 		}
 	}
