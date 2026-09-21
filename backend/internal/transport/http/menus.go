@@ -77,7 +77,7 @@ func (s *Server) menuPlan(m menuPreset, pl pageLocale) planner.Plan {
 }
 
 func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
-	pl, ok := s.localeFromPath(r)
+	pl, ok := s.stableLocale(r)
 	if !ok || !topicLang(pl.L) {
 		s.notFoundPage(w, r)
 		return
@@ -87,7 +87,6 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		s.notFoundPage(w, r)
 		return
 	}
-	rememberCountry(w, r)
 	l := pl.L
 	base := s.baseURL(r)
 	plan := s.menuPlan(m, pl)

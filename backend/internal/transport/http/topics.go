@@ -142,7 +142,7 @@ type cutList struct {
 }
 
 func (s *Server) cookPage(w http.ResponseWriter, r *http.Request) {
-	pl, ok := s.localeFromPath(r)
+	pl, ok := s.stableLocale(r)
 	if !ok || !topicLang(pl.L) {
 		s.notFoundPage(w, r)
 		return
@@ -152,7 +152,6 @@ func (s *Server) cookPage(w http.ResponseWriter, r *http.Request) {
 		s.notFoundPage(w, r)
 		return
 	}
-	rememberCountry(w, r)
 	l := pl.L
 	recipes := s.topicRecipes(t)
 	if len(recipes) < 4 {
@@ -343,7 +342,7 @@ func topicOG(base, cover string, l i18n.Lang) string {
 
 // cookHubPage — /cook: все темы с числом рецептов.
 func (s *Server) cookHubPage(w http.ResponseWriter, r *http.Request) {
-	pl, ok := s.localeFromPath(r)
+	pl, ok := s.stableLocale(r)
 	if !ok || !topicLang(pl.L) {
 		s.notFoundPage(w, r)
 		return

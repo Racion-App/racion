@@ -81,6 +81,21 @@ type pageLocale struct {
 // langCountry — страна по умолчанию для языка из _meta локали.
 func langCountry(l i18n.Lang) string { return i18n.Meta(l).Country }
 
+// stableLocale — для страниц под поисковик (темы, недельные меню) страна берётся по языку, а не по IP или
+// cookie: у роботов и читателей из разных стран должна быть одна и та же страница; ?country= всё ещё работает.
+func (s *Server) stableLocale(r *http.Request) (pageLocale, bool) {
+	pl, ok := s.localeFromPath(r)
+	if !ok {
+		return pl, ok
+	}
+	if _, explicit := countryValid(r.URL.Query().Get("country")); !explicit {
+		if cy, ok := countryValid(langCountry(pl.L)); ok {
+			pl.Country = cy
+		}
+	}
+	return pl, true
+}
+
 func (s *Server) localeFromPath(r *http.Request) (pageLocale, bool) {
 	l := i18n.RU
 	if p := r.URL.Path; len(p) > 3 && p[0] == '/' && p[3] == '/' {
