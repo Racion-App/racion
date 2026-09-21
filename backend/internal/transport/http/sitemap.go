@@ -59,6 +59,23 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	for _, col := range curated {
 		url("/collection/"+col.Slug, "weekly", "0.7")
 	}
+	// «Что приготовить из …» есть только на ru, en, de
+	if topicLang(l) {
+		urlTopics := func(path string) {
+			fmt.Fprintf(&b, "<url><loc>%s%s%s</loc>", base, p, path)
+			for _, al := range topicLangs {
+				fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="%s" href="%s%s%s"/>`, al, base, prefix(al), path)
+			}
+			fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s%s"/>`, base, path)
+			b.WriteString("<changefreq>weekly</changefreq><priority>0.7</priority></url>\n")
+		}
+		urlTopics("/cook")
+		for _, t := range topics {
+			if len(s.topicRecipes(t)) >= 4 {
+				urlTopics("/cook/" + t.Slug)
+			}
+		}
+	}
 	for _, rc := range s.catalog.Recipes {
 		if rc.Hidden {
 			continue

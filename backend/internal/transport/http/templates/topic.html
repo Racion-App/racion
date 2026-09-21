@@ -1,0 +1,56 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><a href="{{.P}}/cook">{{t .L "cook.hub.title"}}</a><span>›</span><span>{{.Name}}</span></nav>
+
+<header class="colhead colhead--rich">
+  {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512" fetchpriority="high">{{end}}
+  <div class="colhead__body">
+    <p class="colhead__eyebrow">{{t .L "cook.eyebrow"}}</p>
+    <h1 class="colhead__title">{{.H1}}</h1>
+    {{if .Facts}}<ul class="colfacts">{{range .Facts}}<li><b class="num">{{.Value}}</b><span>{{.Label}}</span></li>{{end}}</ul>{{end}}
+    {{if .Cuts}}<div class="rpage__tags">{{range .Cuts}}<a class="chip chip--sm" href="#cut-{{.Key}}">{{.Title}} <span class="num">{{.Total}}</span></a>{{end}}</div>{{end}}
+    <div class="coltext">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+    <div class="colhead__actions">
+      <a class="btn btn-primary btn-lg" href="/">{{t .L "page.foot.plan"}}</a>
+      <a class="btn btn-soft btn-lg" href="{{.CatalogHref}}">{{t .L "cook.catalog"}}</a>
+    </div>
+  </div>
+</header>
+
+{{range .Groups}}
+<section class="rpage__section colgroup" aria-labelledby="g-{{.Key}}">
+  <div class="rpage__section-head">
+    <h2 class="catsection" id="g-{{.Key}}">{{.Title}} <span class="catsection__n num">{{.Total}}</span></h2>
+  </div>
+  <div class="rgrid">{{range .Cards}}{{template "card" .}}{{end}}</div>
+  {{if gt .Total (len .Cards)}}<p class="rpage__note">{{t $.L "cook.more" (sub .Total (len .Cards))}} <a href="{{$.CatalogHref}}">{{t $.L "cook.catalog"}}</a></p>{{end}}
+</section>
+{{end}}
+
+{{range .Cuts}}
+<section class="rpage__section colgroup" aria-labelledby="cut-{{.Key}}">
+  <div class="rpage__section-head">
+    <h2 class="catsection" id="cut-{{.Key}}">{{$.H1}}: {{.Title}} <span class="catsection__n num">{{.Total}}</span></h2>
+  </div>
+  <div class="rgrid rgrid--tight">{{range .Cards}}{{template "card" .}}{{end}}</div>
+</section>
+{{end}}
+
+{{if .FAQ}}
+<section class="colhow" aria-label="{{t .L "coll.faq"}}">
+  <div class="colhow__col">
+    <h2>{{t .L "coll.faq"}}</h2>
+    {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+  </div>
+</section>
+{{end}}
+
+{{if .Others}}
+<section class="rpage__section colothers" aria-labelledby="more-topics">
+  <div class="rpage__section-head">
+    <h2 id="more-topics">{{t .L "cook.others"}}</h2>
+    <a class="rpage__more" href="{{.P}}/cook">{{t .L "cook.hub.title"}}</a>
+  </div>
+  <div class="rpage__tags">{{range .Others}}<a class="chip" href="{{.Href}}">{{.Name}} <span class="num">{{.Count}}</span></a>{{end}}</div>
+</section>
+{{end}}
+{{template "foot" .}}

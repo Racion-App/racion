@@ -199,6 +199,12 @@
     <div class="rgrid rgrid--tight">{{range .Sides}}{{template "card" .}}{{end}}</div>
   </section>
   {{end}}
+  {{if .Topics}}
+  <section class="rpage__foot rpage__section" aria-labelledby="topics">
+    <div class="rpage__section-head"><h2 id="topics">{{t .L "cook.eyebrow"}}</h2></div>
+    <div class="rpage__tags">{{range .Topics}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
+  </section>
+  {{end}}
   {{if .InCollections}}
   <section class="rpage__foot rpage__section" aria-labelledby="incols">
     <div class="rpage__section-head"><h2 id="incols">{{t .L "recipe.incollections"}}</h2></div>

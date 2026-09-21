@@ -1,0 +1,11 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><span>{{t .L "cook.hub.title"}}</span></nav>
+<h1 class="pages__title">{{t .L "cook.hub.title"}}</h1>
+<p class="pages__lead">{{t .L "cook.hub.lead" .Total}}</p>
+<div class="colstrip__row colstrip__row--grid">
+  {{range .Items}}<a class="colcard" href="{{.Href}}">
+    {{if .Cover}}<img class="colcard__img" src="{{.Cover}}" alt="" loading="lazy">{{else}}<span class="colcard__img colcard__img--empty" aria-hidden="true"></span>{{end}}
+    <span class="colcard__body"><b>{{t $.L "cook.h1" .Of}}</b><small>{{.Count}} {{t $.L "recipes.n"}}</small></span>
+  </a>{{end}}
+</div>
+{{template "foot" .}}

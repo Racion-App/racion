@@ -413,8 +413,8 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	data := map[string]any{
-		"InCollections": inCols,
-		"Viewer":        viewer, "Stats": stats, "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
+		"InCollections": inCols, "Topics": s.topicsFor(rc, l, pl.P),
+		"Viewer": viewer, "Stats": stats, "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
 		"Base": pageBase{User: currentUser(r) != nil, Title: tx.Title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
 			Alternates: s.alternates(r, "/recipe/"+rc.ID), NoIndex: rc.Own},
 		"L": l, "P": pl.P, "Country": pl.Country,
