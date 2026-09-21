@@ -48,22 +48,28 @@ func StoreLevel(kind string) int {
 	}
 }
 
-func TierLevel(tier string) int {
+// TierLevel — какой магазин нужен продукту в стране. Разметка premium сделана по российским сетям (утка,
+// мидии, вырезка есть только в гипермаркетах); в Европе и США это обычный супермаркетный ассортимент.
+func TierLevel(tier, country string) int {
 	switch tier {
 	case "super":
 		return 2
 	case "premium":
-		return 3
+		switch country {
+		case "RU", "BY", "KZ", "":
+			return 3
+		}
+		return 2
 	}
 	return 0
 }
 
 // Unavailable — продукты рецепта, которых в магазине такого вида обычно нет.
-func (c *Catalog) Unavailable(r Recipe, storeKind string) []Ingredient {
+func (c *Catalog) Unavailable(r Recipe, storeKind, country string) []Ingredient {
 	lvl := StoreLevel(storeKind)
 	var out []Ingredient
 	for _, ri := range r.Ingredients {
-		if ing, ok := c.Ingredients[ri.IngredientID]; ok && TierLevel(ing.Tier) > lvl {
+		if ing, ok := c.Ingredients[ri.IngredientID]; ok && TierLevel(ing.Tier, country) > lvl {
 			out = append(out, ing)
 		}
 	}

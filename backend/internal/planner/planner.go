@@ -266,7 +266,7 @@ func (c *Catalog) allowed(r Recipe, e effective) bool {
 		if !ok {
 			return false
 		}
-		if TierLevel(ing.Tier) > e.storeLevel && !slices.Contains(e.Have, ri.IngredientID) {
+		if TierLevel(ing.Tier, e.Country) > e.storeLevel && !slices.Contains(e.Have, ri.IngredientID) {
 			return false // в «Пятёрочке» утки нет: не предлагать, пока не выбран магазин побольше
 		}
 		for _, a := range ing.Allergens {

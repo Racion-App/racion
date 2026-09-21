@@ -194,7 +194,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 				dearest = line
 			}
 		}
-		if lvl := planner.TierLevel(ing.Tier); lvl > 0 {
+		if lvl := planner.TierLevel(ing.Tier, pl.Country.Code); lvl > 0 {
 			var names []string
 			for _, st := range s.catalog.StoresOf(pl.Country.Code) {
 				if planner.StoreLevel(st.Kind) >= lvl {
