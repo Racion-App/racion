@@ -234,7 +234,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /sitemap/{file}", s.sitemapLang) // /sitemap/ru.xml … по языку
 	mux.HandleFunc("GET /{file}", s.indexNowKey)         // /<key>.txt в корне: ключ IndexNow действует на весь сайт только из корня
 	mux.HandleFunc("GET /robots.txt", s.robots)
-	return s.withLogging(s.withRecover(s.withHeaders(s.withLimit(s.withUser(mux)))))
+	return s.withLogging(s.withRecover(s.withHeaders(s.withUser(s.withLimit(mux))))) // пользователь известен до лимита: админы без лимитов
 }
 
 // ── Middleware ─────────────────────────────────────────────────────────────

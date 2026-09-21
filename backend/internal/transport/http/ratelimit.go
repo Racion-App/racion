@@ -90,10 +90,20 @@ func tooMany(w http.ResponseWriter, r *http.Request) {
 	writeErr(w, http.StatusTooManyRequests, i18n.T(i18n.FromRequest(r), "api.toomany"))
 }
 
+// unlimited — лимиты не считаем для ключей API (их выдают только админам) и для админов и модераторов,
+// вошедших по сессии: их скрипты и пакетные загрузки не должны упираться в защиту от ботов.
+func (s *Server) unlimited(r *http.Request) bool {
+	if strings.HasPrefix(r.Header.Get("Authorization"), "Bearer rk_") {
+		return true
+	}
+	u := currentUser(r)
+	return u != nil && s.svc.Admin.Role(u) != ""
+}
+
 // withLimit — общий лимит на /api по IP; точечные лимиты навешиваются на ручки через limited().
 func (s *Server) withLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") && !s.lim.api.allow(geo.ClientIP(r)) {
+		if strings.HasPrefix(r.URL.Path, "/api/") && !s.unlimited(r) && !s.lim.api.allow(geo.ClientIP(r)) {
 			tooMany(w, r)
 			return
 		}
@@ -103,7 +113,7 @@ func (s *Server) withLimit(next http.Handler) http.Handler {
 
 func (s *Server) limited(l *limiter, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !l.allow(geo.ClientIP(r)) {
+		if !s.unlimited(r) && !l.allow(geo.ClientIP(r)) {
 			tooMany(w, r)
 			return
 		}
