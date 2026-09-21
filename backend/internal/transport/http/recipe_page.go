@@ -377,8 +377,32 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		}
 		cviews = append(cviews, commentView{c, when})
 	}
+	// подборки, где есть этот рецепт: перелинковка на страницы-вопросы («Что приготовить на ужин»)
+	type colLink struct {
+		Name, Href, Cover string
+		Count             int
+	}
+	var inCols []colLink
+	if !rc.Own {
+		for _, oc := range s.svc.Collections.Curated(r.Context()) {
+			if !oc.Public {
+				continue
+			}
+			for _, id := range oc.Recipes {
+				if id == rc.ID {
+					oc = oc.Localized(string(l))
+					inCols = append(inCols, colLink{Name: oc.Name, Href: pl.P + "/collection/" + oc.Slug, Cover: oc.CoverAuto, Count: len(oc.Recipes)})
+					break
+				}
+			}
+			if len(inCols) >= 4 {
+				break
+			}
+		}
+	}
 	data := map[string]any{
-		"Viewer": viewer, "Stats": stats, "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
+		"InCollections": inCols,
+		"Viewer":        viewer, "Stats": stats, "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
 		"Base": pageBase{User: currentUser(r) != nil, Title: tx.Title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
 			Alternates: s.alternates(r, "/recipe/"+rc.ID), NoIndex: rc.Own},
 		"L": l, "P": pl.P, "Country": pl.Country,

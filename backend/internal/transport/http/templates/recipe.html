@@ -199,6 +199,17 @@
     <div class="rgrid rgrid--tight">{{range .Sides}}{{template "card" .}}{{end}}</div>
   </section>
   {{end}}
+  {{if .InCollections}}
+  <section class="rpage__foot rpage__section" aria-labelledby="incols">
+    <div class="rpage__section-head"><h2 id="incols">{{t .L "recipe.incollections"}}</h2></div>
+    <div class="colstrip__row colstrip__row--wrap">
+      {{range .InCollections}}<a class="colmini" href="{{.Href}}">
+        {{if .Cover}}<img class="colmini__img" src="{{.Cover}}" alt="" loading="lazy">{{else}}<span class="colmini__img colmini__img--empty" aria-hidden="true"></span>{{end}}
+        <span class="colmini__body"><b>{{.Name}}</b><small>{{.Count}} {{t $.L "recipes.n"}}</small></span>
+      </a>{{end}}
+    </div>
+  </section>
+  {{end}}
   {{if .Related}}
   <section class="rpage__foot rpage__section" aria-labelledby="rel">
     <div class="rpage__section-head">
