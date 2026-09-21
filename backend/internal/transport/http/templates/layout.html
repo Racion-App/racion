@@ -93,6 +93,11 @@
       <a href="{{.P}}/recipes?slot=dinner">{{t .L "slot.dinner"}}</a>
       <a href="{{.P}}/recipes?tag=kidmenu">{{t .L "foot.kids"}}</a>
     </div>
+    {{with featured .L .P}}<div class="sitefoot__col">
+      <h3>{{t $.L "foot.cook"}}</h3>
+      {{range .}}<a href="{{.Href}}">{{.Name}}</a>{{end}}
+      <a href="{{$.P}}/collections">{{t $.L "foot.cook.all"}}</a>
+    </div>{{end}}
     <div class="sitefoot__col">
       <h3>{{t .L "foot.app"}}</h3>
       <a href="/">{{t .L "page.foot.plan"}}</a>

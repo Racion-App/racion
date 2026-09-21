@@ -1342,5 +1342,7 @@
   "admin.recipe.publish": "发布",
   "admin.recipe.hide": "隐藏",
   "admin.recipe.published": "菜谱已发布",
-  "admin.recipe.hidden.done": "菜谱已隐藏"
+  "admin.recipe.hidden.done": "菜谱已隐藏",
+  "foot.cook": "做什么菜",
+  "foot.cook.all": "全部合集"
 }

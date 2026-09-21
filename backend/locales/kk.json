@@ -1342,5 +1342,7 @@
   "admin.recipe.publish": "Жариялау",
   "admin.recipe.hide": "Жасыру",
   "admin.recipe.published": "Рецепт жарияланды",
-  "admin.recipe.hidden.done": "Рецепт жасырылды"
+  "admin.recipe.hidden.done": "Рецепт жасырылды",
+  "foot.cook": "Не пісіруге болады",
+  "foot.cook.all": "Барлық топтамалар"
 }

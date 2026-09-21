@@ -1341,5 +1341,7 @@
   "admin.recipe.publish": "Yayınla",
   "admin.recipe.hide": "Gizle",
   "admin.recipe.published": "Tarif yayınlandı",
-  "admin.recipe.hidden.done": "Tarif gizlendi"
+  "admin.recipe.hidden.done": "Tarif gizlendi",
+  "foot.cook": "Ne pişirmeli",
+  "foot.cook.all": "Tüm koleksiyonlar"
 }

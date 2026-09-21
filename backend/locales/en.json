@@ -1368,5 +1368,7 @@
   "admin.recipe.publish": "Publish",
   "admin.recipe.hide": "Hide",
   "admin.recipe.published": "Recipe published",
-  "admin.recipe.hidden.done": "Recipe hidden"
+  "admin.recipe.hidden.done": "Recipe hidden",
+  "foot.cook": "What to cook",
+  "foot.cook.all": "All collections"
 }

@@ -886,7 +886,7 @@ main.pages.is-loading {
   &__brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; color: var(--ds-label-primary); svg { color: var(--ds-blue); } }
   &__tag { margin: 0; font-size: 14px; color: var(--ds-label-secondary); max-width: 520px; }
   &__cta { white-space: nowrap; }
-  &__cols { display: grid; gap: 28px 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  &__cols { display: grid; gap: 28px 24px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   &__col { display: grid; gap: 8px; align-content: start;
     h3 { margin: 0 0 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ds-label-tertiary); }
     p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ds-label-tertiary); max-width: 48ch; & + p { margin-top: 2px; } & + a { margin-top: 4px; } } }
@@ -895,7 +895,7 @@ main.pages.is-loading {
   &__copy { margin: 0; font-size: 12.5px; color: var(--ds-label-tertiary); }
   // широкий подвал (каталог, рецепт): бренд · слоган · кнопка в одну строку; узкий (главная, кабинет) — столбиком
   @container (min-width: 720px) { &__top { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; } }
-  @container (max-width: 719px) { &__cols { grid-template-columns: 1fr 1fr; } &__col:last-child { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid var(--ds-separator); } &__top .sitefoot__cta { margin-top: 4px; } }
+  @container (max-width: 719px) { &__cols { grid-template-columns: 1fr 1fr; } &__col:nth-child(2) { grid-column: 1 / -1; } &__col:last-child { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid var(--ds-separator); } &__top .sitefoot__cta { margin-top: 4px; } }
   @container (max-width: 440px) { &__cols { grid-template-columns: 1fr; } &__col:last-child { grid-column: auto; } }
 }
 // карточки без фото ниже карточек с фото: строки не тянутся под самую высокую

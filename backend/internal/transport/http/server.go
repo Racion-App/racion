@@ -4,6 +4,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -54,6 +55,19 @@ func New(d Deps) http.Handler {
 	metrikaID = d.Metrika
 	legalEmail = d.Contact
 	imagesDir = d.Images
+	featuredFn = func(l i18n.Lang, p string) []FootLink {
+		var out []FootLink
+		for _, slug := range featuredSlugs {
+			for _, c := range d.Services.Collections.Curated(context.Background()) {
+				if c.Slug == slug && c.Public {
+					c = c.Localized(string(l))
+					out = append(out, FootLink{Name: c.Name, Href: p + "/collection/" + c.Slug})
+					break
+				}
+			}
+		}
+		return out
+	}
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)

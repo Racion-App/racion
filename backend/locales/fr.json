@@ -1341,5 +1341,7 @@
   "admin.recipe.publish": "Publier",
   "admin.recipe.hide": "Masquer",
   "admin.recipe.published": "Recette publiée",
-  "admin.recipe.hidden.done": "Recette masquée"
+  "admin.recipe.hidden.done": "Recette masquée",
+  "foot.cook": "Quoi cuisiner",
+  "foot.cook.all": "Toutes les sélections"
 }

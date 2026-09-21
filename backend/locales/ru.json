@@ -1386,5 +1386,7 @@
   "admin.recipe.publish": "Опубликовать",
   "admin.recipe.hide": "Скрыть",
   "admin.recipe.published": "Рецепт опубликован",
-  "admin.recipe.hidden.done": "Рецепт скрыт"
+  "admin.recipe.hidden.done": "Рецепт скрыт",
+  "foot.cook": "Что приготовить",
+  "foot.cook.all": "Все подборки"
 }

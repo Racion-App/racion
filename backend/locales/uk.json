@@ -1355,5 +1355,7 @@
   "admin.recipe.publish": "Опублікувати",
   "admin.recipe.hide": "Приховати",
   "admin.recipe.published": "Рецепт опубліковано",
-  "admin.recipe.hidden.done": "Рецепт приховано"
+  "admin.recipe.hidden.done": "Рецепт приховано",
+  "foot.cook": "Що приготувати",
+  "foot.cook.all": "Усі добірки"
 }

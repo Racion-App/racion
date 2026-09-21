@@ -51,7 +51,24 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"plural":   func(l i18n.Lang, n int, key string) string { return i18n.Plural(l, n, key) },
 	"minutes":  func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
 	"langMeta": func(l i18n.Lang) locales.Meta { return i18n.Meta(l) },
+	"featured": func(l i18n.Lang, p string) []FootLink { return featuredLinks(l, p) },
 }).ParseFS(templateFS, "templates/*.html"))
+
+// FootLink — ссылка в подвале на подборку-вопрос («Что приготовить на ужин»): с каждой страницы сайта.
+type FootLink struct{ Name, Href string }
+
+// featuredSlugs — подборки, которые держим в подвале всего сайта: самые частые поисковые вопросы.
+var featuredSlugs = []string{"dinner-ideas", "birthday-table", "new-year-table", "kids-party"}
+
+// featuredFn ставит сервер при старте: шаблоны разбираются раньше, чем есть каталог.
+var featuredFn func(l i18n.Lang, p string) []FootLink
+
+func featuredLinks(l i18n.Lang, p string) []FootLink {
+	if featuredFn == nil {
+		return nil
+	}
+	return featuredFn(l, p)
+}
 
 // pageLang — язык страницы по префиксу пути: /en/..., /de/...; без префикса — русский.
 // Страна для цен: ru → Россия (Росстат), en → США, de → Германия.

@@ -1341,5 +1341,7 @@
   "admin.recipe.publish": "Pubblica",
   "admin.recipe.hide": "Nascondi",
   "admin.recipe.published": "Ricetta pubblicata",
-  "admin.recipe.hidden.done": "Ricetta nascosta"
+  "admin.recipe.hidden.done": "Ricetta nascosta",
+  "foot.cook": "Cosa cucinare",
+  "foot.cook.all": "Tutte le raccolte"
 }

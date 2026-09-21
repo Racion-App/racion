@@ -1355,5 +1355,7 @@
   "admin.recipe.publish": "Opublikuj",
   "admin.recipe.hide": "Ukryj",
   "admin.recipe.published": "Przepis opublikowany",
-  "admin.recipe.hidden.done": "Przepis ukryty"
+  "admin.recipe.hidden.done": "Przepis ukryty",
+  "foot.cook": "Co ugotować",
+  "foot.cook.all": "Wszystkie kolekcje"
 }

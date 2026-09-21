@@ -1355,5 +1355,7 @@
   "admin.recipe.publish": "Zveřejnit",
   "admin.recipe.hide": "Skrýt",
   "admin.recipe.published": "Recept zveřejněn",
-  "admin.recipe.hidden.done": "Recept skryt"
+  "admin.recipe.hidden.done": "Recept skryt",
+  "foot.cook": "Co uvařit",
+  "foot.cook.all": "Všechny sbírky"
 }

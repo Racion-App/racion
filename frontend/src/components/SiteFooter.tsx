@@ -1,13 +1,26 @@
+import { useEffect, useState } from "react";
 import { ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LangButton } from "./LangDialog";
 import { useT } from "../i18n";
+import { api } from "../lib/api";
+
+// Подборки-вопросы в подвале каждой страницы: самые частые запросы, те же, что в серверном подвале
+const FEATURED = ["dinner-ideas", "birthday-table", "new-year-table", "kids-party"];
 
 // Подвал сайта: тот же, что у серверных страниц (layout.html «foot»), чтобы ссылки на каталог,
 // кабинет и юридические страницы были на каждом экране приложения.
 export function SiteFooter() {
   const { t, lang } = useT();
   const p = lang === "ru" ? "" : `/${lang}`;
+  const [featured, setFeatured] = useState<{ slug: string; name: string }[]>([]);
+  useEffect(() => {
+    let alive = true;
+    api.publicCollections(lang)
+      .then((cs) => { if (alive) setFeatured(FEATURED.map((slug) => cs.find((c) => c.slug === slug)).filter((c): c is NonNullable<typeof c> => !!c).map((c) => ({ slug: c.slug!, name: c.name }))); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [lang]);
   return (
     <footer className="sitefoot">
       <div className="sitefoot__top">
@@ -27,6 +40,13 @@ export function SiteFooter() {
           <a href={`${p}/recipes?slot=dinner`}>{t("slot.dinner")}</a>
           <a href={`${p}/recipes?tag=kidmenu`}>{t("foot.kids")}</a>
         </div>
+        {featured.length > 0 && (
+          <div className="sitefoot__col">
+            <h3>{t("foot.cook")}</h3>
+            {featured.map((c) => <a key={c.slug} href={`${p}/collection/${c.slug}`}>{c.name}</a>)}
+            <a href={`${p}/collections`}>{t("foot.cook.all")}</a>
+          </div>
+        )}
         <div className="sitefoot__col">
           <h3>{t("foot.app")}</h3>
           <Link to="/">{t("page.foot.plan")}</Link>

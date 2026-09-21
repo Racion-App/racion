@@ -1373,5 +1373,7 @@
   "admin.recipe.publish": "Veröffentlichen",
   "admin.recipe.hide": "Verbergen",
   "admin.recipe.published": "Rezept veröffentlicht",
-  "admin.recipe.hidden.done": "Rezept verborgen"
+  "admin.recipe.hidden.done": "Rezept verborgen",
+  "foot.cook": "Was kochen",
+  "foot.cook.all": "Alle Sammlungen"
 }

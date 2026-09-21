@@ -1342,5 +1342,7 @@
   "admin.recipe.publish": "公開する",
   "admin.recipe.hide": "非公開にする",
   "admin.recipe.published": "レシピを公開しました",
-  "admin.recipe.hidden.done": "レシピを非公開にしました"
+  "admin.recipe.hidden.done": "レシピを非公開にしました",
+  "foot.cook": "何を作るか",
+  "foot.cook.all": "すべてのコレクション"
 }
