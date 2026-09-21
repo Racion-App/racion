@@ -134,5 +134,5 @@ func (s *Server) statusAPI(w http.ResponseWriter, r *http.Request) {
 		code = 503
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	writeJSON(w, code, map[string]any{"ok": ok, "components": snap, "since": s.monitor.Started().UTC().Format(time.RFC3339), "recipes": len(s.catalog.Recipes)})
+	writeJSON(w, code, map[string]any{"ok": ok, "components": snap, "since": s.monitor.Started().UTC().Format(time.RFC3339), "recipes": s.visibleRecipes()})
 }

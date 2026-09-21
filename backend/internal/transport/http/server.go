@@ -332,11 +332,22 @@ func (s *Server) healthz(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	writeJSON(w, 200, map[string]any{"ok": true, "recipes": len(s.catalog.Recipes)})
+	writeJSON(w, 200, map[string]any{"ok": true, "recipes": s.visibleRecipes()})
 }
 
 // geoCountry — страна посетителя по IP (или по заголовку CF-IPCountry за Cloudflare), только если она
 // среди поддерживаемых; иначе пусто, и клиент подставит страну по языку.
+// visibleRecipes — рецепты базы без скрытых: то, что видят каталог и планировщик.
+func (s *Server) visibleRecipes() int {
+	n := 0
+	for _, rc := range s.catalog.Recipes {
+		if !rc.Hidden {
+			n++
+		}
+	}
+	return n
+}
+
 func (s *Server) geoCountry(r *http.Request) string {
 	code := r.Header.Get("CF-IPCountry")
 	if code == "" && s.geo != nil {
