@@ -30,6 +30,44 @@ type Ingredient struct {
 	Names         map[string]string  `json:"names,omitempty"`  // название на en/de; ru — в Name
 	Prices        map[string]float64 `json:"prices,omitempty"` // ручная цена упаковки по странам (BY, KZ, DE, US) в местной валюте
 	Image         string             `json:"image,omitempty"`  // картинка для подсказки при наведении
+	Tier          string             `json:"tier,omitempty"`   // где продаётся: "" везде, super — супермаркеты и крупнее, premium — гипермаркеты, оптовики, премиум-сети
+}
+
+// StoreLevel — размер ассортимента по виду магазина: у дома и дискаунтеры (0–1), супермаркет (2), гипермаркет,
+// оптовик и премиум-сеть (3). Продукт с Tier доступен, если TierLevel ≤ StoreLevel.
+func StoreLevel(kind string) int {
+	switch kind {
+	case "discounter":
+		return 0
+	case "convenience":
+		return 1
+	case "supermarket":
+		return 2
+	default:
+		return 3
+	}
+}
+
+func TierLevel(tier string) int {
+	switch tier {
+	case "super":
+		return 2
+	case "premium":
+		return 3
+	}
+	return 0
+}
+
+// Unavailable — продукты рецепта, которых в магазине такого вида обычно нет.
+func (c *Catalog) Unavailable(r Recipe, storeKind string) []Ingredient {
+	lvl := StoreLevel(storeKind)
+	var out []Ingredient
+	for _, ri := range r.Ingredients {
+		if ing, ok := c.Ingredients[ri.IngredientID]; ok && TierLevel(ing.Tier) > lvl {
+			out = append(out, ing)
+		}
+	}
+	return out
 }
 
 // LocalName — название продукта на языке.

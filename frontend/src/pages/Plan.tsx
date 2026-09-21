@@ -786,7 +786,7 @@ export function Plan() {
                       </div>
                       <div className="item__qty">
                         <span className="num">{it.atHome ? qty(it.needed, it.unit, lang) : amount}</span>
-                        {it.atHome ? ` ${t("item.athome")}` : it.home ? ` ${t("item.home", { n: qty(it.home, it.unit, lang) })}` : it.pantry ? ` ${t("item.pantry")}` : ""}
+                        {it.atHome ? ` ${t("item.athome")}` : it.home ? ` ${t("item.home", { n: qty(it.home, it.unit, lang) })}` : it.pantry ? ` ${t("item.pantry")}` : !it.loose && it.unit !== "pcs" && it.buy >= it.needed * 1.5 ? ` ${t("item.need", { n: qty(it.needed, it.unit, lang) })}` : ""}
                       </div>
                       <div className="item__used">{it.usedIn.slice(0, 2).join(", ")}</div>
                     </div>

@@ -32,6 +32,7 @@ type ingredient struct {
 	Perishable bool     `json:"perishable"`
 	Pantry     bool     `json:"pantry"`
 	Loose      bool     `json:"loose"`
+	Tier       string   `json:"tier"` // доступность: "" везде, super, premium
 	Rosstat    *struct {
 		Item   int     `json:"item"`
 		Factor float64 `json:"factor"`
@@ -274,13 +275,13 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 				prices[k] = v
 			}
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO ingredients (id, name, category, unit, pack, price, kcal, protein, fat, carb, allergens, perishable, pantry, loose, rosstat_item, rosstat_factor, rosstat_note, names, prices)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+		if _, err := tx.Exec(ctx, `INSERT INTO ingredients (id, name, category, unit, pack, price, kcal, protein, fat, carb, allergens, perishable, pantry, loose, rosstat_item, rosstat_factor, rosstat_note, names, prices, tier)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
 			ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, category=EXCLUDED.category, unit=EXCLUDED.unit, pack=EXCLUDED.pack, price=EXCLUDED.price,
 			kcal=EXCLUDED.kcal, protein=EXCLUDED.protein, fat=EXCLUDED.fat, carb=EXCLUDED.carb, allergens=EXCLUDED.allergens,
 			perishable=EXCLUDED.perishable, pantry=EXCLUDED.pantry, loose=EXCLUDED.loose,
-			rosstat_item=EXCLUDED.rosstat_item, rosstat_factor=EXCLUDED.rosstat_factor, rosstat_note=EXCLUDED.rosstat_note, names=EXCLUDED.names, prices=EXCLUDED.prices`,
-			i.ID, i.Name, i.Category, i.Unit, i.Pack, i.Price, i.Kcal, i.Protein, i.Fat, i.Carb, i.Allergens, i.Perishable, i.Pantry, i.Loose, rItem, rFactor, rNote, names, prices); err != nil {
+			rosstat_item=EXCLUDED.rosstat_item, rosstat_factor=EXCLUDED.rosstat_factor, rosstat_note=EXCLUDED.rosstat_note, names=EXCLUDED.names, prices=EXCLUDED.prices, tier=EXCLUDED.tier`,
+			i.ID, i.Name, i.Category, i.Unit, i.Pack, i.Price, i.Kcal, i.Protein, i.Fat, i.Carb, i.Allergens, i.Perishable, i.Pantry, i.Loose, rItem, rFactor, rNote, names, prices, i.Tier); err != nil {
 			return fmt.Errorf("ingredient %s: %w", i.ID, err)
 		}
 	}

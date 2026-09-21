@@ -33,6 +33,7 @@ type ingredientLine struct {
 	PackNote string // «упаковка 800 г ≈ 390 ₽» — по справочным ценам, если есть
 	Cost     float64
 	Image    string
+	Where    string // «не везде: Лента, Ашан, Metro» — продукт с ограниченной доступностью
 }
 
 type stepView struct {
@@ -191,6 +192,17 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 			}
 			if line.Cost > dearest.Cost {
 				dearest = line
+			}
+		}
+		if lvl := planner.TierLevel(ing.Tier); lvl > 0 {
+			var names []string
+			for _, st := range s.catalog.StoresOf(pl.Country.Code) {
+				if planner.StoreLevel(st.Kind) >= lvl {
+					names = append(names, st.Name)
+				}
+			}
+			if len(names) > 0 {
+				line.Where = i18n.T(l, "recipe.where", strings.Join(names, ", "))
 			}
 		}
 		grams += gramsOf(ing, ri.Amount)

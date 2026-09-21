@@ -231,11 +231,15 @@ type effective struct {
 	Params
 	kidExclude []string
 	kidTags    []string
+	storeLevel int // ассортимент выбранного магазина; без магазина — всё доступно
 }
 
 func (c *Catalog) effective(p Params) effective {
-	e := effective{Params: p}
+	e := effective{Params: p, storeLevel: 3}
 	e.kidExclude, e.kidTags, _ = kidsRestrictions(p.Kids)
+	if st, ok := c.Stores[p.Store]; ok {
+		e.storeLevel = StoreLevel(st.Kind)
+	}
 	return e
 }
 
@@ -261,6 +265,9 @@ func (c *Catalog) allowed(r Recipe, e effective) bool {
 		ing, ok := c.Ingredients[ri.IngredientID]
 		if !ok {
 			return false
+		}
+		if TierLevel(ing.Tier) > e.storeLevel && !slices.Contains(e.Have, ri.IngredientID) {
+			return false // в «Пятёрочке» утки нет: не предлагать, пока не выбран магазин побольше
 		}
 		for _, a := range ing.Allergens {
 			if slices.Contains(e.Allergens, a) {
@@ -498,6 +505,9 @@ func (c *Catalog) pick(pool []Recipe, day int, slot string, portions float64, pr
 				b := 0.2
 				if ing.Perishable {
 					b = 0.35
+				}
+				if left >= needNow*3 && !ing.Pantry {
+					b += 0.15 // кочан капусты или тыква куском: остаток большой, доедать его важнее
 				}
 				reuse -= b
 				s.reused = append(s.reused, ing.ID)

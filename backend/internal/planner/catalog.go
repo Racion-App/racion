@@ -25,13 +25,13 @@ func loadCatalog(ctx context.Context, pool *pgxpool.Pool, prices *priceStore) (*
 		c.prices = prices
 	}
 
-	rows, err := pool.Query(ctx, `SELECT id, name, category, unit, pack, price, kcal, protein, fat, carb, allergens, perishable, pantry, loose, COALESCE(rosstat_item, 0), rosstat_factor, rosstat_note, names, prices, image FROM ingredients`)
+	rows, err := pool.Query(ctx, `SELECT id, name, category, unit, pack, price, kcal, protein, fat, carb, allergens, perishable, pantry, loose, COALESCE(rosstat_item, 0), rosstat_factor, rosstat_note, names, prices, image, tier FROM ingredients`)
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var i Ingredient
-		if err := rows.Scan(&i.ID, &i.Name, &i.Category, &i.Unit, &i.Pack, &i.Price, &i.Kcal, &i.Protein, &i.Fat, &i.Carb, &i.Allergens, &i.Perishable, &i.Pantry, &i.Loose, &i.RosstatItem, &i.RosstatFactor, &i.RosstatNote, &i.Names, &i.Prices, &i.Image); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Category, &i.Unit, &i.Pack, &i.Price, &i.Kcal, &i.Protein, &i.Fat, &i.Carb, &i.Allergens, &i.Perishable, &i.Pantry, &i.Loose, &i.RosstatItem, &i.RosstatFactor, &i.RosstatNote, &i.Names, &i.Prices, &i.Image, &i.Tier); err != nil {
 			rows.Close()
 			return nil, err
 		}
