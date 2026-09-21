@@ -144,14 +144,15 @@ func main() {
 	}
 	services.Subs = service.NewSubstitutes(subsTable, services.Recipes)
 	// Рецепты базы из админки: после правки каталог перечитывается из БД с теми же ценниками
-	services.CatalogAdmin = service.NewCatalogAdmin(store.CatalogRecipes, catalogRef, func(ctx context.Context) error {
+	reloadCatalog := func(ctx context.Context) error {
 		fresh, err := catalogRef.Load().Reload(ctx, pool)
 		if err != nil {
 			return err
 		}
 		catalogRef.Store(fresh)
 		return nil
-	})
+	}
+	services.CatalogAdmin = service.NewCatalogAdmin(store.CatalogRecipes, catalogRef, reloadCatalog)
 	// Нейросети: пул провайдеров (бесплатные уровни Mistral/Gemini/Groq/OpenRouter, OpenAI, локальный прокси);
 	// один пул на модерацию, помощника и очередь переводов своих рецептов
 	aiPool := ai.NewPoolFromKeys(ai.ProviderKeys{Order: splitList(cfg.AIOrder), Mistral: cfg.MistralKey, Gemini: cfg.GeminiKey, Groq: cfg.GroqKey, OpenRouter: cfg.OpenRouterKey, OpenAI: cfg.OpenAIKey, LocalURL: cfg.LocalAIURL, Models: parseModels(cfg.AIModels, cfg.OpenAIModel)})
@@ -161,6 +162,7 @@ func main() {
 	}
 	services.Moderation = service.NewModeration(store.UserRecipes, store.UserRecipes, store.Users, checker, log.Named("moderation"))
 	services.Translations = service.NewTranslations(store.Translations, store.UserRecipes, store.UserRecipes, aiPool, log.Named("translations"))
+	services.Translations.SetCatalog(catalogRef, store.CatalogRecipes, reloadCatalog)
 	services.Recipes.SetTranslations(services.Translations)
 	services.PlanChat = service.NewPlanChat(aiPool, services.Plans)
 	go services.Translations.Run(ctx)

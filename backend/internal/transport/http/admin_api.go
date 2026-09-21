@@ -162,6 +162,23 @@ func (s *Server) importRecipeImage(ctx context.Context, u *domain.User, rc *doma
 	return ""
 }
 
+// adminTranslateMissing — поставить в очередь переводов все рецепты базы без переводов (загрузки через API).
+func (s *Server) adminTranslateMissing(w http.ResponseWriter, r *http.Request) {
+	if s.requirePerm(w, r, service.PermRecipes) == nil {
+		return
+	}
+	if !s.svc.Translations.Enabled() {
+		writeErr(w, 503, "translations are off: no AI providers")
+		return
+	}
+	n, err := s.svc.Translations.EnqueueCatalogMissing(r.Context())
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	writeJSON(w, 200, map[string]any{"queued": n})
+}
+
 // adminRecipePublish — снять скрытие с рецепта базы; DELETE — снова спрятать.
 func (s *Server) adminRecipePublish(w http.ResponseWriter, r *http.Request) {
 	if s.requirePerm(w, r, service.PermRecipes) == nil {

@@ -64,6 +64,13 @@ func (r *UserRecipes) SetI18n(ctx context.Context, id, lang string, text planner
 	return wrap("user_recipes.i18n", err)
 }
 
+// SetI18n — перевод рецепта базы (загруженного через API: в seed его нет, переводы живут только в базе).
+func (r *CatalogRecipes) SetI18n(ctx context.Context, id, lang string, text planner.RecipeText) error {
+	raw, _ := json.Marshal(map[string]planner.RecipeText{lang: text})
+	_, err := r.pool.Exec(ctx, `UPDATE recipes SET i18n = i18n || $2::jsonb WHERE id = $1`, id, raw)
+	return wrap("recipes.i18n", err)
+}
+
 // ClearI18n — стереть переводы (текст рецепта изменился).
 func (r *UserRecipes) ClearI18n(ctx context.Context, id string) error {
 	_, err := r.pool.Exec(ctx, `UPDATE user_recipes SET i18n = '{}'::jsonb WHERE id = $1`, id)

@@ -46,6 +46,59 @@ type Translations struct {
 	pool  *ai.Pool
 	log   *zap.Logger
 	wake  chan struct{}
+	// рецепты базы (загруженные через API): текст берём из каталога, перевод пишем в recipes.i18n,
+	// каталог перечитываем не чаще раза в пару минут
+	catalog    *planner.CatalogRef
+	catTexts   CatalogI18n
+	reload     func(ctx context.Context) error
+	dirty      bool
+	lastReload time.Time
+}
+
+type CatalogI18n interface {
+	SetI18n(ctx context.Context, id, lang string, text planner.RecipeText) error
+}
+
+// SetCatalog — включить переводы рецептов базы.
+func (t *Translations) SetCatalog(c *planner.CatalogRef, texts CatalogI18n, reload func(ctx context.Context) error) {
+	t.catalog, t.catTexts, t.reload = c, texts, reload
+}
+
+// EnqueueCatalogMissing — поставить в очередь рецепты базы, у которых нет перевода хотя бы на один язык.
+// Возвращает число рецептов.
+func (t *Translations) EnqueueCatalogMissing(ctx context.Context) (int, error) {
+	if t.catalog == nil {
+		return 0, nil
+	}
+	n := 0
+	for _, rc := range t.catalog.Load().Recipes {
+		var langs []string
+		for _, l := range Targets("ru") {
+			if tx, ok := rc.I18n[l]; !ok || tx.Title == "" {
+				langs = append(langs, l)
+			}
+		}
+		if len(langs) == 0 {
+			continue
+		}
+		if err := t.repo.Enqueue(ctx, rc.ID, langs); err != nil {
+			return n, err
+		}
+		n++
+	}
+	t.kick()
+	return n, nil
+}
+
+func (t *Translations) maybeReload(ctx context.Context, force bool) {
+	if !t.dirty || t.reload == nil || (!force && time.Since(t.lastReload) < 2*time.Minute) {
+		return
+	}
+	if err := t.reload(ctx); err != nil {
+		t.log.Warn("catalog reload", zap.Error(err))
+		return
+	}
+	t.dirty, t.lastReload = false, time.Now()
 }
 
 func NewTranslations(repo TranslationRepo, texts TranslationText, own UserRecipeRepo, pool *ai.Pool, log *zap.Logger) *Translations {
@@ -161,6 +214,9 @@ func (t *Translations) Run(ctx context.Context) {
 			return
 		}
 		wait := 30 * time.Second
+		if !did && err == nil {
+			t.maybeReload(ctx, true)
+		}
 		switch {
 		case err != nil && errors.Is(err, ai.ErrBusy):
 			wait = 60 * time.Second
@@ -187,10 +243,26 @@ func (t *Translations) step(ctx context.Context) (bool, error) {
 	if err != nil || !ok {
 		return false, err
 	}
-	rc, err := t.own.Get(ctx, recipeID)
-	if err != nil {
-		_ = t.repo.SetStatus(ctx, recipeID, lang, TrError, "", "recipe missing")
-		return true, nil
+	var rc planner.Recipe
+	fromCatalog := !strings.HasPrefix(recipeID, OwnPrefix)
+	if fromCatalog {
+		c, ok := planner.Recipe{}, false
+		if t.catalog != nil {
+			c, ok = t.catalog.Load().RecipeByID[recipeID]
+		}
+		if !ok {
+			_ = t.repo.SetStatus(ctx, recipeID, lang, TrError, "", "recipe missing")
+			return true, nil
+		}
+		rc = c
+		rc.Lang = "ru"
+	} else {
+		var err error
+		rc, err = t.own.Get(ctx, recipeID)
+		if err != nil {
+			_ = t.repo.SetStatus(ctx, recipeID, lang, TrError, "", "recipe missing")
+			return true, nil
+		}
 	}
 	if err := t.repo.SetStatus(ctx, recipeID, lang, TrRunning, "", ""); err != nil {
 		return false, err
@@ -213,7 +285,14 @@ func (t *Translations) step(ctx context.Context) (bool, error) {
 		_ = t.repo.SetStatus(ctx, recipeID, lang, TrError, model, truncateErr(err))
 		return true, nil
 	}
-	if err := t.texts.SetI18n(ctx, recipeID, lang, planner.RecipeText{Title: out.Title, Description: out.Description, Steps: out.Steps}); err != nil {
+	text := planner.RecipeText{Title: out.Title, Description: out.Description, Steps: out.Steps}
+	if fromCatalog {
+		if err := t.catTexts.SetI18n(ctx, recipeID, lang, text); err != nil {
+			return false, err
+		}
+		t.dirty = true
+		t.maybeReload(ctx, false)
+	} else if err := t.texts.SetI18n(ctx, recipeID, lang, text); err != nil {
 		return false, err
 	}
 	return true, t.repo.SetStatus(ctx, recipeID, lang, TrDone, model, "")
