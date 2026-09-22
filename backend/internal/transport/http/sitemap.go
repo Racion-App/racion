@@ -112,11 +112,12 @@ func homePath(l i18n.Lang) string {
 // картинки превью и поиск по каталогу (?q=: страницы и так noindex, а боты перебирают тысячи запросов).
 // Сочетания фильтров каталога («?…&…») закрыты от обхода: такие страницы и так отдают noindex, но робот
 // тратил на них почти весь бюджет — у Googlebot уходило 16 тысяч запросов из 18 тысяч за день. В карте
-// сайта только одиночные фильтры, их обход по-прежнему открыт.
-// Clean-param для Яндекса: параметры страны и цены не создают отдельных страниц каталога.
+// сайта только одиночные фильтры main, slot и tag, их обход по-прежнему открыт.
+// ?country= закрыт по той же причине: страна умножает каждый рецепт на 22 варианта с одним и тем же
+// каноническим адресом. Яндекс от этого спасала Clean-param, остальные роботы перебирали всё подряд.
 func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
-	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*recipes?*&\n"
+	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*?*country=\nDisallow: /*recipes?*&\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)
