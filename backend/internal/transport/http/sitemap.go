@@ -108,8 +108,10 @@ func homePath(l i18n.Lang) string {
 	return "/" + string(l)
 }
 
-// robots — закрытые разделы: API, личные планы и события, кабинет, режим готовки (SPA /cook/), админка,
+// robots — закрытые разделы: личные планы и события, кабинет, режим готовки (SPA /cook/), админка,
 // картинки превью и поиск по каталогу (?q=: страницы и так noindex, а боты перебирают тысячи запросов).
+// Чтение каталога через API открыто: оно описано в /openapi.json и /llms.txt, и ассистенты должны иметь
+// возможность им пользоваться. Запись и личные данные под /api/ остаются закрытыми.
 // Сочетания фильтров каталога («?…&…») закрыты от обхода: такие страницы и так отдают noindex, но робот
 // тратил на них почти весь бюджет — у Googlebot уходило 16 тысяч запросов из 18 тысяч за день. В карте
 // сайта только одиночные фильтры main, slot и tag, их обход по-прежнему открыт.
@@ -117,7 +119,8 @@ func homePath(l i18n.Lang) string {
 // каноническим адресом. Яндекс от этого спасала Clean-param, остальные роботы перебирали всё подряд.
 func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
-	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*?*country=\nDisallow: /*recipes?*&\n"
+	closed := "Allow: /api/recipes\nAllow: /api/collections\nAllow: /api/meta\nAllow: /api/occasions\nAllow: /api/ingredients\n" +
+		"Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*?*country=\nDisallow: /*recipes?*&\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)

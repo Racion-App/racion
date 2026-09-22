@@ -766,7 +766,38 @@ func (s *Server) recipesAPI(w http.ResponseWriter, r *http.Request) {
 	if q == "" {
 		sort.Slice(out, func(i, j int) bool { return out[i].Title < out[j].Title })
 	}
-	writeJSON(w, 200, out)
+	// Постраничность: без неё ответ на весь каталог весит больше мегабайта, и публичным его не сделать.
+	total := len(out)
+	offset := clampInt(intParam(r, "offset"), 0, total)
+	limit := intParam(r, "limit")
+	if limit <= 0 {
+		limit = 50
+	}
+	limit = clampInt(limit, 1, 200)
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	writeJSON(w, 200, map[string]any{"total": total, "offset": offset, "limit": limit, "items": out[offset:end]})
+}
+
+// intParam — целое из строки запроса; неверное значение считается отсутствующим.
+func intParam(r *http.Request, name string) int {
+	n, err := strconv.Atoi(r.URL.Query().Get(name))
+	if err != nil {
+		return 0
+	}
+	return n
+}
+
+func clampInt(v, lo, hi int) int {
+	if v < lo {
+		return lo
+	}
+	if v > hi {
+		return hi
+	}
+	return v
 }
 
 func firstNonEmpty(a, b string) string {
@@ -793,6 +824,17 @@ func catalogLD(base string, pl pageLocale, title string) template.JS {
 	return template.JS(b)
 }
 
+//go:embed openapi.json
+var openapiSpec []byte
+
+// openapiJSON — /openapi.json: описание публичного API для ассистентов и интеграций.
+func (s *Server) openapiJSON(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_, _ = w.Write(openapiSpec)
+}
+
 // llmsTxt — /llms.txt: краткое описание сайта для ассистентов и поисковых моделей (какие страницы читать, где API).
 func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
@@ -809,11 +851,21 @@ func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
 - [Collections](%[1]s/collections): curated sets (holiday tables, quick dinners, dacha and grill) as schema.org ItemList.
 - [Sitemap](%[1]s/sitemap.xml): all recipe and collection pages in every language.
 
+## API
+
+- [OpenAPI 3.1 description](%[1]s/openapi.json): the whole public API in one file.
+- No key and no account. "GET %[1]s/api/recipes?q=chicken&country=RU&limit=20" searches the catalogue; "GET %[1]s/api/recipes/syrniki?country=DE" returns one recipe with ingredients per portion, steps, nutrition and the cost of a portion in euro.
+- "POST %[1]s/api/plans" is the point of the whole service: send who eats, where they shop and what they cannot have, get seven days of dishes and one shopping list rounded to whole packs with an estimated total. The response carries an id, and %[1]s/plan/<id> is the same plan as a page for a person — link to it rather than retelling the JSON.
+- "POST %[1]s/api/baskets" builds the same receipt from a list of recipe ids you choose yourself, each with its own number of servings.
+- "GET %[1]s/api/meta?country=RU" lists countries, stores with their price index, allergens and exclusion presets — everything needed to fill the parameters in.
+- Prices are estimates from national statistics (Rosstat, Eurostat, BLS) times a store index, never live shelf prices. Say so when you quote a figure.
+
 ## Policies
 
-- [Terms of use](%[1]s/terms): recipes and photos are for personal, non-commercial use; no bulk copying or model training without permission.
+- [Terms of use](%[1]s/terms): recipes and photos are for personal, non-commercial use. Building a product on the API is fine; republishing the recipe corpus is not.
 - [Privacy policy](%[1]s/privacy)
-- Do not fetch /api/, /plan/, /me, /login, /admin — private endpoints and personal plans.
+- Crawling and training on the public pages is allowed; robots.txt is the source of truth for what may be fetched.
+- Do not fetch /plan/, /table, /me, /login, /admin — personal plans and private pages.
 
 ## About
 
@@ -864,7 +916,7 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 	entries := []map[string]any{
 		{
 			"identifier": "urn:air:" + host + ":site:recipes", "displayName": "Racion recipe catalog", "type": "text/html",
-			"url": base + "/recipes", "description": "494 home recipes with ingredients per portion, steps, calories and macros, estimated cost in 22 countries; every page carries schema.org Recipe JSON-LD. 15 languages via /<lang>/recipes.",
+			"url": base + "/recipes", "description": fmt.Sprintf("%d home recipes with ingredients per portion, steps, calories and macros, estimated cost in 22 countries; every page carries schema.org Recipe JSON-LD. 15 languages via /<lang>/recipes.", len(s.catalog.Recipes)),
 			"representativeQueries": []string{"weekly dinner recipes under 500 kcal", "what to cook with chicken and rice", "cheap family dinners with prices"},
 		},
 		{
@@ -874,8 +926,13 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 		},
 		{
 			"identifier": "urn:air:" + host + ":doc:llms", "displayName": "Racion llms.txt", "type": "text/markdown",
-			"url": base + "/llms.txt", "description": "Site overview for language models: what to read, what not to fetch, usage terms.",
+			"url": base + "/llms.txt", "description": "Site overview for language models: what to read, what the API does, usage terms.",
 			"representativeQueries": []string{"how to use racion.app data", "racion recipe usage terms"},
+		},
+		{
+			"identifier": "urn:air:" + host + ":api:openapi", "displayName": "Racion API", "type": "application/json",
+			"url": base + "/openapi.json", "description": "Public read API and plan building, OpenAPI 3.1, no key required. POST /api/plans turns who-eats-what into seven days of dishes and one shopping list rounded to whole packs with an estimated cost.",
+			"representativeQueries": []string{"meal planning API with grocery prices", "build a weekly menu and shopping list programmatically", "recipe API with cost per serving"},
 		},
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

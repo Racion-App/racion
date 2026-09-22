@@ -1,0 +1,323 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Racion API",
+    "version": "1.0.0",
+    "summary": "Weekly meal plans with real store prices and one shopping list.",
+    "description": "Read-only catalogue plus plan building. No key, no account: send a request, get JSON.\n\nThe planner is deterministic — the same answers give the same week, and every dish carries the reason it was chosen. Prices are estimates from national statistics (Rosstat in Russia, Eurostat price levels with HICP in Europe, BLS in the US) multiplied by a store index; they are never live shelf prices and must be presented as estimates.\n\nRecipes and photos are ours and licensed for personal, non-commercial use. Building a product on top of this API is fine; republishing the recipe corpus is not.\n\nRate limit: 60 plan builds and 600 reads per hour per address. Language comes from ?lang=; prices from ?country= and the chosen store.",
+    "contact": {"name": "Racion", "email": "info@racion.app", "url": "https://racion.app"},
+    "license": {"name": "AGPL-3.0-or-later", "identifier": "AGPL-3.0-or-later"}
+  },
+  "servers": [{"url": "https://racion.app", "description": "Production"}],
+  "tags": [
+    {"name": "catalogue", "description": "Recipes, collections, ingredients, stores"},
+    {"name": "plans", "description": "Building a week, a holiday table or a chosen set of dishes"}
+  ],
+  "paths": {
+    "/api/meta": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "getMeta",
+        "summary": "Countries, stores, filters and allergens",
+        "description": "Everything needed to fill in plan parameters: the list of supported countries with currency and decimals, the stores of one country with their price index, catalogue filters, allergens and exclusion presets.",
+        "parameters": [
+          {"$ref": "#/components/parameters/country"},
+          {"$ref": "#/components/parameters/lang"}
+        ],
+        "responses": {"200": {"description": "Reference data", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Meta"}}}}}
+      }
+    },
+    "/api/recipes": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "listRecipes",
+        "summary": "Recipe catalogue with search and paging",
+        "description": "Returns short cards: title, meal, time, calories and the cost of one portion in the currency of ?country=. Use ?q= for search, ?slot= to keep one meal only.",
+        "parameters": [
+          {"$ref": "#/components/parameters/country"},
+          {"$ref": "#/components/parameters/lang"},
+          {"name": "q", "in": "query", "description": "Free-text search over titles and ingredients", "schema": {"type": "string"}},
+          {"name": "slot", "in": "query", "description": "Keep one meal only", "schema": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]}},
+          {"name": "limit", "in": "query", "description": "Page size, 1–200", "schema": {"type": "integer", "default": 50, "minimum": 1, "maximum": 200}},
+          {"name": "offset", "in": "query", "schema": {"type": "integer", "default": 0, "minimum": 0}}
+        ],
+        "responses": {"200": {"description": "A page of recipe cards", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RecipePage"}}}}}
+      }
+    },
+    "/api/recipes/{id}": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "getRecipe",
+        "summary": "One recipe with ingredients, steps and nutrition",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "string"}, "example": "syrniki"},
+          {"$ref": "#/components/parameters/country"},
+          {"$ref": "#/components/parameters/lang"}
+        ],
+        "responses": {
+          "200": {"description": "The recipe", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Recipe"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/api/collections": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "listCollections",
+        "summary": "Curated collections with their recipe ids",
+        "description": "Holiday tables, quick dinners, pizza doughs, childhood food and the rest. A collection id can be passed to POST /api/plans as `collection` so the planner takes its dishes first.",
+        "parameters": [{"$ref": "#/components/parameters/lang"}],
+        "responses": {"200": {"description": "Collections", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Collection"}}}}}}
+      }
+    },
+    "/api/occasions": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "listOccasions",
+        "summary": "Holiday tables that can be built for a number of guests",
+        "parameters": [{"$ref": "#/components/parameters/lang"}],
+        "responses": {"200": {"description": "Occasions", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Occasion"}}}}}}
+      }
+    },
+    "/api/ingredients": {
+      "get": {
+        "tags": ["catalogue"],
+        "operationId": "listIngredients",
+        "summary": "Ingredient reference: units, pack sizes, nutrition per 100 g",
+        "parameters": [{"$ref": "#/components/parameters/lang"}],
+        "responses": {"200": {"description": "Ingredients", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Ingredient"}}}}}}
+      }
+    },
+    "/api/plans": {
+      "post": {
+        "tags": ["plans"],
+        "operationId": "createPlan",
+        "summary": "Build a week of meals with a shopping list",
+        "description": "The main call. Give who eats, where they shop and what they cannot have; get seven days of dishes, per-day nutrition, and one shopping list rounded to whole packs with an estimated total.\n\nThe result is stored and readable at GET /api/plans/{id}; the same id opens the human page at /plan/{id}, which is what you show a person.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Params"}, "examples": {"family": {"summary": "Two adults and a child, Пятёрочка, no fish", "value": {"country": "RU", "store": "pyaterochka", "region": "", "adults": 2, "kids": [{"age": 7}], "slots": ["breakfast", "lunch", "dinner"], "equipment": ["stove", "oven"], "excludeTags": ["fish"], "allergens": [], "budgetMode": "perPersonDay", "budgetValue": 400, "lang": "ru"}}}}}},
+        "responses": {
+          "201": {"description": "The plan", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Plan"}}}},
+          "400": {"$ref": "#/components/responses/BadInput"},
+          "429": {"$ref": "#/components/responses/TooMany"}
+        }
+      }
+    },
+    "/api/plans/{id}": {
+      "get": {
+        "tags": ["plans"],
+        "operationId": "getPlan",
+        "summary": "Read a plan that was built earlier",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+          {"$ref": "#/components/parameters/lang"}
+        ],
+        "responses": {
+          "200": {"description": "The plan", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Plan"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/api/occasions/{id}": {
+      "post": {
+        "tags": ["plans"],
+        "operationId": "createOccasionPlan",
+        "summary": "Build a holiday table for a number of guests",
+        "description": "One day instead of a week: the planner fills the courses of the occasion (starters, mains, salads, dessert) for the given number of guests.",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}, "example": "newyear"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["guests", "params"], "properties": {"guests": {"type": "integer", "minimum": 1, "maximum": 40}, "params": {"$ref": "#/components/schemas/Params"}}}}}},
+        "responses": {
+          "201": {"description": "The table", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Plan"}}}},
+          "400": {"$ref": "#/components/responses/BadInput"}
+        }
+      }
+    },
+    "/api/baskets": {
+      "post": {
+        "tags": ["plans"],
+        "operationId": "createBasket",
+        "summary": "Build a table from dishes you picked yourself",
+        "description": "Give a list of recipe ids and how many people each one feeds; get the same receipt and shopping list as a week, but with the set you chose. Up to 30 dishes.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["items", "guests", "params"], "properties": {"guests": {"type": "integer", "minimum": 1, "maximum": 40}, "items": {"type": "array", "maxItems": 30, "items": {"type": "object", "required": ["recipeId"], "properties": {"recipeId": {"type": "string"}, "servings": {"type": "integer", "minimum": 1, "maximum": 40, "description": "How many people this dish feeds; 0 or absent means the same as guests"}}}}, "params": {"$ref": "#/components/schemas/Params"}}}, "examples": {"table": {"summary": "Three dishes, salad for eight", "value": {"guests": 4, "items": [{"recipeId": "olivier_pp", "servings": 8}, {"recipeId": "chicken_baked_potato", "servings": 4}, {"recipeId": "herring_fur_coat", "servings": 6}], "params": {"country": "RU", "store": "pyaterochka", "lang": "ru"}}}}}}},
+        "responses": {
+          "201": {"description": "The table", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Plan"}}}},
+          "400": {"$ref": "#/components/responses/BadInput"}
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "country": {"name": "country", "in": "query", "description": "Two-letter country code: prices and currency come from it. RU by default.", "schema": {"type": "string", "example": "RU"}},
+      "lang": {"name": "lang", "in": "query", "description": "Interface and recipe language, one of 15 codes. ru by default.", "schema": {"type": "string", "enum": ["ru", "en", "de", "fr", "es", "it", "pt", "pl", "uk", "tr", "nl", "cs", "kk", "zh", "ja"]}}
+    },
+    "responses": {
+      "NotFound": {"description": "No such object", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+      "BadInput": {"description": "The request cannot be satisfied: unknown store, empty result after filters", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+      "TooMany": {"description": "Rate limit reached, try later", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+    },
+    "schemas": {
+      "Error": {"type": "object", "properties": {"error": {"type": "string"}}},
+      "Meta": {
+        "type": "object",
+        "description": "Reference data for building parameters.",
+        "properties": {
+          "countries": {"type": "array", "items": {"type": "object", "properties": {"code": {"type": "string"}, "label": {"type": "string"}, "currency": {"type": "string"}, "symbol": {"type": "string"}, "decimals": {"type": "integer"}, "hasRegions": {"type": "boolean"}}}},
+          "stores": {"type": "array", "items": {"type": "object", "properties": {"code": {"type": "string"}, "country": {"type": "string"}, "name": {"type": "string"}, "kind": {"type": "string"}, "priceIndex": {"type": "number", "description": "Multiplier over the national average price"}}}},
+          "allergens": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "label": {"type": "string"}}}},
+          "excludePresets": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "kind": {"type": "string"}, "label": {"type": "string"}}}}
+        }
+      },
+      "RecipePage": {
+        "type": "object",
+        "properties": {
+          "total": {"type": "integer"},
+          "offset": {"type": "integer"},
+          "limit": {"type": "integer"},
+          "items": {"type": "array", "items": {"$ref": "#/components/schemas/RecipeCard"}}
+        }
+      },
+      "RecipeCard": {
+        "type": "object",
+        "properties": {
+          "ID": {"type": "string"},
+          "Title": {"type": "string"},
+          "Slot": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]},
+          "TimeMin": {"type": "integer"},
+          "Kcal": {"type": "number", "description": "Per portion"},
+          "Cost": {"type": "number", "description": "Estimated cost of one portion in the currency of ?country="},
+          "Image": {"type": "string"},
+          "Tags": {"type": "array", "items": {"type": "string"}},
+          "Href": {"type": "string", "description": "Page for people"}
+        }
+      },
+      "Recipe": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "slot": {"type": "string"},
+          "timeMin": {"type": "integer"},
+          "equipment": {"type": "array", "items": {"type": "string"}},
+          "tags": {"type": "array", "items": {"type": "string"}},
+          "steps": {"type": "array", "items": {"type": "string"}},
+          "ingredients": {"type": "array", "items": {"type": "object", "properties": {"ingredientId": {"type": "string"}, "name": {"type": "string"}, "amount": {"type": "number", "description": "Per one portion"}, "unit": {"type": "string", "enum": ["g", "ml", "pcs"]}, "pantry": {"type": "boolean", "description": "Usually already at home: salt, pepper, oil"}}}},
+          "kcal": {"type": "number"},
+          "protein": {"type": "number"},
+          "fat": {"type": "number"},
+          "carb": {"type": "number"},
+          "cost": {"type": "number", "description": "Estimated cost of one portion"}
+        }
+      },
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "slug": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "recipes": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Occasion": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "lead": {"type": "string"},
+          "guests": {"type": "integer"},
+          "kind": {"type": "string", "enum": ["menu", "week"]},
+          "courses": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Ingredient": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "category": {"type": "string"},
+          "unit": {"type": "string"},
+          "pack": {"type": "number", "description": "Pack size sold in shops: the shopping list rounds up to it"},
+          "kcal": {"type": "number"},
+          "protein": {"type": "number"},
+          "fat": {"type": "number"},
+          "carb": {"type": "number"},
+          "allergens": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Params": {
+        "type": "object",
+        "description": "Answers that define a plan. Only country and store are really needed; the rest have defaults.",
+        "required": ["country", "store"],
+        "properties": {
+          "country": {"type": "string", "example": "RU"},
+          "store": {"type": "string", "description": "Store code from /api/meta", "example": "pyaterochka"},
+          "region": {"type": "string", "description": "Region or city for countries with regional prices; empty means national average"},
+          "lang": {"type": "string", "example": "ru"},
+          "adults": {"type": "integer", "minimum": 1, "maximum": 10},
+          "kids": {"type": "array", "items": {"type": "object", "properties": {"age": {"type": "integer", "minimum": 0, "maximum": 17}, "appetite": {"type": "string", "enum": ["small", "normal", "big"]}}}},
+          "slots": {"type": "array", "description": "Which meals to plan", "items": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]}},
+          "equipment": {"type": "array", "description": "What the kitchen has: stove, oven, microwave, airfryer, multicooker, blender, mixer, grill, steamer, meatgrinder", "items": {"type": "string"}},
+          "allergens": {"type": "array", "description": "Allergen ids from /api/meta; dishes containing them are never offered", "items": {"type": "string"}},
+          "exclude": {"type": "array", "description": "Ingredient ids the person will not eat", "items": {"type": "string"}},
+          "excludeTags": {"type": "array", "description": "Whole groups: meat, poultry, fish, seafood, offal, spicy", "items": {"type": "string"}},
+          "goal": {"type": "string", "description": "none | healthy | lose | gain"},
+          "budgetMode": {"type": "string", "enum": ["perPersonDay", "week"]},
+          "budgetValue": {"type": "number", "description": "Target in the currency of the country; 0 means no target"},
+          "collection": {"type": "string", "description": "Collection slug: its dishes are taken first"},
+          "have": {"type": "array", "description": "Ingredient ids already at home; the shopping list subtracts them", "items": {"type": "string"}},
+          "startDate": {"type": "string", "format": "date"}
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "description": "A built week or table. The same id opens the page for people at /plan/{id}.",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "lang": {"type": "string"},
+          "country": {"type": "object"},
+          "store": {"type": "object"},
+          "portions": {"type": "number"},
+          "days": {"type": "array", "items": {"$ref": "#/components/schemas/Day"}},
+          "shopping": {"type": "array", "description": "Shopping list grouped by aisle category", "items": {"$ref": "#/components/schemas/ShopGroup"}},
+          "totals": {"type": "object", "properties": {"cost": {"type": "number", "description": "Estimated cost of everything on the list"}, "usedCost": {"type": "number", "description": "What is actually eaten during the plan; the rest is leftover packs"}, "items": {"type": "integer"}, "kcalPerDay": {"type": "number"}, "proteinPerDay": {"type": "number"}, "cookMin": {"type": "integer"}}},
+          "priceSource": {"type": "string", "description": "Where the prices came from and as of when"},
+          "warnings": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Day": {
+        "type": "object",
+        "properties": {
+          "index": {"type": "integer"},
+          "date": {"type": "string", "format": "date"},
+          "label": {"type": "string"},
+          "kcal": {"type": "number"},
+          "cost": {"type": "number"},
+          "dishes": {"type": "array", "items": {"$ref": "#/components/schemas/Dish"}}
+        }
+      },
+      "Dish": {
+        "type": "object",
+        "properties": {
+          "slot": {"type": "string"},
+          "recipeId": {"type": "string"},
+          "title": {"type": "string"},
+          "timeMin": {"type": "integer"},
+          "kcal": {"type": "number"},
+          "cost": {"type": "number", "description": "Per portion"},
+          "leftover": {"type": "boolean", "description": "Yesterday's dish eaten again"},
+          "batch": {"type": "boolean", "description": "Cooked once for two days"},
+          "servings": {"type": "integer", "description": "Baskets only: how many people this dish feeds"},
+          "why": {"type": "string", "description": "Why the planner chose it: finishing an open pack, under budget, fits calories"}
+        }
+      },
+      "ShopGroup": {
+        "type": "object",
+        "properties": {
+          "category": {"type": "string"},
+          "cost": {"type": "number"},
+          "items": {"type": "array", "items": {"type": "object", "properties": {"ingredientId": {"type": "string"}, "name": {"type": "string"}, "amount": {"type": "number", "description": "How much to buy, rounded up to whole packs"}, "need": {"type": "number", "description": "How much the recipes actually use"}, "unit": {"type": "string"}, "cost": {"type": "number"}, "pantry": {"type": "boolean"}}}}
+        }
+      }
+    }
+  }
+}
