@@ -47,6 +47,8 @@ var excludePresets = []struct{ ID, Kind string }{
 	{"liver_chicken", "ingredient"}, {"cottage_cheese", "ingredient"}, {"eggplant", "ingredient"}, {"olives", "ingredient"},
 	{"pearl_barley", "ingredient"}, {"beef_stew", "ingredient"}, {"pork_neck", "ingredient"}, {"mushrooms", "ingredient"},
 	{"spicy", "tag"}, {"offal", "tag"}, {"sausages", "ingredient"}, {"shrimp", "ingredient"}, {"pumpkin", "ingredient"}, {"beet", "ingredient"},
+	// целые группы: вегетарианцу хватает четырёх отметок вместо поиска по продуктам
+	{"meat", "tag"}, {"poultry", "tag"}, {"fish", "tag"}, {"seafood", "tag"},
 }
 
 // ShortLabel — «Свинина (шея)» → «Свинина», «Творог 5%» → «Творог».
