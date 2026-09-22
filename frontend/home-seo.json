@@ -1,0 +1,464 @@
+{
+ "ru": {
+  "title": "Рацион — меню на неделю с ценами и списком покупок",
+  "description": "Ответьте на семь вопросов — магазин, кто ест, что нельзя, техника, бюджет — и получите семь дней блюд с ценами вашего магазина и один список покупок, округлённый до упаковок. Бесплатно, без регистрации.",
+  "links": [
+   {
+    "href": "/recipes",
+    "text": "Рецепты"
+   },
+   {
+    "href": "/collections",
+    "text": "Что приготовить"
+   },
+   {
+    "href": "/menu/family-4",
+    "text": "Меню на неделю для семьи из 4 человек с рецептами"
+   },
+   {
+    "href": "/collection/dinner-ideas",
+    "text": "Что приготовить на ужин"
+   },
+   {
+    "href": "/collection/kids-dinner",
+    "text": "Что приготовить ребёнку на ужин"
+   },
+   {
+    "href": "/collection/festive-table",
+    "text": "Что приготовить на праздничный стол"
+   },
+   {
+    "href": "/collection/budget-week",
+    "text": "Что приготовить недорого и вкусно"
+   }
+  ]
+ },
+ "en": {
+  "title": "Weekly meal plan with prices and a shopping list — Racion",
+  "description": "Answer seven questions and get a week of meals with your store's prices and one shopping list rounded to whole packs. Free, no signup, no subscription.",
+  "links": [
+   {
+    "href": "/en/recipes",
+    "text": "Recipes"
+   },
+   {
+    "href": "/en/collections",
+    "text": "What to cook"
+   },
+   {
+    "href": "/en/menu/family-4",
+    "text": "Weekly menu for a family of 4 with recipes"
+   },
+   {
+    "href": "/en/collection/dinner-ideas",
+    "text": "What to cook for dinner"
+   },
+   {
+    "href": "/en/collection/kids-dinner",
+    "text": "What to cook for a child's dinner"
+   },
+   {
+    "href": "/en/collection/festive-table",
+    "text": "What to cook for a festive table"
+   },
+   {
+    "href": "/en/collection/budget-week",
+    "text": "What to cook cheaply and well"
+   }
+  ]
+ },
+ "de": {
+  "title": "Wochenplan fürs Essen mit Preisen und Einkaufsliste — Racion",
+  "description": "Sieben Fragen, und Sie bekommen eine Woche mit Gerichten, den Preisen Ihres Supermarkts und einer Einkaufsliste in ganzen Packungen. Kostenlos, ohne Anmeldung.",
+  "links": [
+   {
+    "href": "/de/recipes",
+    "text": "Rezepte"
+   },
+   {
+    "href": "/de/collections",
+    "text": "Was kochen"
+   },
+   {
+    "href": "/de/menu/family-4",
+    "text": "Wochenmenü für eine 4-köpfige Familie mit Rezepten"
+   },
+   {
+    "href": "/de/collection/dinner-ideas",
+    "text": "Was zum Abendessen kochen"
+   },
+   {
+    "href": "/de/collection/kids-dinner",
+    "text": "Was dem Kind zum Abendessen kochen"
+   },
+   {
+    "href": "/de/collection/festive-table",
+    "text": "Was für die Festtafel kochen"
+   },
+   {
+    "href": "/de/collection/budget-week",
+    "text": "Was günstig und gut kochen"
+   }
+  ]
+ },
+ "fr": {
+  "title": "Menu de la semaine avec les prix et la liste de courses — Racion",
+  "description": "Répondez à sept questions et recevez une semaine de repas avec les prix de votre magasin et une liste de courses arrondie aux paquets. Gratuit, sans inscription.",
+  "links": [
+   {
+    "href": "/fr/recipes",
+    "text": "Recettes"
+   },
+   {
+    "href": "/fr/collections",
+    "text": "Quoi cuisiner"
+   },
+   {
+    "href": "/fr/collection/dinner-ideas",
+    "text": "Quoi cuisiner pour le dîner"
+   },
+   {
+    "href": "/fr/collection/kids-dinner",
+    "text": "Que cuisiner à un enfant pour le dîner"
+   },
+   {
+    "href": "/fr/collection/festive-table",
+    "text": "Que cuisiner pour une table de fête"
+   },
+   {
+    "href": "/fr/collection/budget-week",
+    "text": "Que cuisiner pour pas cher et bon"
+   }
+  ]
+ },
+ "es": {
+  "title": "Menú semanal con precios y lista de la compra — Racion",
+  "description": "Responde siete preguntas y recibe una semana de comidas con los precios de tu supermercado y una lista de la compra por paquetes. Gratis, sin registro.",
+  "links": [
+   {
+    "href": "/es/recipes",
+    "text": "Recetas"
+   },
+   {
+    "href": "/es/collections",
+    "text": "Qué cocinar"
+   },
+   {
+    "href": "/es/collection/dinner-ideas",
+    "text": "Qué cocinar para cenar"
+   },
+   {
+    "href": "/es/collection/kids-dinner",
+    "text": "Qué cocinar a un niño para la cena"
+   },
+   {
+    "href": "/es/collection/festive-table",
+    "text": "Qué cocinar para una mesa de fiesta"
+   },
+   {
+    "href": "/es/collection/budget-week",
+    "text": "Qué cocinar barato y rico"
+   }
+  ]
+ },
+ "it": {
+  "title": "Menù settimanale con prezzi e lista della spesa — Racion",
+  "description": "Rispondi a sette domande e ottieni una settimana di piatti con i prezzi del tuo supermercato e una lista della spesa a confezioni. Gratis, senza registrazione.",
+  "links": [
+   {
+    "href": "/it/recipes",
+    "text": "Ricette"
+   },
+   {
+    "href": "/it/collections",
+    "text": "Cosa cucinare"
+   },
+   {
+    "href": "/it/collection/dinner-ideas",
+    "text": "Cosa cucinare per cena"
+   },
+   {
+    "href": "/it/collection/kids-dinner",
+    "text": "Cosa cucinare a un bambino per cena"
+   },
+   {
+    "href": "/it/collection/festive-table",
+    "text": "Cosa cucinare per una tavola di festa"
+   },
+   {
+    "href": "/it/collection/budget-week",
+    "text": "Cosa cucinare spendendo poco"
+   }
+  ]
+ },
+ "pt": {
+  "title": "Menu semanal com preços e lista de compras — Racion",
+  "description": "Responda a sete perguntas e receba uma semana de refeições com os preços do seu supermercado e uma lista de compras por embalagens. Grátis, sem registo.",
+  "links": [
+   {
+    "href": "/pt/recipes",
+    "text": "Receitas"
+   },
+   {
+    "href": "/pt/collections",
+    "text": "O que cozinhar"
+   },
+   {
+    "href": "/pt/collection/dinner-ideas",
+    "text": "O que cozinhar para o jantar"
+   },
+   {
+    "href": "/pt/collection/kids-dinner",
+    "text": "O que cozinhar para o jantar de uma criança"
+   },
+   {
+    "href": "/pt/collection/festive-table",
+    "text": "O que cozinhar para uma mesa de festa"
+   },
+   {
+    "href": "/pt/collection/budget-week",
+    "text": "O que cozinhar barato e bom"
+   }
+  ]
+ },
+ "pl": {
+  "title": "Jadłospis na tydzień z cenami i listą zakupów — Racion",
+  "description": "Odpowiedz na siedem pytań i dostań tydzień dań z cenami z twojego sklepu oraz jedną listę zakupów w całych opakowaniach. Za darmo, bez rejestracji.",
+  "links": [
+   {
+    "href": "/pl/recipes",
+    "text": "Przepisy"
+   },
+   {
+    "href": "/pl/collections",
+    "text": "Co ugotować"
+   },
+   {
+    "href": "/pl/collection/dinner-ideas",
+    "text": "Co ugotować na kolację"
+   },
+   {
+    "href": "/pl/collection/kids-dinner",
+    "text": "Co ugotować dziecku na kolację"
+   },
+   {
+    "href": "/pl/collection/festive-table",
+    "text": "Co ugotować na świąteczny stół"
+   },
+   {
+    "href": "/pl/collection/budget-week",
+    "text": "Co ugotować tanio i smacznie"
+   }
+  ]
+ },
+ "uk": {
+  "title": "Меню на тиждень із цінами та списком покупок — Раціон",
+  "description": "Відповідайте на сім питань і отримайте сім днів страв із цінами вашого магазину та один список покупок, округлений до упаковок. Безкоштовно, без реєстрації.",
+  "links": [
+   {
+    "href": "/uk/recipes",
+    "text": "Рецепти"
+   },
+   {
+    "href": "/uk/collections",
+    "text": "Що приготувати"
+   },
+   {
+    "href": "/uk/collection/dinner-ideas",
+    "text": "Що приготувати на вечерю"
+   },
+   {
+    "href": "/uk/collection/kids-dinner",
+    "text": "Що приготувати дитині на вечерю"
+   },
+   {
+    "href": "/uk/collection/festive-table",
+    "text": "Що приготувати на святковий стіл"
+   },
+   {
+    "href": "/uk/collection/budget-week",
+    "text": "Що приготувати недорого і смачно"
+   }
+  ]
+ },
+ "tr": {
+  "title": "Haftalık yemek planı: fiyatlar ve alışveriş listesi — Racion",
+  "description": "Yedi soruyu yanıtlayın, marketinizin fiyatlarıyla bir haftalık yemek planı ve paket paket bir alışveriş listesi alın. Ücretsiz, kayıt yok.",
+  "links": [
+   {
+    "href": "/tr/recipes",
+    "text": "Tarifler"
+   },
+   {
+    "href": "/tr/collections",
+    "text": "Ne pişirmeli"
+   },
+   {
+    "href": "/tr/collection/dinner-ideas",
+    "text": "Akşam yemeğinde ne pişirmeli"
+   },
+   {
+    "href": "/tr/collection/kids-dinner",
+    "text": "Çocuğa akşam yemeğinde ne pişirilir"
+   },
+   {
+    "href": "/tr/collection/festive-table",
+    "text": "Bayram sofrası için ne pişirilir"
+   },
+   {
+    "href": "/tr/collection/budget-week",
+    "text": "Ucuz ve lezzetli ne pişirilir"
+   }
+  ]
+ },
+ "nl": {
+  "title": "Weekmenu met prijzen en boodschappenlijst — Racion",
+  "description": "Beantwoord zeven vragen en krijg een week met gerechten, de prijzen van jouw supermarkt en één boodschappenlijst in hele verpakkingen. Gratis, zonder account.",
+  "links": [
+   {
+    "href": "/nl/recipes",
+    "text": "Recepten"
+   },
+   {
+    "href": "/nl/collections",
+    "text": "Wat koken"
+   },
+   {
+    "href": "/nl/collection/dinner-ideas",
+    "text": "Wat koken voor het avondeten"
+   },
+   {
+    "href": "/nl/collection/kids-dinner",
+    "text": "Wat koken voor het avondeten van een kind"
+   },
+   {
+    "href": "/nl/collection/festive-table",
+    "text": "Wat koken voor een feestelijke tafel"
+   },
+   {
+    "href": "/nl/collection/budget-week",
+    "text": "Wat goedkoop en lekker koken"
+   }
+  ]
+ },
+ "cs": {
+  "title": "Jídelníček na týden s cenami a nákupním seznamem — Racion",
+  "description": "Odpovězte na sedm otázek a dostanete týden jídel s cenami vašeho obchodu a jeden nákupní seznam po baleních. Zdarma, bez registrace.",
+  "links": [
+   {
+    "href": "/cs/recipes",
+    "text": "Recepty"
+   },
+   {
+    "href": "/cs/collections",
+    "text": "Co uvařit"
+   },
+   {
+    "href": "/cs/collection/dinner-ideas",
+    "text": "Co uvařit k večeři"
+   },
+   {
+    "href": "/cs/collection/kids-dinner",
+    "text": "Co uvařit dítěti k večeři"
+   },
+   {
+    "href": "/cs/collection/festive-table",
+    "text": "Co uvařit na sváteční stůl"
+   },
+   {
+    "href": "/cs/collection/budget-week",
+    "text": "Co uvařit levně a dobře"
+   }
+  ]
+ },
+ "kk": {
+  "title": "Апталық ас мәзірі: бағалар мен сатып алу тізімі — Рацион",
+  "description": "Жеті сұраққа жауап беріңіз де, дүкеніңіздің бағасымен бір апталық тағам мен қаптамамен есептелген сатып алу тізімін алыңыз. Тегін, тіркеусіз.",
+  "links": [
+   {
+    "href": "/kk/recipes",
+    "text": "Рецепттер"
+   },
+   {
+    "href": "/kk/collections",
+    "text": "Не пісіруге болады"
+   },
+   {
+    "href": "/kk/collection/dinner-ideas",
+    "text": "Кешкі асқа не пісіруге болады"
+   },
+   {
+    "href": "/kk/collection/kids-dinner",
+    "text": "Балаға кешкі асқа не пісіруге болады"
+   },
+   {
+    "href": "/kk/collection/festive-table",
+    "text": "Мерекелік дастарханға не пісіруге болады"
+   },
+   {
+    "href": "/kk/collection/budget-week",
+    "text": "Арзан әрі дәмді не пісіруге болады"
+   }
+  ]
+ },
+ "zh": {
+  "title": "一周菜单，带价格和购物清单 — Racion",
+  "description": "回答七个问题，得到一周的菜单、你所在超市的价格，以及一份按包装计算的购物清单。免费，无需注册。",
+  "links": [
+   {
+    "href": "/zh/recipes",
+    "text": "菜谱"
+   },
+   {
+    "href": "/zh/collections",
+    "text": "做什么菜"
+   },
+   {
+    "href": "/zh/collection/dinner-ideas",
+    "text": "晚餐做什么"
+   },
+   {
+    "href": "/zh/collection/kids-dinner",
+    "text": "给孩子做什么晚餐"
+   },
+   {
+    "href": "/zh/collection/festive-table",
+    "text": "节日餐桌做什么菜"
+   },
+   {
+    "href": "/zh/collection/budget-week",
+    "text": "便宜又好吃能做什么"
+   }
+  ]
+ },
+ "ja": {
+  "title": "1週間の献立と価格、買い物リスト — Racion",
+  "description": "7つの質問に答えると、1週間の献立、お店の価格、パック単位の買い物リストが手に入ります。無料、登録不要。",
+  "links": [
+   {
+    "href": "/ja/recipes",
+    "text": "レシピ"
+   },
+   {
+    "href": "/ja/collections",
+    "text": "何を作るか"
+   },
+   {
+    "href": "/ja/collection/dinner-ideas",
+    "text": "夕食に何を作るか"
+   },
+   {
+    "href": "/ja/collection/kids-dinner",
+    "text": "子どもの夕食に何を作るか"
+   },
+   {
+    "href": "/ja/collection/festive-table",
+    "text": "お祝いの食卓に何を作るか"
+   },
+   {
+    "href": "/ja/collection/budget-week",
+    "text": "安くておいしいものを何を作るか"
+   }
+  ]
+ }
+}

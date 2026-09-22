@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { Fragment, lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Quiz } from "./pages/Quiz";
 // Квиз — в основном бандле (главная), остальные страницы подгружаются по маршруту: первый экран легче.
@@ -23,7 +23,7 @@ const NotFound = page(() => import("./pages/NotFound"), (m) => m.NotFound);
 const Occasion = page(() => import("./pages/Occasion"), (m) => m.Occasion);
 const Cook = page(() => import("./pages/Cook"), (m) => m.Cook);
 import { AuthProvider } from "./lib/auth";
-import { LangProvider } from "./i18n";
+import { LANG_PREFIXES, LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";
 import { UpdateBar } from "./components/UpdateBar";
 
@@ -35,15 +35,20 @@ export function App() {
       <BrowserRouter>
         <Suspense fallback={<div className="boot" role="status" aria-busy="true"><span className="boot__spin" /></div>}>
         <Routes>
-          <Route path="/" element={<Quiz />} />
-          <Route path="/plan/:id" element={<Plan />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/me" element={<Account />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/:tab" element={<Admin />} />
-          <Route path="/admin/recipes/:id" element={<Admin />} />
-          <Route path="/event/:id" element={<Occasion />} />
-          <Route path="/cook/:id" element={<Cook />} />
+          {/* те же экраны с языковым префиксом: /en, /de/plan/… — ссылка из другой локали не должна давать 404 */}
+          {["", ...LANG_PREFIXES].map((p) => (
+            <Fragment key={p || "root"}>
+              <Route path={`${p}/`} element={<Quiz />} />
+              <Route path={`${p}/plan/:id`} element={<Plan />} />
+              <Route path={`${p}/login`} element={<Login />} />
+              <Route path={`${p}/me`} element={<Account />} />
+              <Route path={`${p}/admin`} element={<Admin />} />
+              <Route path={`${p}/admin/:tab`} element={<Admin />} />
+              <Route path={`${p}/admin/recipes/:id`} element={<Admin />} />
+              <Route path={`${p}/event/:id`} element={<Occasion />} />
+              <Route path={`${p}/cook/:id`} element={<Cook />} />
+            </Fragment>
+          ))}
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>

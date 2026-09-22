@@ -46,9 +46,13 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s%s"/>`, base, path)
 		fmt.Fprintf(&b, "<changefreq>%s</changefreq><priority>%s</priority></url>\n", freq, prio)
 	}
-	if l == i18n.RU {
-		fmt.Fprintf(&b, "<url><loc>%s/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n", base)
+	// главная: у каждого языка своя оболочка (/en, /de) со своим head, поэтому она в карте с альтернативами
+	fmt.Fprintf(&b, "<url><loc>%s%s</loc>", base, homePath(l))
+	for _, al := range i18n.Langs {
+		fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="%s" href="%s%s"/>`, al, base, homePath(al))
 	}
+	fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s/"/>`, base)
+	b.WriteString("<changefreq>weekly</changefreq><priority>1.0</priority></url>\n")
 	url("/recipes", "weekly", "0.8")
 	url("/collections", "weekly", "0.8")
 	for _, g := range service.CatalogFilters[:3] {
@@ -94,6 +98,14 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	_, _ = w.Write([]byte(b.String()))
+}
+
+// homePath — адрес главной на языке: «/» у русского, «/en» у остальных.
+func homePath(l i18n.Lang) string {
+	if l == i18n.RU {
+		return "/"
+	}
+	return "/" + string(l)
 }
 
 // robots — закрытые разделы: API, личные планы и события, кабинет, режим готовки (SPA /cook/), админка,

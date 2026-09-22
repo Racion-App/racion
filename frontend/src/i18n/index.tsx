@@ -46,6 +46,9 @@ function writeCache(k: string, v: unknown) {
   }
 }
 
+// Префиксы языковых маршрутов SPA: список фиксирован на сборке, чтобы роутер знал их до ответа /api/locales.
+export const LANG_PREFIXES = ["/cs", "/de", "/en", "/es", "/fr", "/it", "/ja", "/kk", "/nl", "/pl", "/pt", "/tr", "/uk", "/zh"];
+
 export function isLang(v: unknown): v is Lang {
   return typeof v === "string" && /^[a-z]{2}$/.test(v) && (LOCALES.length === 0 ? ["ru", "en", "de"].includes(v) : LOCALES.some((l) => l.code === v));
 }
@@ -75,8 +78,14 @@ export function storedLang(): Lang | null {
   return null;
 }
 
+// Язык из адреса: /en, /de/plan/… — префикс главнее браузера и хранилища, иначе ссылка на /en открывала бы русскую версию.
+export function langFromPath(path = location.pathname): Lang | null {
+  const code = path.split("/")[1]?.toLowerCase() ?? "";
+  return /^[a-z]{2}$/.test(code) && (LOCALES.length === 0 ? ["ru", "en", "de"].includes(code) : isLang(code)) ? (code as Lang) : null;
+}
+
 export function getLang(): Lang {
-  return storedLang() ?? fromNavigator() ?? FALLBACK;
+  return langFromPath() ?? storedLang() ?? fromNavigator() ?? FALLBACK;
 }
 
 export function persistLang(l: Lang) {
@@ -204,7 +213,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     return l;
   });
   const [ready, setReady] = useState(false);
-  const auto = storedLang() === null;
+  const auto = storedLang() === null && langFromPath() === null;
 
   // список языков, словарь текущего и русский как запас
   useEffect(() => {
