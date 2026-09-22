@@ -1,5 +1,5 @@
 import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
-import { tStatic } from "../i18n";
+import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
   status: number;
@@ -9,10 +9,17 @@ export class ApiError extends Error {
   }
 }
 
+// Язык страницы важнее языка браузера: на /en посетитель с немецким браузером должен получать
+// английские названия стран и блюд, поэтому у каждого запроса к API язык указан явно.
+function withLang(path: string): string {
+  if (!path.startsWith("/api/") || /[?&]lang=/.test(path)) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}lang=${getLang()}`;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(path, { ...init, headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
+    res = await fetch(withLang(path), { ...init, headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
   } catch {
     throw new ApiError(0, tStatic("api.offline"));
   }

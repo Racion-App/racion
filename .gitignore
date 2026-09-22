@@ -30,3 +30,4 @@ __pycache__/
 .impeccable/hook.cache.json
 frontend/.impeccable/hook.cache.json
 /todo/
+.secrets/
