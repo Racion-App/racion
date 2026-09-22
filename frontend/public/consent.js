@@ -13,10 +13,19 @@
     pl: ["Analityka", "Używamy Yandex Metrica i Google Analytics, by widzieć, co działa. Możesz odmówić — serwis działa tak samo.", "Zezwól", "Tylko niezbędne", "/pl/privacy", "Prywatność", "Rozumiem"],
     nl: ["Analyse", "We gebruiken Yandex Metrica en Google Analytics om te zien wat werkt. Je kunt weigeren — de dienst werkt hetzelfde.", "Toestaan", "Alleen noodzakelijk", "/nl/privacy", "Privacy", "Begrepen"],
     cs: ["Analytika", "Používáme Yandex Metrica a Google Analytics, abychom viděli, co funguje. Můžete odmítnout — služba funguje stejně.", "Povolit", "Jen nezbytné", "/cs/privacy", "Soukromí", "Rozumím"],
-    pt: ["Análise", "Usamos Yandex Metrica e Google Analytics para ver o que funciona. Pode recusar — o serviço funciona igual.", "Permitir", "Só necessários", "/pt/privacy", "Privacidade", "Entendi"]
+    pt: ["Análise", "Usamos Yandex Metrica e Google Analytics para ver o que funciona. Pode recusar — o serviço funciona igual.", "Permitir", "Só necessários", "/pt/privacy", "Privacidade", "Entendi"],
+    uk: ["Аналітика", "Ми використовуємо Yandex Metrica і Google Analytics, щоб бачити, що працює. Можна відмовитися — сервіс працює так само.", "Дозволити", "Лише необхідні", "/uk/privacy", "Політика", "Зрозуміло"],
+    tr: ["Analitik", "Neyin işe yaradığını görmek için Yandex Metrica ve Google Analytics kullanıyoruz. Reddedebilirsiniz, hizmet aynı şekilde çalışır.", "İzin ver", "Yalnızca gerekli", "/tr/privacy", "Gizlilik", "Anladım"],
+    kk: ["Аналитика", "Не жұмыс істейтінін көру үшін Yandex Metrica мен Google Analytics қолданамыз. Бас тартуға болады, қызмет солай жұмыс істейді.", "Рұқсат ету", "Тек қажеттісі", "/kk/privacy", "Құпиялылық", "Түсінікті"],
+    zh: ["分析", "我们使用 Yandex Metrica 和 Google Analytics 了解哪些功能有用。你可以拒绝，服务照常使用。", "允许", "仅必要项", "/zh/privacy", "隐私政策", "知道了"],
+    ja: ["アクセス解析", "何が使われているかを見るために Yandex Metrica と Google Analytics を使っています。断っても機能は変わりません。", "許可する", "必要なものだけ", "/ja/privacy", "プライバシー", "わかりました"]
   };
-  // язык: выбранный в приложении → язык браузера → атрибут html (в index.html он всегда ru, поэтому последним)
+  // язык: префикс адреса → выбранный в приложении → язык браузера → атрибут html (в index.html он всегда ru,
+  // поэтому последним). Префикс первый: на /en/plan/… отдаётся русская оболочка приложения, и без него
+  // англоязычный посетитель видел уведомление по-русски.
   function lang() {
+    var p = (location.pathname.split("/")[1] || "").toLowerCase();
+    if (/^[a-z]{2}$/.test(p) && T[p]) return p;
     var s = "";
     try { s = (localStorage.getItem("racion.lang") || "").replace(/"/g, ""); } catch (e) { /* приватный режим */ }
     if (T[s]) return s;
