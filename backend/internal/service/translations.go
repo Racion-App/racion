@@ -238,6 +238,8 @@ func (t *Translations) loop(ctx context.Context) {
 		wait := 30 * time.Second
 		if !did && err == nil {
 			t.maybeReload(ctx, true)
+			// очередь пуста: вернуть задачи, застрявшие в running после остановки контейнера посреди перевода
+			_ = t.repo.ResetStale(ctx, 10*time.Minute)
 		}
 		switch {
 		case err != nil && errors.Is(err, ai.ErrBusy):
