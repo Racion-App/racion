@@ -19,7 +19,8 @@ import (
 
 // Подборки, влитые в более полные: старый адрес ведёт на новый, чтобы не держать две страницы на один запрос.
 var mergedCollections = map[string]string{
-	"quick-dinners": "quick20",
+	"quick-dinners":   "quick20",
+	"picnic-shashlik": "dacha-grill",
 }
 
 // pageTitle — заголовок вкладки: редакционный, если задан, иначе имя подборки.
