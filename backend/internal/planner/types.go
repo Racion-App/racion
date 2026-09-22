@@ -106,7 +106,9 @@ type Notes struct {
 	Serve    string `json:"serve,omitempty"`    // с чем подать
 }
 
-func (n Notes) Empty() bool { return n.Why == "" && n.Swaps == "" && n.Mistakes == "" && n.Keep == "" && n.Serve == "" }
+func (n Notes) Empty() bool {
+	return n.Why == "" && n.Swaps == "" && n.Mistakes == "" && n.Keep == "" && n.Serve == ""
+}
 
 type RecipeIngredient struct {
 	IngredientID string  `json:"ingredientId"`
@@ -283,23 +285,24 @@ type Params struct {
 
 // Dish — одна ячейка недели.
 type Dish struct {
-	Slot     string  `json:"slot"`
-	RecipeID string  `json:"recipeId"`
-	Title    string  `json:"title"`
-	TimeMin  int     `json:"timeMin"`
-	Leftover bool    `json:"leftover"`         // доедаем вчерашнее
-	Batch    bool    `json:"batch"`            // готовим сразу на два дня
-	Own      bool    `json:"own,omitempty"`    // рецепт пользователя
-	Course   string  `json:"course,omitempty"` // событие: курс (salads, mains…) вместо приёма пищи
-	Kcal     float64 `json:"kcal"`             // на порцию взрослого
-	Protein  float64 `json:"protein"`
-	Fat      float64 `json:"fat"`
-	Carb     float64 `json:"carb"`
-	Cost     float64 `json:"cost"` // на порцию, без «домашних» продуктов, с индексом магазина
-	Why      string  `json:"why"`  // почему выбрано: коротко и честно, на языке плана
-	WhyCode  WhyCode `json:"whyCode"`
-	Side     *Side   `json:"side,omitempty"` // гарнир к основному (итоги выше — суммой с ним)
-	Prep     *PrepInfo `json:"prep,omitempty"` // режим заготовок: когда и как приготовлено
+	Slot     string    `json:"slot"`
+	RecipeID string    `json:"recipeId"`
+	Title    string    `json:"title"`
+	TimeMin  int       `json:"timeMin"`
+	Leftover bool      `json:"leftover"`         // доедаем вчерашнее
+	Batch    bool      `json:"batch"`            // готовим сразу на два дня
+	Own      bool      `json:"own,omitempty"`    // рецепт пользователя
+	Course   string    `json:"course,omitempty"` // событие: курс (salads, mains…) вместо приёма пищи
+	Kcal     float64   `json:"kcal"`             // на порцию взрослого
+	Protein  float64   `json:"protein"`
+	Fat      float64   `json:"fat"`
+	Carb     float64   `json:"carb"`
+	Cost     float64   `json:"cost"` // на порцию, без «домашних» продуктов, с индексом магазина
+	Why      string    `json:"why"`  // почему выбрано: коротко и честно, на языке плана
+	WhyCode  WhyCode   `json:"whyCode"`
+	Side     *Side     `json:"side,omitempty"`     // гарнир к основному (итоги выше — суммой с ним)
+	Prep     *PrepInfo `json:"prep,omitempty"`     // режим заготовок: когда и как приготовлено
+	Servings int       `json:"servings,omitempty"` // корзина: на сколько человек готовят именно это блюдо
 }
 
 // WhyCode — из чего собрана подпись «почему»; по нему подпись пересобирается на другом языке.
@@ -407,6 +410,7 @@ type Plan struct {
 	Notes        []string            `json:"notes"`              // пояснения (дети, источник цен)
 	Family       []string            `json:"family,omitempty"`   // имена аккаунтов, присоединившихся к плану; ставит транспорт
 	Occasion     *OccasionInfo       `json:"occasion,omitempty"` // событие вместо недели
+	Basket       *BasketInfo         `json:"basket,omitempty"`   // стол, который человек набрал сам
 	PrepDays     []PrepDay           `json:"prepDays,omitempty"` // режим заготовок: что готовить в дни заготовок
 }
 

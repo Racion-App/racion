@@ -116,7 +116,7 @@ func homePath(l i18n.Lang) string {
 // Clean-param для Яндекса: параметры страны и цены не создают отдельных страниц каталога.
 func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
-	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*recipes?*&\n"
+	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*recipes?*&\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)

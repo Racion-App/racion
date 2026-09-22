@@ -51,7 +51,7 @@ export const api = {
   skipDay: (id: string, day: number, skip: boolean) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/skip`, { method: "POST", body: JSON.stringify({ day, skip }) }),
   moveDish: (id: string, from: number, to: number, slot: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/move`, { method: "POST", body: JSON.stringify({ from, to, slot }) }),
   repeatPlan: (id: string, startDate?: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/repeat`, { method: "POST", body: JSON.stringify({ startDate: startDate ?? "" }) }),
-  recipe: (id: string) => request<Recipe>(`/api/recipes/${encodeURIComponent(id)}`),
+  recipe: (id: string, country?: string) => request<Recipe>(`/api/recipes/${encodeURIComponent(id)}${country ? `?country=${encodeURIComponent(country)}` : ""}`),
   // аккаунт
   me: () => request<{ user: User | null; admin?: boolean; perms?: string[]; role?: string }>("/api/me"),
   adminRecipes: (q: string) => request<{ items: AdminRecipe[]; tags: string[] }>(`/api/admin/recipes?q=${encodeURIComponent(q)}`),
@@ -148,6 +148,7 @@ export const api = {
   // язык в адресе: ответ кэшируется браузером на 10 минут, и без него после смены языка приходили старые названия
   occasions: (lang: string) => request<OccasionView[]>(`/api/occasions?lang=${encodeURIComponent(lang)}`),
   createOccasion: (id: string, guests: number, params: Params) => request<Plan>(`/api/occasions/${id}`, { method: "POST", body: JSON.stringify({ guests, params }) }),
+  createTable: (items: { recipeId: string; servings: number }[], guests: number, params: Params) => request<Plan>("/api/baskets", { method: "POST", body: JSON.stringify({ items, guests, params }) }),
   recipeSubs: (id: string, country?: string) => request<SubRow[]>(`/api/recipes/${encodeURIComponent(id)}/subs${country ? `?country=${country}` : ""}`),
   feedback: (id: string, liked: boolean) => request<{ ok: boolean }>(`/api/recipes/${encodeURIComponent(id)}/feedback`, { method: "POST", body: JSON.stringify({ liked }) }),
   deleteOwnRecipe: (id: string) => request<void>(`/api/me/recipes/${encodeURIComponent(id)}`, { method: "DELETE" }),

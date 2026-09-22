@@ -142,13 +142,19 @@
   </ul>
   </div>
 </dialog>{{end}}
+<div class="tablebar" data-table-bar hidden data-l-count="{{t .L "table.count" "{n}"}}">
+  <span class="tablebar__count" data-table-count></span>
+  <a class="btn btn-primary btn-sm" href="{{.P}}/table">{{t .L "table.open"}}</a>
+</div>
 <script src="/ssr.js" defer></script>
+<script src="/table.js" defer></script>
 <script src="/consent.js" defer></script>
 </body>
 </html>
 {{end}}
 
 {{define "card"}}
+<div class="rcard-wrap">
 <a class="rcard" href="{{.Href}}">
   {{if .Image}}<img class="rcard__img" src="{{.Image}}" alt="" loading="lazy">{{else}}<span class="rcard__cover rcard__cover--{{.Slot}}" aria-hidden="true"></span>{{end}}
   <span class="rcard__body">
@@ -156,4 +162,6 @@
     <span class="rcard__meta"><span>{{.Slot_}}</span><span class="num">{{.TimeLabel}}</span><span class="num">{{.KcalLabel}}</span>{{if .Money}}<span class="num is-rub">≈ {{.Money}}</span>{{end}}</span>
   </span>
 </a>
+<button type="button" class="rcard__add" data-table-add="{{.ID}}" data-l-add="{{.AddLabel}}" data-l-added="{{.AddedLabel}}" aria-pressed="false" aria-label="{{.AddLabel}}" title="{{.AddLabel}}"></button>
+</div>
 {{end}}

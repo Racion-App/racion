@@ -15,8 +15,8 @@ import { api } from "../lib/api";
 import { track } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
 import { readDraft } from "../lib/draft";
-import { weekRange } from "../lib/format";
-import type { Child, Country, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
+import { fmtMoney, weekRange } from "../lib/format";
+import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
 import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
@@ -79,15 +79,6 @@ function nextMondays(n: number, lang: Lang, thisWeek: string, nextWeek: string):
 }
 
 // Сумма в валюте страны для подсказок и поля бюджета.
-function fmtMoney(v: number, c: Country | undefined): string {
-  if (!c) return String(v);
-  try {
-    return new Intl.NumberFormat(c.locale, { style: "currency", currency: c.currency, minimumFractionDigits: 0, maximumFractionDigits: c.decimals }).format(v);
-  } catch {
-    return `${v} ${c.symbol}`;
-  }
-}
-
 export function Quiz() {
   const nav = useNavigate();
   const { user } = useAuth();

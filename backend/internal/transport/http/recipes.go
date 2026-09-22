@@ -21,6 +21,7 @@ type recipeView struct {
 	Protein     float64            `json:"protein"`
 	Fat         float64            `json:"fat"`
 	Carb        float64            `json:"carb"`
+	Cost        float64            `json:"cost"` // цена порции в валюте ?country, 0 — цены нет
 	Stats       domain.RecipeStats `json:"stats"`
 }
 
@@ -60,6 +61,7 @@ func (s *Server) recipe(w http.ResponseWriter, r *http.Request) {
 		view.Ingredients = append(view.Ingredients, recipeIngredient{ri.IngredientID, ing.LocalName(lang), ri.Amount, ing.Unit, ing.Pantry, ing.Image})
 	}
 	view.Kcal, view.Protein, view.Fat, view.Carb = s.catalog.Nutrition(rc)
+	view.Cost, _ = s.catalog.PortionCost(rc, planner.CountryOf(r.URL.Query().Get("country")).Code)
 	view.Stats = s.svc.Social.Stats(r.Context(), rc.ID, viewerID(r))
 	writeJSON(w, 200, view)
 }

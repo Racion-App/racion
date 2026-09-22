@@ -21,6 +21,7 @@ const Account = page(() => import("./pages/Account"), (m) => m.Account);
 const Admin = page(() => import("./pages/Admin"), (m) => m.Admin);
 const NotFound = page(() => import("./pages/NotFound"), (m) => m.NotFound);
 const Occasion = page(() => import("./pages/Occasion"), (m) => m.Occasion);
+const Table = page(() => import("./pages/Table"), (m) => m.Table);
 const Cook = page(() => import("./pages/Cook"), (m) => m.Cook);
 import { AuthProvider } from "./lib/auth";
 import { LANG_PREFIXES, LangProvider } from "./i18n";
@@ -46,6 +47,7 @@ export function App() {
               <Route path={`${p}/admin/:tab`} element={<Admin />} />
               <Route path={`${p}/admin/recipes/:id`} element={<Admin />} />
               <Route path={`${p}/event/:id`} element={<Occasion />} />
+              <Route path={`${p}/table`} element={<Table />} />
               <Route path={`${p}/cook/:id`} element={<Cook />} />
             </Fragment>
           ))}

@@ -240,21 +240,23 @@ func breadcrumbLD(items [][2]string) map[string]any {
 func hasTag(r planner.Recipe, t string) bool { return service.HasTag(r, t) }
 
 type recipeCard struct {
-	ID        string
-	Title     string
-	Slot      string
-	Slot_     string
-	TimeMin   int
-	Kcal      float64
-	Cost      float64
-	Money     string
-	TimeLabel string
-	KcalLabel string
-	Image     string
-	Tags      []string
-	Kid       bool
-	Desc      string
-	Href      string
+	ID         string
+	Title      string
+	Slot       string
+	Slot_      string
+	TimeMin    int
+	Kcal       float64
+	Cost       float64
+	Money      string
+	TimeLabel  string
+	KcalLabel  string
+	Image      string
+	Tags       []string
+	Kid        bool
+	Desc       string
+	Href       string
+	AddLabel   string // «Добавить в стол» на языке страницы: внутри шаблона карточки язык недоступен
+	AddedLabel string
 }
 
 func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
@@ -264,9 +266,11 @@ func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
 	c := recipeCard{
 		ID: r.ID, Title: tx.Title, Slot: r.Slot, Slot_: planner.SlotLabel(pl.L, r.Slot), TimeMin: r.TimeMin,
 		Kcal: kcal, Cost: cost, Image: r.Image, Tags: r.Tags, Kid: hasTag(r, "kidmenu"), Desc: tx.Description,
-		Href:      pl.P + "/recipe/" + r.ID,
-		TimeLabel: i18n.Minutes(pl.L, r.TimeMin),
-		KcalLabel: i18n.T(pl.L, "recipe.kcal", strconv.Itoa(int(math.Round(kcal)))),
+		Href:       pl.P + "/recipe/" + r.ID,
+		TimeLabel:  i18n.Minutes(pl.L, r.TimeMin),
+		KcalLabel:  i18n.T(pl.L, "recipe.kcal", strconv.Itoa(int(math.Round(kcal)))),
+		AddLabel:   i18n.T(pl.L, "table.add"),
+		AddedLabel: i18n.T(pl.L, "table.added"),
 	}
 	if priced && cost > 0 {
 		c.Money = formatMoney(pl.Country, cost)

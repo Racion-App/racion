@@ -68,3 +68,25 @@ func (s *Server) createOccasion(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 201, plan)
 }
+
+// createBasket — стол из корзины: блюда выбрал человек, каждое со своим числом порций.
+func (s *Server) createBasket(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Guests int                  `json:"guests"`
+		Items  []planner.BasketItem `json:"items"`
+		Params planner.Params       `json:"params"`
+	}
+	if !decode(w, r, 32<<10, &body) {
+		return
+	}
+	if len(body.Items) == 0 || len(body.Items) > planner.BasketMax {
+		writeErr(w, 400, "bad basket")
+		return
+	}
+	plan, err := s.svc.Plans.CreateBasket(r.Context(), body.Items, body.Params, body.Guests, i18n.FromRequest(r), currentUser(r))
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	writeJSON(w, 201, plan)
+}

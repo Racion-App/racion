@@ -102,6 +102,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/recipes/{id}/subs", s.recipeSubs)
 	mux.HandleFunc("GET /api/occasions", s.occasions)
 	mux.HandleFunc("POST /api/occasions/{id}", s.limited(s.lim.build, s.createOccasion))
+	mux.HandleFunc("POST /api/baskets", s.limited(s.lim.build, s.createBasket))
 	mux.HandleFunc("GET /api/collections", s.publicCollections)
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)

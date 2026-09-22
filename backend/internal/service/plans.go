@@ -146,6 +146,27 @@ func (p *Plans) SwapSide(ctx context.Context, id string, day int, slot string, l
 	return updated, nil
 }
 
+// CreateBasket — стол из блюд, которые человек выбрал сам. Отличается от события только тем, что
+// состав задаёт он: дальше это обычный план со списком покупок и ценами.
+func (p *Plans) CreateBasket(ctx context.Context, items []planner.BasketItem, params planner.Params, guests int, lang i18n.Lang, user *domain.User) (planner.Plan, error) {
+	params.Lang = string(lang)
+	params.ExcludeRecipes, params.Favorites, params.Liked, params.Meh, params.CollectionIDs = nil, nil, nil, nil, nil
+	var ownerID *string
+	if user != nil {
+		ownerID = &user.ID
+	}
+	plan, err := p.recipes.CatalogFor(ctx, ownerID).BuildBasket(items, params, guests)
+	if err != nil {
+		return plan, domain.Invalid("basket.empty")
+	}
+	pid, err := p.plans.Insert(ctx, plan, ownerID)
+	if err != nil {
+		return plan, err
+	}
+	plan.ID = pid
+	return plan, nil
+}
+
 // CreateOccasion — меню события на гостей вместо недели; сохраняется как обычный план.
 func (p *Plans) CreateOccasion(ctx context.Context, id string, params planner.Params, guests int, lang i18n.Lang, user *domain.User) (planner.Plan, error) {
 	o, ok := planner.OccasionByID(id)

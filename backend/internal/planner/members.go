@@ -203,6 +203,15 @@ func memberViews(p Params, l i18n.Lang) []MemberView {
 }
 
 // portionsFor — порций на приём; старые планы без SlotPortions считаются по общему числу.
+// portionsForDish — сколько порций у конкретного блюда. В корзине человек задаёт это сам
+// (салат на восьмерых, курица на четверых), в остальных планах порции общие для приёма пищи.
+func (p Plan) portionsForDish(d Dish) float64 {
+	if d.Servings > 0 {
+		return float64(d.Servings)
+	}
+	return p.portionsFor(d.Slot)
+}
+
 func (p Plan) portionsFor(slot string) float64 {
 	if v, ok := p.SlotPortions[slot]; ok && v > 0 {
 		return v

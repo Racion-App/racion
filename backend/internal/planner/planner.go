@@ -640,7 +640,12 @@ func (c *Catalog) Localize(plan Plan, l i18n.Lang) Plan {
 	for i, d := range plan.Days {
 		d.Label = DayLabel(l, d.Index)
 		if plan.Occasion != nil {
-			d.Label = i18n.T(l, "occasion."+plan.Occasion.ID+".title")
+			// у стола, набранного вручную, события нет и ID пустой — тогда название своё, не по ключу события
+			key := "basket.title"
+			if plan.Occasion.ID != "" {
+				key = "occasion." + plan.Occasion.ID + ".title"
+			}
+			d.Label = i18n.T(l, key)
 			plan.Occasion.Title = d.Label
 		}
 		d.Dishes = slices.Clone(d.Dishes)
@@ -949,7 +954,7 @@ func (c *Catalog) finish(plan *Plan) {
 			day.Protein += dish.Protein
 			day.Fat += dish.Fat
 			day.Carb += dish.Carb
-			day.Cost += dish.Cost * plan.portionsFor(dish.Slot)
+			day.Cost += dish.Cost * plan.portionsForDish(dish)
 			for i, m := range p.Members {
 				if m.eats(dish.Slot) {
 					day.PerMember[i] += math.Round(dish.Kcal * factors[i])
@@ -966,7 +971,7 @@ func (c *Catalog) finish(plan *Plan) {
 			}
 			title := r.LocalTitle(lang)
 			for _, ri := range r.Ingredients {
-				need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+				need[ri.IngredientID] += ri.Amount * plan.portionsForDish(dish) * mult
 				if !slices.Contains(usedIn[ri.IngredientID], title) {
 					usedIn[ri.IngredientID] = append(usedIn[ri.IngredientID], title)
 				}
@@ -975,7 +980,7 @@ func (c *Catalog) finish(plan *Plan) {
 				if sr, ok := c.RecipeByID[dish.Side.RecipeID]; ok {
 					st := sr.LocalTitle(lang)
 					for _, ri := range sr.Ingredients {
-						need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+						need[ri.IngredientID] += ri.Amount * plan.portionsForDish(dish) * mult
 						if !slices.Contains(usedIn[ri.IngredientID], st) {
 							usedIn[ri.IngredientID] = append(usedIn[ri.IngredientID], st)
 						}
@@ -1219,12 +1224,12 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 				mult = 2
 			}
 			for _, ri := range r.Ingredients {
-				ct.need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+				ct.need[ri.IngredientID] += ri.Amount * plan.portionsForDish(dish) * mult
 			}
 			if dish.Side != nil {
 				if sr, ok := c.RecipeByID[dish.Side.RecipeID]; ok {
 					for _, ri := range sr.Ingredients {
-						ct.need[ri.IngredientID] += ri.Amount * plan.portionsFor(dish.Slot) * mult
+						ct.need[ri.IngredientID] += ri.Amount * plan.portionsForDish(dish) * mult
 					}
 				}
 			}

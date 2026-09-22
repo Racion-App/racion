@@ -77,3 +77,13 @@ export function people(adults: number, children: number, lang: Lang = "ru"): str
   if (children > 0) parts.push(`${children} ${w("people.kids", children)}`);
   return parts.join(", ");
 }
+
+// Деньги в валюте страны плана: Intl знает, где символ слева, а где справа, и сколько знаков после запятой.
+export function fmtMoney(v: number, c: Country | undefined): string {
+  if (!c) return String(v);
+  try {
+    return new Intl.NumberFormat(c.locale, { style: "currency", currency: c.currency, minimumFractionDigits: 0, maximumFractionDigits: c.decimals }).format(v);
+  } catch {
+    return `${v} ${c.symbol}`;
+  }
+}

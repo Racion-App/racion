@@ -321,7 +321,12 @@ export function Plan() {
     try {
       clearDraftLimits();
       const params = { ...plan.params, excludeTags: [], allergens: [], exclude: [] } as Params;
-      const next = plan.occasion ? await api.createOccasion(plan.occasion.id, plan.occasion.guests, params) : await api.createPlan(params);
+      // у стола Occasion без id: пересобирать его как событие нельзя, только заново из тех же блюд
+      const next = plan.basket
+        ? await api.createTable(plan.days[0].dishes.map((d) => ({ recipeId: d.recipeId, servings: d.servings || plan.basket!.guests })), plan.basket.guests, params)
+        : plan.occasion
+          ? await api.createOccasion(plan.occasion.id, plan.occasion.guests, params)
+          : await api.createPlan(params);
       track("plan_limits_clear", { occasion: plan.occasion?.id ?? "" });
       nav(`/plan/${next.id}`);
     } catch (e) {

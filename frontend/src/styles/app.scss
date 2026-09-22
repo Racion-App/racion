@@ -918,6 +918,67 @@ main.pages.is-loading {
   &__meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--ds-label-secondary); .is-rub { color: var(--ds-green); } }
 }
 
+// «Мой стол»: кнопка в углу карточки и полоса со счётчиком внизу страницы.
+// Кнопка лежит рядом со ссылкой, а не внутри неё: кнопка внутри <a> — невалидная разметка.
+.rcard-wrap { position: relative; display: grid; }
+.rcard__add {
+  position: absolute; inset-block-start: 8px; inset-inline-end: 8px; z-index: 1;
+  width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: var(--ds-bg-elevated); color: var(--ds-label-secondary);
+  box-shadow: var(--ds-shadow-sm); opacity: 0; transform: scale(0.9);
+  transition: opacity var(--ds-dur-base) var(--ds-ease-spring), transform var(--ds-dur-base) var(--ds-ease-spring), background var(--ds-dur-base), color var(--ds-dur-base);
+  &::before { content: ""; display: block; width: 14px; height: 2px; margin: 0 auto; background: currentColor; border-radius: 1px; }
+  &::after { content: ""; display: block; width: 2px; height: 14px; margin: -8px auto 0; background: currentColor; border-radius: 1px; transition: opacity var(--ds-dur-fast); }
+  &:hover { color: var(--ds-blue); }
+  &:focus-visible { opacity: 1; transform: none; outline: 2px solid var(--ds-blue); outline-offset: 2px; }
+  &.is-on { opacity: 1; transform: none; background: var(--ds-blue); color: #fff; &::after { opacity: 0; } }
+}
+.rcard-wrap:hover .rcard__add, .rcard-wrap:focus-within .rcard__add { opacity: 1; transform: none; }
+// На телефоне наведения нет — кнопка видна всегда.
+@media (hover: none) { .rcard__add { opacity: 1; transform: none; } }
+
+// Список блюд на странице «Мой стол»: фото, название с ценой, счётчик порций и крестик.
+.tablelist {
+  list-style: none; margin: 16px 0 20px; padding: 0;
+  border: 1px solid var(--ds-separator); border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); overflow: hidden;
+  &__row {
+    display: grid; grid-template-columns: 56px 1fr auto auto; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    & + & { border-block-start: 1px solid var(--ds-separator); }
+  }
+  &__img { width: 56px; height: 56px; border-radius: var(--ds-radius-md); object-fit: cover; display: block; }
+  &__img--empty { background: var(--ds-fill-3); }
+  &__body { display: grid; gap: 2px; min-width: 0; }
+  &__title { font-size: 15px; font-weight: 600; color: inherit; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    &:hover { color: var(--ds-blue); } }
+  &__meta { font-size: 12.5px; color: var(--ds-label-secondary); .num { color: var(--ds-green); } }
+  &__counter { margin: 0; }
+  &__del {
+    width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    border: 0; border-radius: 50%; background: transparent; color: var(--ds-label-tertiary); cursor: pointer;
+    &:hover { background: var(--ds-fill-3); color: var(--ds-red); }
+    &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); }
+  }
+  &__clear { margin: 10px auto 0; display: inline-flex; align-items: center; gap: 6px; }
+  @container (max-width: 440px) {
+    &__row { grid-template-columns: 44px 1fr auto; row-gap: 8px; }
+    &__img { width: 44px; height: 44px; }
+    &__counter { grid-column: 2 / 3; justify-self: start; }
+    &__del { grid-row: 1; grid-column: 3; align-self: start; }
+  }
+}
+.occ__go-sum { opacity: 0.85; }
+
+// Полоса стола выше уведомления о cookies (z-index 60): иначе на первом визите она прячется под ним.
+.tablebar {
+  position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--ds-bg-elevated); border-block-start: 1px solid var(--ds-separator); box-shadow: var(--ds-shadow-md);
+  &[hidden] { display: none; }
+  &__count { font-size: 14px; font-weight: 600; }
+}
+
 // Детское меню внутри дня: те же строки, подпись с иконкой, лёгкая подложка.
 .kidrows {
   margin: 6px -8px 0; padding: 6px 8px 2px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);
@@ -1609,7 +1670,8 @@ main.pages.is-loading {
     th { font-weight: 600; color: var(--ds-label-secondary); border-top: 0; } } }
 
 // Баннер выбора аналитики (ЕС): снизу, компактный, не перекрывает контент надолго
-.consent { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 60; margin: 0 auto; max-width: 640px;
+.consent { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  body:has(.tablebar:not([hidden])) & { bottom: calc(76px + env(safe-area-inset-bottom)); } z-index: 60; margin: 0 auto; max-width: 640px;
   display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 12px 14px; border-radius: var(--ds-radius-lg);
   background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); box-shadow: var(--ds-shadow-lg); font-size: 13.5px; color: var(--ds-label-secondary);
   &__text { flex: 1 1 320px; b { color: var(--ds-label-primary); } a { color: var(--ds-blue); } }

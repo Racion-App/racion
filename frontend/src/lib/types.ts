@@ -83,6 +83,7 @@ export type MemberView = { name: string; goal: string; goalLabel: string; kcal: 
 export const APPETITES = ["small", "normal", "big"] as const;
 
 export type Dish = {
+  servings?: number; // стол: на сколько человек готовят это блюдо
   slot: string;
   recipeId: string;
   title: string;
@@ -142,6 +143,7 @@ export type ShopGroup = { category: string; label: string; items: ShopItem[]; co
 
 export type Plan = {
   id: string;
+  basket?: { guests: number; dishes: number }; // стол, набранный вручную, вместо недели
   params: Params;
   prepDays?: PrepDay[];
   lang: string;
@@ -196,6 +198,7 @@ export type Recipe = {
   protein: number;
   fat: number;
   carb: number;
+  cost: number; // цена порции в валюте страны запроса
   own?: boolean;
   public?: boolean;
   author?: string;
