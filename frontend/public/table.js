@@ -24,12 +24,13 @@
   }
 
   function label(el, on) {
-    var add = el.getAttribute("data-l-add") || el.getAttribute("title") || "";
+    var add = el.getAttribute("data-l-add") || "";
     var added = el.getAttribute("data-l-added") || add;
     el.classList.toggle("is-on", on);
     el.setAttribute("aria-pressed", on ? "true" : "false");
-    el.setAttribute("title", on ? added : add);
-    el.setAttribute("aria-label", on ? added : add);
+    var span = el.querySelector("[data-table-label]");
+    if (span) span.textContent = on ? added : add;
+    else el.setAttribute("aria-label", on ? added : add); // кнопка без подписи (старая разметка)
   }
 
   function paint() {

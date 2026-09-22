@@ -9,7 +9,7 @@ import { api } from "../lib/api";
 import { track } from "../lib/analytics";
 import { readDraft } from "../lib/draft";
 import { clearTable, readTable, setServings, toggleTable, type TableItem } from "../lib/table";
-import { fmtMoney } from "../lib/format";
+import { approx } from "../lib/format";
 import type { Meta, Params, Recipe } from "../lib/types";
 import { langCountry, useLang, useT } from "../i18n";
 
@@ -105,6 +105,7 @@ export function Table() {
           </div>
         ) : (
           <>
+            <p className="tablelist__hint">{t("table.portions.hint")}</p>
             <ul className="tablelist">
               {items.map((x) => {
                 const r = recipes[x.id];
@@ -112,19 +113,19 @@ export function Table() {
                 return (
                   <li key={x.id} className="tablelist__row">
                     {r?.image
-                      ? <img className="tablelist__img" src={r.image} alt="" loading="lazy" />
+                      ? <img className="tablelist__img" src={r.image} alt="" loading="lazy" width={56} height={56} />
                       : <span className="tablelist__img tablelist__img--empty" aria-hidden />}
                     <div className="tablelist__body">
                       <Link className="tablelist__title" to={`/recipe/${x.id}`}>{r?.title ?? x.id}</Link>
-                      {r && <span className="tablelist__meta"><span className="num">{fmtMoney((r.cost ?? 0) * n, cy)}</span> · {t("table.servings", { n })}</span>}
+                      {r && <span className="tablelist__meta num">{approx((r.cost ?? 0) * n, cy, lang)}</span>}
                     </div>
-                    <div className="counter tablelist__counter">
-                      <button type="button" className="counter__btn" onClick={() => setItems(setServings(x.id, Math.max(1, n - 1)))} aria-label="−">
-                        <Minus size={16} aria-hidden />
+                    <div className="tablelist__portions" role="group" aria-label={t("table.portions")}>
+                      <button type="button" className="tablelist__step" onClick={() => setItems(setServings(x.id, Math.max(1, n - 1)))} aria-label={t("table.less")} disabled={n <= 1}>
+                        <Minus size={15} aria-hidden />
                       </button>
-                      <output className="num">{n}</output>
-                      <button type="button" className="counter__btn" onClick={() => setItems(setServings(x.id, Math.min(40, n + 1)))} aria-label="+">
-                        <Plus size={16} aria-hidden />
+                      <output className="tablelist__n num">{n}</output>
+                      <button type="button" className="tablelist__step" onClick={() => setItems(setServings(x.id, Math.min(40, n + 1)))} aria-label={t("table.more")} disabled={n >= 40}>
+                        <Plus size={15} aria-hidden />
                       </button>
                     </div>
                     <button type="button" className="tablelist__del" onClick={() => setItems(toggleTable(x.id))} aria-label={t("table.remove")}>
@@ -161,7 +162,7 @@ export function Table() {
             {error && <p className="error-inline">{error}</p>}
             <button type="button" className="btn btn-primary btn-lg occ__go" onClick={build} disabled={busy || !store}>
               {t("table.build", { n: items.length, dishes: tn("dishes", items.length) })}
-              {rough > 0 && <span className="occ__go-sum num"> · ≈ {fmtMoney(rough, cy)}</span>}
+              {rough > 0 && <span className="occ__go-sum num"> · {approx(rough, cy, lang)}</span>}
             </button>
             <button type="button" className="btn btn-link btn-sm tablelist__clear" onClick={() => { clearTable(); setItems([]); }}>
               <Trash2 size={14} aria-hidden /> {t("table.clear")}

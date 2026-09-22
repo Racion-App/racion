@@ -15,7 +15,7 @@ import { api } from "../lib/api";
 import { track } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
 import { readDraft } from "../lib/draft";
-import { fmtMoney, weekRange } from "../lib/format";
+import { money, weekRange } from "../lib/format";
 import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
 import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
@@ -854,7 +854,7 @@ export function Quiz() {
                 const value = p.budgetMode === "week" ? Math.round((b.perDay * eaters * 7) / roundTo) * roundTo : b.perDay;
                 return (
                   <button key={b.id} type="button" className="chip" aria-pressed={p.budgetValue === value} onClick={() => set({ budgetValue: value })}>
-                    {b.label} · <span className="num">{fmtMoney(value, country)}</span>
+                    {b.label} · <span className="num">{money(value, country, lang)}</span>
                   </button>
                 );
               })}
