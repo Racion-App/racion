@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -207,7 +209,13 @@ func (t *Translations) kick() {
 
 // Run — воркер: берёт следующую задачу, переводит, пишет статус. Без свободного провайдера ждёт минуту.
 // translationWorkers — параллельных переводов; лимит провайдера держит пул (reserve), а один перевод ждёт ответа ~30 с.
-const translationWorkers = 3
+// По умолчанию один: на маленьком сервере лишние воркеры отнимают CPU у сайта. TRANSLATION_WORKERS переопределяет.
+func translationWorkers() int {
+	if n, err := strconv.Atoi(os.Getenv("TRANSLATION_WORKERS")); err == nil && n > 0 {
+		return n
+	}
+	return 1
+}
 
 func (t *Translations) Run(ctx context.Context) {
 	if !t.Enabled() {
@@ -215,7 +223,7 @@ func (t *Translations) Run(ctx context.Context) {
 	}
 	// зависшие «running» после перезапуска — обратно в очередь
 	_ = t.repo.ResetStale(ctx, 10*time.Minute)
-	for i := 1; i < translationWorkers; i++ {
+	for i := 1; i < translationWorkers(); i++ {
 		go t.loop(ctx)
 	}
 	t.loop(ctx)

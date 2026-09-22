@@ -14,6 +14,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: unless-stopped
 
   backend:
     build: ./backend
@@ -53,6 +54,7 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       LOCAL_AI_URL: ${LOCAL_AI_URL:-}
       AI_ORDER: ${AI_ORDER:-}
+      TRANSLATION_WORKERS: ${TRANSLATION_WORKERS:-1}
       AI_MODELS: ${AI_MODELS:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-nano}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
