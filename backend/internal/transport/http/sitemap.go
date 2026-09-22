@@ -96,11 +96,12 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(b.String()))
 }
 
-// robots — закрытые разделы: API, личные планы и события, кабинет, готовка, админка, картинки превью.
+// robots — закрытые разделы: API, личные планы и события, кабинет, режим готовки (SPA /cook/), админка,
+// картинки превью и поиск по каталогу (?q=: страницы и так noindex, а боты перебирают тысячи запросов).
 // Clean-param для Яндекса: параметры страны и цены не создают отдельных страниц каталога.
 func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
-	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /recipes/from/\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\n"
+	closed := "Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)
