@@ -61,7 +61,7 @@ func (s *Server) createOccasion(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, 32<<10, &body) {
 		return
 	}
-	plan, err := s.svc.Plans.CreateOccasion(r.Context(), r.PathValue("id"), body.Params, body.Guests, i18n.FromRequest(r), currentUser(r))
+	plan, err := s.svc.Plans.CreateOccasion(r.Context(), r.PathValue("id"), body.Params, body.Guests, langOf(r, body.Params.Lang), currentUser(r))
 	if err != nil {
 		s.fail(w, r, err)
 		return
@@ -83,7 +83,7 @@ func (s *Server) createBasket(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, "bad basket")
 		return
 	}
-	plan, err := s.svc.Plans.CreateBasket(r.Context(), body.Items, body.Params, body.Guests, i18n.FromRequest(r), currentUser(r))
+	plan, err := s.svc.Plans.CreateBasket(r.Context(), body.Items, body.Params, body.Guests, langOf(r, body.Params.Lang), currentUser(r))
 	if err != nil {
 		s.fail(w, r, err)
 		return

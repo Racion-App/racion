@@ -14,7 +14,7 @@ func (s *Server) createPlan(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, 64<<10, &p) {
 		return
 	}
-	plan, err := s.svc.Plans.Create(r.Context(), p, i18n.FromRequest(r), currentUser(r))
+	plan, err := s.svc.Plans.Create(r.Context(), p, langOf(r, p.Lang), currentUser(r))
 	if err != nil {
 		s.fail(w, r, err)
 		return
@@ -220,4 +220,13 @@ func (s *Server) planChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, out)
+}
+
+// langOf — язык ответа: из тела запроса, если он там задан, иначе как обычно (?lang=, cookie, Accept-Language).
+// Клиенты API шлют язык в параметрах плана — в openapi.json это описано, и обещание надо держать.
+func langOf(r *http.Request, want string) i18n.Lang {
+	if l, ok := i18n.Valid(want); ok {
+		return l
+	}
+	return i18n.FromRequest(r)
 }
