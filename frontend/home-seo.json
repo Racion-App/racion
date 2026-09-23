@@ -1,7 +1,7 @@
 {
  "ru": {
   "title": "Рацион — меню на неделю с ценами и списком покупок",
-  "description": "Ответьте на семь вопросов — магазин, кто ест, что нельзя, техника, бюджет — и получите семь дней блюд с ценами вашего магазина и один список покупок, округлённый до упаковок. Бесплатно, без регистрации.",
+  "description": "Ответьте на семь вопросов и получите семь дней блюд с ценами вашего магазина и один список покупок, округлённый до упаковок. Бесплатно, без регистрации.",
   "links": [
    {
     "href": "/recipes",
@@ -103,7 +103,7 @@
  },
  "fr": {
   "title": "Menu de la semaine avec les prix et la liste de courses — Racion",
-  "description": "Répondez à sept questions et recevez une semaine de repas avec les prix de votre magasin et une liste de courses arrondie aux paquets. Gratuit, sans inscription.",
+  "description": "Répondez à sept questions et recevez une semaine de repas aux prix de votre magasin, avec une liste de courses arrondie aux paquets. Sans inscription.",
   "links": [
    {
     "href": "/fr/recipes",
