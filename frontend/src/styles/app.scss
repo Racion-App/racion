@@ -990,8 +990,10 @@ body:has(.tablebar:not([hidden])) .sitefoot {
     th { text-align: start; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
       color: var(--ds-label-tertiary); padding: 0 12px 8px 0; border-block-end: 1px solid var(--ds-separator); }
     td { padding: 9px 12px 9px 0; border-block-end: 1px solid var(--ds-fill-4); vertical-align: top; }
-    td:first-child { white-space: nowrap; }
-    code { font-family: var(--ds-font-mono); font-size: 13px; }
+    td:first-child { white-space: nowrap; width: 1%; }
+    // без этого Bootstrap красит inline-code в розовый: десять розовых строк подряд в таблице
+    // читаются как ошибки, а это просто адреса методов
+    code { font-family: var(--ds-font-mono); font-size: 13px; color: var(--ds-label-primary); }
   }
   @media (max-width: 560px) {
     &__table { display: block; th:first-child, td:first-child { white-space: normal; }
