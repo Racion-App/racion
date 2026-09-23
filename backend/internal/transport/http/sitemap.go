@@ -92,6 +92,7 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	for _, rc := range community {
 		url("/recipe/"+rc.ID, "monthly", "0.5")
 	}
+	url("/developers", "monthly", "0.5")
 	url("/terms", "yearly", "0.3")
 	url("/privacy", "yearly", "0.3")
 	b.WriteString("</urlset>\n")

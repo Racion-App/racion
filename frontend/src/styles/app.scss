@@ -970,6 +970,37 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   padding-block-end: calc(var(--r-bar-h) + env(safe-area-inset-bottom) + 12px);
 }
 
+// Страница /developers: те же правила листа, что у юридических страниц, плюс плитки фактов,
+// таблица методов и блоки кода. Моноширинный шрифт здесь по делу — это код, а не костюм.
+.devpage {
+  &__facts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 18px 0 26px;
+    > div { padding: 12px 14px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4); }
+    dt { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ds-label-tertiary); }
+    dd { margin: 4px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  }
+  &__code {
+    margin: 12px 0 18px; padding: 14px 16px; overflow-x: auto;
+    border-radius: var(--ds-radius-md); background: var(--ds-fill-4); border: 1px solid var(--ds-separator);
+    font-family: var(--ds-font-mono); font-size: 13px; line-height: 1.55; white-space: pre;
+    code { font: inherit; }
+  }
+  &__table {
+    width: 100%; margin: 12px 0 20px; border-collapse: collapse; font-size: 14px;
+    th { text-align: start; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--ds-label-tertiary); padding: 0 12px 8px 0; border-block-end: 1px solid var(--ds-separator); }
+    td { padding: 9px 12px 9px 0; border-block-end: 1px solid var(--ds-fill-4); vertical-align: top; }
+    td:first-child { white-space: nowrap; }
+    code { font-family: var(--ds-font-mono); font-size: 13px; }
+  }
+  @media (max-width: 560px) {
+    &__table { display: block; th:first-child, td:first-child { white-space: normal; }
+      thead { display: none; }
+      tr { display: block; padding: 10px 0; border-block-end: 1px solid var(--ds-fill-4); }
+      td { display: block; padding: 0; border: 0; &:first-child { margin-bottom: 3px; font-weight: 600; } } }
+  }
+}
+
 // Список блюд на странице «Мой стол»: фото, название, цена и счётчик порций.
 // На телефоне счётчик уходит под название — в одну строку он не помещается и рвёт заголовок.
 .tablelist {

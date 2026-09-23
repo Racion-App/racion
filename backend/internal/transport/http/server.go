@@ -73,10 +73,29 @@ func New(d Deps) http.Handler {
 	}
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth}
 	mux := http.NewServeMux()
+	// Публичные методы, описанные в openapi.json, вызываются в том числе из браузера: без CORS
+	// стороннее приложение до них не достучится. Куки при этом не передаются — доступ анонимный.
+	cors := func(h http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Vary", "Origin")
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				w.Header().Set("Access-Control-Max-Age", "86400")
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			h(w, r)
+		}
+	}
 	mux.HandleFunc("GET /healthz", s.healthz)
-	mux.HandleFunc("GET /api/meta", s.meta)
-	mux.HandleFunc("POST /api/plans", s.limited(s.lim.build, s.createPlan))
-	mux.HandleFunc("GET /api/plans/{id}", s.getPlan)
+	mux.HandleFunc("OPTIONS /api/plans", cors(nil))
+	mux.HandleFunc("OPTIONS /api/baskets", cors(nil))
+	mux.HandleFunc("OPTIONS /api/occasions/{id}", cors(nil))
+	mux.HandleFunc("GET /api/meta", cors(s.meta))
+	mux.HandleFunc("POST /api/plans", cors(s.limited(s.lim.build, s.createPlan)))
+	mux.HandleFunc("GET /api/plans/{id}", cors(s.getPlan))
 	mux.HandleFunc("POST /api/plans/{id}/swap", s.limited(s.lim.build, s.swap))
 	mux.HandleFunc("POST /api/plans/{id}/side", s.limited(s.lim.build, s.swapSide))
 	mux.HandleFunc("POST /api/plans/{id}/chat", s.limited(s.lim.build, s.planChat))
@@ -91,8 +110,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/plans/{id}/join", s.limited(s.lim.write, s.joinPlan))
 	mux.HandleFunc("PATCH /api/plans/{id}", s.renamePlan)
 	mux.HandleFunc("DELETE /api/plans/{id}", s.deletePlan)
-	mux.HandleFunc("GET /api/recipes", s.recipesAPI)
-	mux.HandleFunc("GET /api/recipes/{id}", s.recipe)
+	mux.HandleFunc("GET /api/recipes", cors(s.recipesAPI))
+	mux.HandleFunc("GET /api/recipes/{id}", cors(s.recipe))
 	mux.HandleFunc("GET /api/recipes/{id}/stats", s.recipeStats)
 	mux.HandleFunc("POST /api/recipes/{id}/rating", s.limited(s.lim.write, s.rateRecipe))
 	mux.HandleFunc("PUT /api/recipes/{id}/like", s.limited(s.lim.write, s.setLike(true)))
@@ -100,10 +119,10 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("PUT /api/recipes/{id}/favorite", s.limited(s.lim.write, s.setFavorite(true)))
 	mux.HandleFunc("POST /api/recipes/{id}/feedback", s.limited(s.lim.write, s.setFeedback))
 	mux.HandleFunc("GET /api/recipes/{id}/subs", s.recipeSubs)
-	mux.HandleFunc("GET /api/occasions", s.occasions)
-	mux.HandleFunc("POST /api/occasions/{id}", s.limited(s.lim.build, s.createOccasion))
-	mux.HandleFunc("POST /api/baskets", s.limited(s.lim.build, s.createBasket))
-	mux.HandleFunc("GET /api/collections", s.publicCollections)
+	mux.HandleFunc("GET /api/occasions", cors(s.occasions))
+	mux.HandleFunc("POST /api/occasions/{id}", cors(s.limited(s.lim.build, s.createOccasion)))
+	mux.HandleFunc("POST /api/baskets", cors(s.limited(s.lim.build, s.createBasket)))
+	mux.HandleFunc("GET /api/collections", cors(s.publicCollections))
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
 	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
@@ -149,7 +168,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/me/recipes/{id}/translations", s.ownTranslations)
 	mux.HandleFunc("POST /api/me/recipes/{id}/translations", s.limited(s.lim.write, s.ownTranslate))
 	mux.HandleFunc("GET /api/admin/ai", s.adminAI)
-	mux.HandleFunc("GET /api/ingredients", s.ingredientsAPI)
+	mux.HandleFunc("GET /api/ingredients", cors(s.ingredientsAPI))
 	mux.HandleFunc("POST /api/events", s.limited(s.lim.events, s.events))
 	// аккаунт
 	mux.HandleFunc("POST /api/auth/register", s.limited(s.lim.auth, s.register))
@@ -231,10 +250,12 @@ func New(d Deps) http.Handler {
 		mux.HandleFunc("GET /"+string(l)+"/recipes/from", s.cookHubPage)
 		mux.HandleFunc("GET /"+string(l)+"/recipes/from/{slug}", s.cookPage)
 		mux.HandleFunc("GET /"+string(l)+"/menu/{slug}", s.menuPage)
+		mux.HandleFunc("GET /"+string(l)+"/developers", s.devPage)
 		mux.HandleFunc("GET /"+string(l)+"/terms", s.legalPage)
 		mux.HandleFunc("GET /"+string(l)+"/privacy", s.legalPage)
 		mux.HandleFunc("GET /"+string(l)+"/status", s.statusPage)
 	}
+	mux.HandleFunc("GET /developers", s.devPage)
 	mux.HandleFunc("GET /terms", s.legalPage)
 	mux.HandleFunc("GET /privacy", s.legalPage)
 	mux.HandleFunc("GET /status", s.statusPage)

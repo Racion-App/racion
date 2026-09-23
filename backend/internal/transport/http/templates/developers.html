@@ -1,0 +1,66 @@
+{{template "head" .}}
+<article class="legal devpage">
+  <nav class="crumbs" aria-label="{{t .L "crumbs"}}"><a href="/">{{t .L "page.brand"}}</a><span aria-hidden="true">›</span><span>{{.Title}}</span></nav>
+  <h1>{{.Title}}</h1>
+  <p class="rpage__lead">{{.Lead}}</p>
+
+  <div class="devpage__facts">
+    <div><dt>{{.T.NoKey}}</dt><dd>{{.T.NoKeyVal}}</dd></div>
+    <div><dt>{{.T.Limit}}</dt><dd class="num">600 / 60</dd></div>
+    <div><dt>{{.T.Recipes}}</dt><dd class="num">{{.Recipes}}</dd></div>
+    <div><dt>{{.T.Countries}}</dt><dd class="num">{{.Countries}}</dd></div>
+  </div>
+
+  <h2 id="key">{{.T.KeyTitle}}</h2>
+  <p>{{.T.KeyBody}}</p>
+
+  <h2 id="start">{{.T.StartTitle}}</h2>
+  <p>{{.T.StartBody}}</p>
+  <pre class="devpage__code"><code>curl "{{.BaseURL}}/api/recipes?q=chicken&amp;country=DE&amp;lang=en&amp;limit=5"</code></pre>
+  <p>{{.T.PlanBody}}</p>
+  <pre class="devpage__code"><code>curl -X POST "{{.BaseURL}}/api/plans" \
+  -H "Content-Type: application/json" \
+  -d '{"country":"DE","store":"rewe","lang":"en","adults":2,
+       "kids":[{"age":7}],"slots":["breakfast","lunch","dinner"],
+       "equipment":["stove","oven"],"excludeTags":["fish"],
+       "budgetMode":"perPersonDay","budgetValue":12}'</code></pre>
+  <p>{{.T.PlanAfter}}</p>
+
+  <h2 id="methods">{{.T.MethodsTitle}}</h2>
+  <table class="devpage__table">
+    <thead><tr><th>{{.T.ColMethod}}</th><th>{{.T.ColWhat}}</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/meta</code></td><td>{{.T.MMeta}}</td></tr>
+      <tr><td><code>GET /api/recipes</code></td><td>{{.T.MRecipes}}</td></tr>
+      <tr><td><code>GET /api/recipes/{id}</code></td><td>{{.T.MRecipe}}</td></tr>
+      <tr><td><code>GET /api/collections</code></td><td>{{.T.MCollections}}</td></tr>
+      <tr><td><code>GET /api/occasions</code></td><td>{{.T.MOccasions}}</td></tr>
+      <tr><td><code>GET /api/ingredients</code></td><td>{{.T.MIngredients}}</td></tr>
+      <tr><td><code>POST /api/plans</code></td><td>{{.T.MPlan}}</td></tr>
+      <tr><td><code>GET /api/plans/{id}</code></td><td>{{.T.MGetPlan}}</td></tr>
+      <tr><td><code>POST /api/baskets</code></td><td>{{.T.MBasket}}</td></tr>
+      <tr><td><code>POST /api/occasions/{id}</code></td><td>{{.T.MOccasionPlan}}</td></tr>
+    </tbody>
+  </table>
+  <p><a href="{{.BaseURL}}/openapi.json">openapi.json</a> — {{.T.SpecNote}}</p>
+
+  <h2 id="limits">{{.T.LimitsTitle}}</h2>
+  <p>{{.T.LimitsBody}}</p>
+
+  <h2 id="prices">{{.T.PricesTitle}}</h2>
+  <p>{{.T.PricesBody}}</p>
+
+  <h2 id="mcp">{{.T.McpTitle}}</h2>
+  <p>{{.T.McpBody}}</p>
+  <pre class="devpage__code"><code>{
+  "mcpServers": {
+    "racion": { "command": "npx", "args": ["-y", "racion-mcp"] }
+  }
+}</code></pre>
+  <p>{{.T.McpTools}}</p>
+
+  <h2 id="terms">{{.T.TermsTitle}}</h2>
+  <p>{{.T.TermsBody}} <a href="{{.P}}/terms">{{t .L "legal.terms"}}</a>.</p>
+  <p>{{.T.Contact}} <a href="mailto:{{.Email}}">{{.Email}}</a>.</p>
+</article>
+{{template "foot" .}}
