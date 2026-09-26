@@ -34,6 +34,7 @@ type Server struct {
 	logs      *logger.Ring
 	oauth     *oauth.Registry
 	publicURL string // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
+	pages     *pageCache // микрокэш готовых страниц каталога
 }
 
 // Deps — всё, что нужно транспорту от приложения.
@@ -71,7 +72,7 @@ func New(d Deps) http.Handler {
 		}
 		return out
 	}
-	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth}
+	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache()}
 	mux := http.NewServeMux()
 	// Публичные методы, описанные в openapi.json, вызываются в том числе из браузера: без CORS
 	// стороннее приложение до них не достучится. Куки при этом не передаются — доступ анонимный.
@@ -267,7 +268,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /sitemap/{file}", s.sitemapLang) // /sitemap/ru.xml … по языку
 	mux.HandleFunc("GET /{file}", s.indexNowKey)         // /<key>.txt в корне: ключ IndexNow действует на весь сайт только из корня
 	mux.HandleFunc("GET /robots.txt", s.robots)
-	return s.withLogging(s.withRecover(s.withHeaders(s.withUser(s.withLimit(mux))))) // пользователь известен до лимита: админы без лимитов
+	return s.withLogging(s.withRecover(s.withHeaders(s.withUser(s.withLimit(s.withPageCache(mux)))))) // пользователь известен до лимита: админы без лимитов
 }
 
 // ── Middleware ─────────────────────────────────────────────────────────────
