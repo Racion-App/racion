@@ -66,6 +66,11 @@ export function SiteFooter() {
         </div>
       </nav>
       <p className="sitefoot__copy">© {t("page.brand")}</p>
+      {/* Значок резидента Product Radar: светлый и тёмный варианты, переключаются темой */}
+      <a className="sitefoot__radar" href="https://productradar.ru/product/raczion?utm_source=badge-resident" target="_blank" rel="noopener">
+        <img className="sitefoot__radar--light" src="https://productradar.ru/wp-json/productradar/v1/resident-badge?theme=white" alt="Product Radar" width={196} height={60} loading="lazy" decoding="async" />
+        <img className="sitefoot__radar--dark" src="https://productradar.ru/wp-json/productradar/v1/resident-badge?theme=black" alt="Product Radar" width={196} height={60} loading="lazy" decoding="async" />
+      </a>
     </footer>
   );
 }

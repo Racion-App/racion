@@ -893,6 +893,13 @@ main.pages.is-loading {
   &__lang { justify-self: start; display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--ds-separator); border-radius: var(--ds-radius-pill); background: transparent; color: var(--ds-label-primary); font: inherit; font-size: 13px; cursor: pointer;
     .fi { width: 18px; height: 13px; border-radius: 2px; } &:hover { border-color: var(--ds-blue); color: var(--ds-blue); } }
   &__copy { margin: 0; font-size: 12.5px; color: var(--ds-label-tertiary); }
+  // Значок резидента Product Radar. Оба варианта лежат в разметке, потому что тему у нас переключают
+  // руками, а не только системной настройкой, и <picture> с prefers-color-scheme этого не увидит.
+  &__radar { justify-self: start; display: inline-flex; line-height: 0; opacity: 0.85;
+    &:hover { opacity: 1; }
+    img { width: 196px; height: 60px; }
+    &--dark { display: none; }
+    @include dark { &--light { display: none; } &--dark { display: inline; } } }
   // широкий подвал (каталог, рецепт): бренд · слоган · кнопка в одну строку; узкий (главная, кабинет) — столбиком
   @container (min-width: 720px) { &__top { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; } }
   @container (max-width: 719px) { &__cols { grid-template-columns: 1fr 1fr; } &__col:nth-child(2) { grid-column: 1 / -1; } &__col:last-child { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid var(--ds-separator); } &__top .sitefoot__cta { margin-top: 4px; } }
