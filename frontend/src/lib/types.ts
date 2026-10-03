@@ -174,7 +174,8 @@ export type Plan = {
   slotPortions?: Record<string, number>;
   family?: string[];
   occasion?: { id: string; title: string; guests: number };
-  priceSource: { name: string; period: string; weeklyDate: string; region: string; regionCode: string; coverage: number };
+  // store/storeDate/storeCoverage — цены из каталога самой сети (ВкусВилл) и доля корзины по ним
+  priceSource: { name: string; period: string; weeklyDate: string; region: string; regionCode: string; coverage: number; store?: string; storeDate?: string; storeCoverage?: number };
   seed: number;
   swaps: number;
   generatedAt: string;
@@ -278,3 +279,6 @@ export type Offer = {
   affiliate: boolean; erid: string; startsAt: string | null; endsAt: string | null; active: boolean; priority: number;
 };
 export type ApiKey = { id: string; name: string; prefix: string; createdAt: string; lastUsedAt?: string; key?: string };
+
+// Корзина сети ссылкой: что положили и что осталось искать по ссылкам на поиск.
+export type StoreCart = { link: string; added: number; matched: number; wanted: number; left: string[] };

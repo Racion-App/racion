@@ -29,6 +29,7 @@ import (
 	"racion/internal/service"
 	"racion/internal/storage/postgres"
 	transport "racion/internal/transport/http"
+	"racion/internal/vkusvill"
 )
 
 func main() {
@@ -58,6 +59,11 @@ func main() {
 		log.Fatal("catalog", zap.Error(err))
 	}
 	log.Info("catalog", zap.Int("recipes", len(catalog.Recipes)), zap.Int("ingredients", len(catalog.Ingredients)), zap.Int("stores", len(catalog.StoreList)))
+	// цены сетей с открытым каталогом (ВкусВилл): заменяют оценку «Росстат × индекс» для сопоставленных продуктов
+	for _, sp := range seed.StorePrices() {
+		catalog.SetStorePrices(sp)
+		log.Info("store prices", zap.String("store", sp.Store), zap.String("date", sp.Date), zap.Int("items", len(sp.Items)))
+	}
 
 	// Страна по IP: база DB-IP в БД, обновление раз в месяц в фоне.
 	geoResolver := &geo.Resolver{Dir: cfg.GeoDir}
@@ -143,6 +149,8 @@ func main() {
 		}
 	}
 	services.Subs = service.NewSubstitutes(subsTable, services.Recipes)
+	// корзина ВкусВилла одной ссылкой: их MCP открыт без ключа (см. internal/vkusvill)
+	services.Plans.SetCart(vkusvill.New(cfg.VkusvillMCP))
 	// Рецепты базы из админки: после правки каталог перечитывается из БД с теми же ценниками
 	reloadCatalog := func(ctx context.Context) error {
 		fresh, err := catalogRef.Load().Reload(ctx, pool)

@@ -29,6 +29,7 @@ type Plans struct {
 	family      *Family
 	catalog     *planner.CatalogRef
 	collections *Collections
+	cart        CartLinker // корзина сети ссылкой (ВкусВилл); nil — не подключена
 }
 
 // Create собирает план по ответам квиза. Нелюбимые рецепты берутся только из аккаунта,

@@ -27,6 +27,10 @@ type PriceSource struct {
 	Region     string  `json:"region"`     // название территории
 	RegionCode string  `json:"regionCode"`
 	Coverage   float64 `json:"coverage"` // доля стоимости корзины, посчитанная по Росстату, 0..1
+	// Цены из каталога самой сети (ВкусВилл): название сети, дата выгрузки и доля корзины по ним.
+	Store         string  `json:"store,omitempty"`
+	StoreDate     string  `json:"storeDate,omitempty"`
+	StoreCoverage float64 `json:"storeCoverage,omitempty"`
 }
 
 // PriceBook — цены Росстата в памяти: регион → товар → цена за кг/л/10 шт с недельной коррекцией.
@@ -209,6 +213,7 @@ func normalizeName(s string) string {
 type pricer struct {
 	pb      *PriceBook
 	local   *LocalPrices
+	store   *StorePrices // цены из каталога самой сети; nil — у сети каталога нет
 	region  string
 	idx     float64
 	country Country
@@ -220,6 +225,11 @@ func (p pricer) round(v float64) float64 { return p.country.RoundMoney(v) }
 
 // packPrice — цена типовой упаковки в валюте страны. Второе значение — из официального источника ли цена.
 func (p pricer) packPrice(ing Ingredient) (float64, bool) {
+	// настоящая цена сети важнее любой оценки, индекс к ней не применяется. Не округляем: упаковка сети
+	// и наша бывают разными, а округляется итог строки списка, иначе ошибка копится на каждой упаковке.
+	if it, ok := p.storeItem(ing); ok {
+		return it.PerUnit() * ing.Pack, true
+	}
 	if p.country.Code == "RU" || p.country.Code == "" {
 		if p.pb != nil && ing.RosstatItem > 0 {
 			if v, ok := p.pb.Price(p.region, ing.RosstatItem); ok {

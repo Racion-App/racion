@@ -188,8 +188,9 @@ type Catalog struct {
 // priceStore — ценники, которые подменяются на лету. Вынесены в указатель, чтобы копия каталога
 // с рецептами пользователя (WithRecipes) видела те же обновления.
 type priceStore struct {
-	book  atomic.Pointer[PriceBook]
-	local sync.Map // код страны → *LocalPrices
+	book   atomic.Pointer[PriceBook]
+	local  sync.Map // код страны → *LocalPrices
+	stores sync.Map // код сети → *StorePrices: свой каталог с ценами (ВкусВилл)
 }
 
 // NewCatalog — пустой каталог с готовыми картами и хранилищем цен.
@@ -345,6 +346,7 @@ type ShopItem struct {
 	Pantry       bool     `json:"pantry"`
 	Cost         float64  `json:"cost"`
 	Rosstat      bool     `json:"rosstat"`          // цена из Росстата, а не ручная
+	Store        bool     `json:"store,omitempty"`  // цена из каталога самой сети (ВкусВилл), а не оценка
 	Home         float64  `json:"home,omitempty"`   // сколько уже есть дома (вычтено из Buy)
 	AtHome       bool     `json:"atHome,omitempty"` // дома хватает на всю неделю: покупать не нужно
 	Image        string   `json:"image,omitempty"`

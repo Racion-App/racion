@@ -17,6 +17,7 @@ type Config struct {
 	ImagesDir       string // фото блюд для карточек превью ссылок (IMAGES_DIR; в докере — том фронтенда)
 	GeoDir          string // папка файла базы городов DB-IP (пусто — только страна)
 	PushContact     string // контакт оператора для VAPID (mailto:…), его видят push-сервисы
+	VkusvillMCP     string // MCP-сервер ВкусВилла для корзины ссылкой; пусто — mcp.vkusvill.ru
 	OpenAIKey       string // ключ OpenAI для переводов и улучшения рецептов; пусто — функции ИИ выключены
 	OpenAIModel     string // модель для ИИ; по умолчанию gpt-5-nano
 	MistralKey      string // бесплатные уровни провайдеров: любой из ключей включает помощника и переводы
@@ -64,6 +65,7 @@ func Load() Config {
 		BaseURL:       env("BASE_URL", ""),
 		MetrikaID:     env("METRIKA_ID", ""),
 		LegalEmail:    env("LEGAL_EMAIL", "info@racion.app"),
+		VkusvillMCP:   env("VKUSVILL_MCP", ""),
 		ImagesDir:     env("IMAGES_DIR", "../frontend/public/images"),
 		GeoDir:        env("GEO_DIR", os.TempDir()),
 		PushContact:   env("PUSH_CONTACT", "mailto:admin@racion.app"),

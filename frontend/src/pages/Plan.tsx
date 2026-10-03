@@ -925,7 +925,14 @@ export function Plan() {
             <span className="num">{t("totals.macros", { kcal: plan.totals.kcalPerDay, p: plan.totals.proteinPerDay, f: plan.totals.fatPerDay, c: plan.totals.carbPerDay })}</span>
           </div>
           <p className="totals__note">
-            {official
+            {plan.priceSource.store
+              ? t("totals.note.store", {
+                  store: plan.priceSource.store,
+                  date: plan.priceSource.storeDate ?? "",
+                  pct: Math.round((plan.priceSource.storeCoverage ?? 0) * 100),
+                  idx: plan.store.priceIndex.toFixed(2),
+                })
+              : official
               ? t("totals.note.official", {
                   source: plan.priceSource.name,
                   region: plan.priceSource.region,
@@ -935,7 +942,7 @@ export function Plan() {
                   idx: plan.store.priceIndex.toFixed(2),
                 })
               : t("totals.note.estimate", { store: plan.store.name, idx: plan.store.priceIndex.toFixed(2) })}{" "}
-            {t("totals.note.tail")}
+            {t(plan.priceSource.store ? "totals.note.tail.store" : "totals.note.tail")}
           </p>
         </footer>
         </aside>
@@ -949,7 +956,7 @@ export function Plan() {
       )}
       <RecipeSheet recipeId={recipeId} portions={plan.portions} country={plan.country.code} onClose={() => setRecipeId(null)} />
       {user && <PlanChat planId={plan.id} open={chatOpen} onClose={() => setChatOpen(false)} onPlan={(p) => { setPlan(p); setToast(t("chat.applied")); }} />}
-      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} storeCode={plan.store.code} storeName={plan.store.name} country={plan.country.code} region={plan.priceSource.regionCode || undefined} items={cartItems} onToast={setToast} />
+      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} planId={plan.id} storeCart={!!plan.priceSource.store} storeCode={plan.store.code} storeName={plan.store.name} country={plan.country.code} region={plan.priceSource.regionCode || undefined} items={cartItems} onToast={setToast} />
 
       <div className="actionbar">
         <div className="actionbar__inner">

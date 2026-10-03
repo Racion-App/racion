@@ -744,7 +744,7 @@ func (c *Catalog) pricerFor(p Params) pricer {
 	if idx <= 0 {
 		idx = 1
 	}
-	return pricer{pb: c.PriceBook(), local: c.LocalPrices(p.Country), region: p.Region, idx: idx, country: CountryOf(p.Country), lang: i18n.Lang(p.Lang)}
+	return pricer{pb: c.PriceBook(), local: c.LocalPrices(p.Country), store: c.StorePrices(p.Store), region: p.Region, idx: idx, country: CountryOf(p.Country), lang: i18n.Lang(p.Lang)}
 }
 
 func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
@@ -1020,7 +1020,7 @@ func (c *Catalog) finish(plan *Plan) {
 	usedCost += kidsMenuCost
 
 	groups := map[string]*ShopGroup{}
-	var total, pantryTotal, rosstatCost, pricedCost, babyTotal, homeSaved float64
+	var total, pantryTotal, rosstatCost, storeCost, pricedCost, babyTotal, homeSaved float64
 	items := 0
 	add := func(item ShopItem, pantry bool) {
 		g, ok := groups[item.Category]
@@ -1038,15 +1038,19 @@ func (c *Catalog) finish(plan *Plan) {
 			if item.Rosstat {
 				rosstatCost += item.Cost
 			}
+			if item.Store {
+				storeCost += item.Cost
+			}
 		}
 		items++
 	}
 	for id, n := range need {
 		ing := c.Ingredients[id]
 		packPrice, fromRosstat := pr.packPrice(ing)
+		_, fromStore := pr.storeItem(ing)
 		item := ShopItem{
 			IngredientID: id, Name: ing.LocalName(lang), Category: ing.Category, Unit: ing.Unit,
-			Needed: round1(n), Pack: ing.Pack, Loose: ing.Loose, Pantry: ing.Pantry, Rosstat: fromRosstat, UsedIn: usedIn[id], Image: ing.Image,
+			Needed: round1(n), Pack: ing.Pack, Loose: ing.Loose, Pantry: ing.Pantry, Rosstat: fromRosstat && !fromStore, Store: fromStore, UsedIn: usedIn[id], Image: ing.Image,
 		}
 		// дома есть одна типовая упаковка: покупаем только остаток
 		if slices.Contains(p.Have, id) {
@@ -1131,6 +1135,11 @@ func (c *Catalog) finish(plan *Plan) {
 	}
 	if pricedCost > 0 {
 		src.Coverage = math.Round(rosstatCost/pricedCost*100) / 100
+	}
+	if pr.store != nil && storeCost > 0 && pricedCost > 0 {
+		src.Store = c.Stores[p.Store].Name
+		src.StoreDate = pr.store.DateLabel(lang)
+		src.StoreCoverage = math.Round(storeCost/pricedCost*100) / 100
 	}
 	plan.PriceSource = src
 	plan.Notes = notes

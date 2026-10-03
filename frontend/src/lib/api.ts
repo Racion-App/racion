@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
 import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -50,6 +50,8 @@ export const api = {
     request<Plan>(`/api/plans/${encodeURIComponent(id)}/side`, { method: "POST", body: JSON.stringify({ day, slot }) }),
   skipDay: (id: string, day: number, skip: boolean) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/skip`, { method: "POST", body: JSON.stringify({ day, skip }) }),
   moveDish: (id: string, from: number, to: number, slot: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/move`, { method: "POST", body: JSON.stringify({ from, to, slot }) }),
+  // корзина сети одной ссылкой (ВкусВилл): ids — продукты, которые ещё не куплены
+  storeCart: (id: string, ids: string[]) => request<StoreCart>(`/api/plans/${encodeURIComponent(id)}/cart`, { method: "POST", body: JSON.stringify({ ids }) }),
   repeatPlan: (id: string, startDate?: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/repeat`, { method: "POST", body: JSON.stringify({ startDate: startDate ?? "" }) }),
   recipe: (id: string, country?: string) => request<Recipe>(`/api/recipes/${encodeURIComponent(id)}${country ? `?country=${encodeURIComponent(country)}` : ""}`),
   // аккаунт

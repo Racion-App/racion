@@ -416,6 +416,32 @@ func seedCollections(ctx context.Context, pool *pgxpool.Pool) error {
 	return nil
 }
 
+// StorePrices — цены сетей из их собственных каталогов: data/store_prices_<сеть>.json. Сопоставление
+// наших продуктов с товарами сети делается скриптом и проверяется руками; файл без единого товара
+// пропускается, чтобы пустая выгрузка не обнулила цены.
+func StorePrices() []*planner.StorePrices {
+	var out []*planner.StorePrices
+	entries, err := data.ReadDir("data")
+	if err != nil {
+		return nil
+	}
+	for _, e := range entries {
+		n := e.Name()
+		if !strings.HasPrefix(n, "store_prices_") || !strings.HasSuffix(n, ".json") {
+			continue
+		}
+		raw, err := data.ReadFile("data/" + n)
+		if err != nil {
+			continue
+		}
+		var sp planner.StorePrices
+		if json.Unmarshal(raw, &sp) == nil && sp.Store != "" && len(sp.Items) > 0 {
+			out = append(out, &sp)
+		}
+	}
+	return out
+}
+
 // Substitutes — таблица замен продуктов из data/substitutes.json: id → варианты {id, ratio, note}.
 func Substitutes() map[string][]SubEntry {
 	out := map[string][]SubEntry{}

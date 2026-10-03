@@ -1,8 +1,11 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+
+	"go.uber.org/zap"
 
 	"racion/internal/domain"
 	"racion/internal/i18n"
@@ -159,6 +162,30 @@ func (s *Server) deletePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(204)
+}
+
+// storeCart — корзина сети одной ссылкой (ВкусВилл). В теле — продукты, которые ещё не куплены:
+// отмеченное в списке в корзину не кладём.
+func (s *Server) storeCart(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		IDs []string `json:"ids"`
+	}
+	if !decode(w, r, 16<<10, &body) {
+		return
+	}
+	l := i18n.FromRequest(r)
+	out, err := s.svc.Plans.StoreCart(r.Context(), r.PathValue("id"), body.IDs, l)
+	var ve *domain.ValidationError
+	switch {
+	case err == nil:
+		writeJSON(w, 200, out)
+	case errors.As(err, &ve), errors.Is(err, domain.ErrNotFound):
+		s.fail(w, r, err)
+	default:
+		// не ответил их сервер: это не наша ошибка и не повод отдавать 500
+		s.log.Warn("store cart", zap.Error(err))
+		writeErr(w, http.StatusBadGateway, i18n.T(l, "cart.failed"))
+	}
 }
 
 // ── Отметки и свои товары: доступны и гостю по ссылке на план ─────────────

@@ -1541,6 +1541,14 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__name { font-size: 15px; min-width: 0; small { color: var(--ds-label-tertiary); margin-left: 6px; } }
   &__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; .btn { display: inline-flex; align-items: center; gap: 6px; } }
   &__hint { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--ds-label-tertiary); }
+  // Корзина сети одной ссылкой (ВкусВилл): главное действие листа, поэтому сверху и отдельной плашкой.
+  // Предупреждение «ссылка заменит вашу корзину» стоит до кнопки, а не после: читают до нажатия.
+  // Заголовок — подпись раздела листа, как у остальных разделов; только без верхнего отступа внутри плашки.
+  &__store { display: grid; gap: 8px; justify-items: start; margin: 0 0 16px; padding: 14px 16px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4);
+    h3 { margin: 0; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; } }
+  &__store-lead { margin: 0; font-size: 14px; line-height: 1.4; color: var(--ds-label-secondary); }
+  &__store-note { margin: 0; font-size: 13px; color: var(--ds-label-secondary); }
 }
 
 // Праздничный стол под кнопкой «Дальше» первого шага. Это другой сценарий, а не вопрос анкеты:

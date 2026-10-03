@@ -123,6 +123,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/occasions", cors(s.occasions))
 	mux.HandleFunc("POST /api/occasions/{id}", cors(s.limited(s.lim.build, s.createOccasion)))
 	mux.HandleFunc("POST /api/baskets", cors(s.limited(s.lim.build, s.createBasket)))
+	mux.HandleFunc("POST /api/plans/{id}/cart", s.limited(s.lim.build, s.storeCart)) // корзина ВкусВилла ссылкой
 	mux.HandleFunc("GET /api/collections", cors(s.publicCollections))
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
