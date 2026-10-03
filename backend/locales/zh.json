@@ -375,6 +375,8 @@
   "bot.done": "全部买齐",
   "bot.empty": "没有要买的：家里都有了。",
   "bot.week": "{0}起的一周",
+  "bot.about": "来自 racion.app 的购物清单，按货架分区排列。在这里勾选的东西，网站上也会同步勾选。",
+  "bot.cmd.list": "最近连接的一周的购物清单",
   "plan.bot.telegram": "在 Telegram 查看清单",
   "plan.bot.max": "在 MAX 查看清单",
   "cart.title": "创建购物车",

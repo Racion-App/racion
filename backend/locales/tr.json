@@ -374,6 +374,8 @@
   "bot.done": "Hepsi alındı",
   "bot.empty": "Alınacak bir şey yok: her şey zaten evde.",
   "bot.week": "{0} haftası",
+  "bot.about": "racion.app alışveriş listeniz, reyonlara göre. Burada işaretlediğiniz sitede de işaretlenir.",
+  "bot.cmd.list": "Son bağlanan haftanın alışveriş listesi",
   "plan.bot.telegram": "Telegram'da liste",
   "plan.bot.max": "MAX'te liste",
   "cart.title": "Bir sepet oluştur",

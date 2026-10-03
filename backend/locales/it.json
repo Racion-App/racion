@@ -374,6 +374,8 @@
   "bot.done": "Tutto comprato",
   "bot.empty": "Non c'è niente da comprare: hai già tutto in casa.",
   "bot.week": "Settimana dal {0}",
+  "bot.about": "La tua lista della spesa di racion.app, divisa per reparto. Quello che spunti qui è spuntato anche sul sito.",
+  "bot.cmd.list": "Lista della spesa dell'ultima settimana collegata",
   "plan.bot.telegram": "Lista su Telegram",
   "plan.bot.max": "Lista su MAX",
   "cart.title": "Costruisci una lista della spesa",

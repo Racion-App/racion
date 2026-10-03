@@ -375,6 +375,8 @@
   "bot.done": "Alles gekauft",
   "bot.empty": "Nichts zu kaufen: Alles ist schon zu Hause.",
   "bot.week": "Woche ab {0}",
+  "bot.about": "Ihre Einkaufsliste von racion.app, nach Abteilungen sortiert. Abgehakt wird im Chat und auf der Website.",
+  "bot.cmd.list": "Einkaufsliste der zuletzt verbundenen Woche",
   "plan.bot.telegram": "Liste in Telegram",
   "plan.bot.max": "Liste in MAX",
   "cart.title": "Warenkorb füllen",

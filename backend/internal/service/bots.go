@@ -99,7 +99,28 @@ func (b *Bots) Hook(ctx context.Context) {
 			continue
 		}
 		b.log.Info("bots: webhook", zap.String("platform", string(c.Platform())), zap.String("bot", c.Username()))
+		if err := c.SetProfile(ctx, profiles(c)); err != nil {
+			b.log.Warn("bots: profile", zap.String("platform", string(c.Platform())), zap.Error(err))
+		}
 	}
+}
+
+// profiles — описание бота и команда /list на всех языках сайта; без языка — английский.
+func profiles(c messenger.Client) map[string]messenger.Profile {
+	out := make(map[string]messenger.Profile, len(i18n.Langs)+1)
+	for _, l := range append([]i18n.Lang{""}, i18n.Langs...) {
+		tl := l
+		if l == "" {
+			tl = i18n.EN
+		}
+		about := i18n.T(tl, "bot.about")
+		out[string(l)] = messenger.Profile{
+			About:       about,
+			Description: about + "\n\n" + i18n.T(tl, "bot.intro", i18n.T(tl, "plan.bot."+string(c.Platform()))),
+			Commands:    []messenger.Command{{Name: "list", Description: i18n.T(tl, "bot.cmd.list")}},
+		}
+	}
+	return out
 }
 
 // PlanLinks — ссылки «подключить неделю» для страницы плана: только мессенджеры, у которых есть бот.
@@ -142,8 +163,30 @@ func (b *Bots) Handle(ctx context.Context, u messenger.Update) error {
 	case u.Start && strings.HasPrefix(u.Payload, "p"):
 		return b.connect(ctx, c, u.ChatID, strings.TrimPrefix(u.Payload, "p"), lang)
 	default:
-		return b.send(ctx, c, u.ChatID, b.intro(c, lang))
+		return b.latest(ctx, c, u.ChatID, lang)
 	}
+}
+
+// latest — ответ на /list, «Начать» и любые слова: список последней подключённой недели, чтобы
+// в магазине не листать чат. Недель нет — подсказка, где взять ссылку.
+func (b *Bots) latest(ctx context.Context, c messenger.Client, chatID string, lang i18n.Lang) error {
+	ids, err := b.repo.Plans(ctx, string(c.Platform()), chatID)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		plan, err := b.plans.Get(ctx, id, lang)
+		if errors.Is(err, domain.ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		key, _ := planKey(id)
+		pages, checked := b.list(ctx, plan, lang)
+		return b.send(ctx, c, chatID, b.listMessage(plan, pages, checked, 0, key, lang))
+	}
+	return b.send(ctx, c, chatID, b.intro(c, lang))
 }
 
 // connect подключает неделю по ссылке со страницы плана: приветствие и сразу список покупок.
@@ -170,8 +213,9 @@ func (b *Bots) connect(ctx context.Context, c messenger.Client, chatID, key stri
 	if err := b.repo.LinkPlan(ctx, string(c.Platform()), chatID, id); err != nil {
 		return err
 	}
+	// неделю называет сам список ниже, здесь — только что произошло
 	welcome := messenger.Message{
-		Text: "<b>" + html.EscapeString(planHeading(plan, lang)) + "</b>\n" + html.EscapeString(i18n.T(lang, "bot.connected")),
+		Text: html.EscapeString(i18n.T(lang, "bot.connected")),
 		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.baseURL + "/plan/" + id}}},
 	}
 	if err := b.send(ctx, c, chatID, welcome); err != nil {
@@ -224,8 +268,10 @@ func (b *Bots) callback(ctx context.Context, c messenger.Client, u messenger.Upd
 // listMessage — один отдел списка: что осталось купить, кнопка на каждый продукт, листание отделов.
 func (b *Bots) listMessage(plan planner.Plan, pages []botPage, checked map[string]bool, page int, key string, lang i18n.Lang) messenger.Message {
 	open := []messenger.Button{{Text: i18n.T(lang, "bot.open"), URL: b.baseURL + "/plan/" + plan.ID + "?mode=shop"}}
+	// какая это неделя: к списку возвращаются через несколько дней, а недель в чате бывает несколько
+	week := "<i>" + html.EscapeString(planHeading(plan, lang)) + "</i>\n"
 	if len(pages) == 0 {
-		return messenger.Message{Text: html.EscapeString(i18n.T(lang, "bot.empty")), Rows: [][]messenger.Button{open}}
+		return messenger.Message{Text: week + html.EscapeString(i18n.T(lang, "bot.empty")), Rows: [][]messenger.Button{open}}
 	}
 	page = max(0, min(page, len(pages)-1))
 	total, bought := 0, 0
@@ -242,7 +288,7 @@ func (b *Bots) listMessage(plan planner.Plan, pages []botPage, checked map[strin
 	}
 	g := pages[page]
 	var head strings.Builder
-	head.WriteString("<b>" + html.EscapeString(g.Label) + "</b>")
+	head.WriteString(week + "<b>" + html.EscapeString(g.Label) + "</b>")
 	if len(pages) > 1 {
 		head.WriteString(" · " + html.EscapeString(i18n.T(lang, "bot.dept", page+1, len(pages))))
 	}

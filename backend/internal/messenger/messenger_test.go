@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -117,6 +118,39 @@ func TestMaxSend(t *testing.T) {
 	}
 	if err := c.Edit(context.Background(), "555", "mid.abc", msg); err != nil || got.method != http.MethodPut || got.query != "message_id=mid.abc" {
 		t.Errorf("правка %s ?%s err=%v", got.method, got.query, err)
+	}
+}
+
+func TestSetProfile(t *testing.T) {
+	var calls []string
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, &body)
+		calls = append(calls, r.Method+" "+r.URL.Path[strings.LastIndex(r.URL.Path, "/"):]+" "+fmt.Sprint(body["language_code"]))
+		if r.URL.Path == "/me" && (body["description"] != "Список по отделам" || len(body["commands"].([]any)) != 1) {
+			t.Errorf("профиль MAX %+v", body)
+		}
+		_, _ = io.WriteString(w, `{"ok":true,"result":true}`)
+	}))
+	defer s.Close()
+	profiles := map[string]Profile{
+		"":   {About: "List", Description: "Shopping list", Commands: []Command{{Name: "list", Description: "Latest week"}}},
+		"ru": {About: "Список", Description: "Список по отделам", Commands: []Command{{Name: "list", Description: "Последняя неделя"}}},
+	}
+	tg := NewTelegram("T", "b", "s")
+	tg.base = s.URL
+	if err := tg.SetProfile(context.Background(), profiles); err != nil {
+		t.Fatal(err)
+	}
+	if len(calls) != 6 || !strings.Contains(strings.Join(calls, ";"), "POST /setMyCommands ru") || !strings.Contains(strings.Join(calls, ";"), "POST /setMyDescription <nil>") {
+		t.Errorf("Telegram: %v", calls)
+	}
+	calls = nil
+	mx := NewMax("T", "b", "s")
+	mx.base = s.URL
+	if err := mx.SetProfile(context.Background(), profiles); err != nil || len(calls) != 1 || calls[0] != "PATCH /me <nil>" {
+		t.Errorf("MAX: %v %v", calls, err)
 	}
 }
 

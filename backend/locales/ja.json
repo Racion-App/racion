@@ -375,6 +375,8 @@
   "bot.done": "すべて購入済み",
   "bot.empty": "買うものはありません。すべて家にあります。",
   "bot.week": "{0}からの週",
+  "bot.about": "racion.appの買い物リストを売り場ごとに表示します。ここでチェックした品はサイトにも反映されます。",
+  "bot.cmd.list": "最後に連携した週の買い物リスト",
   "plan.bot.telegram": "Telegramでリスト",
   "plan.bot.max": "MAXでリスト",
   "cart.title": "カートを作成",

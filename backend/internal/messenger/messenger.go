@@ -43,6 +43,18 @@ type Update struct {
 	MessageID string // сообщение, под которым нажали кнопку
 }
 
+// Profile — как бот выглядит в мессенджере до первого сообщения.
+type Profile struct {
+	About       string // строка в профиле и в превью ссылки, до 120 символов
+	Description string // экран «что умеет бот» до нажатия «Начать», до 512 символов
+	Commands    []Command
+}
+
+type Command struct {
+	Name        string // без «/», латиницей в нижнем регистре
+	Description string
+}
+
 // Client — один мессенджер.
 type Client interface {
 	Platform() Platform
@@ -52,6 +64,8 @@ type Client interface {
 	Edit(ctx context.Context, chatID, messageID string, m Message) error
 	Answer(ctx context.Context, callbackID, text string) error
 	SetWebhook(ctx context.Context, url string) error
+	// SetProfile — описание и команды по языкам; ключ "" — для всех остальных языков.
+	SetProfile(ctx context.Context, profiles map[string]Profile) error
 	// Parse проверяет подпись вебхука и разбирает обновление. ok=false — обновление не про нас
 	// (участник вышел из группы и т. п.): отвечаем 200 и ничего не делаем.
 	Parse(r *http.Request) (u Update, ok bool, err error)

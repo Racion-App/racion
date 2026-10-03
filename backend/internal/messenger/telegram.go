@@ -93,6 +93,34 @@ func (c *TelegramClient) SetWebhook(ctx context.Context, hook string) error {
 		"allowed_updates": []string{"message", "callback_query"}}, nil)
 }
 
+// SetProfile — описание, строка профиля и команды на каждом языке: Telegram показывает тот вариант,
+// что совпал с языком приложения у человека.
+func (c *TelegramClient) SetProfile(ctx context.Context, profiles map[string]Profile) error {
+	for lang, p := range profiles {
+		cmds := make([]map[string]string, 0, len(p.Commands))
+		for _, cmd := range p.Commands {
+			cmds = append(cmds, map[string]string{"command": cmd.Name, "description": cmd.Description})
+		}
+		calls := []struct {
+			method string
+			body   map[string]any
+		}{
+			{"setMyDescription", map[string]any{"description": p.Description}},
+			{"setMyShortDescription", map[string]any{"short_description": p.About}},
+			{"setMyCommands", map[string]any{"commands": cmds}},
+		}
+		for _, call := range calls {
+			if lang != "" {
+				call.body["language_code"] = lang
+			}
+			if err := c.call(ctx, call.method, call.body, nil); err != nil {
+				return fmt.Errorf("%s [%s]: %w", call.method, lang, err)
+			}
+		}
+	}
+	return nil
+}
+
 func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 	if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Telegram-Bot-Api-Secret-Token")), []byte(c.secret)) != 1 {
 		return Update{}, false, ErrForged

@@ -3,9 +3,11 @@ package service
 import (
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"racion/internal/domain"
 	"racion/internal/i18n"
+	"racion/internal/messenger"
 	"racion/internal/planner"
 )
 
@@ -64,7 +66,7 @@ func TestListMessage(t *testing.T) {
 	key, _ := planKey(botPlan().ID)
 	pages := shopPages(botPlan(), nil, i18n.RU)
 	m := b.listMessage(botPlan(), pages, map[string]bool{"milk": true}, 0, key, i18n.RU)
-	if !strings.Contains(m.Text, "Молочное") || !strings.Contains(m.Text, "1 из 2") || !strings.Contains(m.Text, "Осталось купить 2 из 3 · ≈ ") {
+	if !strings.HasPrefix(m.Text, "<i>Рацион</i>\n<b>Молочное</b> · отдел 1 из 2\n") || !strings.Contains(m.Text, "Осталось купить 2 из 3 · ≈ ") {
 		t.Errorf("заголовок: %q", m.Text)
 	}
 	// два продукта, листание вперёд, ссылка на сайт
@@ -115,6 +117,30 @@ func TestToggleDataFitsTelegram(t *testing.T) {
 	// на сайте заменили блюдо, отделы сдвинулись: продукт ищем по id во всём списке
 	if it, ok := findItem(pages, 0, "potato"); !ok || it.Name != "Картофель" {
 		t.Errorf("сдвиг отделов: %+v", it)
+	}
+}
+
+type stubClient struct {
+	messenger.Client
+	p messenger.Platform
+}
+
+func (s stubClient) Platform() messenger.Platform { return s.p }
+
+// Описания бота на всех языках влезают в лимиты: Telegram — 120 знаков строки профиля и 512
+// описания, команда — до 256 (у MAX до 128); пустой ключ — для языков, которых у нас нет.
+func TestProfilesFitLimits(t *testing.T) {
+	for _, p := range []messenger.Platform{messenger.Telegram, messenger.Max} {
+		all := profiles(stubClient{p: p})
+		if len(all) != len(i18n.Langs)+1 || all[""].About != i18n.T(i18n.EN, "bot.about") {
+			t.Fatalf("%s: языков %d", p, len(all))
+		}
+		for lang, pr := range all {
+			about, desc, cmd := utf8.RuneCountInString(pr.About), utf8.RuneCountInString(pr.Description), utf8.RuneCountInString(pr.Commands[0].Description)
+			if about > 120 || desc > 512 || cmd > 128 || strings.HasPrefix(pr.About, "bot.") || strings.Contains(pr.Description, "{") {
+				t.Errorf("%s/%s: %d/%d/%d %q", p, lang, about, desc, cmd, pr.Description)
+			}
+		}
 	}
 }
 

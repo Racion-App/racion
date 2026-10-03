@@ -374,6 +374,8 @@
   "bot.done": "Alles gekocht",
   "bot.empty": "Niets te kopen: alles is al in huis.",
   "bot.week": "Week van {0}",
+  "bot.about": "Je boodschappenlijst van racion.app, per afdeling. Wat je hier afvinkt, is ook op de site afgevinkt.",
+  "bot.cmd.list": "Boodschappenlijst van de laatst gekoppelde week",
   "plan.bot.telegram": "Lijst in Telegram",
   "plan.bot.max": "Lijst in MAX",
   "cart.title": "Winkelwagen samenstellen",

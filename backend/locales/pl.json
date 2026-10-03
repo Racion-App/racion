@@ -388,6 +388,8 @@
   "bot.done": "Wszystko kupione",
   "bot.empty": "Nie ma nic do kupienia: wszystko już masz w domu.",
   "bot.week": "Tydzień od {0}",
+  "bot.about": "Lista zakupów z racion.app według działów. To, co odhaczysz tutaj, jest odhaczone także na stronie.",
+  "bot.cmd.list": "Lista zakupów ostatnio podłączonego tygodnia",
   "plan.bot.telegram": "Lista w Telegramie",
   "plan.bot.max": "Lista w MAX",
   "cart.title": "Zbudować koszyk",

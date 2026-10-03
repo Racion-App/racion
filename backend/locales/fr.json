@@ -374,6 +374,8 @@
   "bot.done": "Tout est acheté",
   "bot.empty": "Rien à acheter : tout est déjà à la maison.",
   "bot.week": "Semaine du {0}",
+  "bot.about": "Votre liste de courses racion.app, classée par rayon. Ce que vous cochez ici est coché sur le site aussi.",
+  "bot.cmd.list": "Liste de courses de la dernière semaine connectée",
   "plan.bot.telegram": "Liste dans Telegram",
   "plan.bot.max": "Liste dans MAX",
   "cart.title": "Construire un panier",

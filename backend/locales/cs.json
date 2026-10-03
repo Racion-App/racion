@@ -388,6 +388,8 @@
   "bot.done": "Vše nakoupeno",
   "bot.empty": "Není co kupovat: vše už máte doma.",
   "bot.week": "Týden od {0}",
+  "bot.about": "Nákupní seznam z racion.app podle oddělení. Co odškrtnete tady, je odškrtnuté i na webu.",
+  "bot.cmd.list": "Nákupní seznam naposledy připojeného týdne",
   "plan.bot.telegram": "Seznam v Telegramu",
   "plan.bot.max": "Seznam v MAX",
   "cart.title": "Sestavit košík",

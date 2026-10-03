@@ -290,6 +290,8 @@
   "bot.done": "All bought",
   "bot.empty": "Nothing to buy: everything is already at home.",
   "bot.week": "Week of {0}",
+  "bot.about": "Your racion.app shopping list, sorted by aisle. Items you tick here are ticked on the site too.",
+  "bot.cmd.list": "Shopping list of the week you connected last",
   "plan.bot.telegram": "List in Telegram",
   "plan.bot.max": "List in MAX",
   "cart.title": "Build a cart",

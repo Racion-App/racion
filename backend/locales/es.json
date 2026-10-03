@@ -375,6 +375,8 @@
   "bot.done": "Todo comprado",
   "bot.empty": "No hay nada que comprar: ya tiene todo en casa.",
   "bot.week": "Semana del {0}",
+  "bot.about": "Su lista de la compra de racion.app, por secciones. Lo que marque aquí queda marcado también en el sitio.",
+  "bot.cmd.list": "Lista de la compra de la última semana conectada",
   "plan.bot.telegram": "Lista en Telegram",
   "plan.bot.max": "Lista en MAX",
   "cart.title": "Construir carrito",

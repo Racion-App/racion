@@ -97,6 +97,19 @@ func (c *MaxClient) SetWebhook(ctx context.Context, hook string) error {
 		"update_types": []string{"bot_started", "message_created", "message_callback"}}, nil)
 }
 
+// SetProfile — у MAX описание и команды одни на всех: берём русский вариант, иначе общий.
+func (c *MaxClient) SetProfile(ctx context.Context, profiles map[string]Profile) error {
+	p, ok := profiles["ru"]
+	if !ok {
+		p = profiles[""]
+	}
+	cmds := make([]map[string]string, 0, len(p.Commands))
+	for _, cmd := range p.Commands {
+		cmds = append(cmds, map[string]string{"name": cmd.Name, "description": cmd.Description})
+	}
+	return c.call(ctx, http.MethodPatch, "/me", map[string]any{"description": p.Description, "commands": cmds}, nil)
+}
+
 func (c *MaxClient) Parse(r *http.Request) (Update, bool, error) {
 	if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Max-Bot-Api-Secret")), []byte(c.secret)) != 1 {
 		return Update{}, false, ErrForged
