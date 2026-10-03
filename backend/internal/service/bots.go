@@ -29,6 +29,7 @@ import (
 // мини-приложением, а привязанный аккаунт видит в боте свои недели без отдельной ссылки.
 type Bots struct {
 	clients  map[messenger.Platform]messenger.Client
+	polled   map[messenger.Platform]bool // обновления опросом, без вебхука
 	repo     MessengerRepo
 	plans    BotPlans
 	accounts BotAccounts
@@ -37,6 +38,7 @@ type Bots struct {
 	baseURL  string
 	log      *zap.Logger
 	pause    time.Duration // между напоминаниями: Telegram пускает около 30 сообщений в секунду
+	retry    time.Duration // повторная попытка опроса: ждём, пока другой экземпляр освободит блокировку
 }
 
 // BotDeps — что ботам нужно от остального приложения.
@@ -76,6 +78,7 @@ type MessengerRepo interface {
 	CreateLink(ctx context.Context, tokenHash, userID string, expires time.Time) error
 	TakeLink(ctx context.Context, tokenHash string) (string, error)
 	ReminderPlans(ctx context.Context, platform, chatID string, userID *string) ([]domain.PlanReminderInfo, error)
+	Lead(ctx context.Context, key int64) (release func(), ok bool, err error)
 	Chat(ctx context.Context, platform, chatID string) (domain.MessengerChat, error)
 	SetBlocked(ctx context.Context, platform, chatID string, blocked bool) error
 	SetSettings(ctx context.Context, platform, chatID string, s domain.NotifySettings) error
@@ -95,12 +98,16 @@ type BotAccounts interface {
 const LinkTTL = 15 * time.Minute
 
 func NewBots(d BotDeps, baseURL string, log *zap.Logger) *Bots {
-	return &Bots{clients: map[messenger.Platform]messenger.Client{}, repo: d.Repo, plans: d.Plans, accounts: d.Accounts, taste: d.Taste, journal: d.Journal,
-		baseURL: strings.TrimRight(baseURL, "/"), log: log, pause: 40 * time.Millisecond}
+	return &Bots{clients: map[messenger.Platform]messenger.Client{}, polled: map[messenger.Platform]bool{}, repo: d.Repo, plans: d.Plans, accounts: d.Accounts, taste: d.Taste, journal: d.Journal,
+		baseURL: strings.TrimRight(baseURL, "/"), log: log, pause: 40 * time.Millisecond, retry: 5 * time.Second}
 }
 
-// Add подключает мессенджер; без токена бота мессенджер просто не добавляют.
-func (b *Bots) Add(c messenger.Client) { b.clients[c.Platform()] = c }
+// Add подключает мессенджер; без токена бота мессенджер просто не добавляют. poll — забирать
+// обновления опросом, а не ждать вебхука.
+func (b *Bots) Add(c messenger.Client, poll bool) {
+	b.clients[c.Platform()] = c
+	b.polled[c.Platform()] = poll
+}
 
 func (b *Bots) Client(p string) (messenger.Client, bool) {
 	if b == nil {
@@ -135,39 +142,92 @@ func (b *Bots) Names() map[string]string {
 	return out
 }
 
-// Hook ставит вебхуки на baseURL/api/bots/<мессенджер>. Обновления Telegram и MAX шлют только
-// на https, поэтому на локальном стенде без публичного адреса бот молчит.
-func (b *Bots) Hook(ctx context.Context) {
-	if b == nil || len(b.clients) == 0 {
-		return
-	}
-	if !strings.HasPrefix(b.baseURL, "https://") {
-		b.log.Warn("bots: no https BASE_URL, webhooks not set", zap.String("base", b.baseURL))
+// Run — запуск ботов: описание и кнопка меню, затем обновления. Мессенджеры, добавленные с опросом,
+// забирают их сами (Telegram: запросы с его адресов до сервера в России доходят через раз, а исходящие
+// через VPN идут стабильно). Остальным ставим вебхук на baseURL/api/bots/<мессенджер> — нужен https.
+func (b *Bots) Run(ctx context.Context) {
+	if b == nil {
 		return
 	}
 	for _, c := range b.All() {
-		hook := b.baseURL + "/api/bots/" + string(c.Platform())
-		var err error
-		for try := 1; try <= 3; try++ {
-			if err = c.SetWebhook(ctx, hook); err == nil {
-				break
-			}
-			select { // API мессенджера мог быть недоступен в момент запуска
-			case <-ctx.Done():
-				return
-			case <-time.After(time.Duration(try) * 20 * time.Second):
-			}
+		if b.polled[c.Platform()] {
+			go b.poll(ctx, c)
+		} else {
+			b.hook(ctx, c)
 		}
-		if err != nil {
-			b.log.Warn("bots: webhook", zap.String("platform", string(c.Platform())), zap.Error(err))
-			continue
-		}
-		b.log.Info("bots: webhook", zap.String("platform", string(c.Platform())), zap.String("bot", c.Username()))
 		if err := c.SetProfile(ctx, profiles(c)); err != nil {
 			b.log.Warn("bots: profile", zap.String("platform", string(c.Platform())), zap.Error(err))
 		}
 		// кнопка меню по умолчанию — по-русски: чат на другом языке получит свою при первом /start
 		b.menu(ctx, c, "", i18n.RU)
+	}
+}
+
+// hook ставит вебхук; API мессенджера могло быть недоступно в момент запуска — три попытки.
+func (b *Bots) hook(ctx context.Context, c messenger.Client) {
+	if !strings.HasPrefix(b.baseURL, "https://") {
+		b.log.Warn("bots: no https BASE_URL, webhook not set", zap.String("platform", string(c.Platform())), zap.String("base", b.baseURL))
+		return
+	}
+	hook := b.baseURL + "/api/bots/" + string(c.Platform())
+	var err error
+	for try := 1; try <= 3; try++ {
+		if err = c.SetWebhook(ctx, hook); err == nil {
+			b.log.Info("bots: webhook", zap.String("platform", string(c.Platform())), zap.String("bot", c.Username()))
+			return
+		}
+		if !sleep(ctx, time.Duration(try)*20*time.Second) {
+			return
+		}
+	}
+	b.log.Warn("bots: webhook", zap.String("platform", string(c.Platform())), zap.Error(err))
+}
+
+// pollLock — блокировка в Postgres: опрашивает один экземпляр сервера. При плавном деплое их два,
+// и оба забирали бы одни и те же сообщения; второй ждёт, пока первый не остановится.
+const pollLock int64 = 0x7261_6369_6f6e // «racion»
+
+// poll — обновления опросом, пока сервер работает. Обработка — в своём контексте с таймаутом:
+// начатую отметку о покупке доводим до конца, даже если сервер в этот момент останавливают.
+func (b *Bots) poll(ctx context.Context, c messenger.Client) {
+	p, ok := c.(messenger.Poller)
+	if !ok {
+		b.log.Warn("bots: polling not supported", zap.String("platform", string(c.Platform())))
+		return
+	}
+	key := pollLock + int64(len(c.Platform())) // своя блокировка на каждый мессенджер
+	for ctx.Err() == nil {
+		release, ok, err := b.repo.Lead(ctx, key)
+		if err != nil || !ok {
+			if !sleep(ctx, b.retry) {
+				return
+			}
+			continue
+		}
+		b.log.Info("bots: polling", zap.String("platform", string(c.Platform())), zap.String("bot", c.Username()))
+		err = p.Poll(ctx, func(u messenger.Update) {
+			hctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
+			defer cancel()
+			if err := b.Handle(hctx, u); err != nil {
+				b.log.Warn("bot update", zap.String("platform", string(u.Platform)), zap.Error(err))
+			}
+		})
+		release()
+		if ctx.Err() != nil {
+			return
+		}
+		b.log.Warn("bots: polling stopped", zap.String("platform", string(c.Platform())), zap.Error(err))
+		sleep(ctx, b.retry)
+	}
+}
+
+// sleep — пауза, которую прерывает остановка сервера; false — остановили.
+func sleep(ctx context.Context, d time.Duration) bool {
+	select {
+	case <-ctx.Done():
+		return false
+	case <-time.After(d):
+		return true
 	}
 }
 
@@ -241,7 +301,7 @@ func (b *Bots) handle(ctx context.Context, u messenger.Update) error {
 	if created || u.Start {
 		b.menu(ctx, c, u.ChatID, lang)
 	}
-	if chat.UserID == nil && u.UserID != "" {
+	if chat.UserID == nil && u.UserID != "" && b.accounts != nil {
 		// мессенджер могли привязать к аккаунту в мини-приложении: чат узнаёт аккаунт с первого сообщения
 		if usr, err := b.accounts.ByLink(ctx, string(u.Platform), u.UserID); err == nil {
 			if err := b.repo.SetUser(ctx, string(u.Platform), u.ChatID, &usr.ID); err != nil {
@@ -372,7 +432,7 @@ func (b *Bots) latest(ctx context.Context, c messenger.Client, chat domain.Messe
 // аккаунту, даже если раньше был привязан к другому: человек подтвердил это, войдя на сайте.
 func (b *Bots) link(ctx context.Context, c messenger.Client, u messenger.Update, token string, lang i18n.Lang) error {
 	userID, err := b.repo.TakeLink(ctx, tokenHash(token))
-	if errors.Is(err, domain.ErrNotFound) || (err == nil && u.UserID == "") {
+	if errors.Is(err, domain.ErrNotFound) || (err == nil && (u.UserID == "" || b.accounts == nil)) {
 		return b.send(ctx, c, u.ChatID, messenger.Message{Text: html.EscapeString(i18n.T(lang, "bot.link.expired"))})
 	}
 	if err != nil {

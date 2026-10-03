@@ -46,13 +46,14 @@ type Config struct {
 
 // Bots — боты в Telegram и MAX: список покупок по отделам. Пустой токен выключает мессенджер.
 type Bots struct {
-	TelegramToken string // от @BotFather
-	TelegramName  string // имя бота без @: из него ссылка t.me/<имя>
-	MaxToken      string // из кабинета «MAX для бизнеса»
-	MaxName       string // ник бота: ссылка max.ru/<ник>
-	Secret        string // секрет вебхуков (A-Z, a-z, 0-9, _ и -); пусто — выводится из токена
-	TelegramAPI   string // другой адрес Bot API для локального стенда; пусто — боевой
-	MaxAPI        string
+	TelegramToken   string // от @BotFather
+	TelegramName    string // имя бота без @: из него ссылка t.me/<имя>
+	MaxToken        string // из кабинета «MAX для бизнеса»
+	MaxName         string // ник бота: ссылка max.ru/<ник>
+	Secret          string // секрет вебхуков (A-Z, a-z, 0-9, _ и -); пусто — выводится из токена
+	TelegramAPI     string // другой адрес Bot API для локального стенда; пусто — боевой
+	TelegramUpdates string // poll (по умолчанию) — сервер сам забирает обновления; webhook — Telegram шлёт их на сервер
+	MaxAPI          string
 }
 
 // OAuth — ключи входа через внешние сервисы; пустая пара выключает провайдера.
@@ -114,6 +115,7 @@ func Load() Config {
 			MaxToken: env("MAX_BOT_TOKEN", ""), MaxName: env("MAX_BOT_NAME", ""),
 			Secret:      env("BOT_SECRET", ""),
 			TelegramAPI: env("TELEGRAM_API", ""), MaxAPI: env("MAX_API", ""),
+			TelegramUpdates: env("TELEGRAM_UPDATES", "poll"),
 		},
 		ShutdownTimeout: 10 * time.Second,
 	}

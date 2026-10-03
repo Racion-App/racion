@@ -219,6 +219,54 @@ func TestTelegramAppButtonAndUser(t *testing.T) {
 	}
 }
 
+// Опрос: сначала снимаем вебхук, потом getUpdates; каждый следующий запрос подтверждает полученное
+// через offset, обновления из групп отсеиваются так же, как у вебхука.
+func TestTelegramPoll(t *testing.T) {
+	var methods []string
+	var offsets []any
+	calls := 0
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		method := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
+		methods = append(methods, method)
+		var body map[string]any
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, &body)
+		if method != "getUpdates" {
+			_, _ = io.WriteString(w, `{"ok":true,"result":true}`)
+			return
+		}
+		offsets = append(offsets, body["offset"])
+		calls++
+		if calls == 1 {
+			_, _ = io.WriteString(w, `{"ok":true,"result":[
+				{"update_id":10,"message":{"message_id":1,"chat":{"id":7,"type":"private"},"from":{"id":7,"language_code":"ru"},"text":"/list"}},
+				{"update_id":11,"message":{"message_id":2,"chat":{"id":-5,"type":"group"},"text":"шум"}},
+				{"update_id":12,"callback_query":{"id":"c1","data":"l:k:1","from":{"id":7},"message":{"message_id":3,"chat":{"id":7}}}}]}`)
+			return
+		}
+		_, _ = io.WriteString(w, `{"ok":true,"result":[]}`)
+	}))
+	defer s.Close()
+	c := NewTelegram("T", "b", "s")
+	c.base = s.URL
+	ctx, cancel := context.WithCancel(context.Background())
+	var got []Update
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		cancel()
+	}()
+	err := c.Poll(ctx, func(u Update) { got = append(got, u) })
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("опрос закончился не по отмене: %v", err)
+	}
+	if methods[0] != "deleteWebhook" || len(got) != 2 || got[0].Text != "/list" || got[1].Callback != "c1" {
+		t.Fatalf("методы %v, обновления %+v", methods[:min(len(methods), 4)], got)
+	}
+	if len(offsets) < 2 || offsets[0] != float64(0) || offsets[1] != float64(13) {
+		t.Errorf("offset: %v", offsets[:min(len(offsets), 3)])
+	}
+}
+
 func TestMaxParse(t *testing.T) {
 	c := NewMax("T", "b", "sec")
 	req := func(secret, body string) *http.Request {

@@ -118,6 +118,25 @@ func (r *Messenger) MarkSent(ctx context.Context, platform, chatID, key string) 
 	return tag.RowsAffected() > 0, nil
 }
 
+// Lead — блокировка в базе на всё время работы: true — этот экземпляр сервера главный, пока не вызовет
+// release или не умрёт (соединение закроется, и Postgres снимет блокировку сам). Нужна там, где работа
+// должна идти в одном месте, а экземпляров при плавном деплое два.
+func (r *Messenger) Lead(ctx context.Context, key int64) (func(), bool, error) {
+	conn, err := r.pool.Acquire(ctx)
+	if err != nil {
+		return nil, false, wrap("messenger.lead", err)
+	}
+	var ok bool
+	if err := conn.QueryRow(ctx, `SELECT pg_try_advisory_lock($1)`, key).Scan(&ok); err != nil || !ok {
+		conn.Release()
+		return nil, false, wrap("messenger.lead", err)
+	}
+	return func() {
+		_, _ = conn.Exec(context.Background(), `SELECT pg_advisory_unlock($1)`, key)
+		conn.Release()
+	}, true, nil
+}
+
 // ReminderPlans — недели для напоминаний в чат: подключённые к нему и, если аккаунт привязан,
 // свои и семейные недели аккаунта. Последние сначала.
 func (r *Messenger) ReminderPlans(ctx context.Context, platform, chatID string, userID *string) ([]domain.PlanReminderInfo, error) {

@@ -17,10 +17,12 @@ import (
 
 // memBotRepo — хранилище бота в памяти: чаты, журнал напоминаний, недели для напоминаний.
 type memBotRepo struct {
-	chats   map[string]domain.MessengerChat
-	sent    map[string]bool
-	plans   []domain.PlanReminderInfo
-	blocked map[string]bool
+	chats           map[string]domain.MessengerChat
+	sent            map[string]bool
+	plans           []domain.PlanReminderInfo
+	blocked         map[string]bool
+	busy            int // сколько первых попыток блокировка опроса занята
+	leads, released int
 }
 
 func newMemBotRepo() *memBotRepo {
@@ -81,6 +83,15 @@ func (m *memBotRepo) MarkSent(_ context.Context, p, id, key string) (bool, error
 	}
 	m.sent[p+id+key] = true
 	return true, nil
+}
+
+// Lead: первые busy попыток блокировка занята другим экземпляром сервера.
+func (m *memBotRepo) Lead(context.Context, int64) (func(), bool, error) {
+	m.leads++
+	if m.leads <= m.busy {
+		return nil, false, nil
+	}
+	return func() { m.released++ }, true, nil
 }
 func (m *memBotRepo) Active(context.Context) ([]domain.MessengerChat, error) {
 	var out []domain.MessengerChat
@@ -161,7 +172,7 @@ func testBots() (*Bots, *memBotRepo, *fakeClient, *fakeTaste, *fakeJournal) {
 	repo, client, taste, journal := newMemBotRepo(), &fakeClient{}, &fakeTaste{}, &fakeJournal{keys: map[string]bool{}}
 	b := NewBots(BotDeps{Repo: repo, Plans: fakePlans{}, Taste: taste, Journal: journal}, "https://racion.app", zap.NewNop())
 	b.pause = 0
-	b.Add(client)
+	b.Add(client, false)
 	return b, repo, client, taste, journal
 }
 
@@ -249,6 +260,44 @@ func TestBotTick(t *testing.T) {
 	client.fail = messenger.ErrBlocked
 	if n, err := b.Tick(ctx, time.Date(2026, 9, 19, 16, 5, 0, 0, time.UTC)); err != nil || n != 0 || !repo.blocked["telegram55"] {
 		t.Errorf("блокировка: n=%d err=%v", n, err)
+	}
+}
+
+// pollClient — мессенджер с опросом: отдаёт одно обновление и ждёт остановки.
+type pollClient struct {
+	fakeClient
+	polls   int
+	handled chan struct{}
+}
+
+func (p *pollClient) Poll(ctx context.Context, handle func(messenger.Update)) error {
+	p.polls++
+	handle(messenger.Update{Platform: messenger.Telegram, ChatID: "9", UserID: "9", Text: "/list"})
+	p.handled <- struct{}{}
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+// Опрос идёт только у того экземпляра, что держит блокировку: занято — ждём и пробуем снова;
+// после остановки блокировка снимается.
+func TestBotPollLeader(t *testing.T) {
+	repo, client := newMemBotRepo(), &pollClient{handled: make(chan struct{}, 1)}
+	repo.busy = 2
+	b := NewBots(BotDeps{Repo: repo, Plans: fakePlans{}}, "https://racion.app", zap.NewNop())
+	b.retry = 10 * time.Millisecond
+	b.Add(client, true)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() { b.poll(ctx, client); close(done) }()
+	select {
+	case <-client.handled:
+	case <-time.After(2 * time.Second):
+		t.Error("обновление не обработано")
+	}
+	cancel()
+	<-done
+	if repo.leads != 3 || client.polls != 1 || len(client.sent) != 1 || repo.released != 1 {
+		t.Errorf("попыток %d, опросов %d, ответов %d, снято %d", repo.leads, client.polls, len(client.sent), repo.released)
 	}
 }
 

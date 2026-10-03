@@ -25,11 +25,12 @@ type TelegramClient struct {
 	token, username, secret string
 	base                    string // https://api.telegram.org; в тестах — подменный сервер
 	http                    *http.Client
+	poll                    *http.Client // для getUpdates: запрос висит до pollTimeout секунд
 }
 
 func NewTelegram(token, username, secret string) *TelegramClient {
 	return &TelegramClient{token: token, username: strings.TrimPrefix(username, "@"), secret: secret,
-		base: "https://api.telegram.org", http: &http.Client{Timeout: 20 * time.Second}}
+		base: "https://api.telegram.org", http: &http.Client{Timeout: 20 * time.Second}, poll: &http.Client{Timeout: (pollTimeout + 15) * time.Second}}
 }
 
 // SetBase меняет адрес Bot API: свой сервер telegram-bot-api или подменный на локальном стенде.
@@ -204,6 +205,61 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 	if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Telegram-Bot-Api-Secret-Token")), []byte(c.secret)) != 1 {
 		return Update{}, false, ErrForged
 	}
+	raw, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		return Update{}, false, err
+	}
+	return decodeUpdate(raw)
+}
+
+// Poll — обновления длинным опросом getUpdates вместо вебхука: сервер сам ходит в Telegram, и входящие
+// соединения не нужны. Так бот работает там, где запросы с адресов Telegram до сервера не доходят.
+// Вебхук с опросом не уживаются: пока он стоит, Telegram отвечает на getUpdates ошибкой, поэтому
+// сначала снимаем его. Обновления, пришедшие, пока опрос стоял, Telegram хранит сутки и отдаст потом.
+func (c *TelegramClient) Poll(ctx context.Context, handle func(Update)) error {
+	if err := c.call(ctx, "deleteWebhook", map[string]any{"drop_pending_updates": false}, nil); err != nil {
+		return err
+	}
+	var offset int64
+	pause := time.Second
+	for {
+		var batch []json.RawMessage
+		err := c.callWith(ctx, c.poll, "getUpdates", map[string]any{"offset": offset, "timeout": pollTimeout,
+			"allowed_updates": []string{"message", "callback_query"}}, &batch)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		if err != nil {
+			// сеть или другой опрос с тем же токеном: ждём и пробуем снова, всё реже
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(pause):
+			}
+			pause = min(pause*2, time.Minute)
+			continue
+		}
+		pause = time.Second
+		for _, raw := range batch {
+			var head struct {
+				ID int64 `json:"update_id"`
+			}
+			if json.Unmarshal(raw, &head) != nil {
+				continue
+			}
+			offset = head.ID + 1 // следующий запрос подтверждает всё до этого номера
+			if u, ok, err := decodeUpdate(raw); err == nil && ok {
+				handle(u)
+			}
+		}
+	}
+}
+
+// pollTimeout — сколько секунд Telegram держит запрос getUpdates, если обновлений нет.
+const pollTimeout = 25
+
+// decodeUpdate — обновление Telegram, приведённое к одному виду; ok=false — не про нас.
+func decodeUpdate(raw []byte) (Update, bool, error) {
 	var in struct {
 		Message *struct {
 			MessageID int64 `json:"message_id"`
@@ -232,7 +288,7 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 			} `json:"message"`
 		} `json:"callback_query"`
 	}
-	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
+	if err := json.Unmarshal(raw, &in); err != nil {
 		return Update{}, false, err
 	}
 	switch {
@@ -249,6 +305,10 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 
 // call — POST к Bot API. 403 «bot was blocked by the user» превращается в ErrBlocked.
 func (c *TelegramClient) call(ctx context.Context, method string, body any, dst any) error {
+	return c.callWith(ctx, c.http, method, body, dst)
+}
+
+func (c *TelegramClient) callWith(ctx context.Context, client *http.Client, method string, body any, dst any) error {
 	raw, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -258,7 +318,7 @@ func (c *TelegramClient) call(ctx context.Context, method string, body any, dst 
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := c.http.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		// в ошибке сети лежит полный адрес запроса, а в адресе у Telegram — токен бота: в лог его не пускаем
 		var ue *url.Error

@@ -78,6 +78,12 @@ type Client interface {
 	Parse(r *http.Request) (u Update, ok bool, err error)
 }
 
+// Poller — мессенджер умеет отдавать обновления опросом: сервер сам забирает их, входящие соединения
+// не нужны (Telegram, getUpdates). Poll работает, пока не отменят ctx.
+type Poller interface {
+	Poll(ctx context.Context, handle func(Update)) error
+}
+
 // MiniApp — мессенджер открывает сайт внутри себя и подписывает данные человека (Telegram).
 type MiniApp interface {
 	VerifyInitData(raw string, now time.Time) (WebAppUser, error)

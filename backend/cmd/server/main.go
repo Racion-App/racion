@@ -163,16 +163,17 @@ func main() {
 		if b.TelegramAPI != "" {
 			tg.SetBase(b.TelegramAPI)
 		}
-		services.Bots.Add(tg)
+		// опросом по умолчанию: запросы с адресов Telegram до сервера в России доходят через раз
+		services.Bots.Add(tg, b.TelegramUpdates != "webhook")
 	}
 	if b := cfg.Bots; b.MaxToken != "" && b.MaxName != "" {
 		mx := messenger.NewMax(b.MaxToken, b.MaxName, botSecret(b.Secret, b.MaxToken))
 		if b.MaxAPI != "" {
 			mx.SetBase(b.MaxAPI)
 		}
-		services.Bots.Add(mx)
+		services.Bots.Add(mx, false)
 	}
-	go services.Bots.Hook(ctx)
+	go services.Bots.Run(ctx)
 	// Рецепты базы из админки: после правки каталог перечитывается из БД с теми же ценниками
 	reloadCatalog := func(ctx context.Context) error {
 		fresh, err := catalogRef.Load().Reload(ctx, pool)
