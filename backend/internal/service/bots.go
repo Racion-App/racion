@@ -30,10 +30,42 @@ import (
 type Bots struct {
 	clients  map[messenger.Platform]messenger.Client
 	repo     MessengerRepo
-	plans    *Plans
+	plans    BotPlans
 	accounts BotAccounts
+	taste    BotTaste    // «как было?»: ответ учит планировщик аккаунта
+	journal  UserJournal // журнал веб-пуша: что уже напомнили аккаунту
 	baseURL  string
 	log      *zap.Logger
+	pause    time.Duration // между напоминаниями: Telegram пускает около 30 сообщений в секунду
+}
+
+// BotDeps — что ботам нужно от остального приложения.
+type BotDeps struct {
+	Repo     MessengerRepo
+	Plans    BotPlans
+	Accounts BotAccounts
+	Taste    BotTaste
+	Journal  UserJournal
+}
+
+// BotPlans — недели для бота: список, отметки, свои покупки, недели аккаунта.
+type BotPlans interface {
+	Get(ctx context.Context, id string, lang i18n.Lang) (planner.Plan, error)
+	Original(ctx context.Context, id string) (planner.Plan, i18n.Lang, error)
+	Extras(ctx context.Context, planID string) ([]domain.Extra, error)
+	Checks(ctx context.Context, planID string) ([]string, error)
+	SetCheck(ctx context.Context, planID string, in domain.CheckInput, viewer *domain.User) error
+	Mine(ctx context.Context, userID string) ([]domain.PlanSummary, error)
+}
+
+// BotTaste — ответ «как было?» после ужина.
+type BotTaste interface {
+	Feedback(ctx context.Context, userID, recipeID string, liked bool) error
+}
+
+// UserJournal — журнал отправленных веб-пушей аккаунта.
+type UserJournal interface {
+	MarkSent(ctx context.Context, userID, key string) (bool, error)
 }
 
 type MessengerRepo interface {
@@ -43,6 +75,7 @@ type MessengerRepo interface {
 	ForgetUser(ctx context.Context, platform, userID string) error
 	CreateLink(ctx context.Context, tokenHash, userID string, expires time.Time) error
 	TakeLink(ctx context.Context, tokenHash string) (string, error)
+	ReminderPlans(ctx context.Context, platform, chatID string, userID *string) ([]domain.PlanReminderInfo, error)
 	Chat(ctx context.Context, platform, chatID string) (domain.MessengerChat, error)
 	SetBlocked(ctx context.Context, platform, chatID string, blocked bool) error
 	SetSettings(ctx context.Context, platform, chatID string, s domain.NotifySettings) error
@@ -61,8 +94,9 @@ type BotAccounts interface {
 // LinkTTL — сколько живёт ссылка «Привязать Telegram» из кабинета.
 const LinkTTL = 15 * time.Minute
 
-func NewBots(repo MessengerRepo, plans *Plans, accounts BotAccounts, baseURL string, log *zap.Logger) *Bots {
-	return &Bots{clients: map[messenger.Platform]messenger.Client{}, repo: repo, plans: plans, accounts: accounts, baseURL: strings.TrimRight(baseURL, "/"), log: log}
+func NewBots(d BotDeps, baseURL string, log *zap.Logger) *Bots {
+	return &Bots{clients: map[messenger.Platform]messenger.Client{}, repo: d.Repo, plans: d.Plans, accounts: d.Accounts, taste: d.Taste, journal: d.Journal,
+		baseURL: strings.TrimRight(baseURL, "/"), log: log, pause: 40 * time.Millisecond}
 }
 
 // Add подключает мессенджер; без токена бота мессенджер просто не добавляют.
@@ -149,7 +183,10 @@ func profiles(c messenger.Client) map[string]messenger.Profile {
 		out[string(l)] = messenger.Profile{
 			About:       about,
 			Description: about + "\n\n" + i18n.T(tl, "bot.intro", i18n.T(tl, "plan.bot."+string(c.Platform()))),
-			Commands:    []messenger.Command{{Name: "list", Description: i18n.T(tl, "bot.cmd.list")}},
+			Commands: []messenger.Command{
+				{Name: "list", Description: i18n.T(tl, "bot.cmd.list")},
+				{Name: "settings", Description: i18n.T(tl, "bot.cmd.settings")},
+			},
 		}
 	}
 	return out
@@ -190,6 +227,17 @@ func (b *Bots) handle(ctx context.Context, u messenger.Update) error {
 		return err
 	}
 	lang := langOr(chat.Lang, i18n.RU)
+	if created {
+		// часовой пояс угадываем по языку мессенджера; мини-приложение потом поставит точный из браузера
+		if tz := defaultTz(u.Lang); tz != chat.Settings.Tz {
+			s := chat.Settings
+			s.Tz = tz
+			if err := b.repo.SetSettings(ctx, string(u.Platform), u.ChatID, s); err != nil {
+				return err
+			}
+			chat.Settings = s
+		}
+	}
 	if created || u.Start {
 		b.menu(ctx, c, u.ChatID, lang)
 	}
@@ -202,16 +250,55 @@ func (b *Bots) handle(ctx context.Context, u messenger.Update) error {
 			chat.UserID = &usr.ID
 		}
 	}
+	if u.Callback != "" {
+		// без ответа на нажатие у человека крутится индикатор на кнопке
+		defer func() { _ = c.Answer(context.WithoutCancel(ctx), u.Callback, "") }()
+	}
 	switch {
+	case strings.HasPrefix(u.Data, "n:"):
+		return b.settingsTap(ctx, c, u, chat, lang)
+	case strings.HasPrefix(u.Data, "f:"):
+		return b.feedbackTap(ctx, c, u, chat, lang)
 	case u.Callback != "":
 		return b.callback(ctx, c, u, lang)
 	case u.Start && strings.HasPrefix(u.Payload, "p"):
 		return b.connect(ctx, c, u.ChatID, strings.TrimPrefix(u.Payload, "p"), lang)
 	case u.Start && strings.HasPrefix(u.Payload, "u"):
 		return b.link(ctx, c, u, strings.TrimPrefix(u.Payload, "u"), lang)
+	case command(u.Text) == "/settings":
+		return b.send(ctx, c, u.ChatID, b.settingsMessage(chat, lang))
 	default:
 		return b.latest(ctx, c, chat, lang)
 	}
+}
+
+// command — «/settings@racionappbot что-то» → «/settings».
+func command(text string) string {
+	f := strings.Fields(text)
+	if len(f) == 0 || !strings.HasPrefix(f[0], "/") {
+		return ""
+	}
+	cmd, _, _ := strings.Cut(strings.ToLower(f[0]), "@")
+	return cmd
+}
+
+// defaultTz — часовой пояс нового чата по языку мессенджера, в минутах к UTC.
+func defaultTz(messengerLang string) int {
+	switch messengerLang {
+	case "uk":
+		return 120
+	case "kk":
+		return 300
+	case "de", "fr", "it", "es", "nl", "pl", "cs":
+		return 60
+	case "en", "pt":
+		return 0
+	case "zh":
+		return 480
+	case "ja":
+		return 540
+	}
+	return 180 // русский, турецкий и всё неизвестное — Москва
 }
 
 // chat заводит чат или находит его. Язык мессенджера берём только для нового чата: нажатие кнопки
@@ -407,9 +494,9 @@ func (b *Bots) connect(ctx context.Context, c messenger.Client, chatID, key stri
 	if err := b.repo.LinkPlan(ctx, string(c.Platform()), chatID, id); err != nil {
 		return err
 	}
-	// неделю называет сам список ниже, здесь — только что произошло
+	// неделю называет сам список ниже, здесь — что произошло и что будет дальше
 	welcome := messenger.Message{
-		Text: html.EscapeString(i18n.T(lang, "bot.connected")),
+		Text: html.EscapeString(i18n.T(lang, "bot.connected")) + "\n\n" + html.EscapeString(i18n.T(lang, "bot.remind.hint")),
 		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/plan/"+id), App: true}}},
 	}
 	if err := b.send(ctx, c, chatID, welcome); err != nil {
@@ -429,8 +516,6 @@ func (b *Bots) list(ctx context.Context, plan planner.Plan, lang i18n.Lang) ([]b
 // callback — нажатие кнопки под списком: «l:<неделя>:<отдел>» — листать отделы,
 // «t:<неделя>:<отдел>:<продукт>» — отметить купленным или вернуть в список.
 func (b *Bots) callback(ctx context.Context, c messenger.Client, u messenger.Update, lang i18n.Lang) error {
-	// без ответа на нажатие у человека крутится индикатор на кнопке
-	defer func() { _ = c.Answer(context.WithoutCancel(ctx), u.Callback, "") }()
 	// в id своей покупки есть двоеточие: «extra:12»
 	parts := strings.SplitN(u.Data, ":", 4)
 	if len(parts) < 3 || (parts[0] != "l" && parts[0] != "t") {

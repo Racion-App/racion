@@ -128,9 +128,6 @@ func (n *Notifications) Tick(ctx context.Context, now time.Time) (sent int, err 
 }
 
 func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now time.Time) int {
-	local := now.UTC().Add(time.Duration(u.Settings.Tz) * time.Minute)
-	today := local.Format("2006-01-02")
-	tomorrow := local.AddDate(0, 0, 1).Format("2006-01-02")
 	subs, err := n.repo.ByUser(ctx, u.UserID)
 	if err != nil || len(subs) == 0 {
 		return 0
@@ -140,113 +137,52 @@ func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now t
 	if err != nil {
 		return 0
 	}
+	local := now.UTC().Add(time.Duration(u.Settings.Tz) * time.Minute)
 	sent := 0
-	// магазин: в выбранный день и час, для ближайшей недели, где ещё есть что купить
-	if u.Settings.ShopHour >= 0 && int(local.Weekday()) == u.Settings.ShopDay && local.Hour() == u.Settings.ShopHour {
-		for _, p := range plans {
-			if p.StartDate < local.AddDate(0, 0, -6).Format("2006-01-02") || p.StartDate > local.AddDate(0, 0, 7).Format("2006-01-02") {
-				continue
-			}
-			left := p.Items - p.Checked
-			if left <= 0 {
-				continue
-			}
-			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "shop:"+p.ID+":"+today); ok {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.shop.title"), Body: i18n.T(lang, "push.shop.body", left), URL: n.baseURL + "/plan/" + p.ID + "?mode=shop", Tag: "shop"})
-				sent++
-			}
-			break
+	for _, r := range dueReminders(local, u.Settings, plans) {
+		if r.Kind == "digest" && n.digest == nil {
+			continue
 		}
-	}
-	// утром: что готовим сегодня; открывается план на сегодняшнем дне
-	if u.Settings.Today && local.Hour() == u.Settings.TodayHour {
-		for _, p := range plans {
-			dishes := p.Dishes[today]
-			if len(dishes) == 0 {
-				continue
-			}
-			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "today:"+p.ID+":"+today); ok {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.today.title"), Body: strings.Join(dishes, " · "), URL: n.baseURL + "/plan/" + p.ID + "?day=" + today, Tag: "today"})
-				sent++
-			}
-			break
+		// журнал общий с ботом: если напоминание уже ушло в Telegram, здесь оно отмечено и не повторится
+		if ok, _ := n.repo.MarkSent(ctx, u.UserID, r.Key); !ok {
+			continue
 		}
-	}
-	// заготовки: накануне вечером и утром в день заготовок
-	if u.Settings.PrepDay {
-		for _, p := range plans {
-			for _, pd := range p.PrepDays {
-				switch {
-				case pd.Date == tomorrow && local.Hour() == u.Settings.PrepHour:
-					if ok, _ := n.repo.MarkSent(ctx, u.UserID, "prepday-eve:"+p.ID+":"+pd.Date); ok {
-						n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.prepday.eve.title"), Body: i18n.T(lang, "push.prepday.body", pd.Items, minutesLabel(lang, pd.TotalMin)), URL: n.baseURL + "/plan/" + p.ID + "?mode=shop", Tag: "prepday"})
-						sent++
-					}
-				case pd.Date == today && local.Hour() == u.Settings.TodayHour:
-					if ok, _ := n.repo.MarkSent(ctx, u.UserID, "prepday:"+p.ID+":"+pd.Date); ok {
-						n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.prepday.title"), Body: i18n.T(lang, "push.prepday.body", pd.Items, minutesLabel(lang, pd.TotalMin)), URL: n.baseURL + "/plan/" + p.ID + "#prep", Tag: "prepday"})
-						sent++
-					}
-				}
-			}
+		msg, ok := n.notification(ctx, r, lang)
+		if !ok {
+			continue
 		}
-	}
-	// вечером: что готовим завтра
-	if u.Settings.Prep && local.Hour() == u.Settings.PrepHour {
-		for _, p := range plans {
-			dishes := p.Dishes[tomorrow]
-			if len(dishes) == 0 {
-				continue
-			}
-			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "prep:"+p.ID+":"+tomorrow); ok {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.prep.title"), Body: strings.Join(dishes, " · "), URL: n.baseURL + "/plan/" + p.ID, Tag: "prep"})
-				sent++
-			}
-			break
-		}
-	}
-	// после ужина: «как было?» с двумя кнопками — ответ учит планировщик
-	if !u.Settings.NoAsk && local.Hour() == 20 {
-		for _, p := range plans {
-			d, ok := p.Dinner[today]
-			if !ok || strings.HasPrefix(d.RecipeID, "u_") {
-				continue
-			}
-			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "ask:"+p.ID+":"+today); ok {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.ask.title", d.Title), Body: i18n.T(lang, "push.ask.body"), URL: n.baseURL + "/plan/" + p.ID, Tag: "ask", Recipe: d.RecipeID,
-					Actions: []domain.NotificationAction{{Action: "like", Title: i18n.T(lang, "feedback.like")}, {Action: "meh", Title: i18n.T(lang, "feedback.meh")}}})
-				sent++
-			}
-			break
-		}
-	}
-	// пятница вечером: новые рецепты и подборки за неделю (только если что-то появилось)
-	if u.Settings.Digest && local.Weekday() == time.Friday && local.Hour() == 18 && n.digest != nil {
-		week := local.Format("2006-01-02")
-		if ok, _ := n.repo.MarkSent(ctx, u.UserID, "digest:"+week); ok {
-			if recipes, cols := n.digest(ctx); recipes+cols > 0 {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.digest.title"), Body: i18n.T(lang, "push.digest.body", recipes, cols), URL: n.baseURL + "/collections", Tag: "digest"})
-				sent++
-			}
-		}
-	}
-	// воскресенье в полдень: на следующую неделю плана нет
-	if u.Settings.Week && local.Weekday() == time.Sunday && local.Hour() == 12 {
-		monday := local.AddDate(0, 0, 1).Format("2006-01-02")
-		has := false
-		for _, p := range plans {
-			if p.StartDate == monday {
-				has = true
-			}
-		}
-		if !has {
-			if ok, _ := n.repo.MarkSent(ctx, u.UserID, "week:"+monday); ok {
-				n.deliver(ctx, u.UserID, domain.Notification{Title: i18n.T(lang, "push.week.title"), Body: i18n.T(lang, "push.week.body"), URL: n.baseURL + "/", Tag: "week"})
-				sent++
-			}
-		}
+		n.deliver(ctx, u.UserID, msg)
+		sent++
 	}
 	return sent
+}
+
+// notification — напоминание в виде веб-пуша; false — сказать нечего (в дайджесте пусто).
+func (n *Notifications) notification(ctx context.Context, r Reminder, lang i18n.Lang) (domain.Notification, bool) {
+	plan := n.baseURL + "/plan/" + r.PlanID
+	switch r.Kind {
+	case "shop":
+		return domain.Notification{Title: i18n.T(lang, "push.shop.title"), Body: i18n.T(lang, "push.shop.body", r.Left), URL: plan + "?mode=shop", Tag: "shop"}, true
+	case "today":
+		return domain.Notification{Title: i18n.T(lang, "push.today.title"), Body: strings.Join(r.Dishes, " · "), URL: plan + "?day=" + r.Date, Tag: "today"}, true
+	case "prepday-eve":
+		return domain.Notification{Title: i18n.T(lang, "push.prepday.eve.title"), Body: i18n.T(lang, "push.prepday.body", r.Prep.Items, minutesLabel(lang, r.Prep.TotalMin)), URL: plan + "?mode=shop", Tag: "prepday"}, true
+	case "prepday":
+		return domain.Notification{Title: i18n.T(lang, "push.prepday.title"), Body: i18n.T(lang, "push.prepday.body", r.Prep.Items, minutesLabel(lang, r.Prep.TotalMin)), URL: plan + "#prep", Tag: "prepday"}, true
+	case "prep":
+		return domain.Notification{Title: i18n.T(lang, "push.prep.title"), Body: strings.Join(r.Dishes, " · "), URL: plan, Tag: "prep"}, true
+	case "ask":
+		return domain.Notification{Title: i18n.T(lang, "push.ask.title", r.Dinner.Title), Body: i18n.T(lang, "push.ask.body"), URL: plan, Tag: "ask", Recipe: r.Dinner.RecipeID,
+			Actions: []domain.NotificationAction{{Action: "like", Title: i18n.T(lang, "feedback.like")}, {Action: "meh", Title: i18n.T(lang, "feedback.meh")}}}, true
+	case "digest":
+		// только если что-то появилось
+		if recipes, cols := n.digest(ctx); recipes+cols > 0 {
+			return domain.Notification{Title: i18n.T(lang, "push.digest.title"), Body: i18n.T(lang, "push.digest.body", recipes, cols), URL: n.baseURL + "/collections", Tag: "digest"}, true
+		}
+	case "week":
+		return domain.Notification{Title: i18n.T(lang, "push.week.title"), Body: i18n.T(lang, "push.week.body"), URL: n.baseURL + "/", Tag: "week"}, true
+	}
+	return domain.Notification{}, false
 }
 
 // deliver шлёт на все устройства; мёртвые подписки (404/410) удаляет.

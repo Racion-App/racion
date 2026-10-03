@@ -220,13 +220,15 @@ export function Plan() {
     return () => { if (!idle) window.clearTimeout(h as number); };
   }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Переходы из уведомлений: ?mode=shop открывает список, ?day=YYYY-MM-DD прокручивает к дню, #prep — к заготовкам
+  // Переходы из уведомлений: ?mode=shop открывает список, ?day=YYYY-MM-DD прокручивает к дню, #prep или ?prep=1 —
+  // к заготовкам (бот шлёт ?prep=1: в адрес мини-приложения после # Telegram дописывает свои параметры)
   const [focusDay, setFocusDay] = useState<string | null>(null);
   useEffect(() => {
     if (!plan) return;
     if (sp.get("mode") === "shop") setStoreMode(true);
     const day = sp.get("day");
-    const target = day ? document.getElementById("day-" + day) : location.hash === "#prep" ? document.querySelector(".prep") : null;
+    const prep = location.hash === "#prep" || sp.get("prep") === "1";
+    const target = day ? document.getElementById("day-" + day) : prep ? document.querySelector(".prep") : null;
     if (target) {
       setFocusDay(day);
       requestAnimationFrame(() => target.scrollIntoView({ block: "start", behavior: "smooth" }));

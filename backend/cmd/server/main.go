@@ -156,7 +156,8 @@ func main() {
 	// корзина ВкусВилла одной ссылкой: их MCP открыт без ключа (см. internal/vkusvill)
 	services.Plans.SetCart(vkusvill.New(cfg.VkusvillMCP))
 	// боты в Telegram и MAX: список покупок по отделам; без токена мессенджер выключен
-	services.Bots = service.NewBots(store.Messenger, services.Plans, services.Accounts, cfg.BaseURL, log.Named("bots"))
+	services.Bots = service.NewBots(service.BotDeps{Repo: store.Messenger, Plans: services.Plans, Accounts: services.Accounts, Taste: services.Social, Journal: store.Push},
+		cfg.BaseURL, log.Named("bots"))
 	if b := cfg.Bots; b.TelegramToken != "" && b.TelegramName != "" {
 		tg := messenger.NewTelegram(b.TelegramToken, b.TelegramName, botSecret(b.Secret, b.TelegramToken))
 		if b.TelegramAPI != "" {
@@ -231,9 +232,19 @@ func main() {
 		log.Warn("push init", zap.Error(err))
 	}
 	go every(ctx, 10*time.Minute, func() {
+		now := time.Now()
+		// сначала чаты ботов: привязанному аккаунту напоминание уходит в Telegram и отмечается в журнале
+		// веб-пуша, который следом его пропустит
+		bctx, bcancel := context.WithTimeout(ctx, 5*time.Minute)
+		if n, err := services.Bots.Tick(bctx, now); err != nil {
+			log.Warn("bots tick", zap.Error(err))
+		} else if n > 0 {
+			log.Info("bots reminders sent", zap.Int("count", n))
+		}
+		bcancel()
 		sctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 		defer cancel()
-		if n, err := services.Notify.Tick(sctx, time.Now()); err != nil {
+		if n, err := services.Notify.Tick(sctx, now); err != nil {
 			log.Warn("push tick", zap.Error(err))
 		} else if n > 0 {
 			log.Info("push sent", zap.Int("count", n))

@@ -118,10 +118,24 @@ func (r *Messenger) MarkSent(ctx context.Context, platform, chatID, key string) 
 	return tag.RowsAffected() > 0, nil
 }
 
-// Active — чаты, которым есть что напоминать: не заблокированы и с подключённой неделей.
+// ReminderPlans — недели для напоминаний в чат: подключённые к нему и, если аккаунт привязан,
+// свои и семейные недели аккаунта. Последние сначала.
+func (r *Messenger) ReminderPlans(ctx context.Context, platform, chatID string, userID *string) ([]domain.PlanReminderInfo, error) {
+	rows, err := r.pool.Query(ctx, `SELECT p.id, p.plan FROM plans p
+		WHERE p.id IN (SELECT plan_id FROM messenger_plans WHERE platform = $1 AND chat_id = $2)
+		OR ($3::uuid IS NOT NULL AND (p.user_id = $3::uuid OR p.id IN (SELECT plan_id FROM plan_members WHERE user_id = $3::uuid)
+			OR p.user_id IN (SELECT y.user_id FROM household_users x JOIN household_users y ON x.household_id = y.household_id WHERE x.user_id = $3::uuid)))
+		ORDER BY p.created_at DESC LIMIT 6`, platform, chatID, userID)
+	if err != nil {
+		return nil, wrap("messenger.reminder_plans", err)
+	}
+	return reminderPlans(ctx, r.pool, rows)
+}
+
+// Active — чаты, которым есть что напоминать: не заблокированы, с подключённой неделей или привязанным аккаунтом.
 func (r *Messenger) Active(ctx context.Context) ([]domain.MessengerChat, error) {
 	rows, err := r.pool.Query(ctx, `SELECT c.platform, c.chat_id, c.user_id::text, c.lang, c.settings FROM messenger_chats c
-		WHERE NOT c.blocked AND EXISTS (SELECT 1 FROM messenger_plans p WHERE p.platform = c.platform AND p.chat_id = c.chat_id)`)
+		WHERE NOT c.blocked AND (c.user_id IS NOT NULL OR EXISTS (SELECT 1 FROM messenger_plans p WHERE p.platform = c.platform AND p.chat_id = c.chat_id))`)
 	if err != nil {
 		return nil, wrap("messenger.active", err)
 	}

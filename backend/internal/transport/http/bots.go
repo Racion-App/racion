@@ -48,6 +48,7 @@ func (s *Server) webAppAuth(w http.ResponseWriter, r *http.Request) {
 		InitData string `json:"initData"`
 		Create   bool   `json:"create"`
 		Plan     string `json:"plan"`
+		Tz       *int   `json:"tz"` // минуты к UTC из браузера: точный часовой пояс для напоминаний в чат
 	}
 	if !decode(w, r, 16<<10, &body) {
 		return
@@ -56,6 +57,9 @@ func (s *Server) webAppAuth(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.fail(w, r, err)
 		return
+	}
+	if body.Tz != nil {
+		_ = s.svc.Bots.SetTz(r.Context(), platform, wu.ID, *body.Tz) // в Telegram id личного чата — id человека
 	}
 	viewer := currentUser(r)
 	res, err := s.svc.Accounts.LoginExternal(r.Context(), service.OAuthProfile{Provider: platform, ID: wu.ID, Name: wu.Name, Avatar: wu.Photo}, viewer, body.Create, body.Plan)

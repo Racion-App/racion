@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"racion/internal/domain"
@@ -120,13 +121,19 @@ func (r *Push) PlansForReminders(ctx context.Context, userID string) ([]domain.P
 	if err != nil {
 		return nil, wrap("push.plans", err)
 	}
+	return reminderPlans(ctx, r.pool, rows)
+}
+
+// reminderPlans разбирает выборку «id, plan» для напоминаний: даты, блюда по дням, ужины, дни заготовок
+// и сколько уже куплено. Общая для веб-пуша и ботов.
+func reminderPlans(ctx context.Context, pool *pgxpool.Pool, rows pgx.Rows) ([]domain.PlanReminderInfo, error) {
 	defer rows.Close()
 	var out []domain.PlanReminderInfo
 	for rows.Next() {
 		var id string
 		var raw []byte
 		if err := rows.Scan(&id, &raw); err != nil {
-			return nil, wrap("push.plans", err)
+			return nil, wrap("reminders.plans", err)
 		}
 		var pl struct {
 			Params struct {
@@ -170,11 +177,11 @@ func (r *Push) PlansForReminders(ctx context.Context, userID string) ([]domain.P
 		out = append(out, info)
 	}
 	if rows.Err() != nil {
-		return nil, wrap("push.plans", rows.Err())
+		return nil, wrap("reminders.plans", rows.Err())
 	}
 	for i := range out {
 		var checked int
-		_ = r.pool.QueryRow(ctx, `SELECT count(*) FROM plan_checks WHERE plan_id = $1`, out[i].ID).Scan(&checked)
+		_ = pool.QueryRow(ctx, `SELECT count(*) FROM plan_checks WHERE plan_id = $1`, out[i].ID).Scan(&checked)
 		out[i].Checked = checked
 	}
 	return out, nil
