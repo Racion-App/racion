@@ -16,7 +16,7 @@ import { track } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
 import { rememberNames } from "../lib/names";
 import { readDraft } from "../lib/draft";
-import { money, weekRange } from "../lib/format";
+import { approx, money, weekRange } from "../lib/format";
 import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
 import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
@@ -83,7 +83,7 @@ function nextMondays(n: number, lang: Lang, thisWeek: string, nextWeek: string):
 export function Quiz() {
   const nav = useNavigate();
   const { user } = useAuth();
-  const { t, lang } = useT();
+  const { t, tn, lang } = useT();
   const [sp, setSp] = useSearchParams();
   const step = Math.min(STEPS, Math.max(1, Number(sp.get("s") ?? 1) || 1));
 
@@ -368,6 +368,20 @@ export function Quiz() {
 
         {step === 1 && (
           <section className="quiz__step" key="s1">
+            {!eventPreset && !p.collection && (
+              <div className="quiz__promise">
+                <p className="quiz__lead">{t("quiz.promise")}</p>
+                {meta?.sample && meta.sample.country === p.country && (
+                  <p className="quiz__sample">
+                    {t("quiz.sample", { store: meta.sample.store })}{" "}
+                    <span className="quiz__fact"><span className="num">{meta.sample.dishes}</span> {tn("dishes", meta.sample.dishes)}</span> ·{" "}
+                    <span className="quiz__fact num">{approx(meta.sample.cost, country, lang)}</span> ·{" "}
+                    <span className="quiz__fact"><span className="num">{meta.sample.items}</span> {tn("items", meta.sample.items)}</span>
+                  </p>
+                )}
+                <p className="quiz__trust">{t("quiz.trust")}</p>
+              </div>
+            )}
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q1")}
             </h1>
@@ -394,18 +408,6 @@ export function Quiz() {
                 <FolderOpen size={15} aria-hidden /> {t("quiz.collection", { name: collName })} — {t("quiz.collection.hint")}
                 <button type="button" className="btn btn-link btn-sm" onClick={() => set({ collection: undefined })}>{t("cancel")}</button>
               </p>
-            )}
-            {occasions.length > 0 && !eventPreset && (
-              <div className="quiz__occ">
-                <span className="quiz__occ-label">{t("occ.pick")}</span>
-                <div className="chips">
-                  {occasions.filter((o) => !o.countries?.length || o.countries.includes(p.country)).map((o) => (
-                    <Link key={o.id} to={`/event/${o.id}`} className={"chip chip--sm" + (o.season ? " chip--season" : "")} onClick={() => track("occasion_open", { id: o.id })}>
-                      <OccasionIcon name={o.icon} size={14} /> {o.title}
-                    </Link>
-                  ))}
-                </div>
-              </div>
             )}
             <div className="quiz__group quiz__group--tight">
               <label className="quiz__label" htmlFor="country">
@@ -470,6 +472,18 @@ export function Quiz() {
                 </>
               )}
             </div>
+            )}
+            {occasions.length > 0 && !eventPreset && (
+              <div className="quiz__occ">
+                <span className="quiz__occ-label">{t("occ.pick")}</span>
+                <div className="chips">
+                  {occasions.filter((o) => !o.countries?.length || o.countries.includes(p.country)).map((o) => (
+                    <Link key={o.id} to={`/event/${o.id}`} className={"chip chip--sm" + (o.season ? " chip--season" : "")} onClick={() => track("occasion_open", { id: o.id })}>
+                      <OccasionIcon name={o.icon} size={14} /> {o.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
           </section>
         )}

@@ -16,6 +16,50 @@ import (
 type Catalog struct {
 	catalog *planner.CatalogRef
 	docs    sync.Map // i18n.Lang → []searchDoc
+	samples sync.Map // код страны → sampleEntry
+}
+
+// Sample — пример недели для первого экрана квиза. Считается тем же планировщиком при стартовых ответах:
+// двое взрослых, завтрак, обед и ужин, первая сеть страны. На экране поэтому не цифра из головы,
+// а то, что человек и правда получит, если ничего не менять.
+type Sample struct {
+	Country string  `json:"country"` // по какой стране считали: квиз сверяет со своей, пока грузится новая мета
+	Dishes  int     `json:"dishes"`
+	Items   int     `json:"items"`
+	Cost    float64 `json:"cost"`
+	Store   string  `json:"store"`
+}
+
+type sampleEntry struct {
+	cat    *planner.Catalog // каталог, по которому считали: после перезагрузки цен пример считается заново
+	sample *Sample
+}
+
+func (c *Catalog) Sample(country planner.Country, lang i18n.Lang) *Sample {
+	cat := c.catalog.Load()
+	if v, ok := c.samples.Load(country.Code); ok && v.(sampleEntry).cat == cat {
+		return v.(sampleEntry).sample
+	}
+	var store planner.Store
+	for _, st := range cat.StoreList {
+		if st.Country == country.Code {
+			store = st
+			break
+		}
+	}
+	if store.Code == "" {
+		return nil
+	}
+	plan := cat.Build(planner.Params{
+		Country: country.Code, Store: store.Code, Lang: string(lang), Adults: 2,
+		Slots: []string{"breakfast", "lunch", "dinner"}, Equipment: []string{"stove", "oven", "microwave"},
+	})
+	s := &Sample{Country: country.Code, Items: plan.Totals.Items, Cost: plan.Totals.Cost, Store: store.Name}
+	for _, d := range plan.Days {
+		s.Dishes += len(d.Dishes)
+	}
+	c.samples.Store(country.Code, sampleEntry{cat: cat, sample: s})
+	return s
 }
 
 func (c *Catalog) Base() *planner.Catalog { return c.catalog.Load() }
@@ -99,10 +143,11 @@ type Meta struct {
 	Ingredients    []Labeled              `json:"ingredients"`
 	Recipes        int                    `json:"recipes"`
 	GeoCountry     string                 `json:"geoCountry"`
-	GeoLang        string                 `json:"geoLang"` // язык по стране посетителя
+	GeoLang        string                 `json:"geoLang"`             // язык по стране посетителя
 	GeoRegion      string                 `json:"geoRegion,omitempty"` // регион или город Росстата по IP: квиз подставит его сам
-	AI             bool                   `json:"ai"`      // помощник для своих рецептов включён
-	Photos         bool                   `json:"photos"`  // загрузка фото включена (есть S3)
+	AI             bool                   `json:"ai"`                  // помощник для своих рецептов включён
+	Photos         bool                   `json:"photos"`              // загрузка фото включена (есть S3)
+	Sample         *Sample                `json:"sample,omitempty"`    // пример недели для первого экрана
 }
 
 func (c *Catalog) Meta(lang i18n.Lang, country planner.Country, geoCountry string) Meta {
@@ -169,6 +214,7 @@ func (c *Catalog) Meta(lang i18n.Lang, country planner.Country, geoCountry strin
 		}
 	}
 	m.BudgetPresets = planner.BudgetPresetsFor(lang, country)
+	m.Sample = c.Sample(country, lang)
 	m.FormulaBrands = planner.FormulaBrandsFor(lang)
 	return m
 }

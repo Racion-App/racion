@@ -69,7 +69,11 @@ export function Admin() {
   if (loading) return null;
   if (!user || !admin) return <Navigate to="/" replace />;
 
+  // Главная метрика удержания — первой: собрал первую неделю и вернулся за второй (см. admin.go, first_plan).
+  const base = ov?.counters.secondWeekBase ?? 0;
+  const back = ov?.counters.secondWeek ?? 0;
   const cards: [string, number | undefined, string?][] = [
+    [t("admin.retention"), ov ? back : undefined, t("admin.retention.sub", { n: base, p: base ? Math.round((back / base) * 100) : 0 })],
     [t("admin.users"), ov?.counters.users, t("admin.week", { n: ov?.counters.usersWeek ?? 0 })],
     [t("admin.active"), ov?.counters.activeWeek],
     [t("admin.plans"), ov?.counters.plans, t("admin.week", { n: ov?.counters.plansWeek ?? 0 })],

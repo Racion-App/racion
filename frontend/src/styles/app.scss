@@ -135,6 +135,13 @@ a { text-underline-offset: 3px; }
   &__hint { font-size: 15px; color: var(--ds-label-secondary); margin: -8px 0 0; }
   &__group { display: flex; flex-direction: column; gap: 10px; }
   &__label { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); margin: 6px 0 0; }
+  // Первый экран: что человек получит, раньше чем его о чём-то спросят. Пример недели посчитан
+  // планировщиком при стартовых ответах (service.Catalog.Sample), а не взят из головы.
+  &__promise { display: grid; gap: 6px; padding: 14px 16px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4); }
+  &__lead { margin: 0; font-size: 17px; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; text-wrap: pretty; }
+  &__sample { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); .num { color: var(--ds-label-primary); font-weight: 600; } }
+  &__fact { white-space: nowrap; } // «21 блюдо» не рвётся между строками: число без слова ничего не значит
+  &__trust { margin: 0; font-size: 13px; color: var(--ds-label-tertiary); }
 }
 @keyframes step-in { from { opacity: 0; transform: translateY(6px); } }
 
@@ -407,6 +414,10 @@ a { text-underline-offset: 3px; }
   &__row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; color: var(--ds-label-secondary); .num { white-space: nowrap; } }
   &__row--stack { flex-direction: column; gap: 2px; align-items: flex-start; }
   &__row--main { font-size: 20px; font-weight: 700; color: var(--ds-label-primary); .num { color: var(--ds-green); } }
+  // «Итого» и из чего оно складывается. Отступ и линия слева читаются как «из них», а не как ещё одна
+  // строка чека: раньше «съедите» и «останется» стояли шестой и седьмой строкой, после специй.
+  &__split { display: grid; gap: 4px; margin: -2px 0 6px; padding-left: 12px; border-left: 2px solid var(--ds-separator-opaque);
+    .totals__row { color: var(--ds-label-primary); } }
   &__note { font-size: 12px; color: var(--ds-label-tertiary); margin-top: 6px; line-height: 1.4; }
 }
 

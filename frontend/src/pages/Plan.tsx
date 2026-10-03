@@ -874,6 +874,25 @@ export function Plan() {
             <span>{t("totals.total")}</span>
             <span className="num">{approxRub(plan.totals.cost)}</span>
           </div>
+          {/* из чего складывается «Итого»: съедите, останется в упаковках, детское питание */}
+          <div className="totals__split">
+            <div className="totals__row">
+              <span>{t(plan.occasion ? "totals.used.table" : "totals.used")}</span>
+              <span className="num">{approxRub(plan.totals.usedCost)}</span>
+            </div>
+            {plan.totals.cost - plan.totals.babyCost - plan.totals.usedCost > 0 && (
+              <div className="totals__row">
+                <span>{t(plan.occasion ? "totals.leftover.table" : "totals.leftover")}</span>
+                <span className="num">{approxRub(plan.totals.cost - plan.totals.babyCost - plan.totals.usedCost)}</span>
+              </div>
+            )}
+            {plan.totals.babyCost > 0 && (
+              <div className="totals__row">
+                <span>{t("totals.baby")}</span>
+                <span className="num">{approxRub(plan.totals.babyCost)}</span>
+              </div>
+            )}
+          </div>
           <div className="totals__row">
             <span>{t("totals.pantry")}</span>
             <span className="num">+ {approxRub(plan.totals.pantryCost)}</span>
@@ -884,26 +903,10 @@ export function Plan() {
               <span className="num">− {approxRub(plan.totals.homeSaved)}</span>
             </div>
           )}
-          {plan.totals.babyCost > 0 && (
-            <div className="totals__row">
-              <span>{t("totals.baby")}</span>
-              <span className="num">{approxRub(plan.totals.babyCost)}</span>
-            </div>
-          )}
           {plan.totals.kidsMenuCost > 0 && (
             <div className="totals__row">
               <span>{t("totals.kids")}</span>
               <span className="num">{approxRub(plan.totals.kidsMenuCost)}</span>
-            </div>
-          )}
-          <div className="totals__row">
-            <span>{t(plan.occasion ? "totals.used.table" : "totals.used")}</span>
-            <span className="num">{approxRub(plan.totals.usedCost)}</span>
-          </div>
-          {plan.totals.cost - plan.totals.babyCost - plan.totals.usedCost > 0 && (
-            <div className="totals__row">
-              <span>{t(plan.occasion ? "totals.leftover.table" : "totals.leftover")}</span>
-              <span className="num">{approxRub(plan.totals.cost - plan.totals.babyCost - plan.totals.usedCost)}</span>
             </div>
           )}
           <div className="totals__row totals__row--goal">

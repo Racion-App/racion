@@ -15,7 +15,10 @@ type Admin struct{ pool *pgxpool.Pool }
 // Counters — числа «сейчас» одной строкой.
 func (r *Admin) Counters(ctx context.Context) (domain.AdminCounters, error) {
 	var c domain.AdminCounters
-	err := r.pool.QueryRow(ctx, `SELECT
+	err := r.pool.QueryRow(ctx, `WITH first_plan AS (
+		SELECT sid, min(ts) AS ts FROM events WHERE name = 'plan_created' GROUP BY sid
+		HAVING min(ts) BETWEEN now() - interval '60 days' AND now() - interval '7 days')
+	SELECT
 		(SELECT count(*) FROM users),
 		(SELECT count(*) FROM users WHERE created_at > now() - interval '7 days'),
 		(SELECT count(DISTINCT user_id) FROM sessions WHERE expires_at > now() AND created_at > now() - interval '7 days'),
@@ -28,8 +31,12 @@ func (r *Admin) Counters(ctx context.Context) (domain.AdminCounters, error) {
 		(SELECT count(*) FROM recipe_comments),
 		(SELECT count(*) FROM recipe_feedback),
 		(SELECT count(*) FROM purchases WHERE bought_at > now() - interval '7 days'),
-		(SELECT count(*) FROM events WHERE name = 'js_error' AND ts > now() - interval '7 days')`).Scan(
-		&c.Users, &c.UsersWeek, &c.ActiveWeek, &c.Plans, &c.PlansWeek, &c.PlansOwned, &c.OwnRecipes, &c.Households, &c.PushUsers, &c.Comments, &c.Feedback, &c.PurchasesWeek, &c.ErrorsWeek)
+		(SELECT count(*) FROM events WHERE name = 'js_error' AND ts > now() - interval '7 days'),
+		(SELECT count(*) FROM first_plan),
+		(SELECT count(*) FROM first_plan f WHERE EXISTS (SELECT 1 FROM events e
+			WHERE e.sid = f.sid AND e.name = 'plan_created' AND e.ts >= f.ts + interval '3 days'))`).Scan(
+		&c.Users, &c.UsersWeek, &c.ActiveWeek, &c.Plans, &c.PlansWeek, &c.PlansOwned, &c.OwnRecipes, &c.Households, &c.PushUsers, &c.Comments, &c.Feedback, &c.PurchasesWeek, &c.ErrorsWeek,
+		&c.SecondWeekBase, &c.SecondWeek)
 	return c, wrap("admin.counters", err)
 }
 

@@ -40,6 +40,7 @@ export type Meta = {
   geoRegion?: string; // регион или город Росстата по IP (только для стран с регионами)
   ai?: boolean; // помощник (нейросеть) для своих рецептов включён на сервере
   photos?: boolean; // загрузка фото включена (есть S3)
+  sample?: { country: string; dishes: number; items: number; cost: number; store: string }; // неделя на двоих при стартовых ответах
 };
 
 export type Child = {
@@ -249,7 +250,7 @@ export type Favorite = { id: string; title: string; slot: string; own: boolean; 
 export type PlanSummary = { id: string; title: string; startDate: string; store: string; cost: number; country?: Country; portions: number; createdAt: string; checked: number; items: number; shared?: boolean; occasion?: { id: string; title: string; guests: number }; date?: string };
 export type NotifySettings = { shopDay: number; shopHour: number; today: boolean; todayHour: number; prep: boolean; prepHour: number; prepDay: boolean; week: boolean; digest: boolean; noAsk?: boolean; tz: number }; // shopHour -1 — напоминание о магазине выключено
 export type AdminOverview = {
-  counters: { users: number; usersWeek: number; activeWeek: number; plans: number; plansWeek: number; plansOwned: number; ownRecipes: number; households: number; pushUsers: number; comments: number; feedback: number; purchasesWeek: number; errorsWeek: number };
+  counters: { users: number; usersWeek: number; activeWeek: number; plans: number; plansWeek: number; plansOwned: number; ownRecipes: number; households: number; pushUsers: number; comments: number; feedback: number; purchasesWeek: number; errorsWeek: number; secondWeekBase: number; secondWeek: number };
   daily: { day: string; users: number; plans: number; visitors: number; quizStarts: number; errors: number }[];
   events: { name: string; count: number; sessions: number }[];
   top: { stores: { key: string; count: number }[] | null; recipes: { key: string; count: number }[] | null };

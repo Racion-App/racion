@@ -331,6 +331,10 @@ type AdminCounters struct {
 	Feedback      int `json:"feedback"`
 	PurchasesWeek int `json:"purchasesWeek"`
 	ErrorsWeek    int `json:"errorsWeek"`
+	// Главная метрика удержания: собрали первую неделю 7–60 дней назад и сколько из них собрали ещё одну
+	// хотя бы через три дня. Считается по браузеру (sid): кто сменил телефон, считается заново.
+	SecondWeekBase int `json:"secondWeekBase"`
+	SecondWeek     int `json:"secondWeek"`
 }
 
 type AdminDay struct {
