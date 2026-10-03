@@ -97,6 +97,21 @@ func (c *MaxClient) SetWebhook(ctx context.Context, hook string) error {
 		"update_types": []string{"bot_started", "message_created", "message_callback"}}, nil)
 }
 
+type maxUser struct {
+	UserID int64 `json:"user_id"`
+	IsBot  bool  `json:"is_bot"`
+}
+
+func (u maxUser) id() string {
+	if u.UserID == 0 {
+		return ""
+	}
+	return strconv.FormatInt(u.UserID, 10)
+}
+
+// SetMenu — у ботов MAX нет кнопки меню с сайтом: мини-приложения там подключаются в кабинете бизнеса.
+func (c *MaxClient) SetMenu(context.Context, string, string, string) error { return nil }
+
 // SetProfile — у MAX описание и команды одни на всех: берём русский вариант, иначе общий.
 func (c *MaxClient) SetProfile(ctx context.Context, profiles map[string]Profile) error {
 	p, ok := profiles["ru"]
@@ -115,26 +130,26 @@ func (c *MaxClient) Parse(r *http.Request) (Update, bool, error) {
 		return Update{}, false, ErrForged
 	}
 	var in struct {
-		Type    string `json:"update_type"`
-		ChatID  int64  `json:"chat_id"`
-		Payload string `json:"payload"`
-		Locale  string `json:"user_locale"`
+		Type    string  `json:"update_type"`
+		ChatID  int64   `json:"chat_id"`
+		Payload string  `json:"payload"`
+		Locale  string  `json:"user_locale"`
+		User    maxUser `json:"user"`
 		Message *struct {
 			Recipient struct {
 				ChatID   int64  `json:"chat_id"`
 				ChatType string `json:"chat_type"`
 			} `json:"recipient"`
-			Sender *struct {
-				IsBot bool `json:"is_bot"`
-			} `json:"sender"`
-			Body struct {
+			Sender *maxUser `json:"sender"`
+			Body   struct {
 				Mid  string `json:"mid"`
 				Text string `json:"text"`
 			} `json:"body"`
 		} `json:"message"`
 		Callback *struct {
-			ID      string `json:"callback_id"`
-			Payload string `json:"payload"`
+			ID      string  `json:"callback_id"`
+			Payload string  `json:"payload"`
+			User    maxUser `json:"user"`
 		} `json:"callback"`
 	}
 	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
@@ -143,7 +158,7 @@ func (c *MaxClient) Parse(r *http.Request) (Update, bool, error) {
 	u := Update{Platform: Max, Lang: lang2(in.Locale)}
 	switch in.Type {
 	case "bot_started":
-		u.ChatID, u.Start, u.Payload = strconv.FormatInt(in.ChatID, 10), true, in.Payload
+		u.ChatID, u.UserID, u.Start, u.Payload = strconv.FormatInt(in.ChatID, 10), in.User.id(), true, in.Payload
 	case "message_created":
 		// отвечаем только человеку в личном диалоге: в общем чате бот не встревает в разговор,
 		// а своё же сообщение не должно запускать ответ на него
@@ -151,12 +166,15 @@ func (c *MaxClient) Parse(r *http.Request) (Update, bool, error) {
 			return Update{}, false, nil
 		}
 		u.ChatID, u.Text = strconv.FormatInt(in.Message.Recipient.ChatID, 10), in.Message.Body.Text
+		if in.Message.Sender != nil {
+			u.UserID = in.Message.Sender.id()
+		}
 		u.Payload, u.Start = splitStart(u.Text)
 	case "message_callback":
 		if in.Callback == nil || in.Message == nil {
 			return Update{}, false, nil
 		}
-		u.ChatID, u.Callback, u.Data = strconv.FormatInt(in.Message.Recipient.ChatID, 10), in.Callback.ID, in.Callback.Payload
+		u.ChatID, u.UserID, u.Callback, u.Data = strconv.FormatInt(in.Message.Recipient.ChatID, 10), in.Callback.User.id(), in.Callback.ID, in.Callback.Payload
 		u.MessageID = in.Message.Body.Mid
 	default:
 		return Update{}, false, nil

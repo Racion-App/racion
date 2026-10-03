@@ -35,6 +35,36 @@ func (r *Users) LinkOAuth(ctx context.Context, provider, providerID, userID, ema
 	return wrap("users.link_oauth", err)
 }
 
+// OAuthProviders — к каким внешним сервисам привязан пользователь.
+func (r *Users) OAuthProviders(ctx context.Context, userID string) ([]string, error) {
+	rows, err := r.pool.Query(ctx, `SELECT provider FROM oauth_accounts WHERE user_id = $1 ORDER BY created_at`, userID)
+	if err != nil {
+		return nil, wrap("users.providers", err)
+	}
+	defer rows.Close()
+	out := []string{}
+	for rows.Next() {
+		var p string
+		if err := rows.Scan(&p); err != nil {
+			return nil, wrap("users.providers", err)
+		}
+		out = append(out, p)
+	}
+	return out, wrap("users.providers", rows.Err())
+}
+
+// UnlinkOAuth отвязывает внешний сервис, только если у аккаунта остаётся другой способ входа:
+// пароль или ещё один сервис. false — ничего не отвязано.
+func (r *Users) UnlinkOAuth(ctx context.Context, userID, provider string) (bool, error) {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM oauth_accounts WHERE user_id = $1 AND provider = $2
+		AND ((SELECT password_hash <> '' FROM users WHERE id = $1) OR EXISTS (SELECT 1 FROM oauth_accounts x WHERE x.user_id = $1 AND x.provider <> $2))`,
+		userID, provider)
+	if err != nil {
+		return false, wrap("users.unlink_oauth", err)
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
 // ByEmail возвращает пользователя и хеш пароля для входа.
 func (r *Users) ByEmail(ctx context.Context, email string) (domain.User, string, error) {
 	var u domain.User

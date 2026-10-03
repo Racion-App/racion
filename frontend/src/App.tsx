@@ -27,6 +27,7 @@ import { AuthProvider } from "./lib/auth";
 import { LANG_PREFIXES, LangProvider } from "./i18n";
 import { ConfirmProvider } from "./components/Confirm";
 import { UpdateBar } from "./components/UpdateBar";
+import { TelegramBridge } from "./components/TelegramBridge";
 
 export function App() {
   return (
@@ -55,6 +56,7 @@ export function App() {
         </Routes>
         </Suspense>
         <UpdateBar />
+        <TelegramBridge />
       </BrowserRouter>
       </ConfirmProvider>
     </AuthProvider>

@@ -147,6 +147,7 @@ type Meta struct {
 	GeoRegion      string                 `json:"geoRegion,omitempty"` // регион или город Росстата по IP: квиз подставит его сам
 	AI             bool                   `json:"ai"`                  // помощник для своих рецептов включён
 	Photos         bool                   `json:"photos"`              // загрузка фото включена (есть S3)
+	Bots           map[string]string      `json:"bots,omitempty"`      // боты по мессенджерам: telegram → имя бота
 	Sample         *Sample                `json:"sample,omitempty"`    // пример недели для первого экрана
 }
 

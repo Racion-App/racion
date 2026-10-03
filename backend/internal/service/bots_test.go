@@ -144,6 +144,29 @@ func TestProfilesFitLimits(t *testing.T) {
 	}
 }
 
+func TestAppURLAndStartPath(t *testing.T) {
+	b := &Bots{baseURL: "https://racion.app"}
+	for _, c := range []struct {
+		lang      i18n.Lang
+		path, url string
+	}{
+		{i18n.RU, "/", "https://racion.app/?lang=ru"},
+		{i18n.RU, "/plan/x?mode=shop", "https://racion.app/plan/x?mode=shop&lang=ru"},
+		{i18n.EN, "/plan/x?mode=shop", "https://racion.app/en/plan/x?mode=shop"},
+	} {
+		if got := b.appURL(c.lang, c.path); got != c.url {
+			t.Errorf("%s %s: %s", c.lang, c.path, got)
+		}
+	}
+	key, _ := planKey(botPlan().ID)
+	if got := b.StartPath("p" + key); got != "/plan/"+botPlan().ID {
+		t.Errorf("неделя из параметра запуска: %q", got)
+	}
+	if b.StartPath("x"+key) != "" || b.StartPath("") != "" {
+		t.Error("чужой параметр запуска")
+	}
+}
+
 func TestPlanKeyRoundTrip(t *testing.T) {
 	id := "68a5d55d-0e0d-452a-bd27-2cb4f5892263"
 	key, ok := planKey(id)

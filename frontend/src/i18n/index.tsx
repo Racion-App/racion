@@ -88,6 +88,17 @@ export function getLang(): Lang {
   return langFromPath() ?? storedLang() ?? fromNavigator() ?? FALLBACK;
 }
 
+// ?lang=ru в адресе — явный выбор языка: так бот открывает сайт на языке недели (у русского нет
+// префикса в адресе). Запоминаем как выбор человека, иначе после первого перехода язык сменился бы.
+export function adoptQueryLang() {
+  try {
+    const code = new URLSearchParams(location.search).get("lang")?.toLowerCase() ?? "";
+    if (isLang(code)) persistLang(code);
+  } catch {
+    // без хранилища язык останется браузерным
+  }
+}
+
 export function persistLang(l: Lang) {
   writeCache(KEY, l);
   document.cookie = `racion_lang=${l};path=/;max-age=31536000;samesite=lax`;

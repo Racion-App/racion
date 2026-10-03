@@ -60,6 +60,11 @@ func (s *Store) Cleanup(ctx context.Context, keepEvents time.Duration) (int64, e
 		return 0, wrap("cleanup.sessions", err)
 	}
 	total += tag.RowsAffected()
+	tag, err = s.pool.Exec(ctx, `DELETE FROM messenger_links WHERE expires_at < now()`)
+	if err != nil {
+		return total, wrap("cleanup.links", err)
+	}
+	total += tag.RowsAffected()
 	tag, err = s.pool.Exec(ctx, `DELETE FROM events WHERE ts < now() - make_interval(days => $1)`, int(keepEvents.Hours()/24))
 	if err != nil {
 		return total, wrap("cleanup.events", err)

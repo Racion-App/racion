@@ -4,6 +4,12 @@ import "flag-icons/css/flag-icons.min.css";
 import "./styles/app.scss";
 import { App } from "./App";
 import { initAnalytics } from "./lib/analytics";
+import { initTelegram } from "./lib/telegram";
+import { adoptQueryLang } from "./i18n";
+
+// до первой отрисовки: данные запуска мини-приложения Telegram и язык из ?lang= (так бот открывает сайт)
+initTelegram();
+adoptQueryLang();
 
 import { initOffline } from "./lib/offline";
 initAnalytics();

@@ -2,11 +2,14 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"html"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -22,29 +25,44 @@ import (
 // Bots — боты «Рациона» в Telegram и MAX. Неделю подключают по ссылке со страницы плана, и бот
 // присылает список покупок по отделам: в магазине идут от молочного к овощам, а не листают
 // полсотни строк. Нажал на товар — он отмечен купленным и на сайте. Мессенджеры спрятаны за
-// messenger.Client, логика одна на оба.
+// messenger.Client, логика одна на оба. В Telegram сайт ещё и открывается внутри мессенджера
+// мини-приложением, а привязанный аккаунт видит в боте свои недели без отдельной ссылки.
 type Bots struct {
-	clients map[messenger.Platform]messenger.Client
-	repo    MessengerRepo
-	plans   *Plans
-	baseURL string
-	log     *zap.Logger
+	clients  map[messenger.Platform]messenger.Client
+	repo     MessengerRepo
+	plans    *Plans
+	accounts BotAccounts
+	baseURL  string
+	log      *zap.Logger
 }
 
 type MessengerRepo interface {
-	SaveChat(ctx context.Context, platform, chatID, lang string) error
+	SaveChat(ctx context.Context, platform, chatID, lang string) (bool, error)
 	SetLang(ctx context.Context, platform, chatID, lang string) error
+	SetUser(ctx context.Context, platform, chatID string, userID *string) error
+	ForgetUser(ctx context.Context, platform, userID string) error
+	CreateLink(ctx context.Context, tokenHash, userID string, expires time.Time) error
+	TakeLink(ctx context.Context, tokenHash string) (string, error)
 	Chat(ctx context.Context, platform, chatID string) (domain.MessengerChat, error)
 	SetBlocked(ctx context.Context, platform, chatID string, blocked bool) error
 	SetSettings(ctx context.Context, platform, chatID string, s domain.NotifySettings) error
 	LinkPlan(ctx context.Context, platform, chatID, planID string) error
-	Plans(ctx context.Context, platform, chatID string) ([]string, error)
+	Plans(ctx context.Context, platform, chatID string) ([]domain.ChatPlan, error)
 	MarkSent(ctx context.Context, platform, chatID, key string) (bool, error)
 	Active(ctx context.Context) ([]domain.MessengerChat, error)
 }
 
-func NewBots(repo MessengerRepo, plans *Plans, baseURL string, log *zap.Logger) *Bots {
-	return &Bots{clients: map[messenger.Platform]messenger.Client{}, repo: repo, plans: plans, baseURL: strings.TrimRight(baseURL, "/"), log: log}
+// BotAccounts — аккаунты сайта для бота: кто привязал мессенджер.
+type BotAccounts interface {
+	ByLink(ctx context.Context, provider, id string) (domain.User, error)
+	Link(ctx context.Context, userID, provider, id string, move bool) error
+}
+
+// LinkTTL — сколько живёт ссылка «Привязать Telegram» из кабинета.
+const LinkTTL = 15 * time.Minute
+
+func NewBots(repo MessengerRepo, plans *Plans, accounts BotAccounts, baseURL string, log *zap.Logger) *Bots {
+	return &Bots{clients: map[messenger.Platform]messenger.Client{}, repo: repo, plans: plans, accounts: accounts, baseURL: strings.TrimRight(baseURL, "/"), log: log}
 }
 
 // Add подключает мессенджер; без токена бота мессенджер просто не добавляют.
@@ -67,6 +85,18 @@ func (b *Bots) All() []messenger.Client {
 		if c, ok := b.clients[p]; ok {
 			out = append(out, c)
 		}
+	}
+	return out
+}
+
+// Names — имена ботов по мессенджерам: сайт показывает по ним карточку привязки и ссылки.
+func (b *Bots) Names() map[string]string {
+	if b == nil || len(b.clients) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(b.clients))
+	for p, c := range b.clients {
+		out[string(p)] = c.Username()
 	}
 	return out
 }
@@ -102,6 +132,8 @@ func (b *Bots) Hook(ctx context.Context) {
 		if err := c.SetProfile(ctx, profiles(c)); err != nil {
 			b.log.Warn("bots: profile", zap.String("platform", string(c.Platform())), zap.Error(err))
 		}
+		// кнопка меню по умолчанию — по-русски: чат на другом языке получит свою при первом /start
+		b.menu(ctx, c, "", i18n.RU)
 	}
 }
 
@@ -139,54 +171,215 @@ func (b *Bots) PlanLinks(planID string) map[string]string {
 	return out
 }
 
-// Handle — одно обновление из мессенджера.
+// Handle — одно обновление из мессенджера. Человек заблокировал бота — не ошибка: чат отмечен,
+// писать ему больше нечего.
 func (b *Bots) Handle(ctx context.Context, u messenger.Update) error {
+	if err := b.handle(ctx, u); err != nil && !errors.Is(err, messenger.ErrBlocked) {
+		return err
+	}
+	return nil
+}
+
+func (b *Bots) handle(ctx context.Context, u messenger.Update) error {
 	c, ok := b.clients[u.Platform]
 	if !ok || u.ChatID == "" {
 		return nil
 	}
-	first := "" // язык мессенджера — только для нового чата; нажатие кнопки его обычно не сообщает
-	if l, ok := i18n.Valid(u.Lang); ok {
-		first = string(l)
-	}
-	if err := b.repo.SaveChat(ctx, string(u.Platform), u.ChatID, first); err != nil {
-		return err
-	}
-	chat, err := b.repo.Chat(ctx, string(u.Platform), u.ChatID)
+	chat, created, err := b.chat(ctx, c, u.ChatID, u.Lang)
 	if err != nil {
 		return err
 	}
 	lang := langOr(chat.Lang, i18n.RU)
+	if created || u.Start {
+		b.menu(ctx, c, u.ChatID, lang)
+	}
+	if chat.UserID == nil && u.UserID != "" {
+		// мессенджер могли привязать к аккаунту в мини-приложении: чат узнаёт аккаунт с первого сообщения
+		if usr, err := b.accounts.ByLink(ctx, string(u.Platform), u.UserID); err == nil {
+			if err := b.repo.SetUser(ctx, string(u.Platform), u.ChatID, &usr.ID); err != nil {
+				return err
+			}
+			chat.UserID = &usr.ID
+		}
+	}
 	switch {
 	case u.Callback != "":
 		return b.callback(ctx, c, u, lang)
 	case u.Start && strings.HasPrefix(u.Payload, "p"):
 		return b.connect(ctx, c, u.ChatID, strings.TrimPrefix(u.Payload, "p"), lang)
+	case u.Start && strings.HasPrefix(u.Payload, "u"):
+		return b.link(ctx, c, u, strings.TrimPrefix(u.Payload, "u"), lang)
 	default:
-		return b.latest(ctx, c, u.ChatID, lang)
+		return b.latest(ctx, c, chat, lang)
 	}
 }
 
-// latest — ответ на /list, «Начать» и любые слова: список последней подключённой недели, чтобы
-// в магазине не листать чат. Недель нет — подсказка, где взять ссылку.
-func (b *Bots) latest(ctx context.Context, c messenger.Client, chatID string, lang i18n.Lang) error {
-	ids, err := b.repo.Plans(ctx, string(c.Platform()), chatID)
+// chat заводит чат или находит его. Язык мессенджера берём только для нового чата: нажатие кнопки
+// язык обычно не сообщает, а дальше чат говорит на языке недели.
+func (b *Bots) chat(ctx context.Context, c messenger.Client, chatID, messengerLang string) (domain.MessengerChat, bool, error) {
+	first := ""
+	if l, ok := i18n.Valid(messengerLang); ok {
+		first = string(l)
+	}
+	created, err := b.repo.SaveChat(ctx, string(c.Platform()), chatID, first)
+	if err != nil {
+		return domain.MessengerChat{}, false, err
+	}
+	chat, err := b.repo.Chat(ctx, string(c.Platform()), chatID)
+	return chat, created, err
+}
+
+// menu — кнопка слева от поля ввода открывает сайт на языке чата. Не вышло — не беда: остаются
+// кнопки под списком.
+func (b *Bots) menu(ctx context.Context, c messenger.Client, chatID string, lang i18n.Lang) {
+	if err := c.SetMenu(ctx, chatID, i18n.T(lang, "page.brand"), b.appURL(lang, "/")); err != nil {
+		b.log.Warn("bots: menu", zap.String("platform", string(c.Platform())), zap.Error(err))
+	}
+}
+
+// appURL — адрес страницы сайта на языке чата: язык в префиксе, для русского — параметром,
+// иначе телефон с английским интерфейсом открыл бы русскую неделю по-английски.
+func (b *Bots) appURL(lang i18n.Lang, path string) string {
+	if lang == i18n.RU {
+		sep := "?"
+		if strings.Contains(path, "?") {
+			sep = "&"
+		}
+		return b.baseURL + path + sep + "lang=ru"
+	}
+	return b.baseURL + "/" + string(lang) + path
+}
+
+// latest — ответ на /list, «Начать» и любые слова: список последней недели, чтобы в магазине не
+// листать чат. Берём самую свежую из подключённых к чату и, если аккаунт привязан, из недель
+// аккаунта: собрал неделю на сайте — она уже в боте. Недель нет — подсказка, где взять ссылку.
+func (b *Bots) latest(ctx context.Context, c messenger.Client, chat domain.MessengerChat, lang i18n.Lang) error {
+	connected, err := b.repo.Plans(ctx, chat.Platform, chat.ChatID)
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
-		plan, err := b.plans.Get(ctx, id, lang)
+	if chat.UserID != nil {
+		if mine, err := b.plans.Mine(ctx, *chat.UserID); err == nil && len(mine) > 0 {
+			if at, err := time.Parse(time.RFC3339, mine[0].CreatedAt); err == nil {
+				connected = append(connected, domain.ChatPlan{ID: mine[0].ID, At: at})
+			}
+		}
+	}
+	sort.SliceStable(connected, func(i, j int) bool { return connected[i].At.After(connected[j].At) })
+	for _, p := range connected {
+		plan, err := b.plans.Get(ctx, p.ID, lang)
 		if errors.Is(err, domain.ErrNotFound) {
 			continue
 		}
 		if err != nil {
 			return err
 		}
-		key, _ := planKey(id)
+		key, _ := planKey(p.ID)
 		pages, checked := b.list(ctx, plan, lang)
-		return b.send(ctx, c, chatID, b.listMessage(plan, pages, checked, 0, key, lang))
+		return b.send(ctx, c, chat.ChatID, b.listMessage(plan, pages, checked, 0, key, lang))
 	}
-	return b.send(ctx, c, chatID, b.intro(c, lang))
+	return b.send(ctx, c, chat.ChatID, b.intro(c, lang))
+}
+
+// link — человек пришёл по ссылке «Привязать Telegram» из кабинета. Мессенджер привязывается к
+// аккаунту, даже если раньше был привязан к другому: человек подтвердил это, войдя на сайте.
+func (b *Bots) link(ctx context.Context, c messenger.Client, u messenger.Update, token string, lang i18n.Lang) error {
+	userID, err := b.repo.TakeLink(ctx, tokenHash(token))
+	if errors.Is(err, domain.ErrNotFound) || (err == nil && u.UserID == "") {
+		return b.send(ctx, c, u.ChatID, messenger.Message{Text: html.EscapeString(i18n.T(lang, "bot.link.expired"))})
+	}
+	if err != nil {
+		return err
+	}
+	if err := b.accounts.Link(ctx, userID, string(c.Platform()), u.UserID, true); err != nil {
+		return err
+	}
+	if err := b.repo.SetUser(ctx, string(c.Platform()), u.ChatID, &userID); err != nil {
+		return err
+	}
+	return b.send(ctx, c, u.ChatID, messenger.Message{
+		Text: html.EscapeString(i18n.T(lang, "bot.linked")),
+		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/me"), App: true}}},
+	})
+}
+
+// LinkURL — одноразовая ссылка на бота для кабинета: по ней бот привяжет мессенджер к аккаунту.
+func (b *Bots) LinkURL(ctx context.Context, platform, userID string) (string, error) {
+	c, ok := b.Client(platform)
+	if !ok {
+		return "", domain.ErrNotFound
+	}
+	raw := make([]byte, 16)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	token := base64.RawURLEncoding.EncodeToString(raw)
+	if err := b.repo.CreateLink(ctx, tokenHash(token), userID, time.Now().Add(LinkTTL)); err != nil {
+		return "", err
+	}
+	return c.StartLink("u" + token), nil
+}
+
+// Unlinked — аккаунт отвязал мессенджер: его чаты больше не знают аккаунт.
+func (b *Bots) Unlinked(ctx context.Context, platform, userID string) error {
+	if b == nil {
+		return nil
+	}
+	return b.repo.ForgetUser(ctx, platform, userID)
+}
+
+// WebApp проверяет подпись данных мини-приложения. Чужая или старая подпись — ErrUnauthorized.
+func (b *Bots) WebApp(platform, initData string) (messenger.WebAppUser, error) {
+	c, ok := b.Client(platform)
+	if !ok {
+		return messenger.WebAppUser{}, domain.ErrNotFound
+	}
+	app, ok := c.(messenger.MiniApp)
+	if !ok {
+		return messenger.WebAppUser{}, domain.ErrNotFound
+	}
+	u, err := app.VerifyInitData(initData, time.Now())
+	if err != nil {
+		return u, domain.ErrUnauthorized
+	}
+	return u, nil
+}
+
+// Known — мини-приложение узнало аккаунт: личный чат с ботом тоже его узнаёт. В Telegram id личного
+// чата совпадает с id человека; чата ещё нет — ничего не меняется.
+func (b *Bots) Known(ctx context.Context, platform, messengerUserID, userID string) error {
+	return b.repo.SetUser(ctx, platform, messengerUserID, &userID)
+}
+
+// StartPath — куда вести мини-приложение по параметру запуска: «p<неделя>» — на страницу недели.
+func (b *Bots) StartPath(param string) string {
+	if id, ok := planIDFromKey(strings.TrimPrefix(param, "p")); ok && strings.HasPrefix(param, "p") {
+		return "/plan/" + id
+	}
+	return ""
+}
+
+// SendList — «Список в Telegram» внутри мини-приложения: бот сразу присылает список в чат, по ссылке
+// уходить не нужно. Человек ещё не начинал чат с ботом — ErrBlocked, тогда сайт откроет ссылку.
+func (b *Bots) SendList(ctx context.Context, platform string, wu messenger.WebAppUser, planID string) error {
+	c, ok := b.Client(platform)
+	if !ok {
+		return domain.ErrNotFound
+	}
+	key, ok := planKey(planID)
+	if !ok {
+		return domain.ErrNotFound
+	}
+	chat, _, err := b.chat(ctx, c, wu.ID, wu.Lang)
+	if err != nil {
+		return err
+	}
+	return b.connect(ctx, c, wu.ID, key, langOr(chat.Lang, i18n.RU))
+}
+
+func tokenHash(token string) string {
+	h := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(h[:])
 }
 
 // connect подключает неделю по ссылке со страницы плана: приветствие и сразу список покупок.
@@ -209,6 +402,7 @@ func (b *Bots) connect(ctx context.Context, c messenger.Client, chatID, key stri
 		if err := b.repo.SetLang(ctx, string(c.Platform()), chatID, string(lang)); err != nil {
 			return err
 		}
+		b.menu(ctx, c, chatID, lang)
 	}
 	if err := b.repo.LinkPlan(ctx, string(c.Platform()), chatID, id); err != nil {
 		return err
@@ -216,7 +410,7 @@ func (b *Bots) connect(ctx context.Context, c messenger.Client, chatID, key stri
 	// неделю называет сам список ниже, здесь — только что произошло
 	welcome := messenger.Message{
 		Text: html.EscapeString(i18n.T(lang, "bot.connected")),
-		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.baseURL + "/plan/" + id}}},
+		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/plan/"+id), App: true}}},
 	}
 	if err := b.send(ctx, c, chatID, welcome); err != nil {
 		return err
@@ -267,7 +461,7 @@ func (b *Bots) callback(ctx context.Context, c messenger.Client, u messenger.Upd
 
 // listMessage — один отдел списка: что осталось купить, кнопка на каждый продукт, листание отделов.
 func (b *Bots) listMessage(plan planner.Plan, pages []botPage, checked map[string]bool, page int, key string, lang i18n.Lang) messenger.Message {
-	open := []messenger.Button{{Text: i18n.T(lang, "bot.open"), URL: b.baseURL + "/plan/" + plan.ID + "?mode=shop"}}
+	open := []messenger.Button{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/plan/"+plan.ID+"?mode=shop"), App: true}}
 	// какая это неделя: к списку возвращаются через несколько дней, а недель в чате бывает несколько
 	week := "<i>" + html.EscapeString(planHeading(plan, lang)) + "</i>\n"
 	if len(pages) == 0 {
@@ -332,7 +526,7 @@ func (b *Bots) intro(c messenger.Client, lang i18n.Lang) messenger.Message {
 	button := i18n.T(lang, "plan.bot."+string(c.Platform()))
 	return messenger.Message{
 		Text: html.EscapeString(i18n.T(lang, "bot.intro", button)),
-		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.build"), URL: b.baseURL + "/"}}},
+		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.build"), URL: b.appURL(lang, "/"), App: true}}},
 	}
 }
 
@@ -346,10 +540,10 @@ func (b *Bots) edit(ctx context.Context, c messenger.Client, chatID, messageID s
 }
 
 // blocked — человек заблокировал бота: отмечаем и больше не пишем, пока сам не вернётся.
+// Ошибку отдаём дальше: мини-приложению по ней понятно, что надо открыть ссылку на бота.
 func (b *Bots) blocked(ctx context.Context, c messenger.Client, chatID string, err error) error {
 	if errors.Is(err, messenger.ErrBlocked) {
 		_ = b.repo.SetBlocked(ctx, string(c.Platform()), chatID, true)
-		return nil
 	}
 	return err
 }

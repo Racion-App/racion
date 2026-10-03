@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Platform string
@@ -18,10 +19,13 @@ const (
 )
 
 // Button — кнопка под сообщением. Data — нажатие обрабатывает бот; URL — кнопка открывает ссылку.
+// App — открыть ссылку как мини-приложение внутри мессенджера, где он это умеет (Telegram);
+// в остальных это обычная ссылка.
 type Button struct {
 	Text string
 	Data string
 	URL  string
+	App  bool
 }
 
 // Message — текст в HTML (только <b> и <i>: оба мессенджера понимают их одинаково) и ряды кнопок.
@@ -34,6 +38,7 @@ type Message struct {
 type Update struct {
 	Platform  Platform
 	ChatID    string
+	UserID    string // человек в мессенджере: по нему аккаунт сайта узнаёт привязку
 	Lang      string // язык интерфейса человека, если мессенджер его сообщил
 	Start     bool   // человек нажал «Начать» или пришёл по ссылке с параметром
 	Payload   string // параметр из ссылки запуска
@@ -66,16 +71,36 @@ type Client interface {
 	SetWebhook(ctx context.Context, url string) error
 	// SetProfile — описание и команды по языкам; ключ "" — для всех остальных языков.
 	SetProfile(ctx context.Context, profiles map[string]Profile) error
+	// SetMenu — кнопка слева от поля ввода открывает сайт мини-приложением; где такой кнопки нет — ничего.
+	SetMenu(ctx context.Context, chatID, text, url string) error
 	// Parse проверяет подпись вебхука и разбирает обновление. ok=false — обновление не про нас
 	// (участник вышел из группы и т. п.): отвечаем 200 и ничего не делаем.
 	Parse(r *http.Request) (u Update, ok bool, err error)
 }
 
-// ErrBlocked — человек заблокировал бота: больше ему не пишем, пока сам не вернётся.
+// MiniApp — мессенджер открывает сайт внутри себя и подписывает данные человека (Telegram).
+type MiniApp interface {
+	VerifyInitData(raw string, now time.Time) (WebAppUser, error)
+}
+
+// WebAppUser — человек, открывший сайт мини-приложением; подпись мессенджера проверена.
+type WebAppUser struct {
+	ID         string
+	Name       string // имя и фамилия, как в мессенджере
+	Username   string
+	Lang       string
+	Photo      string
+	StartParam string // параметр из ссылки запуска мини-приложения
+}
+
+// ErrBlocked — человек заблокировал бота или ещё не начинал с ним чат: писать ему нельзя.
 var ErrBlocked = errors.New("messenger: bot blocked by user")
 
-// ErrForged — вебхук без нашей подписи.
-var ErrForged = errors.New("messenger: webhook secret mismatch")
+// ErrForged — вебхук или данные мини-приложения без нашей подписи.
+var ErrForged = errors.New("messenger: signature mismatch")
+
+// ErrExpired — данные мини-приложения подписаны давно: войти по ним нельзя.
+var ErrExpired = errors.New("messenger: init data expired")
 
 // splitStart — «/start p123» → payload «p123»; true, если это команда запуска.
 func splitStart(text string) (string, bool) {

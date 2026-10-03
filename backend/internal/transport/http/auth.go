@@ -143,7 +143,8 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	if u := currentUser(r); u != nil {
-		writeJSON(w, 200, map[string]any{"user": u, "admin": s.svc.Admin.Is(u), "perms": s.svc.Admin.Perms(u), "role": s.svc.Admin.Role(u)})
+		links, _ := s.svc.Accounts.Links(r.Context(), u.ID) // к каким сервисам привязан вход: карточка Telegram в кабинете
+		writeJSON(w, 200, map[string]any{"user": u, "admin": s.svc.Admin.Is(u), "perms": s.svc.Admin.Perms(u), "role": s.svc.Admin.Role(u), "links": links})
 		return
 	}
 	writeJSON(w, 200, map[string]any{"user": nil})

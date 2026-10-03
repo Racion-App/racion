@@ -156,7 +156,7 @@ func main() {
 	// корзина ВкусВилла одной ссылкой: их MCP открыт без ключа (см. internal/vkusvill)
 	services.Plans.SetCart(vkusvill.New(cfg.VkusvillMCP))
 	// боты в Telegram и MAX: список покупок по отделам; без токена мессенджер выключен
-	services.Bots = service.NewBots(store.Messenger, services.Plans, cfg.BaseURL, log.Named("bots"))
+	services.Bots = service.NewBots(store.Messenger, services.Plans, services.Accounts, cfg.BaseURL, log.Named("bots"))
 	if b := cfg.Bots; b.TelegramToken != "" && b.TelegramName != "" {
 		tg := messenger.NewTelegram(b.TelegramToken, b.TelegramName, botSecret(b.Secret, b.TelegramToken))
 		if b.TelegramAPI != "" {

@@ -213,6 +213,12 @@ type MessengerChat struct {
 	Blocked  bool
 }
 
+// ChatPlan — неделя, подключённая к чату бота, и когда её подключили.
+type ChatPlan struct {
+	ID string
+	At time.Time
+}
+
 type NotifyUser struct {
 	UserID   string
 	Settings NotifySettings

@@ -55,7 +55,14 @@ export const api = {
   repeatPlan: (id: string, startDate?: string) => request<Plan>(`/api/plans/${encodeURIComponent(id)}/repeat`, { method: "POST", body: JSON.stringify({ startDate: startDate ?? "" }) }),
   recipe: (id: string, country?: string) => request<Recipe>(`/api/recipes/${encodeURIComponent(id)}${country ? `?country=${encodeURIComponent(country)}` : ""}`),
   // аккаунт
-  me: () => request<{ user: User | null; admin?: boolean; perms?: string[]; role?: string }>("/api/me"),
+  me: () => request<{ user: User | null; admin?: boolean; perms?: string[]; role?: string; links?: string[] }>("/api/me"),
+  // мини-приложение в мессенджере: вход по подписи мессенджера; create — человек сам нажал «Войти»
+  webAppAuth: (platform: string, initData: string, create?: boolean, plan?: string) =>
+    request<{ status: "login" | "created" | "linked" | "other" | "guest"; user: User | null; open?: string }>(`/api/webapp/${platform}/auth`, { method: "POST", body: JSON.stringify({ initData, create: !!create, plan: plan ?? "" }) }),
+  // «Список в Telegram» внутри мини-приложения: бот присылает список прямо в чат (409 — чата с ботом ещё нет)
+  webAppList: (platform: string, initData: string, plan: string) => request<{ sent: boolean }>(`/api/webapp/${platform}/list`, { method: "POST", body: JSON.stringify({ initData, plan }) }),
+  messengerLink: (platform: string) => request<{ url: string }>(`/api/me/messengers/${platform}`, { method: "POST" }),
+  messengerUnlink: (platform: string) => request<{ ok: boolean }>(`/api/me/messengers/${platform}`, { method: "DELETE" }),
   adminRecipes: (q: string) => request<{ items: AdminRecipe[]; tags: string[] }>(`/api/admin/recipes?q=${encodeURIComponent(q)}`),
   adminRecipe: (id: string) => request<AdminRecipe>(`/api/admin/recipes/${encodeURIComponent(id)}`),
   adminSaveRecipe: (body: CatalogRecipeInput) => request<AdminRecipe>("/api/admin/recipes", { method: "POST", body: JSON.stringify(body) }),

@@ -2,14 +2,20 @@ package messenger
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 type seen struct {
@@ -154,6 +160,65 @@ func TestSetProfile(t *testing.T) {
 	}
 }
 
+// sign подписывает initData по алгоритму из документации Telegram: поля без hash по алфавиту через
+// перевод строки, ключ — HMAC-SHA256 токена бота ключом «WebAppData».
+func sign(token string, vals url.Values) string {
+	keys := make([]string, 0, len(vals))
+	for k := range vals {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var lines []string
+	for _, k := range keys {
+		lines = append(lines, k+"="+vals.Get(k))
+	}
+	key := hmac.New(sha256.New, []byte("WebAppData"))
+	key.Write([]byte(token))
+	m := hmac.New(sha256.New, key.Sum(nil))
+	m.Write([]byte(strings.Join(lines, "\n")))
+	vals.Set("hash", hex.EncodeToString(m.Sum(nil)))
+	return vals.Encode()
+}
+
+func TestVerifyInitData(t *testing.T) {
+	c := NewTelegram("123:ABC", "b", "s")
+	now := time.Unix(1_790_000_000, 0)
+	raw := sign("123:ABC", url.Values{
+		"auth_date": {fmt.Sprint(now.Unix() - 60)}, "query_id": {"AAHdF6IQ"}, "start_param": {"pabc"}, "signature": {"c2ln"},
+		"user": {`{"id":42,"first_name":"Анна","last_name":"К","username":"anna","language_code":"ru-RU","photo_url":"https://t.me/i/userpic/320/a.jpg"}`},
+	})
+	u, err := c.VerifyInitData(raw, now)
+	if err != nil || u.ID != "42" || u.Name != "Анна К" || u.Username != "anna" || u.Lang != "ru" || u.StartParam != "pabc" || u.Photo == "" {
+		t.Fatalf("%+v %v", u, err)
+	}
+	if _, err := NewTelegram("999:X", "b", "s").VerifyInitData(raw, now); !errors.Is(err, ErrForged) {
+		t.Errorf("подпись другого бота принята: %v", err)
+	}
+	if _, err := c.VerifyInitData(strings.Replace(raw, "anna", "eve", 1), now); !errors.Is(err, ErrForged) {
+		t.Errorf("подменённое поле принято: %v", err)
+	}
+	if _, err := c.VerifyInitData(raw, now.Add(25*time.Hour)); !errors.Is(err, ErrExpired) {
+		t.Errorf("вчерашние данные приняты: %v", err)
+	}
+	if _, err := c.VerifyInitData("", now); !errors.Is(err, ErrForged) {
+		t.Errorf("пустые данные: %v", err)
+	}
+}
+
+func TestTelegramAppButtonAndUser(t *testing.T) {
+	body := tgBody(Message{Text: "x", Rows: [][]Button{{{Text: "Открыть", URL: "https://racion.app/plan/1", App: true}}}})
+	b := body["reply_markup"].(map[string]any)["inline_keyboard"].([][]tgButton)[0][0]
+	if b.WebApp == nil || b.WebApp.URL != "https://racion.app/plan/1" || b.URL != "" {
+		t.Errorf("кнопка мини-приложения %+v", b)
+	}
+	c := NewTelegram("T", "b", "sec")
+	r := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"message":{"message_id":5,"chat":{"id":77,"type":"private"},"from":{"id":77,"language_code":"ru"},"text":"/start u123"}}`))
+	r.Header.Set("X-Telegram-Bot-Api-Secret-Token", "sec")
+	if u, ok, _ := c.Parse(r); !ok || u.UserID != "77" || u.Payload != "u123" {
+		t.Errorf("человек в обновлении %+v", u)
+	}
+}
+
 func TestMaxParse(t *testing.T) {
 	c := NewMax("T", "b", "sec")
 	req := func(secret, body string) *http.Request {
@@ -164,8 +229,8 @@ func TestMaxParse(t *testing.T) {
 	if _, _, err := c.Parse(req("", `{}`)); !errors.Is(err, ErrForged) {
 		t.Errorf("вебхук без подписи принят: %v", err)
 	}
-	u, ok, _ := c.Parse(req("sec", `{"update_type":"bot_started","chat_id":321,"payload":"p0123","user_locale":"ru"}`))
-	if !ok || !u.Start || u.Payload != "p0123" || u.ChatID != "321" || u.Lang != "ru" {
+	u, ok, _ := c.Parse(req("sec", `{"update_type":"bot_started","chat_id":321,"user":{"user_id":9001},"payload":"p0123","user_locale":"ru"}`))
+	if !ok || !u.Start || u.Payload != "p0123" || u.ChatID != "321" || u.Lang != "ru" || u.UserID != "9001" {
 		t.Errorf("старт %+v", u)
 	}
 	u, ok, _ = c.Parse(req("sec", `{"update_type":"message_callback","callback":{"callback_id":"c9","payload":"l:x:1"},"message":{"recipient":{"chat_id":321},"body":{"mid":"mid.7"}}}`))

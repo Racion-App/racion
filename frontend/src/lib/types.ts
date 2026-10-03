@@ -40,6 +40,7 @@ export type Meta = {
   geoRegion?: string; // регион или город Росстата по IP (только для стран с регионами)
   ai?: boolean; // помощник (нейросеть) для своих рецептов включён на сервере
   photos?: boolean; // загрузка фото включена (есть S3)
+  bots?: Partial<Record<"telegram" | "max", string>>; // имена ботов: по ним кабинет показывает привязку мессенджера
   sample?: { country: string; dishes: number; items: number; cost: number; store: string }; // неделя на двоих при стартовых ответах
 };
 

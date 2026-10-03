@@ -1966,6 +1966,20 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ds-blue-tint); color: var(--ds-blue); }
   &-text { display: grid; gap: 1px; min-width: 0; b { font-size: 15px; font-weight: 600; } small { font-size: 13px; color: var(--ds-label-secondary); } }
   &-done { color: var(--ds-green); } }
+// Карточка кабинета с пояснением в пару строк: значок слева, текст во всю ширину, действие под текстом
+// (привязка Telegram). Справа от текста кнопка зажала бы пояснение в узкую колонку.
+.rowcard { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 2px 12px;
+  &__icon { grid-row: span 3; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ds-blue-tint); color: var(--ds-blue); }
+  &__text { display: grid; gap: 2px; min-width: 0;
+    b { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; }
+    small { font-size: 13px; line-height: 1.4; color: var(--ds-label-secondary); } }
+  &__done { color: var(--ds-green); }
+  &__note { grid-column: 2; margin: 4px 0 0; font-size: 13px; color: var(--ds-orange); }
+  // у кнопки без фона текст встаёт вровень с пояснением
+  &__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+    .btn-ghost { margin-inline-start: -12px; } } }
+// Вход внутри Telegram: одна кнопка над формой, почта — запасным путём ниже
+.auth__tg { display: grid; gap: 14px; margin-bottom: 4px; .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; } }
 .install__benefits { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px;
   li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.4; svg { flex: 0 0 auto; margin-top: 2px; color: var(--ds-blue); } } }
 .install__steps { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 12px;

@@ -125,6 +125,12 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/baskets", cors(s.limited(s.lim.build, s.createBasket)))
 	mux.HandleFunc("POST /api/plans/{id}/cart", s.limited(s.lim.build, s.storeCart)) // корзина ВкусВилла ссылкой
 	mux.HandleFunc("POST /api/bots/{platform}", s.botUpdate)                         // вебхуки Telegram и MAX
+	// вход в мини-приложении — не под /api/auth/: подпись мессенджера не подобрать, а открытий много,
+	// и строгий лимит на вход по паролю задевал бы людей за одним адресом мобильного оператора
+	mux.HandleFunc("POST /api/webapp/{platform}/auth", s.limited(s.lim.write, s.webAppAuth))
+	mux.HandleFunc("POST /api/webapp/{platform}/list", s.limited(s.lim.write, s.webAppList))
+	mux.HandleFunc("POST /api/me/messengers/{platform}", s.limited(s.lim.write, s.linkMessenger))
+	mux.HandleFunc("DELETE /api/me/messengers/{platform}", s.limited(s.lim.write, s.unlinkMessenger))
 	mux.HandleFunc("GET /api/collections", cors(s.publicCollections))
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
@@ -422,6 +428,7 @@ func (s *Server) meta(w http.ResponseWriter, r *http.Request) {
 	}
 	m.AI = s.svc.AI.Enabled()
 	m.Photos = s.svc.Media.Enabled()
+	m.Bots = s.svc.Bots.Names()
 	writeJSON(w, 200, m)
 }
 

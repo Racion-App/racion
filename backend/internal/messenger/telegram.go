@@ -3,13 +3,17 @@ package messenger
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -40,9 +44,14 @@ func (c *TelegramClient) StartLink(payload string) string {
 }
 
 type tgButton struct {
-	Text string `json:"text"`
-	Data string `json:"callback_data,omitempty"`
-	URL  string `json:"url,omitempty"`
+	Text   string    `json:"text"`
+	Data   string    `json:"callback_data,omitempty"`
+	URL    string    `json:"url,omitempty"`
+	WebApp *tgWebApp `json:"web_app,omitempty"`
+}
+
+type tgWebApp struct {
+	URL string `json:"url"`
 }
 
 func tgBody(m Message) map[string]any {
@@ -50,6 +59,10 @@ func tgBody(m Message) map[string]any {
 	for _, r := range m.Rows {
 		row := make([]tgButton, 0, len(r))
 		for _, b := range r {
+			if b.App && b.URL != "" { // сайт открывается внутри Telegram; так можно только в личном чате, а бот и пишет только туда
+				row = append(row, tgButton{Text: b.Text, WebApp: &tgWebApp{URL: b.URL}})
+				continue
+			}
 			row = append(row, tgButton{Text: b.Text, Data: b.Data, URL: b.URL})
 		}
 		rows = append(rows, row)
@@ -93,6 +106,72 @@ func (c *TelegramClient) SetWebhook(ctx context.Context, hook string) error {
 		"allowed_updates": []string{"message", "callback_query"}}, nil)
 }
 
+// SetMenu — кнопка меню чата открывает сайт мини-приложением; без chatID — кнопка по умолчанию для всех чатов.
+func (c *TelegramClient) SetMenu(ctx context.Context, chatID, text, url string) error {
+	body := map[string]any{"menu_button": map[string]any{"type": "web_app", "text": text, "web_app": tgWebApp{URL: url}}}
+	if chatID != "" {
+		body["chat_id"] = chatID
+	}
+	return c.call(ctx, "setChatMenuButton", body, nil)
+}
+
+// VerifyInitData проверяет подпись данных мини-приложения: HMAC-SHA256 отсортированных полей ключом
+// HMAC-SHA256("WebAppData", токен бота). Данные старше суток не принимаем: по ним вошёл бы тот,
+// кто перехватил старую ссылку запуска.
+func (c *TelegramClient) VerifyInitData(raw string, now time.Time) (WebAppUser, error) {
+	vals, err := url.ParseQuery(raw)
+	hash := vals.Get("hash")
+	if err != nil || hash == "" {
+		return WebAppUser{}, ErrForged
+	}
+	vals.Del("hash")
+	keys := make([]string, 0, len(vals))
+	for k := range vals {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	lines := make([]string, len(keys))
+	for i, k := range keys {
+		lines[i] = k + "=" + vals.Get(k)
+	}
+	secret := hmacSHA256([]byte("WebAppData"), []byte(c.token))
+	want := hex.EncodeToString(hmacSHA256(secret, []byte(strings.Join(lines, "\n"))))
+	if !hmac.Equal([]byte(want), []byte(hash)) {
+		return WebAppUser{}, ErrForged
+	}
+	ts, _ := strconv.ParseInt(vals.Get("auth_date"), 10, 64)
+	signed := time.Unix(ts, 0)
+	if ts == 0 || now.Sub(signed) > 24*time.Hour || signed.Sub(now) > 5*time.Minute {
+		return WebAppUser{}, ErrExpired
+	}
+	var u struct {
+		ID        int64  `json:"id"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Username  string `json:"username"`
+		Lang      string `json:"language_code"`
+		Photo     string `json:"photo_url"`
+	}
+	if json.Unmarshal([]byte(vals.Get("user")), &u) != nil || u.ID == 0 {
+		return WebAppUser{}, ErrForged
+	}
+	return WebAppUser{ID: strconv.FormatInt(u.ID, 10), Name: strings.TrimSpace(u.FirstName + " " + u.LastName), Username: u.Username,
+		Lang: lang2(u.Lang), Photo: u.Photo, StartParam: vals.Get("start_param")}, nil
+}
+
+func tgID(id int64) string {
+	if id == 0 {
+		return ""
+	}
+	return strconv.FormatInt(id, 10)
+}
+
+func hmacSHA256(key, msg []byte) []byte {
+	m := hmac.New(sha256.New, key)
+	m.Write(msg)
+	return m.Sum(nil)
+}
+
 // SetProfile — описание, строка профиля и команды на каждом языке: Telegram показывает тот вариант,
 // что совпал с языком приложения у человека.
 func (c *TelegramClient) SetProfile(ctx context.Context, profiles map[string]Profile) error {
@@ -133,6 +212,7 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 				Type string `json:"type"`
 			} `json:"chat"`
 			From struct {
+				ID   int64  `json:"id"`
 				Lang string `json:"language_code"`
 			} `json:"from"`
 			Text string `json:"text"`
@@ -141,6 +221,7 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 			ID   string `json:"id"`
 			Data string `json:"data"`
 			From struct {
+				ID   int64  `json:"id"`
 				Lang string `json:"language_code"`
 			} `json:"from"`
 			Message struct {
@@ -156,10 +237,10 @@ func (c *TelegramClient) Parse(r *http.Request) (Update, bool, error) {
 	}
 	switch {
 	case in.Callback != nil:
-		return Update{Platform: Telegram, ChatID: strconv.FormatInt(in.Callback.Message.Chat.ID, 10), Lang: lang2(in.Callback.From.Lang),
+		return Update{Platform: Telegram, ChatID: strconv.FormatInt(in.Callback.Message.Chat.ID, 10), UserID: tgID(in.Callback.From.ID), Lang: lang2(in.Callback.From.Lang),
 			Callback: in.Callback.ID, Data: in.Callback.Data, MessageID: strconv.FormatInt(in.Callback.Message.MessageID, 10)}, true, nil
 	case in.Message != nil && in.Message.Chat.Type == "private": // в группах бот не отвечает на разговоры
-		u := Update{Platform: Telegram, ChatID: strconv.FormatInt(in.Message.Chat.ID, 10), Lang: lang2(in.Message.From.Lang), Text: in.Message.Text}
+		u := Update{Platform: Telegram, ChatID: strconv.FormatInt(in.Message.Chat.ID, 10), UserID: tgID(in.Message.From.ID), Lang: lang2(in.Message.From.Lang), Text: in.Message.Text}
 		u.Payload, u.Start = splitStart(in.Message.Text)
 		return u, true, nil
 	}

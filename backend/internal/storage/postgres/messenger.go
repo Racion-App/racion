@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,11 +17,38 @@ type Messenger struct{ pool *pgxpool.Pool }
 
 // SaveChat заводит чат; человек вернулся к боту — снимаем отметку о блокировке. Язык мессенджера
 // берём только для нового чата: дальше чат говорит на языке подключённой недели (SetLang).
-func (r *Messenger) SaveChat(ctx context.Context, platform, chatID, lang string) error {
-	_, err := r.pool.Exec(ctx, `INSERT INTO messenger_chats (platform, chat_id, lang) VALUES ($1, $2, $3)
-		ON CONFLICT (platform, chat_id) DO UPDATE SET lang = CASE WHEN messenger_chats.lang = '' THEN EXCLUDED.lang ELSE messenger_chats.lang END, blocked = false`,
-		platform, chatID, lang)
-	return wrap("messenger.save", err)
+// true — чат новый.
+func (r *Messenger) SaveChat(ctx context.Context, platform, chatID, lang string) (bool, error) {
+	var created bool
+	err := r.pool.QueryRow(ctx, `INSERT INTO messenger_chats (platform, chat_id, lang) VALUES ($1, $2, $3)
+		ON CONFLICT (platform, chat_id) DO UPDATE SET lang = CASE WHEN messenger_chats.lang = '' THEN EXCLUDED.lang ELSE messenger_chats.lang END, blocked = false
+		RETURNING (xmax = 0)`, platform, chatID, lang).Scan(&created)
+	return created, wrap("messenger.save", err)
+}
+
+// SetUser — аккаунт сайта, к которому привязан чат; nil — отвязан.
+func (r *Messenger) SetUser(ctx context.Context, platform, chatID string, userID *string) error {
+	_, err := r.pool.Exec(ctx, `UPDATE messenger_chats SET user_id = $3 WHERE platform = $1 AND chat_id = $2`, platform, chatID, userID)
+	return wrap("messenger.user", err)
+}
+
+// ForgetUser — аккаунт отвязал мессенджер: его чаты больше не знают аккаунт.
+func (r *Messenger) ForgetUser(ctx context.Context, platform, userID string) error {
+	_, err := r.pool.Exec(ctx, `UPDATE messenger_chats SET user_id = NULL WHERE platform = $1 AND user_id = $2`, platform, userID)
+	return wrap("messenger.forget", err)
+}
+
+// CreateLink — одноразовая ссылка привязки аккаунта; в базе только хеш токена.
+func (r *Messenger) CreateLink(ctx context.Context, tokenHash, userID string, expires time.Time) error {
+	_, err := r.pool.Exec(ctx, `INSERT INTO messenger_links (token_hash, user_id, expires_at) VALUES ($1, $2, $3)`, tokenHash, userID, expires)
+	return wrap("messenger.link_create", err)
+}
+
+// TakeLink — аккаунт по токену ссылки; токен сгорает. Просроченный или чужой — ErrNotFound.
+func (r *Messenger) TakeLink(ctx context.Context, tokenHash string) (string, error) {
+	var userID string
+	err := r.pool.QueryRow(ctx, `DELETE FROM messenger_links WHERE token_hash = $1 AND expires_at > now() RETURNING user_id::text`, tokenHash).Scan(&userID)
+	return userID, wrap("messenger.link_take", err)
 }
 
 func (r *Messenger) SetLang(ctx context.Context, platform, chatID, lang string) error {
@@ -61,21 +89,21 @@ func (r *Messenger) LinkPlan(ctx context.Context, platform, chatID, planID strin
 	return wrap("messenger.link", err)
 }
 
-// Plans — недели чата, последние подключённые первыми.
-func (r *Messenger) Plans(ctx context.Context, platform, chatID string) ([]string, error) {
-	rows, err := r.pool.Query(ctx, `SELECT plan_id::text FROM messenger_plans WHERE platform = $1 AND chat_id = $2 ORDER BY created_at DESC LIMIT 6`,
+// Plans — недели чата, последние подключённые первыми, со временем подключения.
+func (r *Messenger) Plans(ctx context.Context, platform, chatID string) ([]domain.ChatPlan, error) {
+	rows, err := r.pool.Query(ctx, `SELECT plan_id::text, created_at FROM messenger_plans WHERE platform = $1 AND chat_id = $2 ORDER BY created_at DESC LIMIT 6`,
 		platform, chatID)
 	if err != nil {
 		return nil, wrap("messenger.plans", err)
 	}
 	defer rows.Close()
-	var out []string
+	var out []domain.ChatPlan
 	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
+		var p domain.ChatPlan
+		if err := rows.Scan(&p.ID, &p.At); err != nil {
 			return nil, wrap("messenger.plans", err)
 		}
-		out = append(out, id)
+		out = append(out, p)
 	}
 	return out, wrap("messenger.plans", rows.Err())
 }

@@ -8,7 +8,8 @@ import { TopBar } from "../components/TopBar";
 import { RecipeSheet } from "../components/RecipeSheet";
 import { CartSheet } from "../components/CartSheet";
 import { flushChecks, pendingCount, queueCheck } from "../lib/offline";
-import { api } from "../lib/api";
+import { api, type ApiError } from "../lib/api";
+import { haptic, inTelegram, openInTelegram, tgInitData } from "../lib/telegram";
 import { track } from "../lib/analytics";
 import { clearDraftLimits } from "../lib/draft";
 import { PlanChat } from "../components/PlanChat";
@@ -111,12 +112,25 @@ export function Plan() {
   const toggleCheck = (itemId: string, name: string, qty: string, cost: number) => {
     const next = !checked[itemId];
     setChecked({ ...checked, [itemId]: next });
+    haptic();
     api.setCheck(id, { itemId, checked: next, name, qty, cost }).catch(() => {
       // без сети — в очередь, дошлём при появлении связи
       queueCheck({ planId: id, itemId, checked: next, name, qty, cost });
       setPending(pendingCount());
     });
     if (next) track("item_checked", { extra: itemId.startsWith("extra:") });
+  };
+
+  // Внутри Telegram список уходит прямо в чат с ботом, из приложения уходить не надо. Человек ещё не
+  // начинал чат с ботом — сервер отвечает 409, тогда открываем ссылку на бота: он подключит неделю сам.
+  const sendToChat = async (href: string) => {
+    try {
+      await api.webAppList("telegram", tgInitData(), id);
+      setToast(t("tg.sent"));
+    } catch (e) {
+      if ((e as ApiError).status === 409) openInTelegram(href);
+      else setToast((e as Error).message);
+    }
   };
 
   const addExtra = async () => {
@@ -770,7 +784,7 @@ export function Plan() {
                 const href = plan.bots?.[p];
                 if (!href) return null;
                 return (
-                  <a key={p} className="btn btn-soft btn-sm" href={href} target="_blank" rel="noopener" onClick={() => track("bot_open", { platform: p })}>
+                  <a key={p} className="btn btn-soft btn-sm" href={href} target="_blank" rel="noopener" onClick={(e) => { track("bot_open", { platform: p }); if (p === "telegram" && inTelegram()) { e.preventDefault(); void sendToChat(href); } }}>
                     {p === "telegram" ? <Send size={14} aria-hidden /> : <MessageCircle size={14} aria-hidden />} {t("plan.bot." + p)}
                   </a>
                 );

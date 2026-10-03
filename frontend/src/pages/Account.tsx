@@ -13,6 +13,8 @@ import { PhotoField } from "../components/PhotoField";
 import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
 import { InstallCard } from "../components/InstallSheet";
+import { MessengerCard } from "../components/MessengerCard";
+import { inTelegram } from "../lib/telegram";
 import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -165,7 +167,8 @@ export function Account() {
           </span>
           <div>
             <h1 className="account__title">{user.name ? t("account.hi", { name: user.name }) : t("account.title")}</h1>
-            <p className="account__email">{user.email}</p>
+            {/* у аккаунта из Telegram или VK без почты адрес служебный: человеку он ничего не скажет */}
+            {!user.email.endsWith("@login.racion.app") && <p className="account__email">{user.email}</p>}
           </div>
         </div>
         <div className="segmented segmented--4" role="tablist" aria-label={t("account.tabs")}>
@@ -509,8 +512,9 @@ export function Account() {
               <LogOut size={16} aria-hidden /> {t("account.logout")}
             </button>
           </div>
+          <MessengerCard onToast={setToast} />
           <NotifyCard onToast={setToast} />
-          <InstallCard />
+          {!inTelegram() && <InstallCard />}
         </section>
       </main>
       <SiteFooter />

@@ -1,18 +1,19 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Send } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { OAuthButtons } from "../components/OAuthButtons";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { track } from "../lib/analytics";
+import { inTelegram } from "../lib/telegram";
 import { useT } from "../i18n";
 
 export function Login() {
   const [sp] = useSearchParams();
   const nav = useNavigate();
-  const { setUser, refresh } = useAuth();
+  const { setUser, refresh, tgLogin } = useAuth();
   const planId = sp.get("plan") ?? undefined;
   const next = sp.get("next") ?? "";
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "";
@@ -26,6 +27,26 @@ export function Login() {
   const { t } = useT();
   const [error, setError] = useState<string | null>(sp.get("error") === "oauth" ? t("auth.oauth.error") : null);
   const [busy, setBusy] = useState(false);
+
+  // внутри Telegram вход в одно касание: мессенджер уже подписал, кто это
+  const tgSignIn = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await tgLogin(planId);
+      track("auth_telegram");
+      if (safeNext) {
+        window.location.assign(safeNext); // SSR-страница рецепта живёт вне React-роутера
+        return;
+      }
+      nav(planId ? `/plan/${planId}` : "/me", { replace: true });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -61,6 +82,15 @@ export function Login() {
         <div className="auth__card">
         <h1 className="auth__title">{mode === "login" ? t("auth.login") : mode === "register" ? t("auth.register") : mode === "forgot" ? t("auth.forgot.title") : t("auth.reset.title")}</h1>
         <p className="auth__lead">{mode === "login" ? t("auth.login.lead") : mode === "register" ? t("auth.register.lead") : mode === "forgot" ? t("auth.forgot.lead") : t("auth.reset.lead")}</p>
+        {/* внутри Telegram главный путь — одна кнопка, почта ниже запасным */}
+        {inTelegram() && (mode === "login" || mode === "register") && (
+          <div className="auth__tg">
+            <button type="button" className="btn btn-primary btn-lg" onClick={tgSignIn} disabled={busy} aria-busy={busy}>
+              <Send size={18} aria-hidden /> {t("tg.login")}
+            </button>
+            <div className="oauth__sep"><span>{t("tg.or")}</span></div>
+          </div>
+        )}
         {(mode === "login" || mode === "register") && <div className="segmented" role="radiogroup" aria-label={t("auth.mode")}>
           <button type="button" role="radio" aria-checked={mode === "login"} onClick={() => setMode("login")}>
             {t("auth.signin")}
@@ -110,7 +140,7 @@ export function Login() {
               <AlertCircle size={18} aria-hidden /> {error}
             </p>
           )}
-          <button type="submit" className="btn btn-primary btn-lg" disabled={busy}>
+          <button type="submit" className={inTelegram() ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg"} disabled={busy}>
             {mode === "login" ? t("auth.signin") : mode === "register" ? t("auth.create") : mode === "forgot" ? t("auth.forgot.send") : t("auth.reset.save")}
           </button>
           {mode === "login" && <button type="button" className="auth__link" onClick={() => { setMode("forgot"); setError(null); }}>{t("auth.forgot")}</button>}

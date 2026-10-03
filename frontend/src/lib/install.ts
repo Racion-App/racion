@@ -1,5 +1,6 @@
 // Установка PWA: ловим beforeinstallprompt (Chrome/Edge/Android), распознаём iOS (там только через
 // «Поделиться → На экран Домой») и уже установленное приложение (display-mode: standalone).
+import { inTelegram } from "./telegram";
 
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
@@ -82,7 +83,8 @@ const DISMISS_KEY = "racion.pwa.dismissed";
 
 // shouldSuggest — предлагать ли установку сейчас: телефон, не установлено, не отказывались последние 14 дней
 export function shouldSuggest(): boolean {
-  if (isStandalone() || !isMobile()) return false;
+  // внутри Telegram сайт уже открыт как приложение, а поставить его на экран из мессенджера нельзя
+  if (isStandalone() || !isMobile() || inTelegram()) return false;
   try {
     if (localStorage.getItem("racion.pwa.installed") === "1") return false;
     const t = Number(localStorage.getItem(DISMISS_KEY) || 0);

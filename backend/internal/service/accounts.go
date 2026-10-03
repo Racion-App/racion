@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/mail"
+	"slices"
 	"strings"
 	"time"
 
@@ -131,6 +132,88 @@ func (a *Accounts) LoginOAuth(ctx context.Context, pr OAuthProfile, claimPlan st
 	}
 	s, err := a.startSession(ctx, u.ID, claimPlan)
 	return u, s, err
+}
+
+// ExternalLogin — итог входа из мини-приложения мессенджера.
+type ExternalLogin struct {
+	Status  string // login, created, linked, other или guest — см. LoginExternal
+	User    *domain.User
+	Session *domain.Session
+}
+
+// LoginExternal — вход из мини-приложения по профилю, подпись которого мессенджер уже подтвердил.
+// Вошёл на сайте, мессенджер не привязан — привязываем к этому аккаунту (linked); привязан к другому —
+// ничего не трогаем (other). Не вошёл, привязка есть — открываем сессию (login). Привязки нет — аккаунт
+// заводим, только когда человек сам нажал «Войти» (created), иначе остаётся гостем (guest).
+func (a *Accounts) LoginExternal(ctx context.Context, pr OAuthProfile, viewer *domain.User, create bool, claimPlan string) (ExternalLogin, error) {
+	known, err := a.users.ByOAuth(ctx, pr.Provider, pr.ID)
+	found := err == nil
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return ExternalLogin{}, err
+	}
+	switch {
+	case viewer != nil && found && known.ID == viewer.ID:
+		return ExternalLogin{Status: "linked"}, nil
+	case viewer != nil && found:
+		return ExternalLogin{Status: "other"}, nil
+	case viewer != nil:
+		if err := a.users.LinkOAuth(ctx, pr.Provider, pr.ID, viewer.ID, ""); err != nil {
+			return ExternalLogin{}, err
+		}
+		return ExternalLogin{Status: "linked"}, nil
+	case found:
+		s, err := a.startSession(ctx, known.ID, claimPlan)
+		if err != nil {
+			return ExternalLogin{}, err
+		}
+		return ExternalLogin{Status: "login", User: &known, Session: &s}, nil
+	case create:
+		u, s, err := a.LoginOAuth(ctx, pr, claimPlan)
+		if err != nil {
+			return ExternalLogin{}, err
+		}
+		return ExternalLogin{Status: "created", User: &u, Session: &s}, nil
+	}
+	return ExternalLogin{Status: "guest"}, nil
+}
+
+// Link привязывает внешний аккаунт к пользователю. Если он привязан к другому аккаунту, переносим
+// только при move: человек сам подтвердил это из кабинета.
+func (a *Accounts) Link(ctx context.Context, userID, provider, id string, move bool) error {
+	known, err := a.users.ByOAuth(ctx, provider, id)
+	switch {
+	case err == nil && known.ID != userID && !move:
+		return domain.Invalid("auth.link.other")
+	case err != nil && !errors.Is(err, domain.ErrNotFound):
+		return err
+	}
+	return a.users.LinkOAuth(ctx, provider, id, userID, "")
+}
+
+// Unlink отвязывает внешний сервис. Последний способ войти в аккаунт отвязать нельзя.
+func (a *Accounts) Unlink(ctx context.Context, userID, provider string) error {
+	links, err := a.users.OAuthProviders(ctx, userID)
+	if err != nil || !slices.Contains(links, provider) {
+		return err
+	}
+	ok, err := a.users.UnlinkOAuth(ctx, userID, provider)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return domain.Invalid("auth.unlink.last")
+	}
+	return nil
+}
+
+// Links — к каким внешним сервисам привязан аккаунт.
+func (a *Accounts) Links(ctx context.Context, userID string) ([]string, error) {
+	return a.users.OAuthProviders(ctx, userID)
+}
+
+// ByLink — пользователь по привязанному внешнему аккаунту.
+func (a *Accounts) ByLink(ctx context.Context, provider, id string) (domain.User, error) {
+	return a.users.ByOAuth(ctx, provider, id)
 }
 
 // Login проверяет пароль и открывает сессию. Неверная почта и неверный пароль неразличимы.
