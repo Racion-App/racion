@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowLeft, ArrowRight, Baby, CalendarDays, Check, ChefHat, FolderOpen, Home, MapPin, Plus, RefreshCw, Search, Trash2, Unlock, User, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, Baby, CalendarDays, Check, ChefHat, ChevronRight, FolderOpen, Home, MapPin, Plus, RefreshCw, Search, Trash2, Unlock, User, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OccasionIcon } from "./Occasion";
 import { SiteFooter } from "../components/SiteFooter";
@@ -473,18 +473,6 @@ export function Quiz() {
               )}
             </div>
             )}
-            {occasions.length > 0 && !eventPreset && (
-              <div className="quiz__occ">
-                <span className="quiz__occ-label">{t("occ.pick")}</span>
-                <div className="chips">
-                  {occasions.filter((o) => !o.countries?.length || o.countries.includes(p.country)).map((o) => (
-                    <Link key={o.id} to={`/event/${o.id}`} className={"chip chip--sm" + (o.season ? " chip--season" : "")} onClick={() => track("occasion_open", { id: o.id })}>
-                      <OccasionIcon name={o.icon} size={14} /> {o.title}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </section>
         )}
 
@@ -920,6 +908,20 @@ export function Quiz() {
           )}
         </div>
       </div>
+      {/* Праздничный стол — отдельный сценарий, а не вопрос анкеты: стоит под «Дальше», чипы ведут
+          на другую страницу и помечены стрелкой, чтобы не читаться как варианты ответа. */}
+      {step === 1 && occasions.length > 0 && !eventPreset && (
+        <section className="quiz__alt" aria-label={t("occ.pick")}>
+          <h2 className="quiz__alt-title">{t("occ.pick")}</h2>
+          <div className="chips">
+            {occasions.filter((o) => !o.countries?.length || o.countries.includes(p.country)).map((o) => (
+              <Link key={o.id} to={`/event/${o.id}`} className={"chip chip--sm chip--go" + (o.season ? " chip--season" : "")} onClick={() => track("occasion_open", { id: o.id })}>
+                <OccasionIcon name={o.icon} size={14} /> {o.title} <ChevronRight size={14} aria-hidden className="chip__go" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <SiteFooter />
     </div>
   );

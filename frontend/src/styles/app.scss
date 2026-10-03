@@ -1543,11 +1543,16 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__hint { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--ds-label-tertiary); }
 }
 
-// События на первом шаге квиза: подпись и чипы; сезонные — синим
-.quiz__occ { display: grid; gap: 6px; margin: 4px 0 10px; }
-.quiz__occ-label { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); }
-.chip--season { border-color: var(--ds-blue); color: var(--ds-blue); }
+// Праздничный стол под кнопкой «Дальше» первого шага. Это другой сценарий, а не вопрос анкеты:
+// отделён линией, подписан без вопросительного знака, а чипы помечены стрелкой — они уводят на
+// страницу события. Стоя над кнопкой, они читались как ещё один вопрос, который надо ответить.
+.quiz__alt { display: grid; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ds-separator); }
+.quiz__alt-title { margin: 0; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary); }
+.chip__go { margin: 0 -2px 0 2px; color: var(--ds-label-tertiary); }
+// Сезонное событие выделено синей иконкой и весом, но не рамкой: синяя рамка у нас значит «выбрано»
+.chip--season { font-weight: 600; > svg:first-child { color: var(--ds-blue); } }
 .chip svg { vertical-align: -2px; margin-right: 4px; }
+.chip svg.chip__go { margin-right: 0; }
 .quiz__preset { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 12px; border-radius: var(--ds-radius-md); background: var(--ds-blue-tint); color: var(--ds-label-primary); font-size: 14px; svg { color: var(--ds-blue); flex: 0 0 auto; } .btn-link { margin-left: auto; padding: 2px 6px; } }
 // Страница события
 // Ограничения из анкеты на странице события: оранжевая плашка с кнопкой «снять», чтобы стол не превращался в нарезку
