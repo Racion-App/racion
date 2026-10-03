@@ -15,6 +15,7 @@ import { PlanChat } from "../components/PlanChat";
 import { IngredientPic } from "../components/IngredientPic";
 import { approx, dateShort, minutes, money, people, qty, weekRange } from "../lib/format";
 import { readJSON, writeJSON } from "../lib/storage";
+import { withNames } from "../lib/names";
 import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan as PlanT } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { useT } from "../i18n";
@@ -30,7 +31,9 @@ export function Plan() {
   const initial = (loc.state as { plan?: PlanT } | null)?.plan;
   const { t, tn, lang } = useT();
 
-  const [plan, setPlan] = useState<PlanT | null>(initial && initial.id === id ? initial : null);
+  const [rawPlan, setPlan] = useState<PlanT | null>(initial && initial.id === id ? initial : null);
+  // по ссылке сервер отдаёт план без имён едоков; автору гостевого плана подставляем их из браузера
+  const plan = useMemo(() => (rawPlan ? withNames(rawPlan) : null), [rawPlan]);
   const [error, setError] = useState<string | null>(null);
   const [storeMode, setStoreMode] = useState(false);
   const [view, setView] = useState<"all" | "adult" | "kids">("all");

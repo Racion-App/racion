@@ -28,6 +28,22 @@ type MemberView struct {
 	Slots     []string `json:"slots"`
 }
 
+// Anonymize стирает имена взрослых и детей. По ссылке план видят чужие люди, а «Маша, похудение,
+// 1600 ккал» или имя ребёнка рядом с возрастом в месяцах — уже сведения о конкретном человеке.
+// Цели, порции и возраст остаются без имён: они нужны тому, кто пойдёт в магазин по этому списку.
+func (p *Plan) Anonymize() {
+	for i := range p.Members {
+		p.Members[i].Name = ""
+	}
+	for i := range p.Params.Members {
+		p.Params.Members[i].Name = ""
+	}
+	for i := range p.Params.Kids {
+		p.Params.Kids[i].Name = ""
+	}
+	p.Family = nil
+}
+
 var appetiteMult = map[string]float64{"small": 0.85, "normal": 1, "big": 1.2}
 
 const refKcal = 2100 // ориентир для тех, у кого цели нет: только для расчёта долей

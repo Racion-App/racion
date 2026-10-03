@@ -28,8 +28,18 @@ func (s *Server) getPlan(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
-	plan.Family = s.svc.Plans.Family(r.Context(), plan.ID)
+	s.private(r, &plan)
 	writeJSON(w, 200, plan)
+}
+
+// private — имена едоков, детей и аккаунтов семьи получает только своя семья (Plans.CanSeeNames).
+// Остальным по ссылке план уходит без имён. Ответ на создание сюда не идёт: его получает сам автор.
+func (s *Server) private(r *http.Request, plan *planner.Plan) {
+	if s.svc.Plans.CanSeeNames(r.Context(), plan.ID, currentUser(r)) {
+		plan.Family = s.svc.Plans.Family(r.Context(), plan.ID)
+		return
+	}
+	plan.Anonymize()
 }
 
 func (s *Server) swap(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +55,7 @@ func (s *Server) swap(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.private(r, &plan)
 	writeJSON(w, 200, plan)
 }
 
@@ -61,6 +72,7 @@ func (s *Server) swapSide(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.private(r, &plan)
 	writeJSON(w, 200, plan)
 }
 
@@ -77,6 +89,7 @@ func (s *Server) skipDay(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.private(r, &plan)
 	writeJSON(w, 200, plan)
 }
 
@@ -94,6 +107,7 @@ func (s *Server) moveDish(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.private(r, &plan)
 	writeJSON(w, 200, plan)
 }
 
@@ -219,6 +233,7 @@ func (s *Server) planChat(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.private(r, &out.Plan) // в ответе чата план целиком, а спросить может любой вошедший по ссылке
 	writeJSON(w, 200, out)
 }
 

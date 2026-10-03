@@ -14,6 +14,7 @@ import { Welcome } from "../components/Welcome";
 import { api } from "../lib/api";
 import { track } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
+import { rememberNames } from "../lib/names";
 import { readDraft } from "../lib/draft";
 import { money, weekRange } from "../lib/format";
 import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
@@ -305,6 +306,7 @@ export function Quiz() {
     track("plan_submit", { country: p.country, store: p.store, region: p.region, adults: p.adults, kids: p.kids.length, goal: p.goal, budgetMode: p.budgetMode, budgetValue: p.budgetValue });
     try {
       const plan = await api.createPlan(p);
+      rememberNames(plan);
       track("plan_created", { id: plan.id, cost: plan.totals.cost });
       if (user) api.updateMe({ defaults: p }).catch(() => {});
       nav(`/plan/${plan.id}`, { state: { plan } });

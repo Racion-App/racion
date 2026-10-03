@@ -238,7 +238,13 @@ func (p *Plans) Repeat(ctx context.Context, id, start string, lang i18n.Lang, us
 			start = cur.AddDate(0, 0, 7).Format("2006-01-02")
 		}
 	}
-	plan, err := cat.Repeat(cat.Localize(l.Plan, lang), start)
+	src := cat.Localize(l.Plan, lang)
+	// Чужую неделю повторяют без имён: копия становится своей, и иначе повтор оказался бы способом
+	// достать имена и возраст детей из любой ссылки.
+	if !p.seesNames(ctx, id, l.ownerID, &user) {
+		src.Anonymize()
+	}
+	plan, err := cat.Repeat(src, start)
 	if err != nil {
 		return plan, domain.Invalid(err.Error())
 	}
@@ -373,6 +379,28 @@ func (p *Plans) canEdit(ctx context.Context, planID string, ownerID *string, vie
 		return true
 	}
 	return p.family != nil && p.family.Together(ctx, *ownerID, viewer.ID)
+}
+
+// CanSeeNames — имена едоков, детей и аккаунтов видит только своя семья: владелец, присоединившиеся
+// и его домашние. Гостевой план без владельца имён не отдаёт никому: менять его может любой по ссылке,
+// но ссылка уходит к чужим людям, а автор хранит имена у себя в браузере.
+func (p *Plans) CanSeeNames(ctx context.Context, planID string, viewer *domain.User) bool {
+	if viewer == nil || !IsPlanID(planID) {
+		return false
+	}
+	ownerID, err := p.plans.OwnerID(ctx, planID)
+	if err != nil {
+		return false
+	}
+	return p.seesNames(ctx, planID, ownerID, viewer)
+}
+
+// seesNames — то же, когда владелец уже известен: план загружен и второй раз в базу идти незачем.
+func (p *Plans) seesNames(ctx context.Context, planID string, ownerID *string, viewer *domain.User) bool {
+	if viewer == nil || ownerID == nil {
+		return false
+	}
+	return p.canEdit(ctx, planID, ownerID, viewer)
 }
 
 // Join добавляет пользователя в семью плана: неделя появляется в его кабинете, он может менять блюда.
