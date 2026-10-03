@@ -203,6 +203,16 @@ func DefaultNotify() NotifySettings {
 	return NotifySettings{ShopDay: 0, ShopHour: 12, Today: true, TodayHour: 8, Prep: true, PrepHour: 19, PrepDay: true, Week: true, Digest: false, Tz: 180}
 }
 
+// MessengerChat — чат с ботом в Telegram или MAX. Аккаунт необязателен: неделю подключают по ссылке.
+type MessengerChat struct {
+	Platform string
+	ChatID   string
+	UserID   *string
+	Lang     string
+	Settings NotifySettings
+	Blocked  bool
+}
+
 type NotifyUser struct {
 	UserID   string
 	Settings NotifySettings

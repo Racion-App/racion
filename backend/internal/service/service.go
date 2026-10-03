@@ -151,6 +151,7 @@ type Services struct {
 	Ads          *Ads
 	IndexNow     *IndexNow
 	APIKeys      *APIKeys
+	Bots         *Bots // nil-безопасен: без токенов ботов кнопок «список в мессенджере» нет
 }
 
 // New собирает сервисы; subscriber и baseURL нужны push-уведомлениям (VAPID и ссылки в них).

@@ -27,6 +27,7 @@ type Store struct {
 	Events         *Events
 	PlanMembers    *PlanMembers
 	Push           *Push
+	Messenger      *Messenger
 	Settings       *Settings
 	Social         *Social
 	Households     *Households
@@ -44,7 +45,7 @@ func New(pool *pgxpool.Pool) *Store {
 	return &Store{
 		Users: &Users{pool}, Resets: &Resets{pool}, Sessions: &Sessions{pool}, Plans: &Plans{pool}, Dislikes: &Dislikes{pool},
 		Checks: &Checks{pool}, Purchases: &Purchases{pool}, Extras: &Extras{pool}, UserRecipes: &UserRecipes{pool}, Events: &Events{pool},
-		PlanMembers: &PlanMembers{pool}, Push: &Push{pool}, Settings: &Settings{pool}, Social: &Social{pool}, Households: &Households{pool}, Admin: &Admin{pool}, CatalogRecipes: &CatalogRecipes{pool}, Collections: &Collections{pool}, Translations: &Translations{pool}, Partners: &Partners{pool}, Offers: &Offers{pool}, APIKeys: &APIKeys{pool},
+		PlanMembers: &PlanMembers{pool}, Push: &Push{pool}, Messenger: &Messenger{pool}, Settings: &Settings{pool}, Social: &Social{pool}, Households: &Households{pool}, Admin: &Admin{pool}, CatalogRecipes: &CatalogRecipes{pool}, Collections: &Collections{pool}, Translations: &Translations{pool}, Partners: &Partners{pool}, Offers: &Offers{pool}, APIKeys: &APIKeys{pool},
 		pool: pool,
 	}
 }

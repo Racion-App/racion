@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, ChevronDown, Clock, CopyPlus, Flame, Info, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowLeftRight, Baby, CalendarOff, CalendarPlus, Check, ChevronDown, Clock, CopyPlus, Flame, Info, MessageCircle, MoreHorizontal, Plus, Printer, RefreshCw, Refrigerator, Repeat2, RotateCcw, Send, Snowflake, ScrollText, Share2, ShoppingBasket, ShoppingCart, Sparkles, Store as StoreIcon, Target, ThumbsDown, ThumbsUp, Trash2, Unlock, UserRound, Users, WifiOff } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { InstallNudge } from "../components/InstallSheet";
 import { OfferCard, useOffer } from "../components/OfferCard";
@@ -764,6 +764,19 @@ export function Plan() {
               {plan.totals.items} {tn("items", plan.totals.items)}
             </span>
           </div>
+          {plan.bots && (plan.bots.telegram || plan.bots.max) && (
+            <div className="list__bots">
+              {(["telegram", "max"] as const).map((p) => {
+                const href = plan.bots?.[p];
+                if (!href) return null;
+                return (
+                  <a key={p} className="btn btn-soft btn-sm" href={href} target="_blank" rel="noopener" onClick={() => track("bot_open", { platform: p })}>
+                    {p === "telegram" ? <Send size={14} aria-hidden /> : <MessageCircle size={14} aria-hidden />} {t("plan.bot." + p)}
+                  </a>
+                );
+              })}
+            </div>
+          )}
           {planOffer && <OfferCard offer={planOffer} compact />}
           {plan.shopping.map((g) => (
             <div className="list__group" key={g.category}>

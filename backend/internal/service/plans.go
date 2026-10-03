@@ -99,6 +99,20 @@ func (p *Plans) Get(ctx context.Context, id string, lang i18n.Lang) (planner.Pla
 	return cat.Localize(l.Plan, lang), nil
 }
 
+// Original — план на языке, на котором его собрали. Бот пишет на языке недели, а не телефона:
+// собирали по-русски — и список нужен по-русски.
+func (p *Plans) Original(ctx context.Context, id string) (planner.Plan, i18n.Lang, error) {
+	l, cat, err := p.load(ctx, id)
+	if err != nil {
+		return l.Plan, i18n.RU, err
+	}
+	lang, ok := i18n.Valid(l.Plan.Lang)
+	if !ok {
+		lang = i18n.RU
+	}
+	return cat.Localize(l.Plan, lang), lang, nil
+}
+
 // Swap меняет блюдо в ячейке и сохраняет план. Чужой план по ссылке менять нельзя: только смотреть.
 func (p *Plans) Swap(ctx context.Context, id string, day int, slot string, lang i18n.Lang, viewer *domain.User) (planner.Plan, error) {
 	l, cat, err := p.load(ctx, id)

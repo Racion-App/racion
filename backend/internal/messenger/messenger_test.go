@@ -1,0 +1,156 @@
+package messenger
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
+
+type seen struct {
+	method, path, query, auth string
+	body                      map[string]any
+}
+
+func fake(t *testing.T, reply string, status int, got *seen) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got.method, got.path, got.query, got.auth = r.Method, r.URL.Path, r.URL.RawQuery, r.Header.Get("Authorization")
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, &got.body)
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, reply)
+	}))
+}
+
+var msg = Message{Text: "<b>Молочное</b>", Rows: [][]Button{{{Text: "Молоко", Data: "t:x:0:milk"}}, {{Text: "Открыть", URL: "https://racion.app/plan/1"}}}}
+
+func TestTelegramSend(t *testing.T) {
+	var got seen
+	s := fake(t, `{"ok":true,"result":{"message_id":42}}`, 200, &got)
+	defer s.Close()
+	c := NewTelegram("TOKEN", "@racion_bot", "sec")
+	c.base = s.URL
+	id, err := c.Send(context.Background(), "100", msg)
+	if err != nil || id != "42" {
+		t.Fatalf("id=%q err=%v", id, err)
+	}
+	if got.path != "/botTOKEN/sendMessage" || got.body["chat_id"] != "100" || got.body["parse_mode"] != "HTML" {
+		t.Errorf("запрос %s %+v", got.path, got.body)
+	}
+	kb := got.body["reply_markup"].(map[string]any)["inline_keyboard"].([]any)
+	first := kb[0].([]any)[0].(map[string]any)
+	link := kb[1].([]any)[0].(map[string]any)
+	if first["callback_data"] != "t:x:0:milk" || link["url"] != "https://racion.app/plan/1" || link["callback_data"] != nil {
+		t.Errorf("клавиатура %+v", kb)
+	}
+	if c.StartLink("pabc") != "https://t.me/racion_bot?start=pabc" {
+		t.Errorf("ссылка %s", c.StartLink("pabc"))
+	}
+}
+
+func TestTelegramErrors(t *testing.T) {
+	var got seen
+	blocked := fake(t, `{"ok":false,"error_code":403,"description":"Forbidden: bot was blocked by the user"}`, 403, &got)
+	defer blocked.Close()
+	c := NewTelegram("T", "b", "s")
+	c.base = blocked.URL
+	if _, err := c.Send(context.Background(), "1", msg); !errors.Is(err, ErrBlocked) {
+		t.Errorf("ждали ErrBlocked, получили %v", err)
+	}
+	same := fake(t, `{"ok":false,"error_code":400,"description":"Bad Request: message is not modified"}`, 400, &got)
+	defer same.Close()
+	c.base = same.URL
+	if err := c.Edit(context.Background(), "1", "2", msg); err != nil {
+		t.Errorf("повторное нажатие той же кнопки — не ошибка: %v", err)
+	}
+}
+
+func TestTelegramParse(t *testing.T) {
+	c := NewTelegram("T", "b", "sec")
+	req := func(secret, body string) *http.Request {
+		r := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+		r.Header.Set("X-Telegram-Bot-Api-Secret-Token", secret)
+		return r
+	}
+	if _, _, err := c.Parse(req("wrong", `{}`)); !errors.Is(err, ErrForged) {
+		t.Errorf("чужой вебхук принят: %v", err)
+	}
+	u, ok, err := c.Parse(req("sec", `{"message":{"message_id":5,"chat":{"id":77,"type":"private"},"from":{"language_code":"de-DE"},"text":"/start p0123"}}`))
+	if err != nil || !ok || !u.Start || u.Payload != "p0123" || u.ChatID != "77" || u.Lang != "de" {
+		t.Errorf("старт %+v ok=%v err=%v", u, ok, err)
+	}
+	if _, ok, _ := c.Parse(req("sec", `{"message":{"message_id":6,"chat":{"id":-100,"type":"group"},"text":"привет"}}`)); ok {
+		t.Error("бот отвечает на разговор в группе")
+	}
+	u, ok, _ = c.Parse(req("sec", `{"callback_query":{"id":"cb1","data":"t:x:0:milk","from":{"language_code":"ru"},"message":{"message_id":9,"chat":{"id":77}}}}`))
+	if !ok || u.Callback != "cb1" || u.Data != "t:x:0:milk" || u.MessageID != "9" || u.ChatID != "77" {
+		t.Errorf("нажатие %+v", u)
+	}
+}
+
+func TestMaxSend(t *testing.T) {
+	var got seen
+	s := fake(t, `{"message":{"body":{"mid":"mid.abc","text":"x"}}}`, 200, &got)
+	defer s.Close()
+	c := NewMax("MTOKEN", "racion", "sec")
+	c.base = s.URL
+	id, err := c.Send(context.Background(), "555", msg)
+	if err != nil || id != "mid.abc" {
+		t.Fatalf("id=%q err=%v", id, err)
+	}
+	if got.method != http.MethodPost || got.path != "/messages" || got.query != "chat_id=555" || got.auth != "MTOKEN" || got.body["format"] != "html" {
+		t.Errorf("запрос %s %s?%s auth=%q %+v", got.method, got.path, got.query, got.auth, got.body)
+	}
+	att := got.body["attachments"].([]any)[0].(map[string]any)
+	rows := att["payload"].(map[string]any)["buttons"].([]any)
+	cb := rows[0].([]any)[0].(map[string]any)
+	ln := rows[1].([]any)[0].(map[string]any)
+	if att["type"] != "inline_keyboard" || cb["type"] != "callback" || cb["payload"] != "t:x:0:milk" || ln["type"] != "link" || ln["url"] == nil {
+		t.Errorf("клавиатура %+v", att)
+	}
+	if c.StartLink("p1") != "https://max.ru/racion/start/p1" {
+		t.Errorf("ссылка %s", c.StartLink("p1"))
+	}
+	if err := c.Edit(context.Background(), "555", "mid.abc", msg); err != nil || got.method != http.MethodPut || got.query != "message_id=mid.abc" {
+		t.Errorf("правка %s ?%s err=%v", got.method, got.query, err)
+	}
+}
+
+func TestMaxParse(t *testing.T) {
+	c := NewMax("T", "b", "sec")
+	req := func(secret, body string) *http.Request {
+		r := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+		r.Header.Set("X-Max-Bot-Api-Secret", secret)
+		return r
+	}
+	if _, _, err := c.Parse(req("", `{}`)); !errors.Is(err, ErrForged) {
+		t.Errorf("вебхук без подписи принят: %v", err)
+	}
+	u, ok, _ := c.Parse(req("sec", `{"update_type":"bot_started","chat_id":321,"payload":"p0123","user_locale":"ru"}`))
+	if !ok || !u.Start || u.Payload != "p0123" || u.ChatID != "321" || u.Lang != "ru" {
+		t.Errorf("старт %+v", u)
+	}
+	u, ok, _ = c.Parse(req("sec", `{"update_type":"message_callback","callback":{"callback_id":"c9","payload":"l:x:1"},"message":{"recipient":{"chat_id":321},"body":{"mid":"mid.7"}}}`))
+	if !ok || u.Callback != "c9" || u.Data != "l:x:1" || u.MessageID != "mid.7" || u.ChatID != "321" {
+		t.Errorf("нажатие %+v", u)
+	}
+	if _, ok, _ := c.Parse(req("sec", `{"update_type":"user_added"}`)); ok {
+		t.Error("чужой тип обновления должен пропускаться")
+	}
+	u, ok, _ = c.Parse(req("sec", `{"update_type":"message_created","message":{"recipient":{"chat_id":321,"chat_type":"dialog"},"sender":{"is_bot":false},"body":{"mid":"m1","text":"/start p9"}}}`))
+	if !ok || !u.Start || u.Payload != "p9" || u.ChatID != "321" {
+		t.Errorf("сообщение в диалоге %+v", u)
+	}
+	for name, body := range map[string]string{
+		"общий чат":  `{"update_type":"message_created","message":{"recipient":{"chat_id":-7,"chat_type":"chat"},"sender":{"is_bot":false},"body":{"text":"привет"}}}`,
+		"свой ответ": `{"update_type":"message_created","message":{"recipient":{"chat_id":321,"chat_type":"dialog"},"sender":{"is_bot":true},"body":{"text":"Неделя подключена"}}}`,
+	} {
+		if _, ok, _ := c.Parse(req("sec", body)); ok {
+			t.Errorf("%s: бот ответил бы", name)
+		}
+	}
+}

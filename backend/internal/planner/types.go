@@ -411,6 +411,7 @@ type Plan struct {
 	Warnings     []string            `json:"warnings"`
 	Notes        []string            `json:"notes"`              // пояснения (дети, источник цен)
 	Family       []string            `json:"family,omitempty"`   // имена аккаунтов, присоединившихся к плану; ставит транспорт
+	Bots         map[string]string   `json:"bots,omitempty"`     // мессенджер → ссылка, по которой бот подключает неделю; ставит транспорт
 	Occasion     *OccasionInfo       `json:"occasion,omitempty"` // событие вместо недели
 	Basket       *BasketInfo         `json:"basket,omitempty"`   // стол, который человек набрал сам
 	PrepDays     []PrepDay           `json:"prepDays,omitempty"` // режим заготовок: что готовить в дни заготовок

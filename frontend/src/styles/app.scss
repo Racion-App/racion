@@ -385,6 +385,8 @@ a { text-underline-offset: 3px; }
 .list {
   padding: 8px 20px 4px;
   &__head { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 0 4px; h2 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.016em; } span { font-size: 13px; color: var(--ds-label-secondary); } }
+  // список в мессенджер: бот присылает его по отделам, отметки общие с сайтом
+  &__bots { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
   &__group { padding: 10px 0 6px; border-top: 1px solid var(--ds-fill-4); &:first-of-type { border-top: 0; } }
   &__cat { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ds-label-tertiary); margin-bottom: 4px; }
 }
@@ -526,7 +528,7 @@ a { text-underline-offset: 3px; }
 }
 
 @media print {
-  .topbar, .actionbar, .dish__swap, .tear__btn, .item__check { display: none !important; }
+  .topbar, .actionbar, .dish__swap, .tear__btn, .item__check, .list__bots { display: none !important; }
   body { background: #fff; }
   .receipt { box-shadow: none; border: 0; }
 }

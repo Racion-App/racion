@@ -40,7 +40,19 @@ type Config struct {
 	S3Secure        bool   // https к хранилищу
 	S3PublicURL     string // база публичных ссылок на фото: /media (nginx → MinIO) или адрес CDN
 	OAuth           OAuth
+	Bots            Bots
 	ShutdownTimeout time.Duration
+}
+
+// Bots — боты в Telegram и MAX: список покупок по отделам. Пустой токен выключает мессенджер.
+type Bots struct {
+	TelegramToken string // от @BotFather
+	TelegramName  string // имя бота без @: из него ссылка t.me/<имя>
+	MaxToken      string // из кабинета «MAX для бизнеса»
+	MaxName       string // ник бота: ссылка max.ru/<ник>
+	Secret        string // секрет вебхуков (A-Z, a-z, 0-9, _ и -); пусто — выводится из токена
+	TelegramAPI   string // другой адрес Bot API для локального стенда; пусто — боевой
+	MaxAPI        string
 }
 
 // OAuth — ключи входа через внешние сервисы; пустая пара выключает провайдера.
@@ -96,6 +108,12 @@ func Load() Config {
 			GoogleID: env("OAUTH_GOOGLE_ID", ""), GoogleSecret: env("OAUTH_GOOGLE_SECRET", ""),
 			GitHubID: env("OAUTH_GITHUB_ID", ""), GitHubSecret: env("OAUTH_GITHUB_SECRET", ""),
 			AppleClientID: env("OAUTH_APPLE_CLIENT_ID", ""), AppleTeamID: env("OAUTH_APPLE_TEAM_ID", ""), AppleKeyID: env("OAUTH_APPLE_KEY_ID", ""), AppleKey: env("OAUTH_APPLE_KEY", ""),
+		},
+		Bots: Bots{
+			TelegramToken: env("TELEGRAM_BOT_TOKEN", ""), TelegramName: env("TELEGRAM_BOT_NAME", ""),
+			MaxToken: env("MAX_BOT_TOKEN", ""), MaxName: env("MAX_BOT_NAME", ""),
+			Secret:      env("BOT_SECRET", ""),
+			TelegramAPI: env("TELEGRAM_API", ""), MaxAPI: env("MAX_API", ""),
 		},
 		ShutdownTimeout: 10 * time.Second,
 	}

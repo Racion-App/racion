@@ -66,6 +66,7 @@ func (s *Server) createOccasion(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.links(&plan)
 	writeJSON(w, 201, plan)
 }
 
@@ -88,5 +89,6 @@ func (s *Server) createBasket(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.links(&plan)
 	writeJSON(w, 201, plan)
 }

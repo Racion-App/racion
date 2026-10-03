@@ -1123,6 +1123,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "bots": {
+            "type": "object",
+            "description": "Links that connect this plan to the Racion bot in a messenger, keyed by messenger (telegram, max). The bot sends the shopping list by aisle; items ticked in the chat are ticked on the plan page too. Only messengers the server runs a bot for are listed.",
+            "additionalProperties": {
+              "type": "string",
+              "format": "uri"
+            }
           }
         }
       },

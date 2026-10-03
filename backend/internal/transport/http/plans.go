@@ -22,6 +22,7 @@ func (s *Server) createPlan(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.links(&plan)
 	writeJSON(w, 201, plan)
 }
 
@@ -38,11 +39,18 @@ func (s *Server) getPlan(w http.ResponseWriter, r *http.Request) {
 // private — имена едоков, детей и аккаунтов семьи получает только своя семья (Plans.CanSeeNames).
 // Остальным по ссылке план уходит без имён. Ответ на создание сюда не идёт: его получает сам автор.
 func (s *Server) private(r *http.Request, plan *planner.Plan) {
+	s.links(plan)
 	if s.svc.Plans.CanSeeNames(r.Context(), plan.ID, currentUser(r)) {
 		plan.Family = s.svc.Plans.Family(r.Context(), plan.ID)
 		return
 	}
 	plan.Anonymize()
+}
+
+// links — ссылки на ботов в мессенджерах: по ним бот подключает неделю и присылает список покупок.
+// Имён в них нет, поэтому их получает каждый, у кого есть ссылка на неделю.
+func (s *Server) links(plan *planner.Plan) {
+	plan.Bots = s.svc.Bots.PlanLinks(plan.ID)
 }
 
 func (s *Server) swap(w http.ResponseWriter, r *http.Request) {
@@ -131,6 +139,7 @@ func (s *Server) repeatPlan(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
+	s.links(&plan)
 	writeJSON(w, 201, plan)
 }
 

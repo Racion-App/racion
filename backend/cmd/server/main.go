@@ -4,6 +4,9 @@ package main
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"net"
 	"net/http"
@@ -23,6 +26,7 @@ import (
 	"racion/internal/localprices"
 	"racion/internal/logger"
 	"racion/internal/media"
+	"racion/internal/messenger"
 	"racion/internal/planner"
 	"racion/internal/rosstat"
 	"racion/internal/seed"
@@ -151,6 +155,23 @@ func main() {
 	services.Subs = service.NewSubstitutes(subsTable, services.Recipes)
 	// корзина ВкусВилла одной ссылкой: их MCP открыт без ключа (см. internal/vkusvill)
 	services.Plans.SetCart(vkusvill.New(cfg.VkusvillMCP))
+	// боты в Telegram и MAX: список покупок по отделам; без токена мессенджер выключен
+	services.Bots = service.NewBots(store.Messenger, services.Plans, cfg.BaseURL, log.Named("bots"))
+	if b := cfg.Bots; b.TelegramToken != "" && b.TelegramName != "" {
+		tg := messenger.NewTelegram(b.TelegramToken, b.TelegramName, botSecret(b.Secret, b.TelegramToken))
+		if b.TelegramAPI != "" {
+			tg.SetBase(b.TelegramAPI)
+		}
+		services.Bots.Add(tg)
+	}
+	if b := cfg.Bots; b.MaxToken != "" && b.MaxName != "" {
+		mx := messenger.NewMax(b.MaxToken, b.MaxName, botSecret(b.Secret, b.MaxToken))
+		if b.MaxAPI != "" {
+			mx.SetBase(b.MaxAPI)
+		}
+		services.Bots.Add(mx)
+	}
+	go services.Bots.Hook(ctx)
 	// Рецепты базы из админки: после правки каталог перечитывается из БД с теми же ценниками
 	reloadCatalog := func(ctx context.Context) error {
 		fresh, err := catalogRef.Load().Reload(ctx, pool)
@@ -273,6 +294,17 @@ func every(ctx context.Context, d time.Duration, fn func()) {
 			fn()
 		}
 	}
+}
+
+// botSecret — секрет вебхука бота: из BOT_SECRET или, если он пуст, из токена бота. Мессенджеры
+// принимают только A-Z, a-z, 0-9, «_» и «-», поэтому hex.
+func botSecret(secret, token string) string {
+	if secret != "" {
+		return secret
+	}
+	m := hmac.New(sha256.New, []byte(token))
+	m.Write([]byte("racion webhook"))
+	return hex.EncodeToString(m.Sum(nil))
 }
 
 func splitList(s string) []string {

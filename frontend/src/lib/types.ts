@@ -173,6 +173,7 @@ export type Plan = {
   members?: MemberView[];
   slotPortions?: Record<string, number>;
   family?: string[];
+  bots?: Partial<Record<"telegram" | "max", string>>; // ссылки на ботов: по ним неделя подключается и список приходит в чат
   occasion?: { id: string; title: string; guests: number };
   // store/storeDate/storeCoverage — цены из каталога самой сети (ВкусВилл) и доля корзины по ним
   priceSource: { name: string; period: string; weeklyDate: string; region: string; regionCode: string; coverage: number; store?: string; storeDate?: string; storeCoverage?: number };
