@@ -27,7 +27,7 @@ const ALIAS: Record<string, string> = {
 
 // Фирменный цвет для монограммы там, где свободного SVG нет (белорусские и казахстанские сети, Carrefour, Biedronka…).
 const BRAND: Record<string, string> = {
-  svetofor: "#2B2B2B", evroopt: "#E2001A", gippo: "#F39200", green: "#3AAA35", korona: "#D71920", santa: "#0066B3", dobronom: "#E30613", vitalur: "#00843D",
+  azbukavkusa: "#1E3B2F", svetofor: "#2B2B2B", evroopt: "#E2001A", gippo: "#F39200", green: "#3AAA35", korona: "#D71920", santa: "#0066B3", dobronom: "#E30613", vitalur: "#00843D",
   small: "#E4002B", galmart: "#7B2D8E", anvar: "#E31E24", arzan: "#F7A600", metro_kz: "#003D7C",
   carrefour: "#004E9F", conad: "#F7A600", alcampo: "#E30613", interspar: "#EE1C25", dirk: "#E30613", rimi_lt: "#E2001A",
   top: "#D40000", selver: "#E4002B", biedronka: "#D6001C", dino: "#E30613", albert: "#E2001A", kiwi: "#008A3F", meny: "#E4002B",
