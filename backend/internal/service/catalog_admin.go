@@ -10,6 +10,7 @@ import (
 
 	"racion/internal/domain"
 	"racion/internal/planner"
+	"racion/locales"
 )
 
 // CatalogAdmin — рецепты базы из админки: поиск, правка, новые, удаление. Правки пишутся в БД
@@ -18,6 +19,7 @@ import (
 type CatalogRecipeRepo interface {
 	Save(ctx context.Context, rc planner.Recipe, isNew bool) error
 	SoftDelete(ctx context.Context, id string) error
+	SetI18n(ctx context.Context, id, lang string, text planner.RecipeText) error
 }
 
 type CatalogAdmin struct {
@@ -90,10 +92,31 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 	if err := a.repo.Save(ctx, rc, isNew); err != nil {
 		return rc, err
 	}
+	// переводы вместе с правкой: иначе на других языках остаётся прежний рецепт
+	for lang, text := range recipeI18n(in.I18n, len(rc.Steps)) {
+		if err := a.repo.SetI18n(ctx, rc.ID, lang, text); err != nil {
+			return rc, err
+		}
+	}
 	if err := a.reload(ctx); err != nil {
 		return rc, err
 	}
 	return rc, nil
+}
+
+// recipeI18n — переводы из запроса, которые можно записать: известный язык (не русский), есть название,
+// шагов столько же, сколько в русском тексте. Остальные отбрасываются молча, как пустые шаги в validate.
+func recipeI18n(in map[string]planner.RecipeText, steps int) map[string]planner.RecipeText {
+	out := map[string]planner.RecipeText{}
+	for lang, t := range in {
+		t.Title = strings.TrimSpace(t.Title)
+		t.Description = strings.TrimSpace(t.Description)
+		if lang == "ru" || locales.All[lang] == nil || t.Title == "" || utf8.RuneCountInString(t.Title) > 120 || len(t.Steps) != steps {
+			continue
+		}
+		out[lang] = t
+	}
+	return out
 }
 
 // SetHidden — показать или спрятать рецепт базы.

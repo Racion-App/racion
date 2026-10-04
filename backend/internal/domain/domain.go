@@ -292,6 +292,9 @@ type CatalogRecipeInput struct {
 	Ingredients []planner.RecipeIngredient `json:"ingredients"`
 	Image       string                     `json:"image"`
 	Hidden      *bool                      `json:"hidden,omitempty"` // nil — не менять (новый через API: скрыт, из формы админки: виден)
+	// I18n — переводы вместе с правкой текста: язык → название, описание, шаги. Переданные языки
+	// заменяют прежние переводы; nil — переводы не трогать.
+	I18n map[string]planner.RecipeText `json:"i18n,omitempty"`
 }
 
 // Collection — папка рецептов пользователя.
