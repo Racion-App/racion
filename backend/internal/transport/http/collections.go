@@ -141,6 +141,28 @@ func (s *Server) publicCollections(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, list)
 }
 
+// featuredCollections — подборки для подвала приложения, те же, что в серверном подвале: только имя
+// и адрес. Весь список подборок весит под мегабайт, а подвалу на каждой странице нужны четыре строки.
+func (s *Server) featuredCollections(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "public, max-age=600")
+	lang := string(i18n.FromRequest(r))
+	type link struct {
+		Slug string `json:"slug"`
+		Name string `json:"name"`
+	}
+	out := []link{}
+	list := s.svc.Collections.Curated(r.Context())
+	for _, slug := range featuredSlugs {
+		for _, c := range list {
+			if c.Slug == slug && c.Public {
+				out = append(out, link{Slug: c.Slug, Name: c.Localized(lang).Name})
+				break
+			}
+		}
+	}
+	writeJSON(w, 200, out)
+}
+
 func (s *Server) adminCollections(w http.ResponseWriter, r *http.Request) {
 	if s.requirePerm(w, r, service.PermRecipes) == nil {
 		return

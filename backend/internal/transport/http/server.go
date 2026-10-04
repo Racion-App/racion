@@ -33,7 +33,7 @@ type Server struct {
 	lim       *limits
 	logs      *logger.Ring
 	oauth     *oauth.Registry
-	publicURL string // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
+	publicURL string     // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
 	pages     *pageCache // микрокэш готовых страниц каталога
 }
 
@@ -132,6 +132,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/me/messengers/{platform}", s.limited(s.lim.write, s.linkMessenger))
 	mux.HandleFunc("DELETE /api/me/messengers/{platform}", s.limited(s.lim.write, s.unlinkMessenger))
 	mux.HandleFunc("GET /api/collections", cors(s.publicCollections))
+	mux.HandleFunc("GET /api/collections/featured", s.featuredCollections) // подвал приложения: четыре подборки, а не весь список
 	mux.HandleFunc("PUT /api/me/collections/{id}/public", s.limited(s.lim.write, s.publishCollection))
 	mux.HandleFunc("GET /api/admin/collections", s.adminCollections)
 	mux.HandleFunc("POST /api/admin/collections", s.limited(s.lim.write, s.adminSaveCollection))
@@ -392,8 +393,6 @@ func (s *Server) healthz(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"ok": true, "recipes": s.visibleRecipes()})
 }
 
-// geoCountry — страна посетителя по IP (или по заголовку CF-IPCountry за Cloudflare), только если она
-// среди поддерживаемых; иначе пусто, и клиент подставит страну по языку.
 // visibleRecipes — рецепты базы без скрытых: то, что видят каталог и планировщик.
 func (s *Server) visibleRecipes() int {
 	n := 0
@@ -405,6 +404,8 @@ func (s *Server) visibleRecipes() int {
 	return n
 }
 
+// geoCountry — страна посетителя по IP (или по заголовку CF-IPCountry за Cloudflare), только если она
+// среди поддерживаемых; иначе пусто, и клиент подставит страну по языку.
 func (s *Server) geoCountry(r *http.Request) string {
 	code := r.Header.Get("CF-IPCountry")
 	if code == "" && s.geo != nil {
@@ -446,9 +447,11 @@ func (s *Server) rawGeoCountry(r *http.Request) string {
 // geoLang — язык по стране посетителя, если такой язык есть в locales/.
 func geoLang(country string) string { return i18n.LangByCountry(country) }
 
-// langHint — подсказка языка по стране посетителя (без кэша: зависит от IP).
+// langHint — подсказка языка по стране посетителя (без кэша: зависит от IP). country — сама страна,
+// любая, не только из поддерживаемых: по ней баннер cookies решает, показывать ли выбор для ЕС.
 func (s *Server) langHint(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, 200, map[string]string{"geo": geoLang(s.rawGeoCountry(r)), "accept": string(i18n.FromAccept(r.Header.Get("Accept-Language")))})
+	country := s.rawGeoCountry(r)
+	writeJSON(w, 200, map[string]string{"geo": geoLang(country), "accept": string(i18n.FromAccept(r.Header.Get("Accept-Language"))), "country": country})
 }
 
 // localesList — языки для переключателя: код, название, флаг, полнота перевода.

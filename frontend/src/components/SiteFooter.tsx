@@ -5,19 +5,17 @@ import { LangButton } from "./LangDialog";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
 
-// Подборки-вопросы в подвале каждой страницы: самые частые запросы, те же, что в серверном подвале
-const FEATURED = ["dinner-ideas", "birthday-table", "new-year-table", "kids-party"];
-
 // Подвал сайта: тот же, что у серверных страниц (layout.html «foot»), чтобы ссылки на каталог,
 // кабинет и юридические страницы были на каждом экране приложения.
 export function SiteFooter() {
   const { t, lang } = useT();
   const p = lang === "ru" ? "" : `/${lang}`;
   const [featured, setFeatured] = useState<{ slug: string; name: string }[]>([]);
+  // подборки-вопросы в подвале каждой страницы: самые частые запросы, те же, что в серверном подвале
   useEffect(() => {
     let alive = true;
-    api.publicCollections(lang)
-      .then((cs) => { if (alive) setFeatured(FEATURED.map((slug) => cs.find((c) => c.slug === slug)).filter((c): c is NonNullable<typeof c> => !!c).map((c) => ({ slug: c.slug!, name: c.name }))); })
+    api.featuredCollections(lang)
+      .then((cs) => { if (alive) setFeatured(cs); })
       .catch(() => {});
     return () => { alive = false; };
   }, [lang]);

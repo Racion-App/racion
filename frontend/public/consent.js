@@ -1,5 +1,6 @@
 // Уведомление о cookies для всех (закон о персональных данных) и выбор по аналитике для ЕС/ЕЭЗ и Британии:
-// cookie racion_analytics=1|0 на год. Счётчики (inline в HTML) не стартуют при 0. Страна — из cookie racion_country или /api/meta.
+// cookie racion_analytics=1|0 на год. Счётчики (inline в HTML) не стартуют при 0. Страна — из cookie racion_country
+// или по IP из /api/lang (маленький ответ; весь справочник /api/meta ради страны не нужен).
 (function () {
   if (document.cookie.indexOf("racion_analytics=") >= 0) return;
   var EU = "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH".split(" ");
@@ -53,7 +54,7 @@
   function country(cb) {
     var m = document.cookie.match(/(?:^|; )racion_country=([A-Z]{2})/);
     if (m) return cb(m[1]);
-    fetch("/api/meta", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (j) { cb(j.geoCountry || ""); }).catch(function () { cb(""); });
+    fetch("/api/lang", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (j) { cb(j.country || ""); }).catch(function () { cb(""); });
   }
   country(function (c) { show(EU.indexOf(c) >= 0); });
 })();

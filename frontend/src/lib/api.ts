@@ -137,6 +137,8 @@ export const api = {
   collectionToggle: (id: string, recipeId: string, on: boolean) => request<void>(`/api/me/collections/${id}/items/${encodeURIComponent(recipeId)}`, { method: on ? "PUT" : "DELETE" }),
   collectionPublish: (id: string, pub: boolean) => request<Collection>(`/api/me/collections/${id}/public`, { method: "PUT", body: JSON.stringify({ public: pub }) }),
   publicCollections: (lang: string) => request<Collection[]>(`/api/collections?lang=${encodeURIComponent(lang)}`),
+  // подвал: только подборки из серверного подвала — имя и адрес, а не весь список под мегабайт
+  featuredCollections: (lang: string) => request<{ slug: string; name: string }[]>(`/api/collections/featured?lang=${encodeURIComponent(lang)}`),
   partners: (country: string) => request<PartnerView>(`/api/partners?country=${encodeURIComponent(country)}`),
   apiKeys: () => request<ApiKey[]>("/api/me/keys"),
   apiKeyCreate: (name: string) => request<ApiKey>("/api/me/keys", { method: "POST", body: JSON.stringify({ name }) }),

@@ -86,6 +86,13 @@ export function Quiz() {
   const { t, tn, lang } = useT();
   const [sp, setSp] = useSearchParams();
   const step = Math.min(STEPS, Math.max(1, Number(sp.get("s") ?? 1) || 1));
+  // Шаг, с которого открыли страницу, появляется без анимации: первый шаг уже был в HTML (home-pages.mjs),
+  // и затухание из нуля выглядело бы миганием. Дальше переходы между шагами анимируются как обычно.
+  const still = useRef<number | null>(step);
+  useEffect(() => {
+    if (step !== still.current) still.current = null;
+  }, [step]);
+  const stepClass = "quiz__step" + (step === still.current ? " quiz__step--still" : "");
 
   const [meta, setMeta] = useState<Meta | null>(null);
   const [metaError, setMetaError] = useState<string | null>(null);
@@ -367,17 +374,24 @@ export function Quiz() {
         )}
 
         {step === 1 && (
-          <section className="quiz__step" key="s1">
+          <section className={stepClass} key="s1">
             {!eventPreset && !p.collection && (
               <div className="quiz__promise">
                 <p className="quiz__lead">{t("quiz.promise")}</p>
-                {meta?.sample && meta.sample.country === p.country && (
+                {meta?.sample && meta.sample.country === p.country ? (
                   <p className="quiz__sample">
                     {t("quiz.sample", { store: meta.sample.store })}{" "}
                     <span className="quiz__fact"><span className="num">{meta.sample.dishes}</span> {tn("dishes", meta.sample.dishes)}</span> ·{" "}
                     <span className="quiz__fact num">{approx(meta.sample.cost, country, lang)}</span> ·{" "}
                     <span className="quiz__fact"><span className="num">{meta.sample.items}</span> {tn("items", meta.sample.items)}</span>
                   </p>
+                ) : (
+                  !meta && (
+                    // пока справочник не пришёл — та же строка невидимкой: пример недели иначе раздвигал бы весь шаг
+                    <p className="quiz__sample" aria-hidden="true" style={{ visibility: "hidden" }}>
+                      {t("quiz.sample", { store: "Пятёрочка" })} <span className="quiz__fact"><span className="num">21</span> {tn("dishes", 21)}</span> · <span className="quiz__fact num">≈ 6 888 ₽</span> · <span className="quiz__fact"><span className="num">65</span> {tn("items", 65)}</span>
+                    </p>
+                  )
                 )}
                 <p className="quiz__trust">{t("quiz.trust")}</p>
               </div>
@@ -477,7 +491,7 @@ export function Quiz() {
         )}
 
         {step === 2 && (
-          <section className="quiz__step" key="s2">
+          <section className={stepClass} key="s2">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q2")}
             </h1>
@@ -590,7 +604,7 @@ export function Quiz() {
         )}
 
         {step === 3 && (
-          <section className="quiz__step" key="s3">
+          <section className={stepClass} key="s3">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q3")}
             </h1>
@@ -623,7 +637,7 @@ export function Quiz() {
         )}
 
         {step === 4 && (
-          <section className="quiz__step" key="s4">
+          <section className={stepClass} key="s4">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q4")}
             </h1>
@@ -649,7 +663,7 @@ export function Quiz() {
         )}
 
         {step === 5 && (
-          <section className="quiz__step" key="s5">
+          <section className={stepClass} key="s5">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q5")}
             </h1>
@@ -768,7 +782,7 @@ export function Quiz() {
         )}
 
         {step === 6 && (
-          <section className="quiz__step" key="s6">
+          <section className={stepClass} key="s6">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q6")}
             </h1>
@@ -820,7 +834,7 @@ export function Quiz() {
         )}
 
         {step === 7 && (
-          <section className="quiz__step" key="s7">
+          <section className={stepClass} key="s7">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
               {t("quiz.q7")}
             </h1>

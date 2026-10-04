@@ -136,6 +136,31 @@ async function loadLocales(): Promise<LocaleMeta[]> {
   }
 }
 
+// Список языков нужен и до первого кадра (warmDict), и провайдеру — запрашиваем один раз.
+let localesP: Promise<LocaleMeta[]> | null = null;
+function localesOnce(): Promise<LocaleMeta[]> {
+  localesP ??= loadLocales().catch((e: unknown) => {
+    localesP = null; // без сети попробуем снова при следующем вызове
+    throw e;
+  });
+  return localesP;
+}
+
+// warmDict — язык страницы и его словарь до первого кадра. Иначе провайдер рисует пустоту, React
+// стирает первый шаг квиза из HTML (или крутилку), и человек смотрит на белый экран, пока грузится
+// словарь. Заодно язык из адреса узнаётся сразу: без списка языков /kk при первом заходе не распознавался.
+export async function warmDict(): Promise<void> {
+  // Словарь просим сразу, не дожидаясь списка языков, — тем же адресом, что предзагружен в HTML
+  // (без версии): иначе предзагрузка пропадает, а словарь едет вторым кругом после списка.
+  const seg = location.pathname.split("/")[1] ?? "";
+  const guess = LANG_PREFIXES.includes(`/${seg}`) ? seg : getLang();
+  const early = DICTS[guess] || readCache<unknown>(CACHE + guess) ? null : loadDict(guess).catch(() => undefined);
+  await localesOnce().catch(() => []);
+  const lang = getLang();
+  if (lang === guess && early) await early;
+  else await loadDict(lang);
+}
+
 async function fetchRetry(url: string, tries = 3): Promise<Response> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -234,7 +259,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
         // первый визит: словарь текущего языка запрашиваем сразу, параллельно со списком языков —
         // это убирает один круг до первой отрисовки; при смене языка ниже он просто не пригодится
         const early = !DICTS[lang] && !readCache<unknown>(CACHE + lang) ? loadDict(lang).catch(() => ({})) : null;
-        await loadLocales();
+        await localesOnce();
         // до загрузки списка языков браузерный язык мог не распознаться (список ещё не в кэше) — проверяем ещё раз
         if (auto) {
           const nav = fromNavigator();

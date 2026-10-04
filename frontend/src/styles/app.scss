@@ -22,16 +22,19 @@
 @import "design-system/apple-utilities";
 
 // ── Шрифты: свои файлы, полная кириллица, «₽» и «≈» в обоих начертаниях ───────
+// optional, а не swap: Inter предзагружается и обычно успевает к первому кадру; не успел — заход идёт
+// системным шрифтом без подмены посреди отрисовки. Подмена переносила подсказку квиза с двух строк на три:
+// текст прыгал, а браузер считал LCP заново — уже по кадру приложения, а не по первому шагу из HTML.
 @font-face {
   font-family: "Inter";
   src: url("/fonts/InterVariable.woff2") format("woff2");
   font-weight: 400 800; // ось opsz закреплена на 14, вес 400–800: файл 75 КБ вместо 165
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
-@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
-@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: optional; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: optional; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: optional; }
 
 // ── Локальные токены поверхности ────────────────────────────────────────────
 :root {
@@ -144,6 +147,9 @@ a { text-underline-offset: 3px; }
   &__trust { margin: 0; font-size: 13px; color: var(--ds-label-tertiary); }
 }
 @keyframes step-in { from { opacity: 0; transform: translateY(6px); } }
+// первый шаг при загрузке — без анимации: он уже был в HTML; из нулевой прозрачности он бы мигнул, а браузер
+// не засчитывает в LCP текст, который в момент отрисовки прозрачен
+.quiz__step--still, #homeshell .quiz__step { animation: none; }
 
 .tiles {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
@@ -1791,6 +1797,8 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 .auth__legal { margin: 0; font-size: 12.5px; color: var(--ds-label-tertiary); a { color: var(--ds-label-secondary); } }
 
 // Экран до старта приложения: знак и кольцо по центру; кольцо появляется с задержкой, чтобы на быстрой сети не мигать
+// главная показывает первый шаг квиза прямо в HTML (scripts/home-pages.mjs) — тогда крутилка не нужна
+#homeshell ~ .boot { display: none; }
 .boot { min-height: 70dvh; display: grid; place-items: center; align-content: center; gap: 18px;
   &__mark { border-radius: 11px; box-shadow: var(--ds-shadow-lg); }
   &__spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--ds-fill-3); border-top-color: var(--ds-blue); opacity: 0;
