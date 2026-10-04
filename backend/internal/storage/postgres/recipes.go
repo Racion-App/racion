@@ -71,6 +71,12 @@ func (r *CatalogRecipes) SetI18n(ctx context.Context, id, lang string, text plan
 	return wrap("recipes.i18n", err)
 }
 
+// ClearI18n — стереть переводы рецепта базы: текст переписан, а очередь переводов заполнит их заново.
+func (r *CatalogRecipes) ClearI18n(ctx context.Context, id string) error {
+	_, err := r.pool.Exec(ctx, `UPDATE recipes SET i18n = '{}'::jsonb WHERE id = $1`, id)
+	return wrap("recipes.i18n", err)
+}
+
 // ClearI18n — стереть переводы (текст рецепта изменился).
 func (r *UserRecipes) ClearI18n(ctx context.Context, id string) error {
 	_, err := r.pool.Exec(ctx, `UPDATE user_recipes SET i18n = '{}'::jsonb WHERE id = $1`, id)

@@ -20,6 +20,7 @@ type CatalogRecipeRepo interface {
 	Save(ctx context.Context, rc planner.Recipe, isNew bool) error
 	SoftDelete(ctx context.Context, id string) error
 	SetI18n(ctx context.Context, id, lang string, text planner.RecipeText) error
+	ClearI18n(ctx context.Context, id string) error
 }
 
 type CatalogAdmin struct {
@@ -91,6 +92,12 @@ func (a *CatalogAdmin) Save(ctx context.Context, in domain.CatalogRecipeInput) (
 	}
 	if err := a.repo.Save(ctx, rc, isNew); err != nil {
 		return rc, err
+	}
+	// пустой i18n — текст переписан, старые переводы стираются, их заново сделает очередь переводов
+	if in.I18n != nil && len(in.I18n) == 0 && !isNew {
+		if err := a.repo.ClearI18n(ctx, rc.ID); err != nil {
+			return rc, err
+		}
 	}
 	// переводы вместе с правкой: иначе на других языках остаётся прежний рецепт
 	for lang, text := range recipeI18n(in.I18n, len(rc.Steps)) {
