@@ -467,13 +467,14 @@ func BudgetPresetsFor(l i18n.Lang, c Country) []BudgetPreset {
 	return out
 }
 
-// NotesFor — заметки на языке с запасом en → ru (как Text).
+// NotesFor — заметки на языке страницы, запас — английские. Русские только на русской странице: советы
+// не текст рецепта, без них страница цела, а русский абзац под английскими заголовками выглядит поломкой.
 func (r Recipe) NotesFor(l i18n.Lang) Notes {
 	if n, ok := r.Notes[string(l)]; ok && !n.Empty() {
 		return n
 	}
-	for _, fb := range []string{"en", "ru"} {
-		if n, ok := r.Notes[fb]; ok && !n.Empty() {
+	if l != "ru" {
+		if n, ok := r.Notes["en"]; ok && !n.Empty() {
 			return n
 		}
 	}
