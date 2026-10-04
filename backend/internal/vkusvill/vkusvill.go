@@ -68,6 +68,68 @@ func (c *Client) CartLink(ctx context.Context, items []CartItem) (string, error)
 	return out.Data.Link, nil
 }
 
+// ErrNotFound — товара больше нет в каталоге сети.
+var ErrNotFound = errors.New("vkusvill: товар не найден")
+
+// Product — товар каталога: обычная цена, единица продажи, вес упаковки.
+type Product struct {
+	XMLID  int
+	Name   string
+	URL    string
+	Unit   string  // «шт» — упаковка, «кг» — на развес
+	Weight float64 // вес упаковки в кг; 0 — не указан
+	Price  float64 // обычная цена, без скидки по карте: неделю считаем по ней
+}
+
+// Product — товар по номеру; у ВкусВилла id каталога совпадает с xml_id корзины. Снятый с продажи
+// товар их сервер отдаёт обычным ответом с ok=false и http_status 404 — это ErrNotFound, а не сбой.
+func (c *Client) Product(ctx context.Context, id int) (Product, error) {
+	var out struct {
+		OK   bool `json:"ok"`
+		Data struct {
+			XMLID int    `json:"xml_id"`
+			Name  string `json:"name"`
+			URL   string `json:"url"`
+			Unit  string `json:"unit"`
+			Price struct {
+				Current float64  `json:"current"`
+				Old     *float64 `json:"old"` // при акции здесь обычная цена, а в current — со скидкой
+			} `json:"price"`
+			Weight struct {
+				Value float64 `json:"value"`
+				Unit  string  `json:"unit"`
+			} `json:"weight"`
+		} `json:"data"`
+		Error *struct {
+			Message string `json:"message"`
+			Status  int    `json:"http_status"`
+		} `json:"error"`
+	}
+	if err := c.call(ctx, "vkusvill_product_details", map[string]any{"id": id}, &out); err != nil {
+		return Product{}, err
+	}
+	if !out.OK {
+		if out.Error != nil && out.Error.Status == http.StatusNotFound {
+			return Product{}, ErrNotFound
+		}
+		msg := "нет товара в ответе"
+		if out.Error != nil {
+			msg = out.Error.Message
+		}
+		return Product{}, fmt.Errorf("vkusvill: %s", msg)
+	}
+	d := out.Data
+	price := d.Price.Current
+	if d.Price.Old != nil && *d.Price.Old > 0 {
+		price = *d.Price.Old
+	}
+	weight := d.Weight.Value
+	if d.Weight.Unit != "" && d.Weight.Unit != "кг" { // граммы бывают у мелочи: приводим к килограммам
+		weight /= 1000
+	}
+	return Product{XMLID: d.XMLID, Name: strings.ReplaceAll(d.Name, "&nbsp;", " "), URL: d.URL, Unit: d.Unit, Weight: weight, Price: price}, nil
+}
+
 // call — tools/call по JSON-RPC. Их защита отбивает запросы без внятного User-Agent, поэтому
 // представляемся явно; ответ бывает и обычным JSON, и потоком событий с одной строкой data.
 func (c *Client) call(ctx context.Context, tool string, args any, dst any) error {

@@ -154,7 +154,31 @@ func main() {
 	}
 	services.Subs = service.NewSubstitutes(subsTable, services.Recipes)
 	// корзина ВкусВилла одной ссылкой: их MCP открыт без ключа (см. internal/vkusvill)
-	services.Plans.SetCart(vkusvill.New(cfg.VkusvillMCP))
+	vv := vkusvill.New(cfg.VkusvillMCP)
+	services.Plans.SetCart(vv)
+	// цены ВкусВилла: сопоставление из данных проекта, цена и вес каждого товара — сверка раз в сутки
+	units := make(map[string]string, len(catalog.Ingredients))
+	for id, ing := range catalog.Ingredients {
+		units[id] = ing.Unit
+	}
+	for _, sp := range seed.StorePrices() {
+		if sp.Store != "vkusvill" {
+			continue
+		}
+		prices := service.NewStorePrices(store.StorePrices, vv, sp, units, catalog.SetStorePrices, log.Named("storeprices"))
+		if err := prices.Load(ctx); err != nil {
+			log.Warn("store prices load", zap.Error(err))
+		}
+		go every(ctx, 6*time.Hour, func() {
+			sctx, cancel := context.WithTimeout(ctx, 30*time.Minute)
+			defer cancel()
+			if n, err := prices.Refresh(sctx); err != nil {
+				log.Warn("store prices refresh", zap.Error(err))
+			} else if n > 0 {
+				log.Info("store prices checked", zap.String("store", sp.Store), zap.Int("products", n))
+			}
+		})
+	}
 	// боты в Telegram и MAX: список покупок по отделам; без токена мессенджер выключен
 	services.Bots = service.NewBots(service.BotDeps{Repo: store.Messenger, Plans: services.Plans, Accounts: services.Accounts, Taste: services.Social, Journal: store.Push},
 		cfg.BaseURL, log.Named("bots"))

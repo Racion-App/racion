@@ -213,6 +213,18 @@ type MessengerChat struct {
 	Blocked  bool
 }
 
+// StorePrice — товар сети по последней сверке с её каталогом.
+type StorePrice struct {
+	XMLID     int
+	Name      string
+	URL       string
+	Unit      string  // «шт» или «кг»
+	Weight    float64 // вес упаковки, кг
+	Price     float64 // обычная цена
+	Found     bool    // false — снят с продажи
+	CheckedAt time.Time
+}
+
 // ChatPlan — неделя, подключённая к чату бота, и когда её подключили.
 type ChatPlan struct {
 	ID string
