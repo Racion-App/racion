@@ -280,6 +280,7 @@
   "api.offline": "无法连接到服务器。请检查网络并重试。",
   "api.server": "服务器没有响应。请稍后再试",
   "api.toomany": "请求过多，请一分钟后再试",
+  "api.quota": "第三方应用的API限制：同一地址每小时{hour}次请求，每天{day}次请求。如需更多，请发邮件至info@racion.app",
   "app.reset": "更新",
   "app.version": "版本 {v}",
   "appetite.big": "大",

@@ -35,6 +35,7 @@ type Server struct {
 	oauth     *oauth.Registry
 	publicURL string     // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
 	pages     *pageCache // микрокэш готовых страниц каталога
+	quota     APIQuota   // квота стороннего API (quota.go)
 }
 
 // Deps — всё, что нужно транспорту от приложения.
@@ -50,6 +51,7 @@ type Deps struct {
 	Images   string          // каталог с фото блюд (том фронтенда) для карточек превью
 	Logs     *logger.Ring    // последние записи лога для админки
 	OAuth    *oauth.Registry
+	Quota    APIQuota // квота стороннего API; nil — без квоты (тесты)
 }
 
 func New(d Deps) http.Handler {
@@ -72,13 +74,14 @@ func New(d Deps) http.Handler {
 		}
 		return out
 	}
-	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache()}
+	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache(), quota: d.Quota}
 	mux := http.NewServeMux()
 	// Публичные методы, описанные в openapi.json, вызываются в том числе из браузера: без CORS
 	// стороннее приложение до них не достучится. Куки при этом не передаются — доступ анонимный.
 	cors := func(h http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Expose-Headers", quotaHeaders)
 			w.Header().Set("Vary", "Origin")
 			if r.Method == http.MethodOptions {
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")

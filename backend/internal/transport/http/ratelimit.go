@@ -105,9 +105,14 @@ func (s *Server) unlimited(r *http.Request) bool {
 // а чужие запросы туда отсекает секрет в заголовке.
 func (s *Server) withLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") && !strings.HasPrefix(r.URL.Path, "/api/bots/") && !s.unlimited(r) && !s.lim.api.allow(geo.ClientIP(r)) {
-			tooMany(w, r)
-			return
+		if strings.HasPrefix(r.URL.Path, "/api/") && !strings.HasPrefix(r.URL.Path, "/api/bots/") && !s.unlimited(r) {
+			if !s.lim.api.allow(geo.ClientIP(r)) {
+				tooMany(w, r)
+				return
+			}
+			if s.overQuota(w, r) {
+				return
+			}
 		}
 		next.ServeHTTP(w, r)
 	})

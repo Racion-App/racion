@@ -293,6 +293,7 @@
   "api.offline": "Nie można nawiązać połączenia z serwerem. Sprawdź połączenie i spróbuj ponownie.",
   "api.server": "Serwer nie odpowiada. Spróbuj ponownie za minutę.",
   "api.toomany": "Zbyt dużo zapytań, spróbuj ponownie za minutę.",
+  "api.quota": "Limit API dla aplikacji zewnętrznych: {hour} zapytań na godzinę i {day} na dobę z jednego adresu. Jeśli potrzebujesz więcej, napisz na info@racion.app.",
   "app.reset": "Odśwież",
   "app.version": "Wersja {v}",
   "appetite.big": "Duży",

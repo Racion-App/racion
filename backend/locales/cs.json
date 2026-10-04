@@ -293,6 +293,7 @@
   "api.offline": "Nelze se připojit k serveru. Zkontrolujte spojení a zkuste to znovu.",
   "api.server": "Server neodpověděl. Zkuste to za minutu.",
   "api.toomany": "Příliš mnoho požadavků, zkuste to za minutu.",
+  "api.quota": "Limit API pro aplikace třetích stran: {hour} požadavků za hodinu a {day} za den z jedné adresy. Pokud potřebujete více, napište na info@racion.app.",
   "app.reset": "Aktualizovat",
   "app.version": "Verze {v}",
   "appetite.big": "Velký",

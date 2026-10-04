@@ -280,6 +280,7 @@
   "api.offline": "No se puede contactar con el servidor. Verifica tu conexión e inténtalo de nuevo.",
   "api.server": "El servidor no respondió. Inténtalo de nuevo en un minuto.",
   "api.toomany": "Demasiadas solicitudes, intenta nuevamente en un minuto.",
+  "api.quota": "Límite de la API para aplicaciones de terceros: {hour} solicitudes por hora y {day} por día desde una misma dirección. Si necesitas más, escribe a info@racion.app.",
   "app.reset": "Actualizar",
   "app.version": "Versión {v}",
   "appetite.big": "Grande",

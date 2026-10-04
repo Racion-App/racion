@@ -29,6 +29,7 @@ type Store struct {
 	Push           *Push
 	Messenger      *Messenger
 	StorePrices    *StorePrices
+	APIUsage       *APIUsage
 	Settings       *Settings
 	Social         *Social
 	Households     *Households
@@ -46,7 +47,7 @@ func New(pool *pgxpool.Pool) *Store {
 	return &Store{
 		Users: &Users{pool}, Resets: &Resets{pool}, Sessions: &Sessions{pool}, Plans: &Plans{pool}, Dislikes: &Dislikes{pool},
 		Checks: &Checks{pool}, Purchases: &Purchases{pool}, Extras: &Extras{pool}, UserRecipes: &UserRecipes{pool}, Events: &Events{pool},
-		PlanMembers: &PlanMembers{pool}, Push: &Push{pool}, Messenger: &Messenger{pool}, StorePrices: &StorePrices{pool}, Settings: &Settings{pool}, Social: &Social{pool}, Households: &Households{pool}, Admin: &Admin{pool}, CatalogRecipes: &CatalogRecipes{pool}, Collections: &Collections{pool}, Translations: &Translations{pool}, Partners: &Partners{pool}, Offers: &Offers{pool}, APIKeys: &APIKeys{pool},
+		PlanMembers: &PlanMembers{pool}, Push: &Push{pool}, Messenger: &Messenger{pool}, StorePrices: &StorePrices{pool}, APIUsage: &APIUsage{pool}, Settings: &Settings{pool}, Social: &Social{pool}, Households: &Households{pool}, Admin: &Admin{pool}, CatalogRecipes: &CatalogRecipes{pool}, Collections: &Collections{pool}, Translations: &Translations{pool}, Partners: &Partners{pool}, Offers: &Offers{pool}, APIKeys: &APIKeys{pool},
 		pool: pool,
 	}
 }
@@ -64,6 +65,11 @@ func (s *Store) Cleanup(ctx context.Context, keepEvents time.Duration) (int64, e
 	tag, err = s.pool.Exec(ctx, `DELETE FROM messenger_links WHERE expires_at < now()`)
 	if err != nil {
 		return total, wrap("cleanup.links", err)
+	}
+	total += tag.RowsAffected()
+	tag, err = s.pool.Exec(ctx, `DELETE FROM api_usage WHERE bucket < now() - interval '2 days'`)
+	if err != nil {
+		return total, wrap("cleanup.api_usage", err)
 	}
 	total += tag.RowsAffected()
 	tag, err = s.pool.Exec(ctx, `DELETE FROM events WHERE ts < now() - make_interval(days => $1)`, int(keepEvents.Hours()/24))

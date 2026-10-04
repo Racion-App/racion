@@ -279,6 +279,7 @@
   "api.offline": "Kan geen verbinding maken met de server. Controleer je verbinding en probeer het opnieuw.",
   "api.server": "De server reageerde niet. Probeer het over een minuut opnieuw.",
   "api.toomany": "Te veel verzoeken, probeer het over een minuut opnieuw.",
+  "api.quota": "API-limiet voor apps van derden: {hour} verzoeken per uur en {day} per dag vanaf één adres. Heb je meer nodig, schrijf dan naar info@racion.app.",
   "app.reset": "Bijwerken",
   "app.version": "Versie {v}",
   "appetite.big": "Groot",

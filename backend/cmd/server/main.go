@@ -297,7 +297,7 @@ func main() {
 			OAuth:   oauthReg,
 			BaseURL: cfg.BaseURL,
 			Metrika: cfg.MetrikaID, Contact: cfg.LegalEmail, Images: cfg.ImagesDir,
-			Logs: ring,
+			Logs: ring, Quota: store.APIUsage,
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,

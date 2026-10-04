@@ -210,6 +210,7 @@
   "api.offline": "Can't reach the server. Check your connection and try again.",
   "api.server": "The server didn't respond. Try again in a minute.",
   "api.toomany": "Too many requests, try again in a minute.",
+  "api.quota": "The API limit for third-party apps is {hour} requests an hour and {day} a day per address. If you need more, write to info@racion.app.",
   "appetite.big": "Big",
   "appetite.normal": "Normal",
   "appetite.small": "Small",

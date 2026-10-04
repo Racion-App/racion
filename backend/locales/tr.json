@@ -279,6 +279,7 @@
   "api.offline": "Sunucuya ulaşılamıyor. Bağlantınızı kontrol edin ve yeniden deneyin.",
   "api.server": "Sunucu yanıt vermedi. Bir dakika sonra yeniden deneyin.",
   "api.toomany": "Çok fazla istek var, bir dakika sonra yeniden deneyin.",
+  "api.quota": "Üçüncü taraf uygulamalar için API sınırı: tek bir adresten saatte {hour} istek ve günde {day} istek. Daha fazlasına ihtiyacınız varsa info@racion.app adresine yazın.",
   "app.reset": "Güncelle",
   "app.version": "Sürüm {v}",
   "appetite.big": "Büyük",

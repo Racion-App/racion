@@ -279,6 +279,7 @@
   "api.offline": "Impossibile raggiungere il server. Controlla la connessione e riprova.",
   "api.server": "Il server non ha risposto. Riprova tra un minuto.",
   "api.toomany": "Troppi richieste, riprova tra un minuto.",
+  "api.quota": "Limite dell'API per le app di terze parti: {hour} richieste all'ora e {day} al giorno da un solo indirizzo. Se ti serve di più, scrivi a info@racion.app.",
   "app.reset": "Aggiorna",
   "app.version": "Versione {v}",
   "appetite.big": "Grande",
