@@ -12,7 +12,7 @@ import { EquipmentIcon } from "../components/EquipmentIcon";
 import { ReceiptLoader } from "../components/ReceiptLoader";
 import { Welcome } from "../components/Welcome";
 import { api } from "../lib/api";
-import { track } from "../lib/analytics";
+import { track, goal } from "../lib/analytics";
 import { writeJSON } from "../lib/storage";
 import { rememberNames } from "../lib/names";
 import { readDraft } from "../lib/draft";
@@ -243,6 +243,7 @@ export function Quiz() {
 
   useEffect(() => {
     track("quiz_step", { step });
+    goal(`quiz_step_${step}`);
     titleRef.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0 });
   }, [step]);
