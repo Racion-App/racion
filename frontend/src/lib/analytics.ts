@@ -39,8 +39,42 @@ export function track(name: string, props?: Record<string, unknown>) {
     if (timer) window.clearTimeout(timer);
     timer = window.setTimeout(() => flush(), 1500);
   }
-  const w = window as unknown as { ym?: (id: number, method: string, ...args: unknown[]) => void };
-  if (METRIKA_ID && w.ym) w.ym(Number(METRIKA_ID), "reachGoal", name, props);
+  metrika("reachGoal", name, props);
+}
+
+// Счётчик Метрики стартует после первого касания или через 5 секунд (index.html): до этого window.ym нет.
+// Цели и просмотры этого времени ждут его в очереди, а не теряются; через минуту без счётчика
+// (отказ от аналитики, не racion.app) очередь выбрасывается.
+type Ym = (id: number, method: string, ...args: unknown[]) => void;
+const pendingYm: unknown[][] = [];
+let ymWait = 0;
+function metrika(method: string, ...args: unknown[]) {
+  if (!METRIKA_ID) return;
+  const ym = (window as unknown as { ym?: Ym }).ym;
+  if (ym) {
+    ym(Number(METRIKA_ID), method, ...args);
+    return;
+  }
+  if (pendingYm.length < 50) pendingYm.push([method, ...args]);
+  if (ymWait) return;
+  const t0 = Date.now();
+  const tick = () => {
+    const f = (window as unknown as { ym?: Ym }).ym;
+    if (f) {
+      ymWait = 0;
+      const items = pendingYm.splice(0);
+      // текущую страницу счётчик посчитал сам при запуске — последний переход на неё второй раз не шлём
+      const last = items.map((x) => x[0]).lastIndexOf("hit");
+      items.forEach(([m, ...a], i) => {
+        if (!(i === last && a[0] === location.href)) f(Number(METRIKA_ID), m as string, ...a);
+      });
+    } else if (Date.now() - t0 < 60_000) ymWait = window.setTimeout(tick, 1000);
+    else {
+      ymWait = 0;
+      pendingYm.length = 0;
+    }
+  };
+  ymWait = window.setTimeout(tick, 1000);
 }
 
 // Ошибки браузера уходят в аналитику как js_error: их видно в админке. Стек режем, чтобы влезть в лимит события.
@@ -62,17 +96,16 @@ export function initAnalytics() {
     if (document.visibilityState === "hidden") flush(true);
   });
   if (!METRIKA_ID) return;
-  // сам счётчик — inline в index.html (так его видит проверка Метрики и он стартует до загрузки приложения);
-  // здесь только просмотры при переходах внутри приложения: они идут через pushState, Метрика сама их не видит
-  const w = window as unknown as Record<string, unknown>;
-  if (!w.ym) return;
+  // сам счётчик — inline в index.html (так его видит проверка Метрики); здесь просмотры при переходах внутри
+  // приложения: они идут через pushState, и Метрика сама их не видит. Раньше перехват ставился, только если
+  // счётчик уже загружен, а он грузится позже, — шаги квиза и страница недели в Метрику почти не попадали.
   const push = history.pushState.bind(history);
   history.pushState = (...args: Parameters<History["pushState"]>) => {
     push(...args);
     try {
-      (w.ym as (id: number, m: string, u: string) => void)(Number(METRIKA_ID), "hit", location.href);
+      metrika("hit", location.href);
     } catch {
-      /* счётчик ещё не загрузился */
+      /* счётчик сломался — переход важнее */
     }
   };
 }
