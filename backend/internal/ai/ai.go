@@ -154,7 +154,7 @@ const translateSystem = `You are a professional UI and cookbook translator. Tran
 Input is a JSON object: key → {"ru": Russian original, "en": English translation}. Translate the meaning of the Russian original; use the English as a hint for terms.
 Rules: keep keys unchanged; keep placeholders like {n}, {name}, {kcal}, {0} exactly as they are; keep units, numbers and punctuation such as "≈", "·", "—";
 be natural and concise, as a native product writer would; keep "Racion" as the product name (transliterate only if the script differs);
-keys ending in .one/.few/.many are plural forms of one word for 1 / 2–4 / 5+ items: give the correct form for %s, and if the language does not inflect, repeat the same form.
+keys ending in .one/.few/.many are the forms of one word right after a number: 1 / 2–4 / 5+ items (e.g. 21, 65); give the form %s uses after a numeral, and where it keeps the noun singular after numbers (Turkish, Kazakh), repeat the singular.
 Answer with JSON: {"translations": {key: translated string}} — every value is a plain string in the target language (never an object), exactly the same keys.`
 
 // TranslateStrings переводит словарь порциями по 25 ключей, по 5 порций параллельно.
