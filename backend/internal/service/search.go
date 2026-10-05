@@ -248,6 +248,7 @@ var CatalogFilters = []FilterGroup{
 	{"price", []string{"1", "2", "3"}, false},
 	{"pmin", nil, false}, // нижняя граница цены порции с ползунка; вариантов нет — только число
 	{"eq", []string{"stove", "nooven", "nocook", "oven", "airfryer", "multicooker", "steamer", "microwave", "grill"}, false},
+	{"have", nil, true}, // «есть дома»: id продуктов, вариантов нет — их собирает ResolveHave
 }
 
 var mainCategories = map[string][]string{
@@ -293,6 +294,11 @@ func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Cou
 	}
 	if !f.Has("tag", "kidmenu") && HasTag(r, "kidmenu") {
 		return false
+	}
+	if v := f["have"]; len(v) > 0 {
+		if used, _, _ := c.HaveMatch(r, v); used == 0 {
+			return false
+		}
 	}
 	if v := f["main"]; len(v) > 0 && len(r.Ingredients) > 0 {
 		main := c.catalog.Load().Ingredients[r.Ingredients[0].IngredientID]
@@ -389,4 +395,149 @@ func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Cou
 		}
 	}
 	return true
+}
+
+// haveFamilies — варианты одного продукта для «есть дома»: есть любая часть курицы — подходят рецепты с
+// любой частью, есть сметана 20% — подходят и со сметаной 15%. Разные продукты не смешиваем: говяжий фарш
+// не куриный, зелёный лук не репчатый.
+var haveFamilies = [][]string{
+	{"chicken_breast", "chicken_thigh", "chicken_drumstick", "chicken_whole", "chicken_legs", "chicken_wings"},
+	{"ground_chicken", "chicken_mince_breast"},
+	{"ground_beef", "beef_ground_lean"},
+	{"sour_cream", "sour_cream_20", "sour_cream_25"},
+	{"milk", "milk_32"},
+	{"kefir", "kefir_1"},
+	{"cottage_cheese", "cottage_cheese_9", "cottage_cheese_0", "cottage_soft"},
+	{"cheese_hard", "cheese_russian", "cheese_gouda", "cheese_cheddar"},
+	{"potato", "potato_baby"},
+	{"rice", "rice_round", "rice_basmati", "rice_brown"},
+	{"pasta", "spaghetti", "wholegrain_pasta"},
+	{"tomato", "tomatoes_plum", "cherry_tomatoes"},
+	{"cucumber", "cucumber_smooth"},
+	{"broccoli", "broccoli_fresh"},
+	{"cauliflower", "cauliflower_fresh"},
+	{"spinach_frozen", "spinach_fresh"},
+	{"green_beans", "green_beans_fresh"},
+	{"cream", "cream_20", "heavy_cream"},
+	{"yogurt_plain", "yogurt_greek"},
+}
+
+// haveAliases — как продукты называют в быту (русский: в базе «Картофель», дома «картошка»).
+var haveAliases = map[string]string{
+	"картошка": "potato", "картоха": "potato", "курица": "chicken_breast", "курятина": "chicken_breast", "куриное филе": "chicken_breast",
+	"фарш": "ground_mixed", "яйца": "eggs", "яйцо": "eggs", "помидор": "tomato", "помидоры": "tomato", "огурец": "cucumber",
+	"огурцы": "cucumber", "морковка": "carrot", "морковь": "carrot", "макароны": "pasta", "сыр": "cheese_hard", "лук": "onion",
+	"chicken": "chicken_breast", "potatoes": "potato", "egg": "eggs", "tomatoes": "tomato", "cheese": "cheese_hard",
+}
+
+// haveSet — продукты «есть дома» вместе с их вариантами.
+func haveSet(have []string) map[string]bool {
+	out := make(map[string]bool, len(have))
+	for _, id := range have {
+		out[id] = true
+		for _, fam := range haveFamilies {
+			if slices.Contains(fam, id) {
+				for _, x := range fam {
+					out[x] = true
+				}
+			}
+		}
+	}
+	return out
+}
+
+// HaveMatch — сколько продуктов рецепта уже есть дома и чего не хватает. Кладовка (соль, масло, специи,
+// мука — Pantry) считается всегда имеющейся: её нет ни в «есть», ни в «докупить».
+func (c *Catalog) HaveMatch(r planner.Recipe, have []string) (used, need int, missing []planner.Ingredient) {
+	ings := c.catalog.Load().Ingredients
+	set := haveSet(have)
+	for _, ri := range r.Ingredients {
+		ing, ok := ings[ri.IngredientID]
+		if !ok || ing.Pantry {
+			continue
+		}
+		need++
+		if set[ing.ID] {
+			used++
+		} else {
+			missing = append(missing, ing)
+		}
+	}
+	return used, need, missing
+}
+
+// ResolveHave — продукты «есть дома» из адреса: id продукта или название, как его ввёл человек на языке
+// страницы (точное совпадение, потом начало названия — из таких самый частый в рецептах: «сметана» —
+// это сметана 15%, а не 25%). Кладовку не берём: она и так считается имеющейся.
+func (c *Catalog) ResolveHave(vals []string, l i18n.Lang) []string {
+	cat := c.catalog.Load()
+	ings := cat.Ingredients
+	uses := map[string]int{}
+	for _, r := range cat.Recipes {
+		for _, ri := range r.Ingredients {
+			uses[ri.IngredientID]++
+		}
+	}
+	var out []string
+	add := func(id string) {
+		if !slices.Contains(out, id) && len(out) < 12 {
+			out = append(out, id)
+		}
+	}
+	for _, v := range vals {
+		v = strings.ToLower(strings.TrimSpace(v))
+		if v == "" {
+			continue
+		}
+		if id, ok := haveAliases[v]; ok {
+			v = id
+		}
+		if ing, ok := ings[v]; ok {
+			if !ing.Pantry {
+				add(ing.ID)
+			}
+			continue
+		}
+		var exact, prefix string
+		for id, ing := range ings {
+			if ing.Pantry {
+				continue
+			}
+			name := strings.ToLower(ing.LocalName(l))
+			if name == v || strings.ToLower(ing.Name) == v {
+				exact = id
+				break
+			}
+			if strings.HasPrefix(name, v) && (prefix == "" || uses[id] > uses[prefix]) {
+				prefix = id
+			}
+		}
+		// не нашлось по началу названия — по корню слова: «помидорчики», «морковочка»
+		if exact == "" && prefix == "" && len([]rune(v)) > 4 {
+			stem := string([]rune(v)[:4])
+			for id, ing := range ings {
+				if !ing.Pantry && strings.HasPrefix(strings.ToLower(ing.LocalName(l)), stem) && (prefix == "" || uses[id] > uses[prefix]) {
+					prefix = id
+				}
+			}
+		}
+		if exact != "" {
+			add(exact)
+		} else if prefix != "" {
+			add(prefix)
+		}
+	}
+	return out
+}
+
+// HaveOptions — продукты для подсказки в поле «есть дома»: всё, кроме кладовки, по алфавиту языка.
+func (c *Catalog) HaveOptions(l i18n.Lang) []string {
+	var out []string
+	for _, ing := range c.catalog.Load().Ingredients {
+		if !ing.Pantry {
+			out = append(out, ing.LocalName(l))
+		}
+	}
+	slices.Sort(out)
+	return slices.Compact(out)
 }

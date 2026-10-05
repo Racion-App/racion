@@ -168,6 +168,7 @@
   <span class="rcard__body">
     <span class="rcard__title">{{.Title}}</span>
     <span class="rcard__meta"><span>{{.Slot_}}</span><span class="num">{{.TimeLabel}}</span><span class="num">{{.KcalLabel}}</span>{{if .Money}}<span class="num is-rub">≈ {{.Money}}</span>{{end}}</span>
+    {{if .Have}}<span class="rcard__have">{{.Have}}</span>{{end}}
   </span>
 </a>
 <button type="button" class="rcard__add" data-table-add="{{.ID}}" data-l-add="{{.AddLabel}}" data-l-added="{{.AddedLabel}}" aria-pressed="false">

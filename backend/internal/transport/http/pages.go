@@ -191,6 +191,7 @@ type recipeCard struct {
 	Href       string
 	AddLabel   string // «Добавить в стол» на языке страницы: внутри шаблона карточки язык недоступен
 	AddedLabel string
+	Have       string // «есть 3 из 5 · докупить: лук, сметана» — при фильтре «есть дома»
 }
 
 func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
@@ -323,6 +324,10 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			active[g.Param] = active[g.Param][:1]
 		}
 	}
+	// «есть дома»: продукты приходят id из ссылок или названием из поля ввода
+	if hv := s.svc.Catalog.ResolveHave(r.URL.Query()["have"], pl.L); len(hv) > 0 {
+		active["have"] = hv
+	}
 	switch legacy {
 	case "breakfast", "lunch", "dinner", "snack":
 		active["slot"] = []string{legacy}
@@ -344,14 +349,41 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			pool = append(pool, rc)
 		}
 	}
-	if q != "" {
+	have := active["have"]
+	switch {
+	case q != "":
 		pool = s.svc.Catalog.Search(q, pool, pl.L)
-	} else {
+	case len(have) > 0:
+		// сначала то, для чего всё уже есть, потом — где в дело идёт больше своих продуктов и меньше докупать
+		type score struct{ used, missing int }
+		sc := make(map[string]score, len(pool))
+		for _, rc := range pool {
+			used, _, miss := s.svc.Catalog.HaveMatch(rc, have)
+			sc[rc.ID] = score{used, len(miss)}
+		}
+		sort.SliceStable(pool, func(i, j int) bool {
+			a, b := sc[pool[i].ID], sc[pool[j].ID]
+			if (a.missing == 0) != (b.missing == 0) {
+				return a.missing == 0
+			}
+			if a.used != b.used {
+				return a.used > b.used
+			}
+			if a.missing != b.missing {
+				return a.missing < b.missing
+			}
+			return pool[i].LocalTitle(pl.L) < pool[j].LocalTitle(pl.L)
+		})
+	default:
 		sort.Slice(pool, func(i, j int) bool { return pool[i].LocalTitle(pl.L) < pool[j].LocalTitle(pl.L) })
 	}
 	all := make([]recipeCard, 0, len(pool))
 	for _, rc := range pool {
-		all = append(all, s.card(rc, pl))
+		c := s.card(rc, pl)
+		if len(have) > 0 {
+			c.Have = s.haveLine(rc, have, pl.L)
+		}
+		all = append(all, c)
 	}
 	total := len(all)
 	pages := (total + perPage - 1) / perPage
@@ -435,8 +467,20 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	if len(active["slot"]) == 1 {
 		sectionTitle = filterLabel(pl, "slot", active["slot"][0])
 	}
+	if len(have) > 0 {
+		sectionTitle = i18n.T(pl.L, "catalog.section.have")
+	}
 	if q != "" {
 		sectionTitle = i18n.T(pl.L, "catalog.section.search", q)
+	}
+	// «есть дома»: продукты чипами, клик убирает продукт
+	type haveChip struct{ Name, Href string }
+	var haveChips []haveChip
+	for _, id := range have {
+		name := s.catalog.Ingredients[id].LocalName(pl.L)
+		haveChips = append(haveChips, haveChip{name, link(toggle("have", id, true), 1)})
+		activeCount++
+		titleParts = append(titleParts, strings.ToLower(name))
 	}
 	for _, g := range service.CatalogFilters {
 		fv := filterView{Param: g.Param, Label: i18n.T(pl.L, "filter."+g.Param)}
@@ -534,7 +578,7 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			Title:       title,
 			Description: i18n.T(pl.L, "catalog.meta", total, i18n.Plural(pl.L, total, "catalog.recipe")),
 			Canonical:   base + link(canon, page),
-			NoIndex:     q != "" || len(active["price"]) > 0 || len(active["pmin"]) > 0,
+			NoIndex:     q != "" || len(active["price"]) > 0 || len(active["pmin"]) > 0 || len(have) > 0,
 			OGImage:     brandOG(base, pl.L),
 			OGWide:      true,
 			JSONLD:      catalogLD(base, pl, title),
@@ -620,6 +664,8 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	data["Hidden"] = hidden
+	data["HaveChips"] = haveChips
+	data["HaveOptions"] = s.svc.Catalog.HaveOptions(pl.L)
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "recipes.html", data); err != nil {
 		s.log.Error("recipes page", zap.Error(err))
@@ -876,3 +922,19 @@ func (s *Server) ardManifest(w http.ResponseWriter, r *http.Request) {
 
 // countryChoice — пункт переключателя страны в шапке серверных страниц.
 type countryChoice struct{ Code, Label, Symbol, Currency string }
+
+// haveLine — подпись карточки при фильтре «есть дома»: сколько продуктов уже есть и что докупить.
+func (s *Server) haveLine(rc planner.Recipe, have []string, l i18n.Lang) string {
+	used, need, missing := s.svc.Catalog.HaveMatch(rc, have)
+	if len(missing) == 0 {
+		return i18n.T(l, "catalog.have.all")
+	}
+	names := make([]string, 0, len(missing))
+	for _, ing := range missing {
+		names = append(names, strings.ToLower(ing.LocalName(l)))
+	}
+	if len(names) > 4 {
+		names = append(names[:4], "…")
+	}
+	return i18n.T(l, "catalog.have.some", used, need, strings.Join(names, ", "))
+}

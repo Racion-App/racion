@@ -31,13 +31,24 @@
     {{if gt .ActiveCount 0}}<a class="filters__reset" href="{{.ResetHref}}">{{t .L "catalog.reset"}}</a>{{end}}
     <button type="button" class="catside__close" data-filters-close aria-label="{{t .L "close"}}">×</button>
   </div>
+  <div class="filters__group filters__group--have" id="have">
+    <div class="filters__label">{{t .L "filter.have"}}</div>
+    {{if .HaveChips}}<div class="chips">{{range .HaveChips}}<a class="chip chip--sm" href="{{.Href}}" aria-pressed="true" title="{{t $.L "filter.have.remove"}}">{{.Name}} <span aria-hidden="true">×</span></a>{{end}}</div>{{end}}
+    <form class="havein" action="{{.P}}/recipes" method="get">
+      {{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}{{if .Q}}<input type="hidden" name="q" value="{{.Q}}">{{end}}
+      <input class="form-control" name="have" list="have-list" placeholder="{{t .L "filter.have.placeholder"}}" aria-label="{{t .L "filter.have"}}" autocomplete="off">
+      <button class="btn btn-soft btn-sm" type="submit">{{t .L "filter.have.add"}}</button>
+      <datalist id="have-list">{{range .HaveOptions}}<option value="{{.}}">{{end}}</datalist>
+    </form>
+    <p class="filters__hint">{{t .L "filter.have.hint"}}</p>
+  </div>
   <details class="catside__country" id="country">
     <summary>{{t .L "catalog.prices"}}: <b>{{.CountryLabel}} · {{.Country.Symbol}}</b></summary>
     <div class="chips">
       {{range .Countries}}<a class="chip chip--sm" href="{{.Href}}" {{if .On}}aria-pressed="true"{{end}}>{{.Label}} · {{.Symbol}}</a>{{end}}
     </div>
   </details>
-  {{range .Filters}}{{if ne .Param "slot"}}
+  {{range .Filters}}{{if and (ne .Param "slot") (ne .Param "have")}}
   <div class="filters__group">
     <div class="filters__label">{{.Label}}{{if .Slider}} <output class="filters__out num" data-price-out data-any="{{.Slider.Any}}" data-upto="{{t $.L "filter.price.upto" "{0}"}}" data-from="{{t $.L "filter.price.from" "{0}"}}" data-range="{{t $.L "filter.price.range" "{0}" "{1}"}}">{{.Slider.Label}}</output>{{end}}</div>
     {{if .Slider}}
@@ -63,6 +74,7 @@
   <nav class="cattabs" aria-label="{{t .L "filter.slot"}}">
     {{range .SlotTabs}}<a class="cattabs__tab" href="{{.Href}}"{{if .On}} aria-current="page"{{end}}>{{.Label}}</a>{{end}}
   </nav>
+  <a class="btn btn-soft catbar__have" href="#have" data-filters-open aria-controls="filters">{{t .L "catalog.have.cta"}}</a>
   <button type="button" class="btn btn-soft catbar__filters" data-filters-open aria-controls="filters">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="8" x2="16" y1="12" y2="12"/><line x1="11" x2="13" y1="18" y2="18"/></svg>
     {{t .L "catalog.filters"}}{{if gt .ActiveCount 0}} <span class="filters__count num">{{.ActiveCount}}</span>{{end}}
