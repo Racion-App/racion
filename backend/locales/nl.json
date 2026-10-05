@@ -680,6 +680,7 @@
   "filter.have": "In uw keuken",
   "filter.have.add": "Toevoegen",
   "filter.have.hint": "Zout, olie, meel en kruiden tellen we als altijd aanwezig.",
+  "filter.have.often": "Vaak thuis",
   "filter.have.placeholder": "Kip, aardappelen…",
   "filter.have.remove": "Verwijderen",
   "filter.kcal": "Calorieën",

@@ -795,9 +795,23 @@ a { text-underline-offset: 3px; }
     &__done { display: block; position: sticky; bottom: 0; width: 100%; margin-top: 6px; }
   }
 }
-body.catside-open { overflow: hidden; }
+body.catside-open { overflow: hidden; .consent { display: none; } } // баннер cookies не закрывает кнопку «Показать» в фильтрах
 // «Есть дома»: поле с подсказкой продуктов в фильтрах и подпись карточки, чего не хватает
-.havein { display: flex; gap: 6px; .form-control { flex: 1 1 auto; min-width: 0; } }
+.havein { display: flex; gap: 6px; align-items: flex-start;
+  &__field { position: relative; flex: 1 1 auto; min-width: 0; .form-control { width: 100%; } }
+  &__list { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; right: 0; margin: 0; padding: 4px; list-style: none; max-height: 320px; overflow: auto;
+    background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-lg);
+    li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 15px;
+      img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; flex: 0 0 auto; }
+      &:hover, &.is-on { background: var(--ds-fill-3); } } } }
+.havequick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  &__label { flex-basis: 100%; font-size: 12px; color: var(--ds-label-tertiary); }
+  &__item { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; background: var(--ds-fill-3); color: var(--ds-label-primary); font-size: 13px; text-decoration: none;
+    img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    &:hover { background: var(--ds-fill-2); opacity: 1; } }
+  &__dot { width: 24px; height: 24px; border-radius: 50%; background: var(--ds-green-tint); flex: 0 0 auto; } }
+.havein__list .havequick__dot { width: 32px; height: 32px; border-radius: 8px; }
+.chips .chip--have { display: inline-flex; }
 .filters__hint { margin: 0; font-size: 12px; color: var(--ds-label-tertiary); }
 .catbar__have { flex: 0 0 auto; white-space: nowrap; }
 @media (max-width: 899px) { .catbar { flex-wrap: wrap; .cattabs { flex-basis: 100%; } } .catbar__have { flex: 1 1 auto; justify-content: center; } }

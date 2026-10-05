@@ -694,6 +694,7 @@
   "filter.have": "У вашій кухні",
   "filter.have.add": "Додати",
   "filter.have.hint": "Сіль, олія, борошно та спеції вважаються завжди наявними.",
+  "filter.have.often": "Часто вдома",
   "filter.have.placeholder": "Курятина, картопля…",
   "filter.have.remove": "Видалити продукт",
   "filter.kcal": "Калорії",

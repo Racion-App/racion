@@ -681,6 +681,7 @@
   "filter.have": "Na sua cozinha",
   "filter.have.add": "Adicionar",
   "filter.have.hint": "Sal, óleo, farinha e temperos são considerados sempre disponíveis.",
+  "filter.have.often": "Frequentemente em casa",
   "filter.have.placeholder": "Frango, batata…",
   "filter.have.remove": "Remover produto",
   "filter.kcal": "Calorias",

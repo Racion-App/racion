@@ -681,6 +681,7 @@
   "filter.have": "In deiner Küche",
   "filter.have.add": "Hinzufügen",
   "filter.have.hint": "Salz, Öl, Mehl und Gewürze zählen wir als immer vorhanden.",
+  "filter.have.often": "Häufig zu Hause",
   "filter.have.placeholder": "Hähnchen, Kartoffeln…",
   "filter.have.remove": "Entfernen",
   "filter.kcal": "Kalorien",

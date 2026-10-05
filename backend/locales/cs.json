@@ -694,6 +694,7 @@
   "filter.have": "V kuchyni",
   "filter.have.add": "Přidat",
   "filter.have.hint": "Sůl, olej, mouku a koření počítáme jako vždy přítomné.",
+  "filter.have.often": "Často doma",
   "filter.have.placeholder": "Kuře, brambory…",
   "filter.have.remove": "Odebrat produkt",
   "filter.kcal": "Kalorie",

@@ -680,6 +680,7 @@
   "filter.have": "Dans votre cuisine",
   "filter.have.add": "Ajouter",
   "filter.have.hint": "Le sel, l’huile, la farine et les épices sont considérés comme toujours disponibles.",
+  "filter.have.often": "Souvent à la maison",
   "filter.have.placeholder": "Poulet, pommes de terre…",
   "filter.have.remove": "Retirer l’ingrédient",
   "filter.kcal": "Calories",

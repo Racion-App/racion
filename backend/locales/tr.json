@@ -680,6 +680,7 @@
   "filter.have": "Mutfakta var",
   "filter.have.add": "Ekle",
   "filter.have.hint": "Tuz, yağ, un ve baharatlar her zaman mevcut olarak kabul edilir.",
+  "filter.have.often": "Evde sık sık",
   "filter.have.placeholder": "Tavuk, patates…",
   "filter.have.remove": "Kaldır",
   "filter.kcal": "Kalori",

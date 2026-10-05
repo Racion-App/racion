@@ -33,14 +33,20 @@
   </div>
   <div class="filters__group filters__group--have" id="have">
     <div class="filters__label">{{t .L "filter.have"}}</div>
-    {{if .HaveChips}}<div class="chips">{{range .HaveChips}}<a class="chip chip--sm" href="{{.Href}}" aria-pressed="true" title="{{t $.L "filter.have.remove"}}">{{.Name}} <span aria-hidden="true">×</span></a>{{end}}</div>{{end}}
-    <form class="havein" action="{{.P}}/recipes" method="get">
+    {{if .HaveChips}}<div class="chips">{{range .HaveChips}}<a class="chip chip--sm chip--have" href="{{.Href}}" aria-pressed="true" title="{{t $.L "filter.have.remove"}}">{{.Name}} <span aria-hidden="true">×</span></a>{{end}}</div>{{end}}
+    <form class="havein" action="{{.P}}/recipes" method="get" autocomplete="off">
       {{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}{{if .Q}}<input type="hidden" name="q" value="{{.Q}}">{{end}}
-      <input class="form-control" name="have" list="have-list" placeholder="{{t .L "filter.have.placeholder"}}" aria-label="{{t .L "filter.have"}}" autocomplete="off">
+      <div class="havein__field">
+        <input class="form-control" name="have" placeholder="{{t .L "filter.have.placeholder"}}" aria-label="{{t .L "filter.have"}}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="have-list">
+        <ul class="havein__list" id="have-list" role="listbox" hidden></ul>
+      </div>
       <button class="btn btn-soft btn-sm" type="submit">{{t .L "filter.have.add"}}</button>
-      <datalist id="have-list">{{range .HaveOptions}}<option value="{{.}}">{{end}}</datalist>
     </form>
+    {{if .HaveQuick}}<div class="havequick" aria-label="{{t .L "filter.have.often"}}"><span class="havequick__label">{{t .L "filter.have.often"}}</span>
+      {{range .HaveQuick}}<a class="havequick__item" href="{{.Href}}">{{if .Image}}<img src="{{.Image}}" alt="" loading="lazy">{{else}}<span class="havequick__dot" aria-hidden="true"></span>{{end}}{{.Name}}</a>{{end}}
+    </div>{{end}}
     <p class="filters__hint">{{t .L "filter.have.hint"}}</p>
+    <script type="application/json" id="have-data">{{.HaveJSON}}</script>
   </div>
   <details class="catside__country" id="country">
     <summary>{{t .L "catalog.prices"}}: <b>{{.CountryLabel}} · {{.Country.Symbol}}</b></summary>

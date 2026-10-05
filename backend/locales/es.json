@@ -681,6 +681,7 @@
   "filter.have": "En tu cocina",
   "filter.have.add": "Agregar",
   "filter.have.hint": "La sal, el aceite, la harina y las especias se consideran siempre disponibles.",
+  "filter.have.often": "Con frecuencia en casa",
   "filter.have.placeholder": "Pollo, papas…",
   "filter.have.remove": "Quitar",
   "filter.kcal": "Calorías",

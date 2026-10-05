@@ -379,6 +379,7 @@
   "filter.have.add": "Добавить",
   "filter.have.remove": "Убрать продукт",
   "filter.have.hint": "Соль, масло, мука и специи считаем, что есть всегда.",
+  "filter.have.often": "Часто дома",
   "catalog.have.cta": "Из того, что есть",
   "catalog.section.have": "Из того, что есть дома",
   "catalog.have.all": "Всё есть дома",

@@ -530,14 +530,37 @@ func (c *Catalog) ResolveHave(vals []string, l i18n.Lang) []string {
 	return out
 }
 
-// HaveOptions — продукты для подсказки в поле «есть дома»: всё, кроме кладовки, по алфавиту языка.
-func (c *Catalog) HaveOptions(l i18n.Lang) []string {
-	var out []string
-	for _, ing := range c.catalog.Load().Ingredients {
-		if !ing.Pantry {
-			out = append(out, ing.LocalName(l))
+// HaveOption — продукт в подсказке «есть дома».
+type HaveOption struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Image string `json:"img,omitempty"`
+	Uses  int    `json:"-"`
+}
+
+// HaveOptions — продукты для подсказки в поле «есть дома»: всё, кроме кладовки, сначала самые частые в рецептах.
+func (c *Catalog) HaveOptions(l i18n.Lang) []HaveOption {
+	cat := c.catalog.Load()
+	uses := map[string]int{}
+	for _, r := range cat.Recipes {
+		if r.Hidden {
+			continue
+		}
+		for _, ri := range r.Ingredients {
+			uses[ri.IngredientID]++
 		}
 	}
-	slices.Sort(out)
-	return slices.Compact(out)
+	var out []HaveOption
+	for _, ing := range cat.Ingredients {
+		if !ing.Pantry && uses[ing.ID] > 0 {
+			out = append(out, HaveOption{ID: ing.ID, Name: ing.LocalName(l), Image: ing.Image, Uses: uses[ing.ID]})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Uses != out[j].Uses {
+			return out[i].Uses > out[j].Uses
+		}
+		return out[i].Name < out[j].Name
+	})
+	return out
 }

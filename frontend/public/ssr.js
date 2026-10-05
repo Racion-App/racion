@@ -153,8 +153,38 @@
       if(push)history.pushState({catalog:1},"",url);
       main.classList.remove("is-loading");busy=null;
       if(scrollTo){var el=main.querySelector(scrollTo);if(el)el.scrollIntoView({block:"start"})}
+      if(haveFocus){haveFocus=false;var hi=main.querySelector(".havein input[role=combobox]");if(hi)hi.focus({preventScroll:true})}
     }).catch(function(e){if(e.name!=="AbortError")location.href=url});
   }
+  // «есть дома»: подсказки по списку продуктов с картинками; продукт добавляется без перезагрузки, панель
+  // фильтров на телефоне остаётся открытой, а поле снова в фокусе — можно сразу добавить следующий
+  var haveOpts=null,haveIdx=-1,haveFocus=false;
+  function hesc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function haveData(){if(!haveOpts){var el=main.querySelector("#have-data");try{haveOpts=el?JSON.parse(el.textContent):[]}catch(e){haveOpts=[]}}return haveOpts}
+  function haveAdd(form,val){var u=new URLSearchParams();form.querySelectorAll("input[type=hidden]").forEach(function(i){u.append(i.name,i.value)});u.append("have",val);haveFocus=true;load(form.getAttribute("action")+"?"+u.toString(),true)}
+  function haveList(input){
+    var list=input.parentNode.querySelector(".havein__list"),q=input.value.trim().toLowerCase();haveIdx=-1;input.removeAttribute("aria-activedescendant");
+    if(!q){list.hidden=true;input.setAttribute("aria-expanded","false");return}
+    var have=[].map.call(input.form.querySelectorAll("input[type=hidden][name=have]"),function(i){return i.value}),first=[],rest=[];
+    haveData().forEach(function(o){if(have.indexOf(o.id)>=0)return;var n=o.name.toLowerCase(),at=n.indexOf(q);if(at===0)first.push(o);else if(at>0)rest.push(o)});
+    var items=first.concat(rest).slice(0,8);
+    list.innerHTML=items.map(function(o,i){return '<li role="option" id="have-o'+i+'" data-id="'+hesc(o.id)+'">'+(o.img?'<img src="'+hesc(o.img)+'" alt="">':'<span class="havequick__dot" aria-hidden="true"></span>')+'<span>'+hesc(o.name)+'</span></li>'}).join("");
+    list.hidden=!items.length;input.setAttribute("aria-expanded",items.length?"true":"false");
+  }
+  main.addEventListener("input",function(e){if(e.target.matches&&e.target.matches(".havein input[role=combobox]"))haveList(e.target)});
+  main.addEventListener("keydown",function(e){
+    var input=e.target;if(!input.matches||!input.matches(".havein input[role=combobox]"))return;
+    var list=input.parentNode.querySelector(".havein__list"),opts=list.querySelectorAll("li");
+    if((e.key==="ArrowDown"||e.key==="ArrowUp")&&opts.length){e.preventDefault();haveIdx=(haveIdx+(e.key==="ArrowDown"?1:-1)+opts.length)%opts.length;
+      opts.forEach(function(li,i){li.classList.toggle("is-on",i===haveIdx);li.setAttribute("aria-selected",i===haveIdx?"true":"false")});input.setAttribute("aria-activedescendant","have-o"+haveIdx)}
+    else if(e.key==="Escape"&&!list.hidden){e.stopPropagation();list.hidden=true;input.setAttribute("aria-expanded","false")}
+  });
+  main.addEventListener("click",function(e){var li=e.target.closest(".havein__list li");if(li)haveAdd(li.closest("form"),li.dataset.id)});
+  main.addEventListener("submit",function(e){
+    var f=e.target;if(!f.classList||!f.classList.contains("havein"))return;e.preventDefault();
+    var input=f.querySelector("input[role=combobox]"),list=f.querySelector(".havein__list"),on=list.querySelector("li.is-on")||(!list.hidden&&list.querySelector("li"));
+    var v=on?on.dataset.id:input.value.trim();if(v)haveAdd(f,v);
+  });
   main.addEventListener("click",function(e){
     var a=e.target.closest("a");if(!a||!main.contains(a))return;
     if(a.classList.contains("pages__country")){var cd=main.querySelector(".catside__country");if(cd)cd.open=true;openSide(true);if(window.innerWidth>=900)return;e.preventDefault();return}

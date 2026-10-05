@@ -694,6 +694,7 @@
   "filter.have": "W Twojej kuchni",
   "filter.have.add": "Dodaj",
   "filter.have.hint": "Sól, olej, mąka i przyprawy liczymy jako zawsze dostępne.",
+  "filter.have.often": "Często w domu",
   "filter.have.placeholder": "Kurczak, ziemniaki…",
   "filter.have.remove": "Usuń produkt",
   "filter.kcal": "Kalorie",

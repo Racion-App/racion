@@ -665,7 +665,21 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	}
 	data["Hidden"] = hidden
 	data["HaveChips"] = haveChips
-	data["HaveOptions"] = s.svc.Catalog.HaveOptions(pl.L)
+	// подсказки «есть дома»: весь список — для поиска на странице, первые частые — чипами «часто дома»
+	opts := s.svc.Catalog.HaveOptions(pl.L)
+	optsJSON, _ := json.Marshal(opts)
+	data["HaveJSON"] = template.JS(optsJSON)
+	type haveQuick struct{ Name, Image, Href string }
+	var quick []haveQuick
+	for _, o := range opts {
+		if len(quick) == 10 {
+			break
+		}
+		if !slices.Contains(have, o.ID) {
+			quick = append(quick, haveQuick{o.Name, o.Image, link(toggle("have", o.ID, true), 1)})
+		}
+	}
+	data["HaveQuick"] = quick
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "recipes.html", data); err != nil {
 		s.log.Error("recipes page", zap.Error(err))

@@ -680,6 +680,7 @@
   "filter.have": "In cucina",
   "filter.have.add": "Aggiungi",
   "filter.have.hint": "Sale, olio, farina e spezie si considerano sempre presenti.",
+  "filter.have.often": "Spesso a casa",
   "filter.have.placeholder": "Pollo, patate…",
   "filter.have.remove": "Rimuovi",
   "filter.kcal": "Calorie",

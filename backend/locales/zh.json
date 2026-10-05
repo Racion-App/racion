@@ -681,6 +681,7 @@
   "filter.have": "厨房中已有",
   "filter.have.add": "添加",
   "filter.have.hint": "盐、油、面粉和调料默认已有。",
+  "filter.have.often": "经常在家",
   "filter.have.placeholder": "鸡肉、土豆…",
   "filter.have.remove": "移除食材",
   "filter.kcal": "热量",
