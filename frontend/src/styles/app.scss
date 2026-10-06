@@ -2171,3 +2171,7 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 .changelog__num { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; background: var(--ds-blue-tint); color: var(--ds-blue); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .changelog .changelog__date { margin: 6px 0 10px; font-size: 13.5px; color: var(--ds-label-tertiary); }
 .changelog__items { display: grid; gap: 8px; margin: 0; padding-left: 20px; li { line-height: 1.5; } }
+
+// «Меню ребёнка в N лет» (/menu/child-*): норма по возрасту и подсказка по нарезке у блюда
+.kidpage__norm { max-width: 720px; margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: var(--ds-label-secondary); }
+.kidpage__note { display: block; margin-top: 2px; color: var(--ds-orange); font-weight: 400; }

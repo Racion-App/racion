@@ -110,6 +110,12 @@ export function Quiz() {
       init.members = Array.from({ length: Math.max(init.kids?.length ? 0 : 1, init.adults) }, () => ({ ...EMPTY_MEMBER, goal: init.goal }));
     }
     init.kids = grownKids(init.kids);
+    // со страницы «Меню ребёнка в N лет»: /?s=2&kid=18 — добавляем ребёнка этого возраста с отдельным меню
+    const kidAge = Number(sp.get("kid"));
+    if (sp.has("kid") && Number.isInteger(kidAge) && kidAge >= 0 && kidAge <= 204 && !init.kids.some((k) => k.ageMonths === kidAge)) {
+      const opts = feedingOptions(kidAge);
+      init.kids = [...init.kids, { ageMonths: kidAge, ageAt: ymNow(), feeding: opts.includes("separate") ? "separate" : opts[0], sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 }];
+    }
     if (!init.wants) init.wants = [];
     if (!init.have) init.have = [];
     return init;

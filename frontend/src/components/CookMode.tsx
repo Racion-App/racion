@@ -165,7 +165,7 @@ export function CookMode({ recipe, portions, onClose }: { recipe: Recipe; portio
   const p = isKid ? 1 : Math.max(1, Math.round(portions * 2) / 2);
 
   return (
-    <dialog ref={ref} className="cook" aria-label={t("cook.title", { title: recipe.title })} onCancel={(e) => { e.preventDefault(); onClose(); }}>
+    <dialog ref={ref} className="cook" aria-label={t("cookmode.title", { title: recipe.title })} onCancel={(e) => { e.preventDefault(); onClose(); }}>
       <header className="cook__head">
         <div className="cook__progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={Math.min(step, total)}>
           {recipe.steps.map((_, i) => (

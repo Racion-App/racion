@@ -82,6 +82,10 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		s.notFoundPage(w, r)
 		return
 	}
+	if km, ok := kidMenuBySlug(r.PathValue("slug")); ok {
+		s.kidMenuPage(w, r, km, pl) // «Меню ребёнка в N лет» — своя страница с детской неделей
+		return
+	}
 	m, ok := menuBySlug(r.PathValue("slug"))
 	if !ok {
 		s.notFoundPage(w, r)
@@ -154,6 +158,9 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		if o.Slug != m.Slug {
 			others = append(others, link{i18n.T(l, "menu."+o.Slug+".h1"), pl.P + "/menu/" + o.Slug})
 		}
+	}
+	for _, o := range kidMenuPresets {
+		others = append(others, link{i18n.T(l, "kidpage."+o.Key+".h1"), pl.P + "/menu/" + o.Slug})
 	}
 	var alts []altLink
 	for _, al := range topicLangs {

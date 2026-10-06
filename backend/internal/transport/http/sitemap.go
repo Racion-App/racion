@@ -78,6 +78,9 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		}
 		urlTopics("/recipes/from")
 		urlTopics("/weaning")
+		for _, m := range kidMenuPresets {
+			urlTopics("/menu/" + m.Slug)
+		}
 		for _, t := range topics {
 			if len(s.topicRecipes(t)) >= 4 {
 				urlTopics("/recipes/from/" + t.Slug)

@@ -1,0 +1,68 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="/">{{t .L "page.brand"}}</a><span>›</span><a href="{{.P}}/collection/kids-1-3">{{t .L "weaning.page.crumb"}}</a><span>›</span><span>{{.H1}}</span></nav>
+
+<header class="colhead colhead--rich colhead--noimg">
+  <div class="colhead__body">
+    <p class="colhead__eyebrow">{{t .L "kidpage.eyebrow"}}</p>
+    <h1 class="colhead__title">{{.H1}}</h1>
+    <ul class="colfacts">
+      <li><b class="num">{{.Week}}</b><span>{{t .L "kidpage.fact.week"}}</span></li>
+      <li><b class="num">{{.PerDay}}</b><span>{{t .L "kidpage.fact.day"}}</span></li>
+      <li><b class="num">{{.KcalDay}}</b><span>{{t .L "kidpage.fact.kcal"}}</span></li>
+      <li><b class="num">{{.Items}}</b><span>{{t .L "menu.fact.items"}}</span></li>
+    </ul>
+    <div class="coltext">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+    <div class="colhead__actions">
+      <a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{t .L "kidpage.cta"}}</a>
+    </div>
+  </div>
+</header>
+
+<section class="rpage__section" aria-labelledby="norm">
+  <h2 class="catsection" id="norm">{{t .L "kidpage.rules.title" .Age}}</h2>
+  <p class="kidpage__norm">{{.Norm}}</p>
+  <ul class="wrules">{{range .Rules}}<li>{{.}}</li>{{end}}</ul>
+</section>
+
+<section class="rpage__section" aria-labelledby="week">
+  <div class="rpage__section-head"><h2 id="week">{{t .L "menu.week.title" .StartDate}}</h2></div>
+  <div class="menus menus--week">
+    {{range .Days}}<article class="menu">
+      <header class="menu__head"><h3 class="menu__title">{{.Label}}</h3><p class="menu__note"><span class="num">{{.Kcal}}</span> {{t $.L "kcal"}}</p></header>
+      <ol class="menu__list">
+        {{range .Dishes}}<li>{{if .Href}}<a class="menu__item menu__item--noimg" href="{{.Href}}">
+          <span class="menu__slot">{{.Slot}}</span>
+          <span class="menu__name">{{.Title}}{{if .Note}} <small class="kidpage__note">{{.Note}}</small>{{end}}</span>
+          <span class="menu__meta num">{{.Kcal}} · {{.Money}}</span>
+        </a>{{else}}<div class="menu__item menu__item--noimg">
+          <span class="menu__slot">{{.Slot}}</span>
+          <span class="menu__name">{{.Title}}</span>
+          <span class="menu__meta"></span>
+        </div>{{end}}</li>{{end}}
+      </ol>
+    </article>{{end}}
+  </div>
+</section>
+
+{{if .Groups}}
+<section class="rpage__section" aria-labelledby="list">
+  <div class="rpage__section-head"><h2 id="list">{{t .L "menu.list.title" .Items}}</h2></div>
+  <div class="menu__foot menu__foot--groups">{{range .Groups}}<span>{{.Label}}: <b class="num">{{.Items}}</b> · <span class="num">{{.Money}}</span></span>{{end}}</div>
+  <p class="rpage__note">{{t .L "menu.list.note"}}</p>
+</section>
+{{end}}
+
+<section class="rpage__section colfaq" aria-labelledby="kid-faq">
+  <h2 id="kid-faq">{{t .L "coll.faq"}}</h2>
+  {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+</section>
+
+{{if .Others}}
+<section class="rpage__section colothers" aria-labelledby="more-menus">
+  <div class="rpage__section-head"><h2 id="more-menus">{{t .L "kidpage.others"}}</h2></div>
+  <div class="rpage__tags">{{range .Others}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
+</section>
+{{end}}
+
+<p class="rpage__note wsource">{{t .L "kidpage.source"}}</p>
+{{template "foot" .}}

@@ -48,5 +48,12 @@
   {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
 </section>
 
+{{if .KidMenus}}
+<section class="rpage__section colothers" aria-labelledby="w-next">
+  <div class="rpage__section-head"><h2 id="w-next">{{t .L "kidpage.others"}}</h2></div>
+  <div class="rpage__tags">{{range .KidMenus}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
+</section>
+{{end}}
+
 <p class="rpage__note wsource">{{.Source}}</p>
 {{template "foot" .}}

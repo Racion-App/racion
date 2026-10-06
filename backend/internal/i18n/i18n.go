@@ -5,6 +5,7 @@ package i18n
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"racion/locales"
@@ -98,11 +99,13 @@ func T(l Lang, key string, args ...any) string {
 	if len(args) == 0 {
 		return s
 	}
+	// {0}, {1} — номер аргумента: переводчик может переставить их местами («{1} … {0}»), и значения не должны
+	// поменяться вместе с порядком слов. Именованные подстановки ({n}, {age}) идут по порядку, как раньше.
 	var b strings.Builder
 	i := 0
 	for {
 		open := strings.IndexByte(s, '{')
-		if open < 0 || i >= len(args) {
+		if open < 0 {
 			b.WriteString(s)
 			break
 		}
@@ -112,8 +115,19 @@ func T(l Lang, key string, args ...any) string {
 			break
 		}
 		b.WriteString(s[:open])
-		b.WriteString(fmtArg(args[i]))
-		i++
+		name := s[open+1 : open+close]
+		if n, err := strconv.Atoi(name); err == nil && name != "" && n >= 0 {
+			if n < len(args) {
+				b.WriteString(fmtArg(args[n]))
+			} else {
+				b.WriteString(s[open : open+close+1])
+			}
+		} else if i < len(args) {
+			b.WriteString(fmtArg(args[i]))
+			i++
+		} else {
+			b.WriteString(s[open : open+close+1])
+		}
 		s = s[open+close+1:]
 	}
 	return b.String()

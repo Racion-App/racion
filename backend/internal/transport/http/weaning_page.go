@@ -138,7 +138,7 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"H1": i18n.T(l, "weaning.page.h1"), "Intro": []string{i18n.T(l, "weaning.page.intro1"), i18n.T(l, "weaning.page.intro2")},
 		"Table": table, "Order": order, "Days": days, "Cards": cards, "FAQ": faq, "Rules": rules,
-		"Source": i18n.T(l, "weaning.source"),
+		"Source": i18n.T(l, "weaning.source"), "KidMenus": kidMenuLinks(pl),
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "weaning.html", data); err != nil {
