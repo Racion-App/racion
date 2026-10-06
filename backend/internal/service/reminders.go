@@ -34,9 +34,10 @@ func dueReminders(local time.Time, s domain.NotifySettings, plans []domain.PlanR
 	tomorrow := local.AddDate(0, 0, 1).Format("2006-01-02")
 	hour := local.Hour()
 	var out []Reminder
-	// магазин: в выбранный день и час, для ближайшей недели, где ещё есть что купить
+	// магазин: в выбранный день и час, для ближайшей недели, где ещё есть что купить. Неделя, которая
+	// сегодня кончается, не в счёт: звать в магазин за её продуктами в последний день незачем
 	if s.ShopHour >= 0 && int(local.Weekday()) == s.ShopDay && hour == s.ShopHour {
-		from, to := local.AddDate(0, 0, -6).Format("2006-01-02"), local.AddDate(0, 0, 7).Format("2006-01-02")
+		from, to := local.AddDate(0, 0, -5).Format("2006-01-02"), local.AddDate(0, 0, 7).Format("2006-01-02")
 		for _, p := range plans {
 			if p.StartDate < from || p.StartDate > to {
 				continue

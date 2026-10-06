@@ -1,5 +1,27 @@
 [
  {
+  "version": "1.12",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Неделя не теряется, напоминания без регистрации",
+   "en": "Your week stays put, reminders without sign-up"
+  },
+  "items": {
+   "ru": [
+    "Браузер помнит ваши недели и без аккаунта. На главной сразу видна последняя неделя и кнопка «Собрать следующую неделю»: те же ответы, новые даты.",
+    "Установленное приложение открывается на неделе, которая идёт сейчас, а не на анкете.",
+    "Напоминания без регистрации: в конце недели можно включить уведомления. В воскресенье напомним про новую неделю и покупки, по утрам пришлём, что готовим сегодня. Если уведомления недоступны, например на iPhone без установленного приложения, те же напоминания приходят в Telegram.",
+    "Напоминание о магазине больше не приходит в последний день недели."
+   ],
+   "en": [
+    "Your browser now remembers your weeks even without an account. The home page shows the latest week and a \"Plan next week\" button: same answers, new dates.",
+    "The installed app opens on the current week instead of the questionnaire.",
+    "Reminders without sign-up: turn on notifications at the end of the week. On Sunday we remind you about the new week and the shopping, and each morning we send what's cooking today. Where notifications aren't available, for example on iPhone without the installed app, the same reminders come in Telegram.",
+    "The shopping reminder no longer arrives on the last day of the week."
+   ]
+  }
+ },
+ {
   "version": "1.11",
   "date": "2026-10-06",
   "title": {

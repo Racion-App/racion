@@ -80,7 +80,7 @@ export function Admin() {
     [t("admin.plans.owned"), ov?.counters.plansOwned],
     [t("admin.own"), ov?.counters.ownRecipes],
     [t("admin.households"), ov?.counters.households],
-    [t("admin.push"), ov?.counters.pushUsers],
+    [t("admin.push"), ov?.counters.pushUsers, t("admin.push.devices", { n: ov?.counters.pushDevices ?? 0 })],
     [t("admin.comments"), ov?.counters.comments],
     [t("admin.feedback"), ov?.counters.feedback],
     [t("admin.purchases"), ov?.counters.purchasesWeek],

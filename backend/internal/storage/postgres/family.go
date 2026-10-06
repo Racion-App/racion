@@ -124,6 +124,74 @@ func (r *Push) PlansForReminders(ctx context.Context, userID string) ([]domain.P
 	return reminderPlans(ctx, r.pool, rows)
 }
 
+// ── Устройства без аккаунта ────────────────────────────────────────────────
+
+// SaveDevice — подписка устройства без аккаунта с настройками напоминаний и неделя, по которой
+// напоминать (повторная привязка освежает время). Одним запросом: недели нет — не остаётся и подписки.
+// Если этот endpoint уже принадлежит аккаунту, аккаунт и его настройки не трогаем: обновляются только ключи.
+func (r *Push) SaveDevice(ctx context.Context, s domain.PushSubscription, settings domain.NotifySettings, planID string) error {
+	raw, _ := json.Marshal(settings)
+	_, err := r.pool.Exec(ctx, `WITH sub AS (
+			INSERT INTO push_subscriptions (endpoint, user_id, p256dh, auth, lang, settings) VALUES ($1, NULL, $2, $3, $4, $5)
+			ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, lang = EXCLUDED.lang,
+				settings = CASE WHEN push_subscriptions.user_id IS NULL THEN EXCLUDED.settings ELSE push_subscriptions.settings END
+			RETURNING endpoint)
+		INSERT INTO push_plans (endpoint, plan_id) SELECT endpoint, $6 FROM sub
+		ON CONFLICT (endpoint, plan_id) DO UPDATE SET created_at = now()`,
+		s.Endpoint, s.P256dh, s.Auth, s.Lang, raw, planID)
+	return wrap("push.save_device", err)
+}
+
+// DeleteDevice снимает подписку без аккаунта; подписку аккаунта так снять нельзя — для неё есть кабинет.
+func (r *Push) DeleteDevice(ctx context.Context, endpoint string) error {
+	_, err := r.pool.Exec(ctx, `DELETE FROM push_subscriptions WHERE endpoint = $1 AND user_id IS NULL`, endpoint)
+	return wrap("push.delete_device", err)
+}
+
+// Devices — подписки без аккаунта, которые открывали неделю за последние четыре недели. Кто перестал
+// открывать недели, через четыре недели перестаёт получать напоминания, а не получает их вечно.
+func (r *Push) Devices(ctx context.Context) ([]domain.PushDevice, error) {
+	rows, err := r.pool.Query(ctx, `SELECT s.endpoint, s.p256dh, s.auth, s.lang, s.settings FROM push_subscriptions s
+		WHERE s.user_id IS NULL AND EXISTS (SELECT 1 FROM push_plans p WHERE p.endpoint = s.endpoint AND p.created_at > now() - interval '28 days')`)
+	if err != nil {
+		return nil, wrap("push.devices", err)
+	}
+	defer rows.Close()
+	var out []domain.PushDevice
+	for rows.Next() {
+		var d domain.PushDevice
+		var raw []byte
+		if err := rows.Scan(&d.Sub.Endpoint, &d.Sub.P256dh, &d.Sub.Auth, &d.Sub.Lang, &raw); err != nil {
+			return nil, wrap("push.devices", err)
+		}
+		d.Settings = domain.DeviceNotify()
+		if len(raw) > 2 {
+			_ = json.Unmarshal(raw, &d.Settings)
+		}
+		out = append(out, d)
+	}
+	return out, wrap("push.devices", rows.Err())
+}
+
+// DevicePlans — недели устройства для напоминаний: последние открытые первыми.
+func (r *Push) DevicePlans(ctx context.Context, endpoint string) ([]domain.PlanReminderInfo, error) {
+	rows, err := r.pool.Query(ctx, `SELECT p.id, p.plan FROM push_plans x JOIN plans p ON p.id = x.plan_id
+		WHERE x.endpoint = $1 ORDER BY x.created_at DESC LIMIT 6`, endpoint)
+	if err != nil {
+		return nil, wrap("push.device_plans", err)
+	}
+	return reminderPlans(ctx, r.pool, rows)
+}
+
+// MarkSentDevice — true, если напоминание с таким ключом ещё не уходило на это устройство.
+func (r *Push) MarkSentDevice(ctx context.Context, endpoint, key string) (bool, error) {
+	tag, err := r.pool.Exec(ctx, `INSERT INTO push_sent (endpoint, key) VALUES ($1, $2) ON CONFLICT DO NOTHING`, endpoint, key)
+	if err != nil {
+		return false, wrap("push.mark_device", err)
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
 // reminderPlans разбирает выборку «id, plan» для напоминаний: даты, блюда по дням, ужины, дни заготовок
 // и сколько уже куплено. Общая для веб-пуша и ботов.
 func reminderPlans(ctx context.Context, pool *pgxpool.Pool, rows pgx.Rows) ([]domain.PlanReminderInfo, error) {

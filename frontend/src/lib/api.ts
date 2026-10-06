@@ -191,6 +191,9 @@ export const api = {
   pushKey: () => request<{ key: string }>("/api/push/key"),
   pushSubscribe: (body: { endpoint: string; p256dh: string; auth: string }) => request<void>("/api/me/push", { method: "POST", body: JSON.stringify(body) }),
   pushUnsubscribe: (endpoint: string) => request<void>("/api/me/push", { method: "DELETE", body: JSON.stringify({ endpoint }) }),
+  // напоминания без аккаунта: подписка устройства и неделя, по которой напоминать
+  pushDevice: (body: { endpoint: string; p256dh: string; auth: string; planId: string; today: boolean; tz: number }) => request<void>("/api/push/device", { method: "POST", body: JSON.stringify(body) }),
+  pushDeviceDelete: (endpoint: string) => request<void>("/api/push/device", { method: "DELETE", body: JSON.stringify({ endpoint }) }),
   notify: () => request<{ settings: NotifySettings; devices: number }>("/api/me/notify"),
   setNotify: (s: NotifySettings) => request<void>("/api/me/notify", { method: "PUT", body: JSON.stringify(s) }),
   notifyTest: () => request<void>("/api/me/notify/test", { method: "POST" }),

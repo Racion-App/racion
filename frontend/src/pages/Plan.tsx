@@ -21,7 +21,10 @@ import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan 
 import { useAuth } from "../lib/auth";
 import { useT } from "../i18n";
 import { WeaningCard, WeaningDayRows } from "../components/Weaning";
+import { RemindCard } from "../components/RemindCard";
 import { draftKid, markWeaning } from "../lib/kids";
+import { forgetWeek, rememberWeek } from "../lib/weeks";
+import { pushLinkDevice } from "../lib/push";
 
 // порции в списке заготовок: 4 или 2,5
 const fmtPortions = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ","));
@@ -97,7 +100,10 @@ export function Plan() {
     api
       .getPlan(id, lang)
       .then((p) => alive && setPlan(p))
-      .catch((e: Error) => alive && setError(e.message));
+      .catch((e: Error) => {
+        if ((e as ApiError).status === 404) forgetWeek(id); // недели больше нет: главная не будет предлагать её открыть
+        if (alive) setError(e.message);
+      });
     return () => {
       alive = false;
     };
@@ -106,6 +112,14 @@ export function Plan() {
   useEffect(() => {
     if (plan) track("plan_view", { id: plan.id, swaps: plan.swaps });
   }, [plan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Браузер помнит неделю: главная и установленное приложение откроют её и без аккаунта. Устройство,
+  // подписанное на напоминания без аккаунта, получает их и по этой неделе.
+  useEffect(() => {
+    if (!plan || plan.occasion || plan.basket) return;
+    rememberWeek(plan);
+    if (!user) void pushLinkDevice(plan.id).catch(() => undefined);
+  }, [plan?.id, plan?.totals.items, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     writeJSON(`racion.check.${id}`, checked);
@@ -814,6 +828,7 @@ export function Plan() {
             })}
           </section>
         ))}
+        {!storeMode && !plan.occasion && !plan.basket && !inTelegram() && <RemindCard planId={plan.id} telegram={plan.bots?.telegram} onToast={setToast} />}
 
         </div>
 

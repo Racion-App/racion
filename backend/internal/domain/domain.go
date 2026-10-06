@@ -204,6 +204,21 @@ func DefaultNotify() NotifySettings {
 	return NotifySettings{ShopDay: 0, ShopHour: 12, Today: true, TodayHour: 8, Prep: true, PrepHour: 19, PrepDay: true, Week: true, Digest: false, Tz: 180}
 }
 
+// DeviceNotify — напоминания устройства без аккаунта. Настроек в кабинете у него нет, поэтому меньше:
+// вечернее «завтра готовим» выключено, а «как было?» без аккаунта записать некуда.
+func DeviceNotify() NotifySettings {
+	s := DefaultNotify()
+	s.Prep = false
+	s.NoAsk = true
+	return s
+}
+
+// PushDevice — подписка без аккаунта: напоминания по неделям, открытым на этом устройстве.
+type PushDevice struct {
+	Sub      PushSubscription
+	Settings NotifySettings
+}
+
 // MessengerChat — чат с ботом в Telegram или MAX. Аккаунт необязателен: неделю подключают по ссылке.
 type MessengerChat struct {
 	Platform string
@@ -370,6 +385,7 @@ type AdminCounters struct {
 	OwnRecipes    int `json:"ownRecipes"`
 	Households    int `json:"households"`
 	PushUsers     int `json:"pushUsers"`
+	PushDevices   int `json:"pushDevices"` // подписки без аккаунта: напоминания по неделям устройства
 	Comments      int `json:"comments"`
 	Feedback      int `json:"feedback"`
 	PurchasesWeek int `json:"purchasesWeek"`

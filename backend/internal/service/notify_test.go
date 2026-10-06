@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -16,6 +17,43 @@ type memPush struct {
 	sent  map[string]bool
 	plans map[string][]domain.PlanReminderInfo
 	set   map[string]domain.NotifySettings
+	// устройства без аккаунта: подписка, настройки, недели по endpoint
+	devices     map[string]domain.PushDevice
+	devicePlans map[string][]string
+	planInfo    map[string]domain.PlanReminderInfo
+}
+
+func (m *memPush) SaveDevice(_ context.Context, s domain.PushSubscription, set domain.NotifySettings, planID string) error {
+	if _, ok := m.planInfo[planID]; !ok {
+		return domain.ErrNotFound // как внешний ключ в базе: недели нет — подписка не сохраняется
+	}
+	m.devices[s.Endpoint] = domain.PushDevice{Sub: s, Settings: set}
+	m.devicePlans[s.Endpoint] = append([]string{planID}, slices.DeleteFunc(m.devicePlans[s.Endpoint], func(x string) bool { return x == planID })...)
+	return nil
+}
+func (m *memPush) DeleteDevice(_ context.Context, endpoint string) error {
+	delete(m.devices, endpoint)
+	delete(m.devicePlans, endpoint)
+	return nil
+}
+func (m *memPush) Devices(_ context.Context) ([]domain.PushDevice, error) {
+	var out []domain.PushDevice
+	for e, d := range m.devices {
+		if len(m.devicePlans[e]) > 0 {
+			out = append(out, d)
+		}
+	}
+	return out, nil
+}
+func (m *memPush) DevicePlans(_ context.Context, endpoint string) ([]domain.PlanReminderInfo, error) {
+	var out []domain.PlanReminderInfo
+	for _, id := range m.devicePlans[endpoint] {
+		out = append(out, m.planInfo[id])
+	}
+	return out, nil
+}
+func (m *memPush) MarkSentDevice(_ context.Context, endpoint, key string) (bool, error) {
+	return m.MarkSent(context.Background(), "device:"+endpoint, key)
 }
 
 func (m *memPush) Save(_ context.Context, u string, s domain.PushSubscription) error {
@@ -23,6 +61,8 @@ func (m *memPush) Save(_ context.Context, u string, s domain.PushSubscription) e
 	return nil
 }
 func (m *memPush) Delete(_ context.Context, endpoint string) error {
+	delete(m.devices, endpoint)
+	delete(m.devicePlans, endpoint)
 	for u, list := range m.subs {
 		var keep []domain.PushSubscription
 		for _, s := range list {
@@ -77,10 +117,15 @@ func (m *memSettings) Get(_ context.Context, k string) (string, error) {
 }
 func (m *memSettings) Set(_ context.Context, k, v string) error { m.kv[k] = v; return nil }
 
+func newMemPush() *memPush {
+	return &memPush{subs: map[string][]domain.PushSubscription{}, sent: map[string]bool{}, plans: map[string][]domain.PlanReminderInfo{}, set: map[string]domain.NotifySettings{},
+		devices: map[string]domain.PushDevice{}, devicePlans: map[string][]string{}, planInfo: map[string]domain.PlanReminderInfo{}}
+}
+
 // Напоминания: магазин в выбранный день и час, «завтра готовим» в 19:00, дубликаты не уходят,
 // мёртвая подписка удаляется.
 func TestReminders(t *testing.T) {
-	repo := &memPush{subs: map[string][]domain.PushSubscription{}, sent: map[string]bool{}, plans: map[string][]domain.PlanReminderInfo{}, set: map[string]domain.NotifySettings{}}
+	repo := newMemPush()
 	n := NewNotifications(repo, &memSettings{kv: map[string]string{}}, "mailto:test@example.com", "https://racion.test")
 	if err := n.Init(context.Background()); err != nil || n.PublicKey() == "" {
 		t.Fatalf("vapid keys: %v", err)
@@ -158,5 +203,80 @@ func TestWeaningReminders(t *testing.T) {
 	}
 	if got := weanLines(i18n.RU, plan.Weaning); len(got) != 1 || !strings.Contains(got[0], "5 г") || !strings.Contains(got[0], "150 г") {
 		t.Fatalf("строка напоминания: %v", got)
+	}
+}
+
+// Магазин в воскресенье: неделя, которая сегодня кончается, в магазин не зовёт, а та, что начинается завтра, зовёт.
+func TestShopSkipsEndingWeek(t *testing.T) {
+	s := domain.DefaultNotify() // магазин в воскресенье в 12:00
+	sunday := time.Date(2026, 10, 18, 12, 0, 0, 0, time.UTC)
+	ending := domain.PlanReminderInfo{ID: "old", StartDate: "2026-10-12", Items: 30, Checked: 2, Dishes: map[string][]string{}, Dinner: map[string]domain.DishRef{}}
+	if rs := dueReminders(sunday, s, []domain.PlanReminderInfo{ending}); slices.ContainsFunc(rs, func(r Reminder) bool { return r.Kind == "shop" }) {
+		t.Fatalf("неделя кончается сегодня, а зовём в магазин: %+v", rs)
+	}
+	next := domain.PlanReminderInfo{ID: "new", StartDate: "2026-10-19", Items: 30, Dishes: map[string][]string{}, Dinner: map[string]domain.DishRef{}}
+	if rs := dueReminders(sunday, s, []domain.PlanReminderInfo{next, ending}); len(rs) != 1 || rs[0].Kind != "shop" || rs[0].PlanID != "new" {
+		t.Fatalf("неделя начинается завтра: %+v", rs)
+	}
+}
+
+// Без аккаунта: устройство подписывается со страницы недели и получает напоминания по ней — утром что
+// готовим, в воскресенье собрать следующую. «Как было?» не спрашиваем, мёртвое устройство удаляется.
+func TestDeviceReminders(t *testing.T) {
+	repo := newMemPush()
+	n := NewNotifications(repo, &memSettings{kv: map[string]string{}}, "mailto:test@example.com", "https://racion.test")
+	if err := n.Init(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	var got []domain.Notification
+	n.send = func(_ context.Context, sub domain.PushSubscription, msg domain.Notification) (int, error) {
+		if sub.Endpoint == "https://dead" {
+			return 410, nil
+		}
+		got = append(got, msg)
+		return 201, nil
+	}
+	ctx := context.Background()
+	repo.planInfo["p1"] = domain.PlanReminderInfo{ID: "p1", StartDate: "2026-10-12", Items: 30,
+		Dishes: map[string][]string{"2026-10-12": {"Сырники", "Борщ"}, "2026-10-13": {"Омлет"}},
+		Dinner: map[string]domain.DishRef{"2026-10-12": {RecipeID: "borsch", Title: "Борщ"}}}
+	sub := domain.PushSubscription{Endpoint: "https://ok", P256dh: "k", Auth: "a", Lang: "ru"}
+	if err := n.SubscribeDevice(ctx, sub, "nope", 180, true); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("неделя, которой нет: %v", err)
+	}
+	if err := n.SubscribeDevice(ctx, domain.PushSubscription{Endpoint: "http://x", P256dh: "k", Auth: "a"}, "p1", 180, true); !errors.Is(err, domain.ErrBadInput) {
+		t.Fatalf("подписка не по https: %v", err)
+	}
+	if err := n.SubscribeDevice(ctx, sub, "p1", 180, true); err != nil {
+		t.Fatal(err)
+	}
+	// понедельник 08:05 по Москве: что готовим сегодня
+	if sent, _ := n.Tick(ctx, time.Date(2026, 10, 12, 5, 5, 0, 0, time.UTC)); sent != 1 || got[0].Tag != "today" || got[0].URL != "https://racion.test/plan/p1?day=2026-10-12" {
+		t.Fatalf("утро: sent=%d got=%+v", sent, got)
+	}
+	// 20:00: ужин был, но без аккаунта ответ «как было?» записать некуда
+	got = nil
+	if sent, _ := n.Tick(ctx, time.Date(2026, 10, 12, 17, 0, 0, 0, time.UTC)); sent != 0 {
+		t.Fatalf("вечером без аккаунта не спрашиваем: %+v", got)
+	}
+	// утреннее напоминание выключили в карточке: во вторник тишина
+	if err := n.SubscribeDevice(ctx, sub, "p1", 180, false); err != nil {
+		t.Fatal(err)
+	}
+	if sent, _ := n.Tick(ctx, time.Date(2026, 10, 13, 5, 5, 0, 0, time.UTC)); sent != 0 {
+		t.Fatalf("утро выключено: %+v", got)
+	}
+	// воскресенье в полдень: неделя кончается сегодня, следующей нет — «собрать неделю», без магазина
+	if sent, _ := n.Tick(ctx, time.Date(2026, 10, 18, 9, 0, 0, 0, time.UTC)); sent != 1 || got[0].Tag != "week" || got[0].URL != "https://racion.test/" {
+		t.Fatalf("воскресенье: sent=%d got=%+v", sent, got)
+	}
+	// push-сервис ответил «подписки нет»: устройство удаляется вместе с неделями
+	dead := domain.PushSubscription{Endpoint: "https://dead", P256dh: "k", Auth: "a", Lang: "ru"}
+	if err := n.SubscribeDevice(ctx, dead, "p1", 180, true); err != nil {
+		t.Fatal(err)
+	}
+	n.Tick(ctx, time.Date(2026, 10, 13, 5, 5, 0, 0, time.UTC))
+	if _, ok := repo.devices["https://dead"]; ok {
+		t.Fatalf("мёртвое устройство должно удалиться")
 	}
 }

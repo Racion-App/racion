@@ -29,6 +29,12 @@ type PushRepo interface {
 	SetSettings(ctx context.Context, userID string, s domain.NotifySettings) error
 	MarkSent(ctx context.Context, userID, key string) (bool, error)
 	PlansForReminders(ctx context.Context, userID string) ([]domain.PlanReminderInfo, error)
+	// устройства без аккаунта: подписка привязана не к человеку, а к неделям, открытым на устройстве
+	SaveDevice(ctx context.Context, s domain.PushSubscription, settings domain.NotifySettings, planID string) error
+	DeleteDevice(ctx context.Context, endpoint string) error
+	Devices(ctx context.Context) ([]domain.PushDevice, error)
+	DevicePlans(ctx context.Context, endpoint string) ([]domain.PlanReminderInfo, error)
+	MarkSentDevice(ctx context.Context, endpoint, key string) (bool, error)
 }
 
 type SettingsRepo interface {
@@ -81,17 +87,42 @@ func (n *Notifications) Init(ctx context.Context) error {
 func (n *Notifications) PublicKey() string { return n.pub }
 
 func (n *Notifications) Subscribe(ctx context.Context, userID string, s domain.PushSubscription) error {
-	if s.Endpoint == "" || len(s.Endpoint) > 1000 || s.P256dh == "" || s.Auth == "" || !strings.HasPrefix(s.Endpoint, "https://") {
+	if !validSub(&s) {
 		return domain.ErrBadInput
-	}
-	if _, ok := i18n.Valid(s.Lang); !ok {
-		s.Lang = "ru"
 	}
 	return n.repo.Save(ctx, userID, s)
 }
 
 func (n *Notifications) Unsubscribe(ctx context.Context, endpoint string) error {
 	return n.repo.Delete(ctx, endpoint)
+}
+
+// validSub проверяет подписку браузера; незнакомый язык становится русским.
+func validSub(s *domain.PushSubscription) bool {
+	if s.Endpoint == "" || len(s.Endpoint) > 1000 || s.P256dh == "" || s.Auth == "" || !strings.HasPrefix(s.Endpoint, "https://") {
+		return false
+	}
+	if _, ok := i18n.Valid(s.Lang); !ok {
+		s.Lang = "ru"
+	}
+	return true
+}
+
+// SubscribeDevice — напоминания без регистрации: подписка этого устройства и неделя, по которой напоминать.
+// Повторный вызов с другой неделей добавляет её к устройству. today — утреннее «что готовим сегодня»;
+// остальное как у всех: список в день покупок, в воскресенье — собрать следующую неделю.
+func (n *Notifications) SubscribeDevice(ctx context.Context, s domain.PushSubscription, planID string, tz int, today bool) error {
+	if !validSub(&s) || planID == "" || tz < -14*60 || tz > 14*60 {
+		return domain.ErrBadInput
+	}
+	set := domain.DeviceNotify()
+	set.Today = today
+	set.Tz = tz
+	return n.repo.SaveDevice(ctx, s, set, planID)
+}
+
+func (n *Notifications) UnsubscribeDevice(ctx context.Context, endpoint string) error {
+	return n.repo.DeleteDevice(ctx, endpoint)
 }
 
 func (n *Notifications) Settings(ctx context.Context, userID string) (domain.NotifySettings, int, error) {
@@ -124,7 +155,51 @@ func (n *Notifications) Tick(ctx context.Context, now time.Time) (sent int, err 
 	for _, u := range users {
 		sent += n.tickUser(ctx, u, now)
 	}
+	devices, err := n.repo.Devices(ctx)
+	if err != nil {
+		return sent, err
+	}
+	for _, d := range devices {
+		sent += n.tickDevice(ctx, d, now)
+	}
 	return sent, nil
+}
+
+// tickDevice — напоминания устройству без аккаунта по его неделям. Подписка у него одна, поэтому
+// отказ push-сервиса (подписки больше нет) сразу удаляет устройство вместе с его неделями.
+func (n *Notifications) tickDevice(ctx context.Context, d domain.PushDevice, now time.Time) int {
+	plans, err := n.repo.DevicePlans(ctx, d.Sub.Endpoint)
+	if err != nil || len(plans) == 0 {
+		return 0
+	}
+	lang := i18n.Lang(d.Sub.Lang)
+	local := now.UTC().Add(time.Duration(d.Settings.Tz) * time.Minute)
+	sent := 0
+	for _, r := range dueReminders(local, d.Settings, plans) {
+		// «как было?» записывается в аккаунт, дайджест новинок — для тех, кто его включил в кабинете
+		if r.Kind == "ask" || r.Kind == "digest" {
+			continue
+		}
+		if ok, _ := n.repo.MarkSentDevice(ctx, d.Sub.Endpoint, r.Key); !ok {
+			continue
+		}
+		msg, ok := n.notification(ctx, r, lang)
+		if !ok {
+			continue
+		}
+		code, err := n.send(ctx, d.Sub, msg)
+		if code == http.StatusNotFound || code == http.StatusGone || code == http.StatusForbidden {
+			n.log.Warn("push device dropped", zap.String("endpoint", short(d.Sub.Endpoint)), zap.Int("status", code), zap.Error(err))
+			_ = n.repo.Delete(ctx, d.Sub.Endpoint)
+			return sent
+		}
+		if err != nil {
+			n.log.Warn("push device", zap.String("kind", r.Kind), zap.Error(err))
+			continue
+		}
+		sent++
+	}
+	return sent
 }
 
 func (n *Notifications) tickUser(ctx context.Context, u domain.NotifyUser, now time.Time) int {

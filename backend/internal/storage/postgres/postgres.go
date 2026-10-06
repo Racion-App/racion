@@ -72,6 +72,18 @@ func (s *Store) Cleanup(ctx context.Context, keepEvents time.Duration) (int64, e
 		return total, wrap("cleanup.api_usage", err)
 	}
 	total += tag.RowsAffected()
+	// журналы отправленных напоминаний: в ключах даты и недели, через 90 дней ни один ключ не повторится
+	for _, q := range []string{
+		`DELETE FROM notifications_sent WHERE sent_at < now() - interval '90 days'`,
+		`DELETE FROM messenger_sent WHERE sent_at < now() - interval '90 days'`,
+		`DELETE FROM push_sent WHERE sent_at < now() - interval '90 days'`,
+	} {
+		tag, err = s.pool.Exec(ctx, q)
+		if err != nil {
+			return total, wrap("cleanup.sent", err)
+		}
+		total += tag.RowsAffected()
+	}
 	tag, err = s.pool.Exec(ctx, `DELETE FROM events WHERE ts < now() - make_interval(days => $1)`, int(keepEvents.Hours()/24))
 	if err != nil {
 		return total, wrap("cleanup.events", err)

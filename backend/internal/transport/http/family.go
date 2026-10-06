@@ -61,6 +61,38 @@ func (s *Server) pushUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
+// pushDevice — напоминания без регистрации: подписка этого устройства и неделя, по которой напоминать.
+// Устройство, уже подписанное, присылает так и каждую новую неделю.
+func (s *Server) pushDevice(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		domain.PushSubscription
+		PlanID string `json:"planId"`
+		Tz     int    `json:"tz"`
+		Today  bool   `json:"today"`
+	}
+	if !decode(w, r, 8<<10, &body) {
+		return
+	}
+	sub := body.PushSubscription
+	sub.Lang = string(i18n.FromRequest(r))
+	if err := s.svc.Notify.SubscribeDevice(r.Context(), sub, body.PlanID, body.Tz, body.Today); err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	w.WriteHeader(204)
+}
+
+func (s *Server) pushDeviceDelete(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Endpoint string `json:"endpoint"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	_ = s.svc.Notify.UnsubscribeDevice(r.Context(), body.Endpoint)
+	w.WriteHeader(204)
+}
+
 func (s *Server) notifySettings(w http.ResponseWriter, r *http.Request) {
 	u := requireUser(w, r)
 	if u == nil {

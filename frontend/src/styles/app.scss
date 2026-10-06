@@ -309,6 +309,21 @@ a { text-underline-offset: 3px; }
   &__away { font-weight: 600; color: var(--ds-label-tertiary); }
   &--away { padding-bottom: 8px; .day__name { color: var(--ds-label-tertiary); } }
 }
+// Напоминания в конце недели, последней строкой чека: значок слева, текст и действия справа.
+// Включённые сворачиваются до строки состояния с переключателем утреннего напоминания.
+.remind { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start; padding: 16px 20px;
+  &__icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ds-blue-tint); color: var(--ds-blue); }
+  &__text { display: grid; gap: 6px; min-width: 0;
+    b { font-size: 15px; font-weight: 600; line-height: 1.35; }
+    p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); } }
+  p.remind__note { font-size: 13px; color: var(--ds-label-tertiary); }
+  &__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 4px; }
+  &__link { justify-self: start; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--ds-label-secondary); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+    &:hover { color: var(--ds-blue); } &:disabled { opacity: 0.5; cursor: default; }
+    &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: 6px; } }
+  &__switch { min-height: 40px; padding: 2px 0; .switch__text { font-size: 14px; font-weight: 500; } }
+  &.is-on { .remind__icon { background: var(--ds-green-tint); color: var(--ds-green); } }
+}
 // Перестановка: исходная ячейка подсвечена, цели того же приёма получают кнопку «Сюда», полоса-подсказка сверху
 .dish.is-moving { background: var(--ds-blue-tint); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: var(--ds-radius-md); }
 .dish.is-target { .dish__nums { opacity: 0.5; } }
@@ -534,7 +549,7 @@ a { text-underline-offset: 3px; }
 }
 
 @media print {
-  .topbar, .actionbar, .dish__swap, .tear__btn, .item__check, .list__bots { display: none !important; }
+  .topbar, .actionbar, .dish__swap, .tear__btn, .item__check, .list__bots, .remind { display: none !important; }
   body { background: #fff; }
   .receipt { box-shadow: none; border: 0; }
 }

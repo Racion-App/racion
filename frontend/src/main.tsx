@@ -3,17 +3,21 @@ import { createRoot } from "react-dom/client";
 import "flag-icons/css/flag-icons.min.css";
 import "./styles/app.scss";
 import { App } from "./App";
-import { initAnalytics } from "./lib/analytics";
+import { initAnalytics, track } from "./lib/analytics";
 import { initTelegram } from "./lib/telegram";
 import { adoptQueryLang, warmDict } from "./i18n";
+import { openCurrentWeek } from "./lib/weeks";
 
 // до первой отрисовки: данные запуска мини-приложения Telegram и язык из ?lang= (так бот открывает сайт)
 initTelegram();
 adoptQueryLang();
+// установленное приложение с идущей неделей открывается сразу на ней, а не на анкете
+const toWeek = openCurrentWeek();
 
 import { initOffline } from "./lib/offline";
 initAnalytics();
 initOffline();
+if (toWeek) track("pwa_open_week");
 try { window.addEventListener("load", () => setTimeout(() => sessionStorage.removeItem("racion.chunk.reload"), 5000)); } catch { /* приватный режим */ }
 // офлайн-оболочка и список покупок: service worker регистрируется сразу, push подключается к нему же
 if ("serviceWorker" in navigator) {
@@ -51,7 +55,8 @@ const presented = () =>
     });
     po.observe({ type: "element", buffered: true });
   });
-const shown = document.getElementById("homeshell")
+// приложение открывается сразу на неделе: шаг квиза из HTML ждать незачем
+const shown = document.getElementById("homeshell") && !toWeek
   ? () => Promise.race([presented(), wait(1000)]).catch(() => {})
   : () => Promise.resolve();
 Promise.race([warmDict(), wait(3000)])

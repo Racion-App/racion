@@ -17,6 +17,7 @@ import { writeJSON } from "../lib/storage";
 import { rememberNames } from "../lib/names";
 import { readDraft } from "../lib/draft";
 import { approx, money, weekRange } from "../lib/format";
+import { lastWeekSummary, nextWeekStart } from "../lib/weeks";
 import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
 import { APPETITES, MOM_STATES } from "../lib/types";
 import { useAuth } from "../lib/auth";
@@ -154,15 +155,17 @@ export function Quiz() {
     track("occasion_preset", { id: eventPreset.id });
   }, [eventPreset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [collName, setCollName] = useState("");
-  // Вошедшему с неделями — быстрые действия вместо анкеты с нуля: открыть последнюю, собрать как в прошлый раз
-  const [lastPlan, setLastPlan] = useState<PlanSummary | null>(null);
+  // Кто уже собирал неделю — быстрые действия вместо анкеты с нуля: открыть последнюю неделю, собрать
+  // следующую по тем же ответам. У вошедшего недели из аккаунта, у гостя — те, что помнит браузер.
+  const [lastPlan, setLastPlan] = useState<PlanSummary | null>(() => lastWeekSummary());
   useEffect(() => {
     if (!user) {
-      setLastPlan(null);
+      setLastPlan(lastWeekSummary());
       return;
     }
-    api.myPlans().then((list) => setLastPlan(list[0] ?? null)).catch(() => setLastPlan(null));
+    api.myPlans().then((list) => setLastPlan(list.find((x) => !x.occasion) ?? lastWeekSummary())).catch(() => setLastPlan(lastWeekSummary()));
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const nextStart = nextWeekStart(lastPlan?.startDate);
   useEffect(() => {
     const cid = sp.get("collection");
     if (cid) setP((prev) => ({ ...prev, collection: cid }));
@@ -331,13 +334,14 @@ export function Quiz() {
     }
   }, [step, p]);
 
-  const submit = async () => {
+  // startDate — для «Собрать следующую неделю»: неделя сразу после последней, а не та же самая
+  const submit = async (startDate?: string) => {
     if (busy) return;
     setBusy(true);
     setSubmitError(null);
     track("plan_submit", { country: p.country, store: p.store, region: p.region, adults: p.adults, kids: p.kids.length, goal: p.goal, budgetMode: p.budgetMode, budgetValue: p.budgetValue });
     try {
-      const plan = await api.createPlan(p);
+      const plan = await api.createPlan(startDate ? { ...p, startDate } : p);
       rememberNames(plan);
       track("plan_created", { id: plan.id, cost: plan.totals.cost });
       if (user) api.updateMe({ defaults: p }).catch(() => {});
@@ -425,15 +429,15 @@ export function Quiz() {
               {t("quiz.q1")}
             </h1>
             <p className="quiz__hint">{p.country === "RU" ? t("quiz.q1.hint.RU") : t("quiz.q1.hint")}</p>
-            {user && lastPlan && !eventPreset && !p.collection && (
+            {lastPlan && !eventPreset && !p.collection && (
               <div className="quickstart" aria-label={t("quick.title")}>
-                <Link className="quickstart__card" to={`/plan/${lastPlan.id}`} onClick={() => track("quick_open_plan")}>
+                <Link className="quickstart__card" to={`/plan/${lastPlan.id}`} onClick={() => track("quick_open_plan", { account: !!user })}>
                   <span className="quickstart__icon"><CalendarDays size={20} aria-hidden /></span>
-                  <span><b>{t("quick.open")}</b><small>{lastPlan.title || t("plan.title", { range: weekRange(lastPlan.startDate, lang) })} · {lastPlan.items} {t("quick.items")}{lastPlan.checked > 0 ? ` · ${t("quick.bought", { n: lastPlan.checked })}` : ""}</small></span>
+                  <span><b>{t("quick.open")}</b><small>{lastPlan.title || t("plan.title", { range: weekRange(lastPlan.startDate, lang) })} · {lastPlan.items} {tn("items", lastPlan.items)}{lastPlan.checked > 0 ? ` · ${t("quick.bought", { n: lastPlan.checked })}` : ""}</small></span>
                 </Link>
-                <button type="button" className="quickstart__card" disabled={busy || !p.store} onClick={() => { track("quick_rebuild"); void submit(); }}>
+                <button type="button" className="quickstart__card" disabled={busy || !p.store} onClick={() => { track("quick_rebuild", { account: !!user }); void submit(nextStart); }}>
                   <span className="quickstart__icon"><RefreshCw size={20} aria-hidden /></span>
-                  <span><b>{t("quick.rebuild")}</b><small>{t("quick.rebuild.sub", { store: stores.find((s) => s.code === p.store)?.name ?? p.store })}</small></span>
+                  <span><b>{t("quick.next")}</b><small>{p.store ? t("quick.next.sub", { range: weekRange(nextStart, lang), store: stores.find((s) => s.code === p.store)?.name ?? p.store }) : weekRange(nextStart, lang)}</small></span>
                 </button>
               </div>
             )}
@@ -962,7 +966,7 @@ export function Quiz() {
               <ArrowRight size={18} aria-hidden />
             </button>
           ) : (
-            <button type="button" className="btn btn-primary" disabled={!canNext || busy} onClick={submit} aria-busy={busy}>
+            <button type="button" className="btn btn-primary" disabled={!canNext || busy} onClick={() => void submit()} aria-busy={busy}>
               {busy ? (
                 <>
                   <ReceiptLoader label={t("quiz.busy")} /> {t("quiz.busy")}

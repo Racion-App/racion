@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { readJSON, writeJSON } from "./storage";
 
 // Web Push на этом устройстве: регистрация service worker, подписка через VAPID-ключ сервера,
 // отправка подписки в аккаунт. Состояние: unsupported | denied | off | on.
@@ -41,8 +42,10 @@ function toKey(base64: string): Uint8Array {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
-// subscribe запрашивает разрешение и регистрирует устройство в аккаунте.
-export async function pushSubscribe(): Promise<PushState> {
+type Keys = { endpoint: string; p256dh: string; auth: string };
+
+// browserSubscription запрашивает разрешение и подписывает браузер на ключ сервера; строка — почему не вышло.
+async function browserSubscription(): Promise<Keys | PushState> {
   if (!pushSupported()) return "unsupported";
   const perm = await Notification.requestPermission();
   if (perm !== "granted") return perm === "denied" ? "denied" : "off";
@@ -57,8 +60,59 @@ export async function pushSubscribe(): Promise<PushState> {
   }
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: wanted as BufferSource });
   const j = sub.toJSON();
-  await api.pushSubscribe({ endpoint: sub.endpoint, p256dh: j.keys?.p256dh ?? "", auth: j.keys?.auth ?? "" });
+  return { endpoint: sub.endpoint, p256dh: j.keys?.p256dh ?? "", auth: j.keys?.auth ?? "" };
+}
+
+// subscribe запрашивает разрешение и регистрирует устройство в аккаунте.
+export async function pushSubscribe(): Promise<PushState> {
+  const sub = await browserSubscription();
+  if (typeof sub === "string") return sub;
+  await api.pushSubscribe(sub);
   return "on";
+}
+
+// Без аккаунта: устройство подписывается на напоминания по неделе. Выбор человека (подписано ли
+// устройство, нужно ли утреннее «что готовим») помнит браузер — с ним подписка уходит и для каждой
+// новой недели.
+const DEVICE_KEY = "racion.remind";
+type DeviceRemind = { on: boolean; today: boolean };
+
+export function deviceRemind(): DeviceRemind {
+  return readJSON<DeviceRemind>(DEVICE_KEY, { on: false, today: true });
+}
+
+export async function pushSubscribeDevice(planId: string, today: boolean): Promise<PushState> {
+  const sub = await browserSubscription();
+  if (typeof sub === "string") return sub;
+  await api.pushDevice({ ...sub, planId, today, tz: -new Date().getTimezoneOffset() });
+  writeJSON(DEVICE_KEY, { on: true, today });
+  return "on";
+}
+
+// pushLinkDevice — открыли другую неделю на подписанном устройстве: напоминания пойдут и по ней.
+// Без запроса разрешения: если подписки в браузере уже нет, просто забываем о ней.
+export async function pushLinkDevice(planId: string): Promise<void> {
+  const r = deviceRemind();
+  if (!r.on || !pushSupported() || Notification.permission !== "granted") return;
+  const reg = await navigator.serviceWorker.getRegistration("/");
+  const sub = await reg?.pushManager.getSubscription();
+  if (!sub) {
+    writeJSON(DEVICE_KEY, { ...r, on: false });
+    return;
+  }
+  const j = sub.toJSON();
+  await api.pushDevice({ endpoint: sub.endpoint, p256dh: j.keys?.p256dh ?? "", auth: j.keys?.auth ?? "", planId, today: r.today, tz: -new Date().getTimezoneOffset() });
+}
+
+export async function pushUnsubscribeDevice(): Promise<PushState> {
+  const reg = await navigator.serviceWorker.getRegistration("/");
+  const sub = await reg?.pushManager.getSubscription();
+  if (sub) {
+    await api.pushDeviceDelete(sub.endpoint).catch(() => undefined);
+    await sub.unsubscribe();
+  }
+  writeJSON(DEVICE_KEY, { ...deviceRemind(), on: false });
+  return "off";
 }
 
 export async function pushUnsubscribe(): Promise<PushState> {

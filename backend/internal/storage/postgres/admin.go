@@ -28,6 +28,7 @@ func (r *Admin) Counters(ctx context.Context) (domain.AdminCounters, error) {
 		(SELECT count(*) FROM user_recipes),
 		(SELECT count(*) FROM households),
 		(SELECT count(DISTINCT user_id) FROM push_subscriptions),
+		(SELECT count(*) FROM push_subscriptions WHERE user_id IS NULL),
 		(SELECT count(*) FROM recipe_comments),
 		(SELECT count(*) FROM recipe_feedback),
 		(SELECT count(*) FROM purchases WHERE bought_at > now() - interval '7 days'),
@@ -35,7 +36,7 @@ func (r *Admin) Counters(ctx context.Context) (domain.AdminCounters, error) {
 		(SELECT count(*) FROM first_plan),
 		(SELECT count(*) FROM first_plan f WHERE EXISTS (SELECT 1 FROM events e
 			WHERE e.sid = f.sid AND e.name = 'plan_created' AND e.ts >= f.ts + interval '3 days'))`).Scan(
-		&c.Users, &c.UsersWeek, &c.ActiveWeek, &c.Plans, &c.PlansWeek, &c.PlansOwned, &c.OwnRecipes, &c.Households, &c.PushUsers, &c.Comments, &c.Feedback, &c.PurchasesWeek, &c.ErrorsWeek,
+		&c.Users, &c.UsersWeek, &c.ActiveWeek, &c.Plans, &c.PlansWeek, &c.PlansOwned, &c.OwnRecipes, &c.Households, &c.PushUsers, &c.PushDevices, &c.Comments, &c.Feedback, &c.PurchasesWeek, &c.ErrorsWeek,
 		&c.SecondWeekBase, &c.SecondWeek)
 	return c, wrap("admin.counters", err)
 }
