@@ -261,3 +261,19 @@
   document.addEventListener("touchstart",function(e){if(cur&&!cur.contains(e.target))hide()},{passive:true,capture:true});
   document.addEventListener("pointerdown",function(e){if(cur&&!cur.contains(e.target))hide()},{passive:true,capture:true});
 })();
+
+// Вопросы и ответы (details.faq) раскрываются плавно: высота ответа растёт от нуля до своей и обратно,
+// плюс поворачивается в крестик. Без JS <details> работает как обычно, при «уменьшить движение» — сразу.
+(function(){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.addEventListener("click",function(e){
+    var s=e.target.closest("details.faq > summary");if(!s||reduce)return;
+    var d=s.parentNode,a=d.querySelector(".faq__a")||d.lastElementChild;if(!a||a===s||!a.animate)return;
+    e.preventDefault();if(d.dataset.anim)return;
+    var open=!d.open;d.dataset.anim="1";
+    if(open){d.open=true}else{d.classList.add("is-closing")}
+    var h=a.scrollHeight;a.style.overflow="hidden";
+    var anim=a.animate(open?[{height:"0px",opacity:0},{height:h+"px",opacity:1}]:[{height:h+"px",opacity:1},{height:"0px",opacity:0}],{duration:280,easing:"cubic-bezier(0.32,0.72,0,1)"});
+    anim.onfinish=function(){a.style.overflow="";if(!open){d.open=false;d.classList.remove("is-closing")}delete d.dataset.anim};
+  });
+})();

@@ -79,7 +79,8 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 	}
 
 	type dishView struct {
-		Slot, Title, Href, Kcal, Money, Note string
+		Slot, Title, Href, Kcal, Money, Note, Image string
+		Product                                     bool // фото продукта на белом фоне (кефир)
 	}
 	type dayView struct {
 		Label, Kcal string
@@ -93,8 +94,12 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		var kcal float64
 		for _, x := range d.Dishes {
 			v := dishView{Slot: planner.SlotLabel(l, x.Slot), Title: x.Title, Note: x.Note}
+			if x.Kind == planner.KidBedtime {
+				v.Image, v.Product = s.catalog.Ingredients["kefir"].Image, true
+			}
 			if x.RecipeID != "" {
 				v.Href = pl.P + "/recipe/" + x.RecipeID
+				v.Image = s.catalog.RecipeByID[x.RecipeID].Image
 				v.Kcal = i18n.T(l, "recipe.kcal", strconv.Itoa(int(math.Round(x.Kcal))))
 				v.Money = formatMoney(pl.Country, x.Cost)
 				kcal += x.Kcal
@@ -156,14 +161,12 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 	if len(faq) > 0 {
 		faq[0].A = planner.KidNorm(m.Age, "", l) // калории и белок — по норме возраста, одной строкой с источником
 	}
-	type link struct{ Name, Href string }
-	var others []link
-	for _, o := range kidMenuPresets {
-		if o.Slug != m.Slug {
-			others = append(others, link{i18n.T(l, "kidpage."+o.Key+".h1"), pl.P + "/menu/" + o.Slug})
-		}
+	// плитки нормы возраста: калории, белок, вода и напитки (МР 2.3.1.0253-21)
+	kcalN, protN, waterN := planner.KidNormValues(m.Age)
+	norms := []normTile{{kcalN, "", i18n.T(l, "agepage.norm.kcal")}, {protN, i18n.T(l, "unit.g"), i18n.T(l, "agepage.norm.protein")}}
+	if waterN != "" {
+		norms = append(norms, normTile{waterN, i18n.T(l, "unit.ml"), i18n.T(l, "agepage.norm.water")})
 	}
-	others = append(others, link{i18n.T(l, "weaning.page.h1"), pl.P + "/weaning"})
 	var alts []altLink
 	for _, al := range topicLangs {
 		mt := i18n.Meta(al)
@@ -173,7 +176,8 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/menu/" + m.Slug,
 			OGImage: brandOG(base, l), OGWide: true, OGType: "article", Alternates: alts, JSONLD: kidMenuLD(base, pl, h1, desc, m.Slug, faq)},
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
-		"H1": h1, "Intro": intro, "Norm": planner.KidNorm(m.Age, "", l), "Rules": rules, "Days": days, "Groups": groups, "FAQ": faq, "Others": others,
+		"H1": h1, "Intro": intro, "Norm": planner.KidNorm(m.Age, "", l), "Rules": rules, "Days": days, "Groups": groups, "FAQ": faq,
+		"Scale": ageScale(pl, m.Slug), "Norms": norms, "Plate": s.kidPlate(s.plateDay(km.Days), pl),
 		"Week": week, "PerDay": perDay, "KcalDay": int(math.Round(kcalSum / 7)), "Items": plan.Totals.Items, "Dishes": dishes, "Age": age,
 		"StartDate": start, "PlanHref": "/?s=2&kid=" + strconv.Itoa(m.Age),
 	}
@@ -198,13 +202,4 @@ func kidMenuLD(base string, pl pageLocale, name, desc, slug string, faq []domain
 	}
 	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{page, crumbs, map[string]any{"@type": "FAQPage", "mainEntity": qs}}})
 	return template.JS(b)
-}
-
-// kidMenuLinks — ссылки на меню по возрасту для страницы прикорма и подвала.
-func kidMenuLinks(pl pageLocale) []struct{ Name, Href string } {
-	var out []struct{ Name, Href string }
-	for _, o := range kidMenuPresets {
-		out = append(out, struct{ Name, Href string }{i18n.T(pl.L, "kidpage."+o.Key+".h1"), pl.P + "/menu/" + o.Slug})
-	}
-	return out
 }

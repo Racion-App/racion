@@ -49,6 +49,16 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 	"add":      func(a, b int) int { return a + b },
 	"sub":      func(a, b int) int { return a - b },
 	"plural":   func(l i18n.Lang, n int, key string) string { return i18n.Plural(l, n, key) },
+	// dict — несколько значений одним аргументом для вложенного шаблона: (dict "L" .L "Items" .Plate)
+	"dict": func(kv ...any) map[string]any {
+		m := make(map[string]any, len(kv)/2)
+		for i := 0; i+1 < len(kv); i += 2 {
+			if k, ok := kv[i].(string); ok {
+				m[k] = kv[i+1]
+			}
+		}
+		return m
+	},
 	"minutes":  func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
 	"seq": func(n int) []int {
 		out := make([]int, n)

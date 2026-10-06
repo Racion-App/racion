@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "generatedAt": "2026-09-17T20:42:49Z",
+ "generatedAt": "2026-10-07T12:00:00Z",
  "title": "Design System: Рацион",
  "extensions": {
   "source": {
@@ -11,7 +11,10 @@
    "ssrTemplates": [
     "backend/internal/api/templates/layout.html",
     "backend/internal/api/templates/recipe.html",
-    "backend/internal/api/templates/recipes.html"
+    "backend/internal/api/templates/recipes.html",
+    "backend/internal/transport/http/templates/kidmenu.html",
+    "backend/internal/transport/http/templates/weaning.html",
+    "backend/internal/transport/http/templates/plate.html"
    ],
    "surfaceTokens": {
     "--r-sheet-max": "560px",
@@ -20,6 +23,19 @@
     "--r-tabular": "\"tnum\" 1, \"lnum\" 1",
     "--r-safe-bottom": "env(safe-area-inset-bottom, 0px)",
     "--rp-tint": "var(--ds-{orange|green|blue|purple}-tint) по .rpage--{breakfast|lunch|dinner|snack}"
+   },
+   "agePages": {
+    "routes": [
+     "/menu/child-1",
+     "/menu/child-1-5",
+     "/menu/child-2",
+     "/menu/child-3",
+     "/weaning"
+    ],
+    "data": "backend/internal/transport/http/agepage.go",
+    "styles": "frontend/src/styles/app.scss — раздел «Страницы возраста», плюс .faq у .colfaq",
+    "script": "frontend/public/ssr.js — плавный FAQ",
+    "brief": ".impeccable/surfaces/end-internal-transport-http-templates-kidmenu-html.md"
    }
   },
   "colorMeta": {
@@ -557,6 +573,21 @@
     "name": "panel-tone",
     "value": "background: var(--ds-fill-4); border: 0; box-shadow: none",
     "purpose": "Панели боковой колонки .panel — тональный слой внутри листа, не карточка в карточке."
+   },
+   {
+    "name": "plate-photo-halo",
+    "value": "0 0 0 4px var(--ds-bg-elevated), 0 2px 10px rgba(0, 0, 0, 0.08)",
+    "purpose": "Круглое фото на «тарелке дня»: белое кольцо цвета карточки отделяет фото от обода эллипса. Единственная тень страниц возраста; фокус добавляет --ds-shadow-focus после кольца."
+   },
+   {
+    "name": "flat-primary",
+    "value": "background: var(--ds-blue); border-color: transparent; box-shadow: none; hover: color-mix(in srgb, var(--ds-blue) 88%, black 12%)",
+    "purpose": "Плоская .btn-primary только внутри .ctapanel страниц возраста: без градиента, блика и свечения DS."
+   },
+   {
+    "name": "age-blocks-flat",
+    "value": "background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); box-shadow: none",
+    "purpose": "Все блоки страниц возраста (тарелка, нормы, правила, карточки дней, таблица) — плоские на грунте, листа нет."
    }
   ],
   "motion": [
@@ -645,6 +676,21 @@
     "name": "reduced-motion",
     "value": "@media (prefers-reduced-motion: reduce) — animation/transition 0.01ms, iteration-count 1",
     "purpose": "Глобально."
+   },
+   {
+    "name": "plate-in",
+    "value": "520ms var(--ds-ease-spring) both; delay calc(var(--i) * 70ms + 80ms); from opacity 0.25 scale(0.86)",
+    "purpose": "Приёмы «тарелки дня» раскладываются по кругу один за другим. Единственный авторский момент страниц возраста; только при prefers-reduced-motion: no-preference."
+   },
+   {
+    "name": "faq-height",
+    "value": "Web Animations API, 280ms cubic-bezier(0.32, 0.72, 0, 1), height 0 ↔ scrollHeight + opacity",
+    "purpose": "Ответ details.faq раскрывается и сворачивается плавно (ssr.js); .is-closing возвращает плюс до конца сворачивания. При reduce — обычный <details>."
+   },
+   {
+    "name": "faq-plus",
+    "value": "transform: rotate(45deg) за var(--ds-dur-base) var(--ds-ease-spring)",
+    "purpose": "Нарисованный плюс у вопроса становится крестиком у открытого."
    }
   ],
   "breakpoints": [
@@ -682,6 +728,36 @@
     "name": "wide",
     "value": "1024px",
     "purpose": "≥1024px: .shell--wide 1120px; чек в две колонки minmax(0,1fr) 400px, линия отрыва скрыта, слот в колонке 64px; рецепт в две колонки minmax(0,1fr) 360px, H1 36px, поля 32px."
+   },
+   {
+    "name": "age-narrow",
+    "value": "420px",
+    "purpose": "≤420px: сегменты шкалы возраста по содержимому 14px, плитки норм 10px 11px, число 17px."
+   },
+   {
+    "name": "plate-phone",
+    "value": "520px",
+    "purpose": "≤520px: геометрия тарелки для телефона — --ry 43cqw, --cy 57cqw, --ph 23cqw, --cw 18cqw, --capw 39cqw, aspect-ratio 1/1.26 (у четырёх приёмов 1/1.22, у прикорма 1/1.38)."
+   },
+   {
+    "name": "week-grid",
+    "value": "640px",
+    "purpose": "≥640px: неделя страниц возраста из горизонтальной ленты становится сеткой в 2 колонки."
+   },
+   {
+    "name": "checks-2col",
+    "value": "800px",
+    "purpose": "≥800px: правила .checks в две колонки."
+   },
+   {
+    "name": "age-top",
+    "value": "900px",
+    "purpose": "≥900px: первый экран страницы возраста в две колонки 1.12fr / 1fr, правая колонка липкая top 16px; ниже — .agetop__side display: contents и порядок через order."
+   },
+   {
+    "name": "week-3col",
+    "value": "1000px",
+    "purpose": "≥1000px: неделя в 3 колонки, список покупок на 2 колонки и в два столбца."
    }
   ],
   "layout": {
@@ -703,7 +779,15 @@
    "cardGrid": "repeat(auto-fill, minmax(240px, 1fr)); tight: 200px",
    "filterGroupGrid": "96px minmax(0, 1fr)",
    "accountGridWide": "minmax(0, 1fr) 320px",
-   "stickyAside": "@media (min-width: 1024px) and (min-height: 760px) — sticky top 12px; no nested scroll"
+   "stickyAside": "@media (min-width: 1024px) and (min-height: 760px) — sticky top 12px; no nested scroll",
+   "agePageOrder": "crumbs → .agehead (h1 + .agescale) → .agetop (plate | side: norms · ctapanel · agefeeds · lead) → .agesec разделы → FAQ → источник",
+   "ageTopWide": "minmax(0, 1.12fr) minmax(0, 1fr), gap 24px, side sticky top 16px @900",
+   "ageTopPhone": ".agetop__side display: contents; order: norms −1, plate, agefeeds 1, ctapanel 2, lead 3",
+   "plateGeometry": "--a0 -90deg; --rx 34cqw; --ry 40cqw; --cy 56cqw; --ph 25cqw; --cw 20cqw; --capw 37.5cqw; aspect-ratio 1/1.18; item at (50cqw + cos(a)·rx, cy + sin(a)·ry), a = a0 + i·360°/n",
+   "plateGeometry4": "--a0 -135deg; --rx 39cqw; --cy 52cqw; --capw 35cqw; aspect-ratio 1/1.14",
+   "weekPhone": "grid-auto-flow: column; grid-auto-columns: 86%; scroll-snap x mandatory; bleed 16px",
+   "dayRowGrid": "40px minmax(0, 1fr) auto",
+   "weaningStepGrid": "84px minmax(0, 1fr) → 1fr @≤560"
   }
  },
  "components": [
@@ -842,6 +926,53 @@
    "description": "Три кода языка (ru/en/de) 11/700 uppercase на подложке fill-4, текущий залит bg-elevated с shadow-xs. Стоит в шапке между «Рецепты» и кнопкой кабинета; в занятой шапке на узком экране виден только текущий код, клик листает языки по кругу.",
    "html": "<span class=\"ds-langsw\" role=\"group\" aria-label=\"Язык\"><button type=\"button\" lang=\"ru\">ru</button><button type=\"button\" lang=\"en\" aria-current=\"true\">en</button><button type=\"button\" lang=\"de\">de</button></span>",
    "css": ".ds-langsw{display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:var(--ds-fill-4)}.ds-langsw button{min-width:26px;height:22px;padding:0 5px;border:0;border-radius:6px;background:transparent;color:var(--ds-label-secondary);font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}.ds-langsw button[aria-current=\"true\"]{background:var(--ds-bg-elevated);color:var(--ds-label-primary);box-shadow:var(--ds-shadow-xs)}"
+  },
+  {
+   "name": "Flat CTA Panel",
+   "kind": "card",
+   "refersTo": "cta-panel",
+   "description": "Единственное действие страниц возраста: строка текста и плоская синяя кнопка на синей подложке. Намеренное исключение из глянцевой кнопки DS, только здесь.",
+   "html": "<div class=\"ds-ctapanel\"><p>Соберём неделю на всю семью с детскими порциями.</p><a class=\"ds-btn-flat\" href=\"#\">Собрать неделю</a></div>",
+   "css": ".ds-ctapanel { display: grid; gap: 12px; padding: 16px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-blue-tint, rgba(0,122,255,0.10)); } .ds-ctapanel p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-btn-flat { display: grid; place-items: center; min-height: 48px; padding: 10px 16px; border-radius: var(--ds-radius-md, 10px); background: var(--ds-blue, #007AFF); color: #fff; font-size: 16px; font-weight: 600; text-decoration: none; box-shadow: none; transition: background 140ms; } .ds-btn-flat:hover { background: color-mix(in srgb, var(--ds-blue, #007AFF) 88%, black 12%); } .ds-btn-flat:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0,122,255,0.22); }"
+  },
+  {
+   "name": "Age Scale",
+   "kind": "nav",
+   "refersTo": "age-scale",
+   "description": "Шкала возраста на всю ширину над первым экраном всех страниц возраста; текущий возраст залит синим.",
+   "html": "<nav class=\"ds-agescale\"><a href=\"#\">Прикорм</a><a href=\"#\" aria-current=\"page\">1 год</a><a href=\"#\">1,5 года</a><a href=\"#\">2 года</a><a href=\"#\">3 года</a></nav>",
+   "css": ".ds-agescale { display: flex; gap: 2px; padding: 3px; border-radius: var(--ds-radius-md, 10px); background: var(--ds-fill-3, rgba(118,118,128,0.12)); } .ds-agescale a { flex: 1 1 0; display: grid; place-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); text-decoration: none; white-space: nowrap; transition: background 140ms, color 140ms; } .ds-agescale a:hover { color: var(--ds-label-primary, rgba(0,0,0,0.88)); } .ds-agescale a[aria-current=\"page\"] { background: var(--ds-blue, #007AFF); color: #fff; } .ds-agescale a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0,122,255,0.22); }"
+  },
+  {
+   "name": "Norm Tiles",
+   "kind": "card",
+   "refersTo": "norm-tile",
+   "description": "Три нормы возраста плитками: число в моно, единица и подпись в Inter.",
+   "html": "<ul class=\"ds-norms\"><li><b><span class=\"ds-num\">1200</span> <small>ккал</small></b><span>в день</span></li><li><b><span class=\"ds-num\">5</span></b><span>приёмов пищи</span></li><li><b><span class=\"ds-num\">400</span> <small>мл</small></b><span>молочного</span></li></ul>",
+   "css": ".ds-norms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; } .ds-norms li { display: grid; gap: 4px; padding: 12px 14px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-norms b { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; font-size: 20px; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; } .ds-norms small { font-size: 14px; font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-norms li > span { font-size: 13px; line-height: 1.3; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-num { font-family: var(--ds-font-mono, 'JetBrains Mono', ui-monospace, monospace); font-variant-numeric: tabular-nums lining-nums; }"
+  },
+  {
+   "name": "Plate of the Day",
+   "kind": "custom",
+   "refersTo": "plate",
+   "description": "Приёмы одного дня на эллипсе: круглые фото блюд, подписи на пилюлях, число приёмов в центре. Геометрия в cqw и cos()/sin(); раскладка plate-in.",
+   "html": "<div class=\"ds-plate\"><div class=\"ds-ring\" style=\"--n:4\"><p class=\"ds-center\"><b>4</b><span>приёма</span></p><div class=\"ds-item\" style=\"--i:0\"><span class=\"ds-img\"></span><span class=\"ds-cap\"><b>Завтрак</b><span>Каша овсяная</span></span></div><div class=\"ds-item\" style=\"--i:1\"><span class=\"ds-img\"></span><span class=\"ds-cap\"><b>Обед</b><span>Суп с фрикадельками</span></span></div><div class=\"ds-item\" style=\"--i:2\"><span class=\"ds-img\"></span><span class=\"ds-cap\"><b>Полдник</b><span>Творог</span></span></div><div class=\"ds-item\" style=\"--i:3\"><span class=\"ds-img\"></span><span class=\"ds-cap\"><b>Ужин</b><span>Тефтели</span></span></div></div></div>",
+   "css": ".ds-plate { padding: 18px 16px 8px; border-radius: var(--ds-radius-xl, 18px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-ring { --a0: -135deg; --rx: 39cqw; --ry: 40cqw; --cy: 52cqw; --ph: 25cqw; --cw: 20cqw; --capw: 35cqw; position: relative; width: 100%; max-width: 410px; margin: 0 auto; aspect-ratio: 1 / 1.14; container-type: inline-size; } .ds-ring::before { content: ''; position: absolute; left: calc(50cqw - var(--rx)); top: calc(var(--cy) - var(--ry)); width: calc(var(--rx) * 2); height: calc(var(--ry) * 2); border-radius: 50%; border: 2px solid var(--ds-blue-tint, rgba(0,122,255,0.10)); } .ds-center { position: absolute; left: 50cqw; top: var(--cy); width: var(--cw); aspect-ratio: 1; margin: 0; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ds-blue-tint, rgba(0,122,255,0.10)); display: grid; place-content: center; justify-items: center; } .ds-center b { font-family: var(--ds-font-mono, ui-monospace, monospace); font-size: 9cqw; line-height: 1; } .ds-center span { font-size: max(12px, 3.3cqw); font-weight: 600; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-item { --a: calc(var(--a0) + var(--i) * 360deg / var(--n)); position: absolute; left: calc(50cqw + cos(var(--a)) * var(--rx)); top: calc(var(--cy) + sin(var(--a)) * var(--ry)); width: var(--ph); aspect-ratio: 1; transform: translate(-50%, -50%); } .ds-img { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--ds-fill-4, rgba(116,116,128,0.08)); box-shadow: 0 0 0 4px var(--ds-bg-elevated, #fff), 0 2px 10px rgba(0,0,0,0.08); } .ds-cap { position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); width: max-content; max-width: var(--capw); display: grid; justify-items: center; text-align: center; line-height: 1.25; padding: 2px 6px; border-radius: 8px; background: var(--ds-bg-elevated, #fff); font-size: clamp(12px, 3.3cqw, 14px); } .ds-cap span { color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } @media (prefers-reduced-motion: no-preference) { .ds-item { animation: ds-plate-in 520ms cubic-bezier(0.32,0.72,0,1) both; animation-delay: calc(var(--i) * 70ms + 80ms); } } @keyframes ds-plate-in { from { opacity: 0.25; transform: translate(-50%, -50%) scale(0.86); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }"
+  },
+  {
+   "name": "Week Day Card",
+   "kind": "card",
+   "refersTo": "day-card",
+   "description": "День недели страницы возраста: строки с круглыми фото 40px, блюдо и пояснение, справа граммы и ≈ ₽ зелёным.",
+   "html": "<article class=\"ds-dayc\"><header><h3>ПН</h3><span>1180 ккал</span></header><div class=\"ds-row\"><span class=\"ds-ph\"></span><span class=\"ds-t\"><a href=\"#\">Каша гречневая</a><em>с молоком</em></span><span class=\"ds-n\">180 г<b>≈ 24 ₽</b></span></div></article>",
+   "css": ".ds-dayc { display: grid; gap: 2px; padding: 14px 14px 8px; border-radius: var(--ds-radius-lg, 14px); background: var(--ds-bg-elevated, #fff); border: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-dayc header { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 6px; } .ds-dayc h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.02em; } .ds-dayc header span { font-size: 13px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); font-family: var(--ds-font-mono, ui-monospace, monospace); } .ds-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--ds-fill-4, rgba(116,116,128,0.08)); } .ds-ph { width: 40px; height: 40px; border-radius: 50%; background: var(--ds-fill-4, rgba(116,116,128,0.08)); } .ds-t { display: grid; font-size: 14.5px; line-height: 1.3; } .ds-t a { font-weight: 600; color: var(--ds-label-primary, rgba(0,0,0,0.88)); text-decoration: none; } .ds-t a:hover { color: var(--ds-blue, #007AFF); } .ds-t em { font-style: normal; font-size: 12.5px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); } .ds-n { display: grid; justify-items: end; font-size: 12.5px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); font-family: var(--ds-font-mono, ui-monospace, monospace); } .ds-n b { font-weight: 400; color: var(--ds-green, #34C759); }"
+  },
+  {
+   "name": "FAQ Row",
+   "kind": "custom",
+   "description": "details.faq: вопрос 15.5/600 с нарисованным плюсом, который поворачивается в крестик; высота ответа анимируется в ssr.js.",
+   "html": "<details class=\"ds-faq\"><summary>Можно ли давать соль?</summary><p>До года — нет, после — понемногу.</p></details>",
+   "css": ".ds-faq { border-top: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-bottom: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); padding: 10px 0; } .ds-faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 15.5px; font-weight: 600; } .ds-faq summary::-webkit-details-marker { display: none; } .ds-faq summary::after { content: ''; flex: 0 0 auto; width: 18px; height: 18px; background: var(--ds-label-secondary, rgba(60,60,67,0.65)); transition: transform 220ms cubic-bezier(0.32,0.72,0,1); -webkit-mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E\") center / contain no-repeat; mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E\") center / contain no-repeat; } .ds-faq[open] summary::after { transform: rotate(45deg); } .ds-faq summary:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0,122,255,0.22); border-radius: 6px; } .ds-faq p { margin: 0; padding-top: 8px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); }"
   }
  ],
  "narrative": {
@@ -852,9 +983,10 @@
    "Одна возвышенная белая карточка (--ds-bg-elevated) на сером грунте: чек, лист рецепта, карточка входа.",
    "Синий = одно действие + выбор, зелёный = деньги, тинт слота = только подложка, красный = только ошибка/удаление.",
    "Inter для текста, JetBrains Mono tnum для всех чисел через .num — и в React, и в Go-шаблонах.",
-   "Пружинная анимация --ds-ease-spring; единственный авторский момент — «печать» чека; на рецепте только reprint пересчитанных граммовок.",
+   "Пружинная анимация --ds-ease-spring; авторский момент чека — «печать», на рецепте только reprint пересчитанных граммовок, на страницах возраста — раскладка «тарелки дня» plate-in.",
    "Каждая оценка в рублях несёт «≈»; цифра без «≈» — только целевой бюджет пользователя.",
-   "Один и тот же топбар в React и SSR: бренд · «Рецепты» · кабинет · тема."
+   "Один и тот же топбар в React и SSR: бренд · «Рецепты» · кабинет · тема.",
+   "Страницы возраста (/menu/child-*, /weaning) — тот же мир без листа: белые плоские блоки с границей на сером грунте, шкала возраста сверху, «тарелка дня» с настоящими фото блюд в первом экране."
   ],
   "rules": [
    {
@@ -879,7 +1011,7 @@
    },
    {
     "name": "The Token-Only Rule",
-    "body": "Поверхность не пишет hex: каждый цвет — var(--ds-*). Единственные литералы — #fff на галочке купленного и на счётчике фильтров, rgba(0,0,0,0.38) у ::backdrop нижнего листа и #fff фона в @media print.",
+    "body": "Поверхность не пишет hex: каждый цвет — var(--ds-*). Единственные литералы — #fff на галочке купленного, на счётчике фильтров и на текущем возрасте шкалы, rgba(0,0,0,0.38) у ::backdrop нижнего листа, rgba(0,0,0,0.08) в мягкой тени фото «тарелки дня», color-mix(in srgb, var(--ds-blue) 88%, black 12%) на hover плоской кнопки .ctapanel и #fff фона в @media print.",
     "section": "colors"
    },
    {
@@ -909,7 +1041,7 @@
    },
    {
     "name": "The One Sheet Rule",
-    "body": "На странице одна приподнятая поверхность — чек, лист рецепта или карточка входа. Внутри листа глубины нет: строки, продукты, шаги и панели разделяются линиями и тональными подложками --ds-fill-4, а не карточками в карточке.",
+    "body": "На странице одна приподнятая поверхность — чек, лист рецепта или карточка входа; страница для чтения без листа (страницы возраста, подборки) не поднимает ни одного блока. Внутри листа глубины нет: строки, продукты, шаги и панели разделяются линиями и тональными подложками --ds-fill-4, а не карточками в карточке.",
     "section": "elevation"
    },
    {
@@ -931,6 +1063,21 @@
     "name": "The Compact Card Rule",
     "body": "Карточка рецепта без фото — полоска 4px цвета слота сверху, заголовок 15/600, мета-строка слот · мин · ккал · ≈ ₽ (зелёный). Никакой цветной обложки с текстом; hover — shadow-md и подъём на 1px.",
     "section": "components"
+   },
+   {
+    "name": "The Secondary On White Rule",
+    "body": "На страницах возраста мелкий текст на белом (подписи норм, «ккал» дня, примечания под таблицей, шапка таблицы прикорма, время кормления, подписи блюд на тарелке) набирается --ds-label-secondary, не tertiary: tertiary на белом даёт около 2.3:1 и не читается в 12–13px. Новые страницы для чтения держат то же правило; tertiary остаётся для декоративных и повторяющихся меток там, где он уже стоит.",
+    "section": "colors"
+   },
+   {
+    "name": "The Flat CTA Exception",
+    "body": "Внутри .ctapanel страниц возраста .btn-primary плоская: --ds-blue без градиента, блика, свечения и тени, hover темнеет на 12%. Намеренное исключение из глянцевой кнопки DS, ограниченное .ctapanel: на спокойной странице для родителей глянец выглядел чужеродно. В квизе, чеке, рецепте и кабинете — кнопка DS.",
+    "section": "components"
+   },
+   {
+    "name": "The Plate Geometry Rule",
+    "body": "«Тарелка дня» раскладывается только переменными --a0 --rx --ry --cy --ph --cw --capw в cqw и cos()/sin() от угла a0 + i·360°/n; телефонная геометрия под 520px, четыре приёма — по диагоналям (.plate__ring--4). Новый случай — новый набор переменных, не ручные координаты.",
+    "section": "layout"
    }
   ],
   "dos": [
@@ -945,7 +1092,11 @@
    "Do писать по-русски, коротко и по делу: заголовки разделов одним словом («Продукты», «Как готовить», «Коротко», «Похожие», «Стоимость»), подписи объясняют метод, не хвалят; склонять счётчики через plural.",
    "Do уважать prefers-reduced-motion, env(safe-area-inset-bottom) и тёмную тему: [data-theme] на <html> из localStorage[\"racion.theme\"] (один ключ и цикл в React и SSR), <meta name=\"color-scheme\"> и два theme-color; поверхность не переопределяет ни одного тёмного значения.",
    "Do делать боковую панель рецепта липкой только при ≥1024px и min-height: 760px; иначе она скроллится с листом.",
-   "Do давать стилю печати снять топбар, панель, кнопки замены/отрыва и чекбоксы — чек печатается как чек."
+   "Do давать стилю печати снять топбар, панель, кнопки замены/отрыва и чекбоксы — чек печатается как чек.",
+   "Do ставить на страницах возраста настоящие фото блюд в круглые рамки — на тарелке и в каждой строке дня; фото продукта на белом фоне — на диске --ds-fill-3 с mix-blend-mode: multiply.",
+   "Do раскладывать «тарелку дня» геометрией в cqw и cos()/sin() из переменных --a0 --rx --ry --cy --ph --cw --capw; новый случай (другое число приёмов, длинные подписи) — новый набор переменных, не ручные координаты.",
+   "Do делать вкладки без JS, если все варианты уже в HTML: радиокнопки + :checked ~ + :has().",
+   "Do набирать мелкий текст на белом --ds-label-secondary на страницах для чтения (The Secondary On White Rule)."
   ],
   "donts": [
    "Don't вводить hex или новые цвета в app.scss; не красить кнопки зелёным, не красить «в бюджете» / «дороже цели» — эти слова остаются label-tertiary; не использовать --ds-orange / --ds-purple как текст или рамку.",
@@ -959,8 +1110,10 @@
    "Don't рисовать цветную обложку с текстом у карточки без фото — только полоска 4px; не показывать ≈ ₽ серым.",
    "Don't добавлять бумажные детали кроме линии отрыва: без зубчатых краёв, текстур, тени-«листка», перфорации.",
    "Don't показывать линию отрыва на десктопе или в режиме магазина.",
-   "Don't заменять кольцо фокуса на outline и не совмещать кольцо фокуса с inset-кольцом выбора в одном box-shadow."
+   "Don't заменять кольцо фокуса на outline и не совмещать кольцо фокуса с inset-кольцом выбора в одном box-shadow.",
+   "Don't переносить плоскую кнопку .ctapanel в квиз, чек, рецепт или кабинет и не ставить глянцевую кнопку DS на страницы возраста: исключение ограничено .ctapanel.",
+   "Don't поднимать тенью блоки страниц возраста: они плоские белые с границей на грунте."
   ],
-  "notCanonized": "Захваты .impeccable/review/r2-*.png сняты до правок: синяя кнопка «Собрать неделю» в топбаре, чипы-ссылки продуктов под шагом, цветные обложки карточек с текстом, «294 рецептов» и серый ≈ ₽ — это дефекты, исправленные в этом раунде, а не образцы; система записана по шаблонам и app.scss. Оставшийся `.pages__crumbs` (13px без шеврона) в app.scss не используется шаблонами и не является правилом."
+  "notCanonized": "Захваты .impeccable/review/r2-*.png сняты до правок: синяя кнопка «Собрать неделю» в топбаре, чипы-ссылки продуктов под шагом, цветные обложки карточек с текстом, «294 рецептов» и серый ≈ ₽ — это дефекты, исправленные в этом раунде, а не образцы; система записана по шаблонам и app.scss. Оставшийся `.pages__crumbs` (13px без шеврона) в app.scss не используется шаблонами и не является правилом. Страницы возраста (2026-10-07): не записаны в систему локальные заплатки — сдвиг центра тарелки --cdy: 3cqw при контейнере ≤320px, снятие собственной карточки у .weanfeeds--page внутри .plate, перекраска .wtable thead и .rpage__note в secondary через .agesec вместо правки общих компонентов, кадрирование бутылочки object-position: 30% 50%; это починки конкретного кадра, а не правила."
  }
 }

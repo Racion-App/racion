@@ -40,7 +40,7 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// порядок введения: продукты по месяцам, с которых их вводят, со ссылками на рецепты
-	type food struct{ Name, Href string }
+	type food struct{ Name, Href, Image string }
 	type step struct {
 		Month int
 		Label string
@@ -61,7 +61,7 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 		if len(order) == 0 || order[len(order)-1].Month != f.From {
 			order = append(order, step{Month: f.From, Label: i18n.T(l, "weaning.page.from", f.From)})
 		}
-		order[len(order)-1].Foods = append(order[len(order)-1].Foods, food{name, href})
+		order[len(order)-1].Foods = append(order[len(order)-1].Foods, food{name, href, cat.Ingredients[f.ID].Image})
 	}
 	sort.SliceStable(order, func(i, j int) bool { return order[i].Month < order[j].Month })
 
@@ -69,7 +69,9 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 	type day struct {
 		Month int
 		Title string
+		Label string // «6 мес» на вкладке тарелки
 		Feeds []planner.WeaningFeed
+		Plate []plateItem
 	}
 	var days []day
 	for _, m := range []int{6, 7, 8, 9} { // с 9 до 12 месяцев объёмы те же, один день на всех
@@ -93,7 +95,7 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 		if m == 9 {
 			label = "9–12"
 		}
-		days = append(days, day{m, i18n.T(l, "weaning.page.day", label), feeds})
+		days = append(days, day{Month: m, Title: i18n.T(l, "weaning.page.day", label), Label: label + " " + i18n.T(l, "weaning.page.mo"), Feeds: feeds, Plate: s.weaningPlate(feeds, pl)})
 	}
 
 	// рецепты прикорма — по возрасту
@@ -138,7 +140,10 @@ func (s *Server) weaningPage(w http.ResponseWriter, r *http.Request) {
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"H1": i18n.T(l, "weaning.page.h1"), "Intro": []string{i18n.T(l, "weaning.page.intro1"), i18n.T(l, "weaning.page.intro2")},
 		"Table": table, "Order": order, "Days": days, "Cards": cards, "FAQ": faq, "Rules": rules,
-		"Source": i18n.T(l, "weaning.source"), "KidMenus": kidMenuLinks(pl),
+		"Source": i18n.T(l, "weaning.source"), "Scale": ageScale(pl, "weaning"),
+		// сроки, темп и вода — из Программы вскармливания 2019, те же цифры, что в тексте и правилах страницы
+		"Norms": []normTile{{"4–6", i18n.T(l, "weaning.page.mo"), i18n.T(l, "agepage.wean.start")}, {"5–7", i18n.T(l, "agepage.unit.days"), i18n.T(l, "agepage.wean.pace")},
+			{"150–200", i18n.T(l, "unit.ml"), i18n.T(l, "agepage.wean.water")}},
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "weaning.html", data); err != nil {

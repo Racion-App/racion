@@ -1083,19 +1083,32 @@ func KidNorm(age int, sex string, l i18n.Lang) string {
 	case age >= 180 && sex == "f":
 		return i18n.T(l, "kid.norm.nowater", "2500", 75)
 	}
+	kcal, protein, water := KidNormValues(age)
+	switch {
+	case kcal == "":
+		return ""
+	case water == "":
+		return i18n.T(l, "kid.norm.nowater", kcal, protein)
+	}
+	return i18n.T(l, "kid.norm", kcal, protein, water)
+}
+
+// KidNormValues — та же норма числами (МР 2.3.1.0253-21): ккал, белок в граммах, вода и напитки в мл
+// в сутки; с 11 лет воду таблица даёт на вес, её нет. До года норму считают на кг веса — всё пусто.
+func KidNormValues(age int) (kcal, protein, water string) {
 	switch {
 	case age < 12:
-		return ""
+		return "", "", ""
 	case age < 36:
-		return i18n.T(l, "kid.norm", "1300", 39, "600–700")
+		return "1300", "39", "600–700"
 	case age < 84:
-		return i18n.T(l, "kid.norm", "1800", 54, "800–900")
+		return "1800", "54", "800–900"
 	case age < 132:
-		return i18n.T(l, "kid.norm", "2100", 63, "1100–1300")
+		return "2100", "63", "1100–1300"
 	case age < 180:
-		return i18n.T(l, "kid.norm.nowater", "2300–2500", "69–75")
+		return "2300–2500", "69–75", ""
 	default:
-		return i18n.T(l, "kid.norm.nowater", "2500–2900", "75–87")
+		return "2500–2900", "75–87", ""
 	}
 }
 

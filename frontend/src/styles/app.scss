@@ -1928,9 +1928,13 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &:last-child { border-bottom: 1px solid var(--ds-separator); }
   summary { cursor: pointer; font-weight: 600; font-size: 15.5px; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center;
     &::-webkit-details-marker { display: none; }
-    &::after { content: "+"; font-size: 20px; line-height: 1; color: var(--ds-label-tertiary); flex: 0 0 auto; } }
-  &[open] summary::after { content: "–"; }
-  p { margin: 8px 0 0; color: var(--ds-label-secondary); } }
+    &::after { content: ""; flex: 0 0 auto; width: 18px; height: 18px; background: var(--ds-label-secondary); transition: transform var(--ds-dur-base) var(--ds-ease-spring);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E") center / contain no-repeat; } }
+  // плюс поворачивается в крестик; .is-closing — ответ ещё сворачивается (ssr.js), а крестик уже возвращается
+  &[open]:not(.is-closing) summary::after { transform: rotate(45deg); }
+  // отступ внутри ответа, а не снаружи: ssr.js анимирует высоту ответа, и внешний отступ дёргался бы
+  p { margin: 0; padding-top: 8px; color: var(--ds-label-secondary); } }
 // Готовые меню на странице подборки: карточка с названием, списком блюд и итогами на человека
 .menus { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 .menu { display: grid; gap: 10px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); box-shadow: var(--ds-shadow-xs);
@@ -2172,15 +2176,10 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   tbody th { font-size: 14px; }
   td { font-variant-numeric: tabular-nums; color: var(--ds-label-primary); }
   tbody tr:last-child > * { border-bottom: 0; } }
-.worder { display: grid; gap: 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 15px; line-height: 1.5;
-  li { padding: 10px 14px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4); }
-  b { margin-right: 4px; }
-  a { color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } } }
-.wrules { display: grid; gap: 6px; margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.5; color: var(--ds-label-secondary); }
 .weanfeeds--page { gap: 0; padding: 4px 14px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); box-shadow: var(--ds-shadow-sm);
   .weanfeed { grid-template-columns: 56px 1fr; padding: 10px 0; font-size: 15px; border-bottom: 1px solid var(--ds-fill-4); &:last-child { border-bottom: 0; } }
   a { color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } } }
-.wsource { margin-top: 24px; }
+.wsource { margin-top: 24px; color: var(--ds-label-secondary); }
 
 // Журнал изменений /changelog: версии сверху вниз, номер плашкой, дата под заголовком
 .changelog__ver { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ds-separator);
@@ -2189,9 +2188,177 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 .changelog .changelog__date { margin: 6px 0 10px; font-size: 13.5px; color: var(--ds-label-tertiary); }
 .changelog__items { display: grid; gap: 8px; margin: 0; padding-left: 20px; li { line-height: 1.5; } }
 
-// «Меню ребёнка в N лет» (/menu/child-*): норма по возрасту и подсказка по нарезке у блюда
-.kidpage__norm { max-width: 720px; margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: var(--ds-label-secondary); }
-.kidpage__note { display: block; margin-top: 2px; color: var(--ds-orange); font-weight: 400; }
+// ── Страницы возраста: прикорм (/weaning) и меню ребёнка в 1–3 года (/menu/child-*) ──────────────────
+// Шкала возраста ведёт по страницам; под ней «тарелка дня» с фото блюд и нормы плитками, ниже — разделы.
+// Одна синяя кнопка — плоская, в панели с синей подложкой: глянец и свечение кнопки дизайн-системы
+// на спокойной странице для родителей выглядели чужеродно.
+.agehead { display: grid; gap: 14px; margin-top: 4px;
+  &__title { margin: 0; font-size: 30px; font-weight: 700; line-height: 1.12; letter-spacing: -0.022em; text-wrap: balance;
+    @media (min-width: 1024px) { font-size: 38px; } } }
+.agescale { display: flex; gap: 2px; width: 100%; padding: 3px; border-radius: var(--ds-radius-md); background: var(--ds-fill-3); overflow-x: auto; scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  a { flex: 1 1 0; display: grid; place-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary); text-decoration: none; white-space: nowrap;
+    transition: background var(--ds-dur-fast) var(--ds-ease-standard), color var(--ds-dur-fast) var(--ds-ease-standard);
+    &:hover { color: var(--ds-label-primary); }
+    &[aria-current="page"] { background: var(--ds-blue); color: #fff; }
+    &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
+  @media (max-width: 420px) { a { flex: 1 0 auto; padding: 0 10px; font-size: 14px; } } }
+
+.agetop { display: grid; gap: 14px; margin-top: 6px;
+  @media (min-width: 900px) { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 24px; align-items: start; } }
+.agetop__side { display: grid; gap: 14px; align-content: start; }
+.agetop__lead { font-size: 15.5px; line-height: 1.55; color: var(--ds-label-secondary); max-width: 62ch;
+  p { margin: 0 0 10px; } p:last-child { margin-bottom: 0; } }
+// телефон: нормы над тарелкой, кнопка сразу под ней, текст в конце
+@media (max-width: 899px) {
+  .agetop__side { display: contents; }
+  .agetop .norms { order: -1; }
+  .agefeeds { order: 1; }
+  .agetop .ctapanel { order: 2; }
+  .agetop__lead { order: 3; } }
+@media (min-width: 900px) {
+  .agetop__side { position: sticky; top: 16px;
+    .norms { order: 0; } .ctapanel { order: 1; } .agefeeds { order: 2; } .agetop__lead { order: 3; } } }
+// точный список кормлений выбранного месяца: вкладки — радиокнопки в карточке тарелки, список — здесь
+.agefeeds { > [data-m] { display: none; }
+  &__title { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+  .weanfeed__time, .weanfeed__milk { color: var(--ds-label-secondary); } }
+@each $m in 6, 7, 8, 9 {
+  .agetop:has(#pd-#{$m}:checked) .agefeeds > [data-m="#{$m}"] { display: block; } }
+
+.norms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none;
+  li { display: grid; gap: 4px; align-content: start; padding: 12px 14px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); }
+  b { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; font-size: 20px; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; color: var(--ds-label-primary);
+    small { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ds-label-secondary); } }
+  > li > span { font-size: 13px; line-height: 1.3; color: var(--ds-label-secondary); }
+  @media (max-width: 420px) { li { padding: 10px 11px; } b { font-size: 17px; } } }
+
+// «Тарелка дня»: приёмы по кругу. Кольцо — контейнер, координаты в cqw: фото на эллипсе, подписи под фото
+.plate { display: grid; gap: 10px; align-content: start; padding: 18px 16px 8px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  &__title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.016em; } }
+// Геометрия в долях ширины кольца: фото --ph на эллипсе --rx × --ry вокруг (50, --cy), центр --cw. Вертикаль
+// растянута, чтобы подписи верхних блюд не касались центра, а подписи соседей — друг друга.
+.plate__ring { --n: 5; --a0: -90deg; --rx: 34cqw; --ry: 40cqw; --cy: 56cqw; --ph: 25cqw; --cw: 20cqw; --capw: 37.5cqw;
+  position: relative; width: 100%; max-width: 500px; margin: 0 auto; aspect-ratio: 1 / 1.18; container-type: inline-size;
+  // на компьютере тарелка меню ребёнка не выше правой колонки; у прикорма рядом список кормлений, круг шире
+  .plate > & { @media (min-width: 900px) { max-width: 410px; } }
+  // на телефоне подпись бывает в три строки: эллипс выше, фото и центр меньше
+  @media (max-width: 520px) { --ry: 43cqw; --cy: 57cqw; --ph: 23cqw; --cw: 18cqw; --capw: 39cqw; aspect-ratio: 1 / 1.26; }
+  // четыре приёма — по диагоналям: прямо внизу подписи не хватает высоты, прямо вверху она заходит в центр
+  //    по диагоналям круг ниже, и пустой полосы над верхними фото не остаётся
+  &--4 { --a0: -135deg; --rx: 39cqw; --cy: 52cqw; --capw: 35cqw; aspect-ratio: 1 / 1.14;
+    @media (max-width: 520px) { aspect-ratio: 1 / 1.22; } }
+  &::before { content: ""; position: absolute; left: calc(50cqw - var(--rx)); top: calc(var(--cy) - var(--ry)); width: calc(var(--rx) * 2); height: calc(var(--ry) * 2);
+    border-radius: 50%; border: 2px solid var(--ds-blue-tint); } }
+// на самых узких кругах (телефон 360 px) верхняя подпись в три строки доходит до центра — центр чуть ниже
+.plate__center { position: absolute; left: 50cqw; top: calc(var(--cy) + var(--cdy, 0px)); width: var(--cw); aspect-ratio: 1; margin: 0; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ds-blue-tint);
+  display: grid; place-content: center; justify-items: center; text-align: center;
+  b { font-size: 9cqw; font-weight: 700; line-height: 1; color: var(--ds-label-primary); }
+  span { font-size: max(12px, 3.3cqw); font-weight: 600; color: var(--ds-label-secondary); }
+  @container (max-width: 320px) { --cdy: 3cqw; } }
+.plate__items { margin: 0; padding: 0; list-style: none; }
+.plate__item { --a: calc(var(--a0) + var(--i) * 360deg / var(--n)); position: absolute; left: calc(50cqw + cos(var(--a)) * var(--rx)); top: calc(var(--cy) + sin(var(--a)) * var(--ry));
+  width: var(--ph); aspect-ratio: 1; transform: translate(-50%, -50%); }
+.plate__link { position: relative; display: block; width: 100%; height: 100%; color: inherit; text-decoration: none;
+  &:focus-visible { outline: none; .plate__img { box-shadow: 0 0 0 4px var(--ds-bg-elevated), var(--ds-shadow-focus); } } }
+.plate__img { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--ds-fill-4); color: var(--ds-label-tertiary);
+  box-shadow: 0 0 0 4px var(--ds-bg-elevated), 0 2px 10px rgba(0, 0, 0, 0.08);
+  img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform var(--ds-dur-slow) var(--ds-ease-spring); }
+  &.is-milk img { object-position: 30% 50%; }
+  &.is-product { background: var(--ds-fill-3); img { mix-blend-mode: multiply; } } }
+a.plate__link:hover .plate__img img { transform: scale(1.06); }
+.plate__cap { position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); width: max-content; max-width: var(--capw); display: grid; gap: 1px; justify-items: center; text-align: center; line-height: 1.25;
+  padding: 2px 6px; border-radius: 8px; background: var(--ds-bg-elevated); }
+.plate__slot { font-size: clamp(12px, 3.3cqw, 14px); font-weight: 700; color: var(--ds-label-primary); }
+.plate__name { font-size: clamp(12px, 3.3cqw, 14px); color: var(--ds-label-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+a.plate__link:hover .plate__name { color: var(--ds-blue); }
+.plate__detail { font-size: clamp(11.5px, 3cqw, 13px); color: var(--ds-label-secondary); }
+// единственный авторский момент страницы: приёмы раскладываются по кругу один за другим
+@media (prefers-reduced-motion: no-preference) {
+  .plate__item { animation: plate-in 520ms var(--ds-ease-spring) both; animation-delay: calc(var(--i) * 70ms + 80ms); } }
+@keyframes plate-in { from { opacity: 0.25; transform: translate(-50%, -50%) scale(0.86); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+// прикорм: вкладки месяцев на радиокнопках — без JS, все дни остаются в HTML
+.plate__tab { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.plate__tabs { display: flex; gap: 2px; width: max-content; max-width: 100%; padding: 3px; border-radius: var(--ds-radius-md); background: var(--ds-fill-3); overflow-x: auto; scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  label { display: grid; place-items: center; min-height: 34px; padding: 0 12px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--ds-label-secondary); white-space: nowrap; cursor: pointer; } }
+.plate__day { display: none; gap: 8px;
+  // у кормлений прикорма под подписью ещё граммы, на телефоне иногда в две строки
+  .plate__ring { aspect-ratio: 1 / 1.24; @media (max-width: 520px) { aspect-ratio: 1 / 1.38; } } }
+.plate .weanfeeds--page { padding: 0; border-radius: 0; background: none; box-shadow: none; border-top: 1px solid var(--ds-separator); }
+@each $m in 6, 7, 8, 9 {
+  #pd-#{$m}:checked ~ .plate__day[data-m="#{$m}"] { display: grid; }
+  #pd-#{$m}:checked ~ .plate__tabs [data-m="#{$m}"] { background: var(--ds-bg-elevated); color: var(--ds-blue); box-shadow: var(--ds-shadow-sm); }
+  #pd-#{$m}:focus-visible ~ .plate__tabs [data-m="#{$m}"] { box-shadow: var(--ds-shadow-focus); }
+}
+
+.ctapanel { display: grid; gap: 12px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-blue-tint);
+  p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ds-label-primary); }
+  .btn-primary { width: 100%; min-height: 48px; padding: 10px 16px; border-radius: var(--ds-radius-md); font-size: 16px; font-weight: 600;
+    background: var(--ds-blue); border-color: transparent; box-shadow: none;
+    &:hover { background: color-mix(in srgb, var(--ds-blue) 88%, black 12%); border-color: transparent; box-shadow: none; }
+    &:focus-visible { box-shadow: var(--ds-shadow-focus); } } }
+
+.agesec { display: grid; gap: 12px; margin-top: 18px;
+  > h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.018em; }
+  &__lead { margin: 0; max-width: 70ch; font-size: 15.5px; line-height: 1.55; color: var(--ds-label-secondary); }
+  .wtable-wrap { margin: 0; padding: 2px 12px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); }
+  .wtable th:first-child { background: var(--ds-bg-elevated); }
+  .wtable thead th { color: var(--ds-label-secondary); }
+  .rpage__note { color: var(--ds-label-secondary); }
+  // рецептов прикорма 26: на телефоне по два в ряд, иначе раздел растягивается на десять экранов
+  @media (max-width: 559px) { .rgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } } }
+.checks { display: grid; gap: 12px 28px; margin: 0; padding: 16px; list-style: none; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  @media (min-width: 800px) { grid-template-columns: 1fr 1fr; padding: 20px 24px; }
+  li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 15px; line-height: 1.45; }
+  svg { width: 26px; height: 26px; padding: 5px; border-radius: 50%; background: var(--ds-fill-3); color: var(--ds-label-secondary); } }
+
+// неделя: на телефоне дни листаются вбок по одному, с 640 px — сетка; последняя клетка — список покупок
+.weekwrap { display: grid; gap: 12px;
+  @media (min-width: 640px) { grid-template-columns: repeat(2, minmax(0, 1fr)); .weekgrid { display: contents; } }
+  @media (min-width: 1000px) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.weekgrid { display: grid; gap: 12px; align-items: start; grid-auto-flow: column; grid-auto-columns: 86%; margin: 0 -16px; padding: 2px 16px 8px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px; scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  > * { scroll-snap-align: start; }
+  // на телефоне карточка дня — своей высоты, а не до самой длинной соседки
+  @media (max-width: 639px) { > * { align-self: start; } } }
+.dayc { display: grid; align-content: start; gap: 2px; padding: 14px 14px 8px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  &__head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 6px;
+    h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.02em; }
+    > span { font-size: 13px; color: var(--ds-label-secondary); } }
+  &__list { margin: 0; padding: 0; list-style: none; }
+  &__row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--ds-fill-4); }
+  &__img { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-4);
+    img { display: block; width: 100%; height: 100%; object-fit: cover; } }
+  &__text { display: grid; gap: 1px; min-width: 0; font-size: 14.5px; line-height: 1.3;
+    small { font-size: 12px; color: var(--ds-label-secondary); }
+    a, > span { font-weight: 600; color: var(--ds-label-primary); text-decoration: none; }
+    a:hover { color: var(--ds-blue); }
+    em { font-style: normal; font-size: 12.5px; line-height: 1.35; color: var(--ds-label-secondary); } }
+  &__num { display: grid; justify-items: end; gap: 1px; font-size: 12.5px; line-height: 1.3; color: var(--ds-label-secondary); white-space: nowrap;
+    .is-rub { color: var(--ds-green); } }
+  &--list { @media (min-width: 1000px) { grid-column: span 2; } }
+  &__note { margin: 8px 0 4px; font-size: 12.5px; line-height: 1.4; color: var(--ds-label-secondary); }
+  &__img.is-product { background: var(--ds-fill-3); img { mix-blend-mode: multiply; } } }
+.shoplist { display: grid; margin: 0; padding: 0; list-style: none;
+  @media (min-width: 1000px) { grid-template-columns: 1fr 1fr; column-gap: 28px; }
+  li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--ds-fill-4); font-size: 14.5px; }
+  .num { white-space: nowrap; color: var(--ds-label-secondary); } }
+
+// порядок введения прикорма: месяц слева, продукты справа плашками с фото продукта
+.wsteps { display: grid; margin: 0; padding: 0; list-style: none; }
+.wsteps__step { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--ds-separator);
+  &:first-child { border-top: 0; padding-top: 0; } }
+.wsteps__month { padding-top: 9px; font-size: 15px; font-weight: 700; }
+@media (max-width: 560px) { .wsteps__step { grid-template-columns: 1fr; gap: 8px; } .wsteps__month { padding-top: 0; } }
+.wfoods { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.wfood { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 3px 14px 3px 3px; border-radius: var(--ds-radius-pill); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  font-size: 14.5px; font-weight: 500; color: var(--ds-label-primary); text-decoration: none; transition: border-color var(--ds-dur-fast) var(--ds-ease-standard), color var(--ds-dur-fast) var(--ds-ease-standard);
+  &:is(a):hover { border-color: var(--ds-blue); color: var(--ds-blue); }
+  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
+.wfood__img { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-3);
+  img { display: block; width: 100%; height: 100%; object-fit: cover; } }
 
 // Дневник прикорма в карточке ребёнка (кабинет → Семья)
 .kiddiary { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);

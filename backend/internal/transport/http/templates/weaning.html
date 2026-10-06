@@ -1,19 +1,36 @@
 {{template "head" .}}
-<nav class="crumbs" aria-label="breadcrumbs"><a href="{{.P}}/recipes">{{t .L "page.foot.recipes"}}</a><span>›</span><a href="{{.P}}/collection/kids-1-3">{{t .L "weaning.page.crumb"}}</a><span>›</span><span>{{.H1}}</span></nav>
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{if .P}}{{.P}}{{else}}/{{end}}">{{t .L "page.brand"}}</a><span>›</span><a href="{{.P}}/collection/kids-1-3">{{t .L "weaning.page.crumb"}}</a><span>›</span><span>{{.H1}}</span></nav>
 
-<header class="colhead colhead--rich">
-  <div class="colhead__body">
-    <p class="colhead__eyebrow">{{t .L "weaning.page.eyebrow"}}</p>
-    <h1 class="colhead__title">{{.H1}}</h1>
-    <div class="coltext">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
-    <div class="colhead__actions">
-      <a class="btn btn-primary btn-lg" href="{{.P}}/?s=2">{{t .L "weaning.page.cta"}}</a>
-    </div>
-  </div>
+<header class="agehead">
+  <h1 class="agehead__title">{{.H1}}</h1>
+  <nav class="agescale" aria-label="{{t .L "agescale.aria"}}">{{range .Scale}}<a href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a>{{end}}</nav>
 </header>
 
-<section class="rpage__section" aria-labelledby="w-table">
-  <h2 class="catsection" id="w-table">{{t .L "weaning.page.table"}}</h2>
+<div class="agetop">
+  <section class="plate plate--tabs" aria-labelledby="plate-h">
+    <h2 class="plate__title" id="plate-h">{{t .L "agepage.plate.wean"}}</h2>
+    {{range $i, $d := .Days}}<input class="plate__tab" type="radio" name="plate-day" id="pd-{{$d.Month}}" aria-label="{{$d.Title}}"{{if eq $i 0}} checked{{end}}>{{end}}
+    <div class="plate__tabs" aria-hidden="true">{{range .Days}}<label for="pd-{{.Month}}" data-m="{{.Month}}">{{.Label}}</label>{{end}}</div>
+    {{range .Days}}<div class="plate__day" data-m="{{.Month}}">
+      {{template "plate" (dict "L" $.L "Items" .Plate "Key" "agepage.feeds")}}
+    </div>{{end}}
+  </section>
+  <div class="agetop__side">
+    <div class="agefeeds">{{range .Days}}<div data-m="{{.Month}}">
+      <h3 class="agefeeds__title">{{.Title}}</h3>
+      <ol class="weanfeeds weanfeeds--page">{{range .Feeds}}<li class="weanfeed"><span class="weanfeed__time num">{{.Time}}</span><span class="weanfeed__what">{{range .Items}}<span class="weanfeed__item">{{if .Recipe}}<a href="{{.Recipe}}">{{.Name}}</a>{{else}}{{.Name}}{{end}} <span class="num">{{if eq .Unit "pcs"}}{{if eq .Grams 0.25}}¼{{else}}½{{end}}{{else}}{{.Grams}} {{t $.L (printf "unit.%s" .Unit)}}{{end}}</span></span>{{end}}{{if .Milk}}<span class="weanfeed__milk">{{if .Items}}{{t $.L "weaning.milk.after"}}{{else}}{{t $.L "weaning.milk"}}{{end}}</span>{{end}}</span></li>{{end}}</ol>
+    </div>{{end}}</div>
+    <ul class="norms">{{range .Norms}}<li><b><span class="num">{{.Value}}</span>{{if .Unit}} <small>{{.Unit}}</small>{{end}}</b><span>{{.Label}}</span></li>{{end}}</ul>
+    <div class="ctapanel">
+      <p>{{t .L "agepage.cta.wean"}}</p>
+      <a class="btn btn-primary" href="{{.P}}/?s=2">{{t .L "weaning.page.cta"}}</a>
+    </div>
+    <div class="agetop__lead">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+  </div>
+</div>
+
+<section class="agesec" aria-labelledby="w-table">
+  <h2 id="w-table">{{t .L "weaning.page.table"}}</h2>
   <div class="wtable-wrap">
     <table class="wtable">
       <thead><tr><th scope="col">{{t .L "weaning.page.table.what"}}</th>{{range $m := months}}<th scope="col" class="num">{{$m}} {{t $.L "weaning.page.mo"}}</th>{{end}}</tr></thead>
@@ -23,37 +40,26 @@
   <p class="rpage__note">{{t .L "weaning.page.table.note"}}</p>
 </section>
 
-<section class="rpage__section" aria-labelledby="w-order">
-  <h2 class="catsection" id="w-order">{{t .L "weaning.page.order"}}</h2>
-  <ol class="worder">{{range .Order}}<li><b>{{.Label}}</b> {{range $i, $f := .Foods}}{{if $i}}, {{end}}{{if $f.Href}}<a href="{{$f.Href}}">{{$f.Name}}</a>{{else}}{{$f.Name}}{{end}}{{end}}</li>{{end}}</ol>
-  <ul class="wrules">{{range .Rules}}<li>{{.}}</li>{{end}}</ul>
+<section class="agesec" aria-labelledby="w-order">
+  <h2 id="w-order">{{t .L "weaning.page.order"}}</h2>
+  <ol class="wsteps">{{range .Order}}<li class="wsteps__step">
+    <span class="wsteps__month">{{.Label}}</span>
+    <ul class="wfoods">{{range .Foods}}<li>{{if .Href}}<a class="wfood" href="{{.Href}}">{{else}}<span class="wfood">{{end}}<span class="wfood__img">{{if .Image}}<img src="{{.Image}}" alt="" width="64" height="64" loading="lazy" decoding="async">{{end}}</span>{{.Name}}{{if .Href}}</a>{{else}}</span>{{end}}</li>{{end}}</ul>
+  </li>{{end}}</ol>
+  <ul class="checks">{{range .Rules}}<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>{{.}}</span></li>{{end}}</ul>
 </section>
-
-{{range .Days}}
-<section class="rpage__section" aria-labelledby="w-day-{{.Month}}">
-  <h2 class="catsection" id="w-day-{{.Month}}">{{.Title}}</h2>
-  <ol class="weanfeeds weanfeeds--page">{{range .Feeds}}<li class="weanfeed"><span class="weanfeed__time num">{{.Time}}</span><span class="weanfeed__what">{{range .Items}}<span class="weanfeed__item">{{if .Recipe}}<a href="{{.Recipe}}">{{.Name}}</a>{{else}}{{.Name}}{{end}} <span class="num">{{if eq .Unit "pcs"}}{{if eq .Grams 0.25}}¼{{else}}½{{end}}{{else}}{{.Grams}} {{t $.L (printf "unit.%s" .Unit)}}{{end}}</span></span>{{end}}{{if .Milk}}<span class="weanfeed__milk">{{if .Items}}{{t $.L "weaning.milk.after"}}{{else}}{{t $.L "weaning.milk"}}{{end}}</span>{{end}}</span></li>{{end}}</ol>
-</section>
-{{end}}
 
 {{if .Cards}}
-<section class="rpage__section colgroup" aria-labelledby="w-recipes">
-  <h2 class="catsection" id="w-recipes">{{t .L "weaning.page.recipes"}} <span class="catsection__n num">{{len .Cards}}</span></h2>
+<section class="agesec colgroup" aria-labelledby="w-recipes">
+  <h2 id="w-recipes">{{t .L "weaning.page.recipes"}} <span class="catsection__n num">{{len .Cards}}</span></h2>
   <div class="rgrid">{{range .Cards}}{{template "card" .}}{{end}}</div>
 </section>
 {{end}}
 
-<section class="rpage__section colfaq" aria-labelledby="w-faq">
+<section class="agesec colfaq" aria-labelledby="w-faq">
   <h2 id="w-faq">{{t .L "coll.faq"}}</h2>
   {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
 </section>
-
-{{if .KidMenus}}
-<section class="rpage__section colothers" aria-labelledby="w-next">
-  <div class="rpage__section-head"><h2 id="w-next">{{t .L "kidpage.others"}}</h2></div>
-  <div class="rpage__tags">{{range .KidMenus}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
-</section>
-{{end}}
 
 <p class="rpage__note wsource">{{.Source}}</p>
 {{template "foot" .}}

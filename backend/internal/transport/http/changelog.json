@@ -1,5 +1,27 @@
 [
  {
+  "version": "1.14",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Меню ребёнка и прикорм: новые страницы",
+   "en": "Child menus and weaning: new pages"
+  },
+  "items": {
+   "ru": [
+    "Меню ребёнка на 1, 1,5, 2 и 3 года и прикорм связаны шкалой возраста, страницы переключаются одним нажатием. Наверху нормы плитками и «тарелка дня»: приёмы дня по кругу, у каждого фото блюда.",
+    "Прикорм: примерный день на вкладках 6, 7, 8 и 9–12 месяцев и продукты в порядке введения, у каждого фото. Фотографии появились у всех 26 рецептов прикорма.",
+    "Неделя ребёнка выглядит как карточки дней с фото каждого блюда. На телефоне дни листаются вбок, список покупок под ними.",
+    "Ответы на вопросы внизу страниц подборок, меню и прикорма раскрываются плавно."
+   ],
+   "en": [
+    "The child menus for 1, 1.5, 2 and 3 years and the weaning page are linked by an age scale, one tap between them. At the top: norms as tiles and a plate of the day, the day's meals in a circle, each with a dish photo.",
+    "Weaning: a sample day in tabs for 6, 7, 8 and 9–12 months and foods in the order they are introduced, each with a photo. All 26 weaning recipes now have photos.",
+    "The child's week as day cards with a photo of every dish. On a phone the days swipe sideways and the shopping list sits below.",
+    "Answers to the questions at the bottom of collection, menu and weaning pages now open smoothly."
+   ]
+  }
+ },
+ {
   "version": "1.13",
   "date": "2026-10-07",
   "title": {

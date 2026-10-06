@@ -1,0 +1,17 @@
+{{/* «Тарелка дня» страниц возраста: приёмы одного дня по кругу, с фото блюд; в центре — сколько их.
+   Аргумент — dict: L (язык), Items ([]plateItem), Key (слово для числа: agepage.meals | agepage.feeds). */}}
+{{define "plate"}}<div class="plate__ring{{if eq (len .Items) 4}} plate__ring--4{{end}}" style="--n:{{len .Items}}">
+  <p class="plate__center"><b class="num">{{len .Items}}</b><span>{{plural .L (len .Items) .Key}}</span></p>
+  <ol class="plate__items">
+    {{range $i, $p := .Items}}<li class="plate__item" style="--i:{{$i}}">
+      {{if $p.Href}}<a class="plate__link" href="{{$p.Href}}">{{else}}<div class="plate__link">{{end}}
+        <span class="plate__img{{if $p.Product}} is-product{{end}}{{if $p.Milk}} is-milk{{end}}">{{if $p.Image}}<img src="{{$p.Image}}" alt="" width="240" height="240" loading="lazy" decoding="async">{{else if $p.Milk}}<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/></svg>{{else}}<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>{{end}}</span>
+        <span class="plate__cap">
+          <span class="plate__slot{{if $p.SlotNum}} num{{end}}">{{$p.Slot}}</span>
+          <span class="plate__name">{{$p.Title}}</span>
+          {{if $p.Detail}}<span class="plate__detail num">{{$p.Detail}}</span>{{end}}
+        </span>
+      {{if $p.Href}}</a>{{else}}</div>{{end}}
+    </li>{{end}}
+  </ol>
+</div>{{end}}
