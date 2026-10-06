@@ -1,0 +1,229 @@
+[
+ {
+  "version": "1.9",
+  "date": "2026-10-06",
+  "title": {"ru": "Дети: прикорм, аллергии, сад и мамы", "en": "Kids: weaning, allergies, nursery and mums"},
+  "items": {
+   "ru": [
+    "Прикорм по месяцам по программе вскармливания Союза педиатров России: один новый продукт в неделю с постепенным увеличением порции, режим из пяти кормлений и страница «Прикорм по месяцам» с таблицей граммов.",
+    "Меню только для ребёнка, без взрослых. Квиз не спрашивает про цель и бюджет, а детское готовим каждый день, без заготовок на неделю.",
+    "Режим «Комбинирую»: на каждый приём свой источник — сами, баночки или общий стол. Баночки идут расписанием по дням с конкретными пюре.",
+    "Смесь: когда и сколько вы её даёте, отдельно для смешанного вскармливания.",
+    "У каждого ребёнка свои аллергии. В базе 24 новых детских блюда без молока.",
+    "Дневник прикорма: «ввели» или «была реакция» прямо в плане, следующая неделя учитывает отметку.",
+    "Ребёнок в саду или школе по будням: порции и детское меню на будни это учитывают. Возраст растёт сам и пишется как «1 год 3 мес».",
+    "Нормы калорий, белка и питья по возрасту (МР 2.3.1.0253-21), кефир перед сном для детей 1–3 лет и подсказки у блюд, как нарезать, чтобы малыш не подавился.",
+    "Беременность и кормление грудью: прибавка калорий маме и меню без продуктов, которых при беременности избегают.",
+    "Перепроверили все рецепты: примерно в 1250 поправили шаги и количества, 50 неудачных скрыли."
+   ],
+   "en": [
+    "Month-by-month weaning based on the Russian Union of Paediatricians feeding programme: one new food a week with a gradual ramp-up, a five-feed day plan and a \"Weaning by month\" page with an amounts table.",
+    "A menu for the child alone, with no adults. The quiz skips goals and budget, and kids' food is cooked fresh every day with no batch cooking.",
+    "\"A mix\" mode: each meal has its own source: home-cooked, jars or the family table. Jars come as a day-by-day schedule with specific purées.",
+    "Formula: when and how much you give, with a separate option for mixed feeding.",
+    "Each child has their own allergies. The base has 24 new dairy-free kids' dishes.",
+    "Weaning diary: mark \"introduced\" or \"there was a reaction\" right in the plan, and next week takes it into account.",
+    "Nursery or school on weekdays: weekday portions and the kids' menu account for it. Age grows on its own and reads like \"1 year 3 mo\".",
+    "Calorie, protein and fluid norms by age (Russian norms MR 2.3.1.0253-21), kefir before bed for ages 1–3, and tips on dishes about cutting food so a little one does not choke.",
+    "Pregnancy and breastfeeding: extra calories for mum and a menu without the foods to avoid in pregnancy.",
+    "We rechecked every recipe: fixed steps and amounts in about 1,250 of them and hid 50 weak ones."
+   ]
+  }
+ },
+ {
+  "version": "1.8",
+  "from": "2026-10-04",
+  "date": "2026-10-05",
+  "title": {"ru": "Готовим из того, что есть дома", "en": "Cook from what you have"},
+  "items": {
+   "ru": [
+    "Каталог подбирает рецепты из продуктов, которые есть дома: подсказки с картинками, продукты добавляются без перезагрузки.",
+    "50 новых блюд для детей от года до трёх лет и подборка для этого возраста.",
+    "Главная на телефоне открывается быстрее: первый вопрос квиза приходит вместе со страницей.",
+    "Советы к рецептам показываются на языке страницы.",
+    "Открытое API: до 50 запросов в час и 300 в сутки с одного адреса."
+   ],
+   "en": [
+    "The catalogue finds recipes from the food you already have at home: suggestions with pictures, and items are added without a reload.",
+    "50 new dishes for children aged one to three and a collection for that age.",
+    "The home page opens faster on phones: the first quiz question arrives with the page.",
+    "Recipe tips appear in the page's language.",
+    "Public API: up to 50 requests an hour and 300 a day from one address."
+   ]
+  }
+ },
+ {
+  "version": "1.7",
+  "date": "2026-10-03",
+  "title": {"ru": "ВкусВилл и боты", "en": "VkusVill and bots"},
+  "items": {
+   "ru": [
+    "Настоящие цены ВкусВилла на 365 продуктов и корзина ВкусВилла одной ссылкой. Цены сверяем раз в сутки.",
+    "Боты в Telegram и MAX: список покупок по отделам, напоминания и вопрос «как было?» после ужина. В Telegram неделя открывается мини-приложением.",
+    "По ссылке план открывается без имён: их видит только своя семья.",
+    "«Азбука Вкуса» в списке магазинов.",
+    "Первый экран, итоги недели и калории праздничного стола поправили по отзывам с Product Radar."
+   ],
+   "en": [
+    "Real VkusVill prices for 365 products and the whole VkusVill basket in one link. Prices are checked daily.",
+    "Telegram and MAX bots: a shopping list by aisle, reminders and a \"how was it?\" question after dinner. In Telegram the week opens as a mini app.",
+    "A shared plan link opens without names: only your family sees them.",
+    "Azbuka Vkusa added to the list of stores.",
+    "The first screen, week totals and party-table calories were reworked after Product Radar feedback."
+   ]
+  }
+ },
+ {
+  "version": "1.6",
+  "from": "2026-09-26",
+  "date": "2026-09-28",
+  "title": {"ru": "Запуск на Product Radar", "en": "Launch on Product Radar"},
+  "items": {
+   "ru": [
+    "«Рацион» вышел на Product Radar.",
+    "Сайт выдерживает наплыв посетителей и ботов: страницы кэшируются, лишние запросы ждут своей очереди."
+   ],
+   "en": [
+    "Racion launched on Product Radar.",
+    "The site holds up under a rush of visitors and bots: pages are cached and extra requests wait their turn."
+   ]
+  }
+ },
+ {
+  "version": "1.5",
+  "date": "2026-09-23",
+  "title": {"ru": "API и MCP", "en": "API and MCP"},
+  "items": {
+   "ru": [
+    "Открытое API без ключа: каталог, рецепты, подборки и сборка недели, с описанием в формате OpenAPI.",
+    "MCP-сервер: ассистент может собрать вам неделю и список покупок.",
+    "Страница для разработчиков /developers."
+   ],
+   "en": [
+    "A public API with no key: catalogue, recipes, collections and building a week, described in OpenAPI.",
+    "An MCP server: an assistant can build your week and shopping list.",
+    "A developers page at /developers."
+   ]
+  }
+ },
+ {
+  "version": "1.4",
+  "date": "2026-09-22",
+  "title": {"ru": "Готовые недели и «Мой стол»", "en": "Ready-made weeks and My table"},
+  "items": {
+   "ru": [
+    "45 страниц «Что приготовить из…» по продуктам.",
+    "Готовые меню на неделю: для семьи из двух, трёх и четырёх человек, для похудения, ПП и экономное.",
+    "«Мой стол»: набираете блюда сами и получаете один список покупок с ценами и упаковками.",
+    "Оценки рецептов звёздами.",
+    "Праздничные и сезонные подборки: Новый год, 14 февраля, 23 февраля, 8 Марта, Масленица, Пасха, Хеллоуин и другие. Больше 500 новых рецептов, среди них домашняя пицца, еда из детства и блюда из книг и фильмов.",
+    "У каждого языка свой адрес главной: /en, /de и другие."
+   ],
+   "en": [
+    "45 \"What to cook with…\" pages by ingredient.",
+    "Ready-made weekly menus: for families of two, three and four, for weight loss, healthy eating and on a budget.",
+    "My table: pick the dishes yourself and get one shopping list with prices and pack sizes.",
+    "Star ratings for recipes.",
+    "Holiday and seasonal collections: New Year, Valentine's Day, Defender of the Fatherland Day, Women's Day, Maslenitsa, Easter, Halloween and more. Over 500 new recipes, including homemade pizza, childhood favourites and dishes from books and films.",
+    "Each language has its own home page address: /en, /de and others."
+   ]
+  }
+ },
+ {
+  "version": "1.3",
+  "date": "2026-09-21",
+  "title": {"ru": "Новые кухни и вход через соцсети", "en": "New cuisines and social sign-in"},
+  "items": {
+   "ru": [
+    "Около 260 новых рецептов: грузинская кухня, 50 блюд для аэрогриля, 40 боулов и быстрые ужины.",
+    "Подборки: ужины за 20 минут, белковое меню, азиатская кухня, «Что приготовить на ужин», день рождения, Новый год.",
+    "Вход через VK ID, Яндекс, Google, GitHub и Apple.",
+    "Неделя учитывает магазин: для магазина у дома и дискаунтера редких продуктов в плане нет."
+   ],
+   "en": [
+    "About 260 new recipes: Georgian cuisine, 50 air fryer dishes, 40 bowls and quick dinners.",
+    "Collections: 20-minute dinners, high-protein menu, Asian cuisine, \"What to cook for dinner\", birthday, New Year.",
+    "Sign in with VK ID, Yandex, Google, GitHub and Apple.",
+    "The week follows your store: plans for a corner shop or discounter skip hard-to-find products."
+   ]
+  }
+ },
+ {
+  "version": "1.2",
+  "date": "2026-09-20",
+  "title": {"ru": "Заготовки и приложение на телефоне", "en": "Meal prep and a phone app"},
+  "items": {
+   "ru": [
+    "Режим заготовок: готовите раз или два раза в неделю, у каждого рецепта срок хранения и пометка, можно ли заморозить.",
+    "Уведомления: «сегодня готовим», дни заготовок и сводка недели.",
+    "«Рацион» ставится на телефон как приложение и открывает рецепты недели без сети.",
+    "Восстановление пароля по почте.",
+    "Страница состояния сервиса.",
+    "Фото у рецептов."
+   ],
+   "en": [
+    "Meal prep mode: cook once or twice a week; every recipe shows how long it keeps and whether it freezes.",
+    "Notifications: \"cooking today\", prep days and a weekly digest.",
+    "Racion installs on your phone like an app and opens the week's recipes offline.",
+    "Password reset by email.",
+    "A service status page.",
+    "Photos for recipes."
+   ]
+  }
+ },
+ {
+  "version": "1.1",
+  "date": "2026-09-19",
+  "title": {"ru": "Сайт открыт для всех", "en": "Open to everyone"},
+  "items": {
+   "ru": [
+    "Блюда с гарниром: планировщик подбирает гарнир к основному и даёт его заменить.",
+    "Советы к рецептам.",
+    "Страницы подборок со вступлением, «Как пользоваться» и вопросами и ответами.",
+    "Регион для цен Росстата определяется сам.",
+    "Условия использования, политика конфиденциальности и уведомление о cookies.",
+    "Карточки-превью рецептов и подборок для соцсетей и мессенджеров.",
+    "Комментарии к рецептам с визуальным редактором."
+   ],
+   "en": [
+    "Mains with sides: the planner picks a side for the main dish and lets you swap it.",
+    "Tips for recipes.",
+    "Collection pages with an introduction, \"How to use\" and questions and answers.",
+    "Your region for Rosstat prices is detected automatically.",
+    "Terms of use, a privacy policy and a cookie notice.",
+    "Preview cards for recipes and collections in social networks and messengers.",
+    "Recipe comments with a visual editor."
+   ]
+  }
+ },
+ {
+  "version": "1.0",
+  "from": "2026-09-17",
+  "date": "2026-09-19",
+  "title": {"ru": "Первая версия", "en": "First version"},
+  "items": {
+   "ru": [
+    "Семь вопросов, и готово меню на неделю с ценами и списком покупок. Бесплатно и без подписки.",
+    "Цены по данным Росстата для 373 территорий. Бюджет на человека в день или на всех за неделю.",
+    "Цель с калориями: похудение, правильное питание или набор массы. В семье у каждого своя цель, аппетит и приёмы пищи дома.",
+    "Дети: порция по возрасту, своё детское меню, смесь и баночки.",
+    "Рецепты с ценами продуктов, КБЖУ и режимом готовки шаг за шагом. Каталог с поиском и фильтрами.",
+    "Кабинет: недели, покупки, свои рецепты, избранное и «не предлагать». Общая неделя на всю семью.",
+    "15 языков. Цены и магазины в Европе, США, Беларуси и Казахстане в местной валюте.",
+    "Праздничные столы, подборки, замены продуктов, режим «Меньше разных продуктов» и помощник, который меняет блюда по просьбе.",
+    "Push-уведомления, отметки «нравится» и комментарии."
+   ],
+   "en": [
+    "Seven questions and your weekly menu is ready, with prices and a shopping list. Free, no subscription.",
+    "Prices from Rosstat data for 373 regions. A budget per person per day or for everyone for the week.",
+    "A goal with calories: weight loss, healthy eating or gaining mass. Each family member has their own goal, appetite and meals at home.",
+    "Kids: portions by age, a kids' menu of their own, formula and jars.",
+    "Recipes with ingredient prices, nutrition and a step-by-step cooking mode. A catalogue with search and filters.",
+    "Account: weeks, purchases, your own recipes, favourites and \"don't suggest\". One shared week for the whole family.",
+    "15 languages. Prices and stores across Europe, the US, Belarus and Kazakhstan in local currency.",
+    "Party tables, collections, ingredient swaps, a \"Fewer different products\" mode and an assistant that swaps dishes on request.",
+    "Push notifications, likes and comments."
+   ]
+  }
+ }
+]

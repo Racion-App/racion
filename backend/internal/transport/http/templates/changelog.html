@@ -1,0 +1,14 @@
+{{template "head" .}}
+<article class="legal changelog">
+  <nav class="crumbs" aria-label="{{t .L "crumbs"}}"><a href="/">{{t .L "page.brand"}}</a><span aria-hidden="true">›</span><span>{{.Title}}</span></nav>
+  <h1>{{.Title}}</h1>
+  <p class="rpage__lead">{{.Lead}}</p>
+  {{range .Entries}}
+  <section class="changelog__ver" id="v{{.Version}}" aria-labelledby="h{{.Version}}">
+    <h2 id="h{{.Version}}"><span class="changelog__num">{{t $.L "changelog.version" .Version}}</span> {{.Title}}</h2>
+    <p class="changelog__date"><time datetime="{{.Date}}">{{.DateLabel}}</time></p>
+    <ul class="changelog__items">{{range .Items}}<li>{{.}}</li>{{end}}</ul>
+  </section>
+  {{end}}
+</article>
+{{template "foot" .}}

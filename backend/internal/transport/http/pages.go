@@ -57,10 +57,11 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 		}
 		return out
 	},
-	"langMeta":  func(l i18n.Lang) locales.Meta { return i18n.Meta(l) },
-	"featured":  func(l i18n.Lang, p string) []FootLink { return featuredLinks(l, p) },
-	"topicLang": func(l i18n.Lang) bool { return topicLang(l) },
-	"months":    func() []string { return []string{"4–5", "6", "7", "8", "9–12"} },
+	"langMeta":   func(l i18n.Lang) locales.Meta { return i18n.Meta(l) },
+	"featured":   func(l i18n.Lang, p string) []FootLink { return featuredLinks(l, p) },
+	"topicLang":  func(l i18n.Lang) bool { return topicLang(l) },
+	"months":     func() []string { return []string{"4–5", "6", "7", "8", "9–12"} },
+	"appVersion": AppVersion,
 }).ParseFS(templateFS, "templates/*.html"))
 
 // FootLink — ссылка в подвале на подборку-вопрос («Что приготовить на ужин»): с каждой страницы сайта.

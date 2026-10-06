@@ -1714,5 +1714,10 @@
   "quiz.prep.kidnote": "Little ones are best fed freshly cooked food every day. Batch cooking is for the adults' dishes.",
   "quiz.q7.kids": "For which week?",
   "quiz.q7.kids.hint": "The kids' menu follows the child's age, not a budget. The receipt shows what the week costs.",
-  "note.kid.fresh": "Give the little one family dishes freshly cooked: leave the batch-cooked food for the adults."
+  "note.kid.fresh": "Give the little one family dishes freshly cooked: leave the batch-cooked food for the adults.",
+  "changelog.title": "What's new",
+  "changelog.desc": "Racion's history of changes: what we added and fixed, version by version since the first one.",
+  "changelog.lead": "What changed in Racion, newest version first.",
+  "changelog.version": "Version {0}",
+  "foot.changelog": "What's new"
 }

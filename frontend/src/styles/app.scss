@@ -2164,3 +2164,10 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   .weanfeed { grid-template-columns: 56px 1fr; padding: 10px 0; font-size: 15px; border-bottom: 1px solid var(--ds-fill-4); &:last-child { border-bottom: 0; } }
   a { color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } } }
 .wsource { margin-top: 24px; }
+
+// Журнал изменений /changelog: версии сверху вниз, номер плашкой, дата под заголовком
+.changelog__ver { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ds-separator);
+  h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin: 0; font-size: 20px; letter-spacing: -0.01em; } }
+.changelog__num { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; background: var(--ds-blue-tint); color: var(--ds-blue); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.changelog .changelog__date { margin: 6px 0 10px; font-size: 13.5px; color: var(--ds-label-tertiary); }
+.changelog__items { display: grid; gap: 8px; margin: 0; padding-left: 20px; li { line-height: 1.5; } }
