@@ -467,11 +467,11 @@ type FormulaBrand struct {
 }
 
 var FormulaBrands = []FormulaBrand{
-	{"nutrilon", "Nutrilon", 800, 1.25, "formula.note.premium"},
+	{"nutrilon", "Nutrilon", 800, 1.25, ""},
 	{"nan", "NAN (Nestlé)", 800, 1.2, ""},
 	{"similac", "Similac", 600, 1.1, ""},
 	{"friso", "Friso", 800, 1.3, ""},
-	{"hipp", "HiPP", 600, 1.35, "formula.note.organic"},
+	{"hipp", "HiPP", 600, 1.35, ""},
 	{"nestogen", "Nestogen", 600, 0.85, ""},
 	{"nutrilak", "Nutrilak", 600, 0.8, ""},
 	{"malyutka", "formula.malyutka", 600, 0.7, ""},
@@ -480,7 +480,9 @@ var FormulaBrands = []FormulaBrand{
 	{"other", "formula.other", 600, 1.0, ""},
 }
 
-// FormulaBrandsFor — марки с подписями на языке (названия-ключи переводятся, остальные как есть).
+// FormulaBrandsFor — марки с подписями на языке (названия-ключи переводятся, остальные как есть). Марки
+// не ранжируем: никаких «премиум», только состав (козье молоко), по алфавиту, «любая» — первой: её
+// предлагаем по умолчанию, цена по ней — средняя по Росстату.
 func FormulaBrandsFor(l i18n.Lang) []FormulaBrand {
 	out := make([]FormulaBrand, len(FormulaBrands))
 	for i, b := range FormulaBrands {
@@ -492,6 +494,15 @@ func FormulaBrandsFor(l i18n.Lang) []FormulaBrand {
 		}
 		out[i] = b
 	}
+	slices.SortStableFunc(out, func(a, b FormulaBrand) int {
+		if (a.ID == "other") != (b.ID == "other") {
+			if a.ID == "other" {
+				return -1
+			}
+			return 1
+		}
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
 	return out
 }
 

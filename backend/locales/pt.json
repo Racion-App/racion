@@ -751,9 +751,7 @@
   "formula.kabrita": "Kabrita (cabra)",
   "formula.malyutka": "Malyutka",
   "formula.note.goat": "À base de leite de cabra",
-  "formula.note.organic": "Orgânico",
-  "formula.note.premium": "Premium",
-  "formula.other": "Outro",
+  "formula.other": "Qualquer uma, pelo preço médio",
   "goal.gain": "Ganhar massa muscular",
   "goal.gain.sub": "Superávit calórico, pratos ricos em proteína",
   "goal.healthy": "Comer bem",
@@ -936,6 +934,7 @@
   "nick.taken": "Este apelido já está em uso.",
   "note.breastfed": "Criança {0} amamentada — nada adicionado à lista.",
   "note.formula.cmpa": "Uma criança {0} com alergia à proteína do leite de vaca precisa de uma fórmula médica: à base de proteína altamente hidrolisada ou de aminoácidos, escolhida por um médico. Fórmulas de leite de cabra e parcialmente hidrolisadas não são adequadas (diretrizes clínicas russas sobre alergia alimentar, 2025).",
+  "note.mom.kcal": "Foram adicionadas {0} kcal por dia à norma da mãe (normas russas MR 2.3.1.0253-21).",
   "note.mom.nursing": "Amamentação: foram adicionadas 500 kcal por dia para a mãe; retiraram carne crua, peixe cru e pratos com álcool. Não é necessária uma dieta especial sem alérgenos, a menos que o médico indique (diretrizes clínicas russas sobre alergia alimentar, 2025).",
   "note.mom.pregnant": "Gravidez: retiramos fígado, queijos com mofo e brie, atum, peixe defumado a frio, carne e peixe crus, e pratos com álcool. Cafeína: não mais que 300 mg por dia (diretrizes clínicas russas sobre gravidez normal, 2023).",
   "notify.ask": "Pergunte “Como foi?” à noite",
@@ -1710,6 +1709,5 @@
   "why.leftover": "restos de ontem",
   "why.lighter": "mais leve que o objetivo",
   "why.pricier": "acima do orçamento, mas com mais variedade",
-  "why.wanted": "conforme você pediu: {0}",
-  "note.mom.kcal": "Foram adicionadas {0} kcal por dia à norma da mãe (normas russas MR 2.3.1.0253-21)."
+  "why.wanted": "conforme você pediu: {0}"
 }

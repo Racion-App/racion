@@ -139,7 +139,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
             {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => setKid(i, { away })} />}
             {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => setKid(i, { allergens })} />}
             {k.ageMonths < 36 && (
-              <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "nutrilon" : k.formulaBrand })}>
+              <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "other" : k.formulaBrand })}>
                 <span className="switch__text">
                   {t("quiz.formula")}
                   <span className="switch__sub">{k.ageMonths < 6 ? t("quiz.formula.sub.young") : t("quiz.formula.sub")}</span>

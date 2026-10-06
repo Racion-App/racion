@@ -604,7 +604,7 @@ export function Quiz() {
                     <WeaningPicker foods={meta.weaningFoods} month={k.ageMonths} value={k.introduced ?? []} onChange={(introduced) => updateKid(i, { introduced })} />
                   )}
                   {k.ageMonths < 36 && (
-                    <Switch label={t("quiz.formula")} sub={k.ageMonths < 6 ? t("quiz.formula.sub.young") : t("quiz.formula.sub")} checked={k.formula} onChange={(v) => updateKid(i, { formula: v, formulaBrand: v && !k.formulaBrand ? "nutrilon" : k.formulaBrand })} />
+                    <Switch label={t("quiz.formula")} sub={k.ageMonths < 6 ? t("quiz.formula.sub.young") : t("quiz.formula.sub")} checked={k.formula} onChange={(v) => updateKid(i, { formula: v, formulaBrand: v && !k.formulaBrand ? "other" : k.formulaBrand })} />
                   )}
                   {k.formula && k.ageMonths < 36 && (
                     <>
