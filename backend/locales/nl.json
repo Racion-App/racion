@@ -1824,5 +1824,15 @@
   "why.leftover": "restjes van gisteren",
   "why.lighter": "minder calorieën dan doelwaarde",
   "why.pricier": "boven budget, maar meer variatie",
-  "why.wanted": "u vroeg om {0}"
+  "why.wanted": "u vroeg om {0}",
+  "max.login": "Inloggen met MAX",
+  "max.text": "Koppel MAX: in de app binnen MAX log je in zonder wachtwoord, en de bot toont de boodschappenlijsten van de weken van dit account.",
+  "max.open": "MAX openen",
+  "max.wait": "Open MAX: de bot koppelt het account zodra je hem start. De link werkt 15 minuten.",
+  "max.linked": "Gekoppeld: in de app binnen MAX log je in zonder wachtwoord, en de bot stuurt de lijsten van de weken van dit account.",
+  "max.linked.short": "MAX gekoppeld",
+  "max.unlink.confirm": "MAX ontkoppelen?",
+  "max.unlink.text": "De bot ziet de weken van dit account dan niet meer, en de app binnen MAX vraagt je opnieuw in te loggen.",
+  "max.unlinked": "MAX ontkoppeld",
+  "remind.max": "Herinner me in MAX"
 }

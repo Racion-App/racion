@@ -1820,5 +1820,15 @@
   "remind.stopped": "Reminders are off",
   "quick.next": "Plan next week",
   "quick.next.sub": "{range}: same answers, {store}",
-  "admin.push.devices": "+{n} without an account"
+  "admin.push.devices": "+{n} without an account",
+  "max.login": "Sign in with MAX",
+  "max.text": "Link MAX: the app inside MAX signs you in without a password, and the bot shows the shopping lists of this account's weeks.",
+  "max.open": "Open MAX",
+  "max.wait": "Open MAX: the bot links the account as soon as you start it. The link works for 15 minutes.",
+  "max.linked": "Linked: the app inside MAX signs you in without a password, and the bot sends the lists of this account's weeks.",
+  "max.linked.short": "MAX linked",
+  "max.unlink.confirm": "Unlink MAX?",
+  "max.unlink.text": "The bot will stop seeing this account's weeks, and the app inside MAX will ask you to sign in again.",
+  "max.unlinked": "MAX unlinked",
+  "remind.max": "Remind me in MAX"
 }

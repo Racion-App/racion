@@ -1825,5 +1825,15 @@
   "why.leftover": "昨天的剩菜",
   "why.lighter": "热量低于目标",
   "why.pricier": "超出预算，但更有品种",
-  "why.wanted": "您要求的：{0}"
+  "why.wanted": "您要求的：{0}",
+  "max.login": "使用 MAX 登录",
+  "max.text": "绑定 MAX：在 MAX 内的应用中无需密码即可登录，机器人会显示此账户各周的购物清单。",
+  "max.open": "打开 MAX",
+  "max.wait": "打开 MAX：启动机器人后即可完成绑定。链接 15 分钟内有效。",
+  "max.linked": "已绑定：在 MAX 内的应用中无需密码即可登录，机器人会发送此账户各周的清单。",
+  "max.linked.short": "已绑定 MAX",
+  "max.unlink.confirm": "解除 MAX 绑定？",
+  "max.unlink.text": "机器人将无法再看到此账户的各周，MAX 内的应用也会要求重新登录。",
+  "max.unlinked": "已解除 MAX 绑定",
+  "remind.max": "在 MAX 中提醒我"
 }

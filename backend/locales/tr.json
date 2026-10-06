@@ -1824,5 +1824,15 @@
   "why.leftover": "dün kalanlar",
   "why.lighter": "hedefe göre daha hafif",
   "why.pricier": "bütçeyi aşıyor, ancak daha çeşitli",
-  "why.wanted": "istediğiniz gibi: {0}"
+  "why.wanted": "istediğiniz gibi: {0}",
+  "max.login": "MAX ile giriş yap",
+  "max.text": "MAX'ı bağlayın: MAX içindeki uygulamada şifresiz giriş yaparsınız, bot da bu hesabın haftalarının alışveriş listelerini gösterir.",
+  "max.open": "MAX'ı aç",
+  "max.wait": "MAX'ı açın: botu başlattığınız anda hesap bağlanır. Bağlantı 15 dakika geçerli.",
+  "max.linked": "Bağlı: MAX içindeki uygulamada şifresiz giriş yaparsınız, bot da bu hesabın haftalarının listelerini gönderir.",
+  "max.linked.short": "MAX bağlı",
+  "max.unlink.confirm": "MAX bağlantısı kaldırılsın mı?",
+  "max.unlink.text": "Bot bu hesabın haftalarını artık görmez, MAX içindeki uygulama da yeniden giriş ister.",
+  "max.unlinked": "MAX bağlantısı kaldırıldı",
+  "remind.max": "MAX'ta hatırlat"
 }

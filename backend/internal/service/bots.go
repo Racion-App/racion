@@ -384,6 +384,28 @@ func (b *Bots) menu(ctx context.Context, c messenger.Client, chatID string, lang
 	}
 }
 
+// appButton — кнопка «Открыть» на страницу сайта. Telegram открывает адрес мини-приложением, MAX —
+// мини-приложение бота с параметром запуска: адрес там задан в кабинете бизнеса, путь не передать.
+func (b *Bots) appButton(lang i18n.Lang, text, path string) messenger.Button {
+	return messenger.Button{Text: text, URL: b.appURL(lang, path), App: true, Start: startParam(path)}
+}
+
+// startParam — параметр запуска мини-приложения для страницы сайта: «p<ключ недели>», «me» —
+// кабинет; для остальных страниц пусто (главная). Обратное — StartPath.
+func startParam(path string) string {
+	p, _, _ := strings.Cut(path, "?")
+	p, _, _ = strings.Cut(p, "#")
+	switch {
+	case p == "/me":
+		return "me"
+	case strings.HasPrefix(p, "/plan/"):
+		if key, ok := planKey(strings.TrimPrefix(p, "/plan/")); ok {
+			return "p" + key
+		}
+	}
+	return ""
+}
+
 // appURL — адрес страницы сайта на языке чата: язык в префиксе, для русского — параметром,
 // иначе телефон с английским интерфейсом открыл бы русскую неделю по-английски.
 func (b *Bots) appURL(lang i18n.Lang, path string) string {
@@ -446,7 +468,7 @@ func (b *Bots) link(ctx context.Context, c messenger.Client, u messenger.Update,
 	}
 	return b.send(ctx, c, u.ChatID, messenger.Message{
 		Text: html.EscapeString(i18n.T(lang, "bot.linked")),
-		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/me"), App: true}}},
+		Rows: [][]messenger.Button{{b.appButton(lang, i18n.T(lang, "bot.open"), "/me")}},
 	})
 }
 
@@ -492,16 +514,23 @@ func (b *Bots) WebApp(platform, initData string) (messenger.WebAppUser, error) {
 	return u, nil
 }
 
-// Known — мини-приложение узнало аккаунт: личный чат с ботом тоже его узнаёт. В Telegram id личного
-// чата совпадает с id человека; чата ещё нет — ничего не меняется.
-func (b *Bots) Known(ctx context.Context, platform, messengerUserID, userID string) error {
-	return b.repo.SetUser(ctx, platform, messengerUserID, &userID)
+// Known — мини-приложение узнало аккаунт: личный чат с ботом тоже его узнаёт (chatID — WebAppUser.ChatID).
+// Чата ещё нет или он неизвестен — ничего не меняется.
+func (b *Bots) Known(ctx context.Context, platform, chatID, userID string) error {
+	if chatID == "" {
+		return nil
+	}
+	return b.repo.SetUser(ctx, platform, chatID, &userID)
 }
 
-// StartPath — куда вести мини-приложение по параметру запуска: «p<неделя>» — на страницу недели.
+// StartPath — куда вести мини-приложение по параметру запуска: «p<неделя>» — на страницу недели,
+// «me» — в кабинет; остальное («home» из кнопок MAX) — главная.
 func (b *Bots) StartPath(param string) string {
 	if id, ok := planIDFromKey(strings.TrimPrefix(param, "p")); ok && strings.HasPrefix(param, "p") {
 		return "/plan/" + id
+	}
+	if param == "me" {
+		return "/me"
 	}
 	return ""
 }
@@ -517,11 +546,16 @@ func (b *Bots) SendList(ctx context.Context, platform string, wu messenger.WebAp
 	if !ok {
 		return domain.ErrNotFound
 	}
-	chat, _, err := b.chat(ctx, c, wu.ID, wu.Lang)
+	// MAX сообщает диалог, только если мини-приложение открыли из него: иначе писать некуда, и сайт
+	// откроет ссылку на бота
+	if wu.ChatID == "" {
+		return messenger.ErrBlocked
+	}
+	chat, _, err := b.chat(ctx, c, wu.ChatID, wu.Lang)
 	if err != nil {
 		return err
 	}
-	return b.connect(ctx, c, wu.ID, key, langOr(chat.Lang, i18n.RU))
+	return b.connect(ctx, c, wu.ChatID, key, langOr(chat.Lang, i18n.RU))
 }
 
 func tokenHash(token string) string {
@@ -557,7 +591,7 @@ func (b *Bots) connect(ctx context.Context, c messenger.Client, chatID, key stri
 	// неделю называет сам список ниже, здесь — что произошло и что будет дальше
 	welcome := messenger.Message{
 		Text: html.EscapeString(i18n.T(lang, "bot.connected")) + "\n\n" + html.EscapeString(i18n.T(lang, "bot.remind.hint")),
-		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/plan/"+id), App: true}}},
+		Rows: [][]messenger.Button{{b.appButton(lang, i18n.T(lang, "bot.open"), "/plan/"+id)}},
 	}
 	if err := b.send(ctx, c, chatID, welcome); err != nil {
 		return err
@@ -606,7 +640,7 @@ func (b *Bots) callback(ctx context.Context, c messenger.Client, u messenger.Upd
 
 // listMessage — один отдел списка: что осталось купить, кнопка на каждый продукт, листание отделов.
 func (b *Bots) listMessage(plan planner.Plan, pages []botPage, checked map[string]bool, page int, key string, lang i18n.Lang) messenger.Message {
-	open := []messenger.Button{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, "/plan/"+plan.ID+"?mode=shop"), App: true}}
+	open := []messenger.Button{b.appButton(lang, i18n.T(lang, "bot.open"), "/plan/"+plan.ID+"?mode=shop")}
 	// какая это неделя: к списку возвращаются через несколько дней, а недель в чате бывает несколько
 	week := "<i>" + html.EscapeString(planHeading(plan, lang)) + "</i>\n"
 	if len(pages) == 0 {
@@ -671,7 +705,7 @@ func (b *Bots) intro(c messenger.Client, lang i18n.Lang) messenger.Message {
 	button := i18n.T(lang, "plan.bot."+string(c.Platform()))
 	return messenger.Message{
 		Text: html.EscapeString(i18n.T(lang, "bot.intro", button)),
-		Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.build"), URL: b.appURL(lang, "/"), App: true}}},
+		Rows: [][]messenger.Button{{b.appButton(lang, i18n.T(lang, "bot.build"), "/")}},
 	}
 }
 

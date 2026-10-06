@@ -3,17 +3,13 @@ package messenger
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
 	"crypto/subtle"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -116,48 +112,12 @@ func (c *TelegramClient) SetMenu(ctx context.Context, chatID, text, url string) 
 	return c.call(ctx, "setChatMenuButton", body, nil)
 }
 
-// VerifyInitData проверяет подпись данных мини-приложения: HMAC-SHA256 отсортированных полей ключом
-// HMAC-SHA256("WebAppData", токен бота). Данные старше суток не принимаем: по ним вошёл бы тот,
-// кто перехватил старую ссылку запуска.
+// VerifyInitData проверяет подпись данных мини-приложения (verifyWebAppData). Личный чат с ботом
+// в Telegram — это id самого человека.
 func (c *TelegramClient) VerifyInitData(raw string, now time.Time) (WebAppUser, error) {
-	vals, err := url.ParseQuery(raw)
-	hash := vals.Get("hash")
-	if err != nil || hash == "" {
-		return WebAppUser{}, ErrForged
-	}
-	vals.Del("hash")
-	keys := make([]string, 0, len(vals))
-	for k := range vals {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	lines := make([]string, len(keys))
-	for i, k := range keys {
-		lines[i] = k + "=" + vals.Get(k)
-	}
-	secret := hmacSHA256([]byte("WebAppData"), []byte(c.token))
-	want := hex.EncodeToString(hmacSHA256(secret, []byte(strings.Join(lines, "\n"))))
-	if !hmac.Equal([]byte(want), []byte(hash)) {
-		return WebAppUser{}, ErrForged
-	}
-	ts, _ := strconv.ParseInt(vals.Get("auth_date"), 10, 64)
-	signed := time.Unix(ts, 0)
-	if ts == 0 || now.Sub(signed) > 24*time.Hour || signed.Sub(now) > 5*time.Minute {
-		return WebAppUser{}, ErrExpired
-	}
-	var u struct {
-		ID        int64  `json:"id"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Username  string `json:"username"`
-		Lang      string `json:"language_code"`
-		Photo     string `json:"photo_url"`
-	}
-	if json.Unmarshal([]byte(vals.Get("user")), &u) != nil || u.ID == 0 {
-		return WebAppUser{}, ErrForged
-	}
-	return WebAppUser{ID: strconv.FormatInt(u.ID, 10), Name: strings.TrimSpace(u.FirstName + " " + u.LastName), Username: u.Username,
-		Lang: lang2(u.Lang), Photo: u.Photo, StartParam: vals.Get("start_param")}, nil
+	u, _, err := verifyWebAppData(c.token, raw, now)
+	u.ChatID = u.ID
+	return u, err
 }
 
 func tgID(id int64) string {
@@ -165,12 +125,6 @@ func tgID(id int64) string {
 		return ""
 	}
 	return strconv.FormatInt(id, 10)
-}
-
-func hmacSHA256(key, msg []byte) []byte {
-	m := hmac.New(sha256.New, key)
-	m.Write(msg)
-	return m.Sum(nil)
 }
 
 // SetProfile — описание, строка профиля и команды на каждом языке: Telegram показывает тот вариант,

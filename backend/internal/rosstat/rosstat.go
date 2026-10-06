@@ -2,8 +2,8 @@
 //   - месячный файл по территориям (регионы и города) — sred_potreb_cen_MM-YYYY.xlsx;
 //   - недельный файл по РФ в целом — nedel_sred_cen.xlsx.
 //
-// Оба лежат на rosstat.gov.ru под сертификатом Минцифры, поэтому в клиент
-// добавлены Russian Trusted Root CA и Sub CA: сервер отдаёт только листовой сертификат, без цепочки.
+// Оба лежат на rosstat.gov.ru под сертификатом Минцифры, поэтому клиент доверяет Russian Trusted
+// Root CA и Sub CA (пакет rucert): сервер отдаёт только листовой сертификат, без цепочки.
 package rosstat
 
 import (
@@ -11,9 +11,6 @@ import (
 
 	"bytes"
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	_ "embed"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,10 +22,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/xuri/excelize/v2"
-)
 
-//go:embed russian_trusted_root_ca.pem
-var russianRootCA []byte
+	"racion/internal/rucert"
+)
 
 const (
 	baseURL    = "https://rosstat.gov.ru/storage/mediabank/"
@@ -63,17 +59,7 @@ type Weekly struct {
 }
 
 func httpClient() *http.Client {
-	pool, err := x509.SystemCertPool()
-	if err != nil || pool == nil {
-		pool = x509.NewCertPool()
-	}
-	pool.AppendCertsFromPEM(russianRootCA)
-	return &http.Client{
-		Timeout: 3 * time.Minute,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12},
-		},
-	}
+	return rucert.Client(3 * time.Minute)
 }
 
 func fetch(ctx context.Context, name string) ([]byte, error) {

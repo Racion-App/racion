@@ -12,11 +12,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"racion/internal/rucert"
 )
 
 // MaxClient — Bot API мессенджера MAX (platform-api2.max.ru, схема — github.com/max-messenger/
 // max-bot-api-client-go/schema.yaml). Токен в заголовке Authorization, клавиатура — вложение
-// inline_keyboard, вебхук с секретом в заголовке X-Max-Bot-Api-Secret.
+// inline_keyboard, вебхук с секретом в заголовке X-Max-Bot-Api-Secret. Сертификат API выдан
+// удостоверяющим центром Минцифры, поэтому клиент доверяет и ему (rucert).
 type MaxClient struct {
 	token, username, secret string
 	base                    string
@@ -25,7 +28,7 @@ type MaxClient struct {
 
 func NewMax(token, username, secret string) *MaxClient {
 	return &MaxClient{token: token, username: strings.TrimPrefix(username, "@"), secret: secret,
-		base: "https://platform-api2.max.ru", http: &http.Client{Timeout: 20 * time.Second}}
+		base: "https://platform-api2.max.ru", http: rucert.Client(20 * time.Second)}
 }
 
 // SetBase меняет адрес API: для локального стенда с подменным сервером.
@@ -34,9 +37,19 @@ func (c *MaxClient) SetBase(u string) { c.base = strings.TrimRight(u, "/") }
 func (c *MaxClient) Platform() Platform { return Max }
 func (c *MaxClient) Username() string   { return c.username }
 
-// StartLink — max.ru/<бот>/start/<параметр>; параметр до 128 символов, длиннее MAX молча отбрасывает.
+// StartLink — max.ru/<бот>?start=<параметр>; параметр до 128 символов, длиннее MAX молча отбрасывает.
 func (c *MaxClient) StartLink(payload string) string {
-	return "https://max.ru/" + c.username + "/start/" + url.PathEscape(payload)
+	return "https://max.ru/" + c.username + "?start=" + url.QueryEscape(payload)
+}
+
+// AppLink — мини-приложение бота с параметром запуска: max.ru/<бот>?startapp=<параметр> (латиница,
+// цифры, «_» и «-», до 512 символов). Внутри MAX ссылка открывает мини-приложение, а не браузер.
+// Без параметра — «home»: сайт откроет главную.
+func (c *MaxClient) AppLink(start string) string {
+	if start == "" {
+		start = "home"
+	}
+	return "https://max.ru/" + c.username + "?startapp=" + url.QueryEscape(start)
 }
 
 type maxButton struct {
@@ -46,16 +59,21 @@ type maxButton struct {
 	URL     string `json:"url,omitempty"`
 }
 
-func maxBody(m Message) map[string]any {
+// body — сообщение в виде MAX. Кнопка «Открыть сайт» (App) ведёт в мини-приложение бота ссылкой
+// с параметром запуска: открыть произвольный адрес мини-приложением MAX не умеет.
+func (c *MaxClient) body(m Message) map[string]any {
 	body := map[string]any{"text": m.Text, "format": "html", "attachments": []any{}}
 	if len(m.Rows) > 0 {
 		rows := make([][]maxButton, 0, len(m.Rows))
 		for _, r := range m.Rows {
 			row := make([]maxButton, 0, len(r))
 			for _, b := range r {
-				if b.URL != "" {
+				switch {
+				case b.App:
+					row = append(row, maxButton{Type: "link", Text: b.Text, URL: c.AppLink(b.Start)})
+				case b.URL != "":
 					row = append(row, maxButton{Type: "link", Text: b.Text, URL: b.URL})
-				} else {
+				default:
 					row = append(row, maxButton{Type: "callback", Text: b.Text, Payload: b.Data})
 				}
 			}
@@ -74,14 +92,32 @@ func (c *MaxClient) Send(ctx context.Context, chatID string, m Message) (string,
 			} `json:"body"`
 		} `json:"message"`
 	}
-	if err := c.call(ctx, http.MethodPost, "/messages?chat_id="+url.QueryEscape(chatID), maxBody(m), &res); err != nil {
+	if err := c.call(ctx, http.MethodPost, "/messages?chat_id="+url.QueryEscape(chatID), c.body(m), &res); err != nil {
 		return "", err
 	}
 	return res.Message.Body.Mid, nil
 }
 
 func (c *MaxClient) Edit(ctx context.Context, _ string, messageID string, m Message) error {
-	return c.call(ctx, http.MethodPut, "/messages?message_id="+url.QueryEscape(messageID), maxBody(m), nil)
+	return c.call(ctx, http.MethodPut, "/messages?message_id="+url.QueryEscape(messageID), c.body(m), nil)
+}
+
+// VerifyInitData проверяет подпись данных мини-приложения (verifyWebAppData — тот же алгоритм, что
+// в Telegram). Диалог с ботом в MAX — отдельный id: он приходит в поле chat, если мини-приложение
+// открыли из этого диалога. Иначе ChatID пустой, и бот не знает, куда писать.
+func (c *MaxClient) VerifyInitData(raw string, now time.Time) (WebAppUser, error) {
+	u, vals, err := verifyWebAppData(c.token, raw, now)
+	if err != nil {
+		return u, err
+	}
+	var chat struct {
+		ID   int64  `json:"id"`
+		Type string `json:"type"`
+	}
+	if json.Unmarshal([]byte(vals.Get("chat")), &chat) == nil && chat.ID != 0 && strings.EqualFold(chat.Type, "dialog") {
+		u.ChatID = strconv.FormatInt(chat.ID, 10)
+	}
+	return u, nil
 }
 
 func (c *MaxClient) Answer(ctx context.Context, callbackID, text string) error {
@@ -112,18 +148,9 @@ func (u maxUser) id() string {
 // SetMenu — у ботов MAX нет кнопки меню с сайтом: мини-приложения там подключаются в кабинете бизнеса.
 func (c *MaxClient) SetMenu(context.Context, string, string, string) error { return nil }
 
-// SetProfile — у MAX описание и команды одни на всех: берём русский вариант, иначе общий.
-func (c *MaxClient) SetProfile(ctx context.Context, profiles map[string]Profile) error {
-	p, ok := profiles["ru"]
-	if !ok {
-		p = profiles[""]
-	}
-	cmds := make([]map[string]string, 0, len(p.Commands))
-	for _, cmd := range p.Commands {
-		cmds = append(cmds, map[string]string{"name": cmd.Name, "description": cmd.Description})
-	}
-	return c.call(ctx, http.MethodPatch, "/me", map[string]any{"description": p.Description, "commands": cmds}, nil)
-}
+// SetProfile — в MAX описание и команды бота меняются только в кабинете бизнеса: PATCH /me
+// с октября 2026 отвечает 404 «Path /me is not recognized». Нечего и пытаться при каждом запуске.
+func (c *MaxClient) SetProfile(context.Context, map[string]Profile) error { return nil }
 
 func (c *MaxClient) Parse(r *http.Request) (Update, bool, error) {
 	if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Max-Bot-Api-Secret")), []byte(c.secret)) != 1 {

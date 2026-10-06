@@ -1,5 +1,27 @@
 [
  {
+  "version": "1.13",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Рацион в MAX",
+   "en": "Racion in MAX"
+  },
+  "items": {
+   "ru": [
+    "Бот в MAX: присылает список покупок по отделам, отметки общие с сайтом, напоминает о покупках и следующей неделе. Неделя подключается кнопкой «Список в MAX» на её странице.",
+    "Сайт открывается внутри MAX как мини-приложение: вход без пароля, неделя из сообщения бота открывается сразу, список уходит в чат одной кнопкой.",
+    "MAX можно привязать к аккаунту в кабинете, как Telegram.",
+    "Новые фото у детских блюд и у рецептов, которые переименовали при сверке."
+   ],
+   "en": [
+    "A bot in MAX: it sends the shopping list by store section with checkmarks shared with the site and reminds you about shopping and the next week. Connect a week with the \"List in MAX\" button on its page.",
+    "The site opens inside MAX as a mini app: sign-in without a password, the week from a bot message opens right away, and the list goes to the chat with one tap.",
+    "You can link MAX to your account in the account settings, like Telegram.",
+    "New photos for kids' dishes and for recipes renamed during the review."
+   ]
+  }
+ },
+ {
   "version": "1.12",
   "date": "2026-10-07",
   "title": {

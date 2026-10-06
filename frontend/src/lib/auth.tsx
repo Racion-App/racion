@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
-import { inTelegram, tgInitData } from "./telegram";
+import { inMiniApp, miniInitData, miniPlatform } from "./miniapp";
 import type { User } from "./types";
 
-// tg — итог входа в мини-приложении Telegram: status от сервера, open — куда вести по параметру запуска.
+// tg — итог входа в мини-приложении мессенджера (Telegram, MAX): status от сервера, open — куда вести по параметру запуска.
 type TgState = { status: "login" | "created" | "linked" | "other" | "guest"; open: string };
 
 type Auth = {
@@ -41,14 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLinks([]);
     }
   }, []);
-  // В Telegram при каждом открытии сверяемся с сервером: привязанный аккаунт входит сам, вошедший на
-  // сайте привязывает Telegram. Пока не ответил — loading, иначе кабинет успел бы отправить на вход.
+  // В мини-приложении при каждом открытии сверяемся с сервером: привязанный аккаунт входит сам, вошедший
+  // на сайте привязывает мессенджер. Пока не ответил — loading, иначе кабинет успел бы отправить на вход.
   useEffect(() => {
     void (async () => {
       await refresh();
-      if (inTelegram()) {
+      if (inMiniApp()) {
         try {
-          const r = await api.webAppAuth("telegram", tgInitData());
+          const r = await api.webAppAuth(miniPlatform(), miniInitData());
           setTg({ status: r.status, open: r.open ?? "" });
           if (r.status !== "guest" && r.status !== "other") await refresh();
         } catch {
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
   const tgLogin = useCallback(
     async (plan?: string) => {
-      const r = await api.webAppAuth("telegram", tgInitData(), true, plan);
+      const r = await api.webAppAuth(miniPlatform(), miniInitData(), true, plan);
       setTg({ status: r.status, open: "" });
       await refresh();
     },

@@ -119,7 +119,7 @@ func TestMaxSend(t *testing.T) {
 	if att["type"] != "inline_keyboard" || cb["type"] != "callback" || cb["payload"] != "t:x:0:milk" || ln["type"] != "link" || ln["url"] == nil {
 		t.Errorf("клавиатура %+v", att)
 	}
-	if c.StartLink("p1") != "https://max.ru/racion/start/p1" {
+	if c.StartLink("p1") != "https://max.ru/racion?start=p1" {
 		t.Errorf("ссылка %s", c.StartLink("p1"))
 	}
 	if err := c.Edit(context.Background(), "555", "mid.abc", msg); err != nil || got.method != http.MethodPut || got.query != "message_id=mid.abc" {
@@ -155,8 +155,8 @@ func TestSetProfile(t *testing.T) {
 	calls = nil
 	mx := NewMax("T", "b", "s")
 	mx.base = s.URL
-	if err := mx.SetProfile(context.Background(), profiles); err != nil || len(calls) != 1 || calls[0] != "PATCH /me <nil>" {
-		t.Errorf("MAX: %v %v", calls, err)
+	if err := mx.SetProfile(context.Background(), profiles); err != nil || len(calls) != 0 {
+		t.Errorf("MAX: профиль правится только в кабинете бизнеса, запросов быть не должно: %v %v", calls, err)
 	}
 }
 
@@ -202,6 +202,43 @@ func TestVerifyInitData(t *testing.T) {
 	}
 	if _, err := c.VerifyInitData("", now); !errors.Is(err, ErrForged) {
 		t.Errorf("пустые данные: %v", err)
+	}
+	if u.ChatID != "42" {
+		t.Errorf("в Telegram личный чат — id человека: %q", u.ChatID)
+	}
+}
+
+// MAX подписывает данные мини-приложения так же, как Telegram; диалог с ботом — свой id в поле chat.
+// Открыли не из диалога — чат неизвестен, писать боту некуда.
+func TestMaxVerifyInitData(t *testing.T) {
+	c := NewMax("MTOKEN", "racion_bot", "s")
+	now := time.Unix(1_790_000_000, 0)
+	vals := url.Values{
+		"auth_date": {fmt.Sprint(now.Unix() - 30)}, "query_id": {"q1"}, "ip": {"10.0.0.1"}, "start_param": {"pAbC_-1"},
+		"user": {`{"id":476,"first_name":"Анна","last_name":"","username":"anna","language_code":"ru","photo_url":""}`},
+		"chat": {`{"id":-7001,"type":"DIALOG"}`},
+	}
+	u, err := c.VerifyInitData(sign("MTOKEN", vals), now)
+	if err != nil || u.ID != "476" || u.ChatID != "-7001" || u.StartParam != "pAbC_-1" || u.Name != "Анна" {
+		t.Fatalf("%+v %v", u, err)
+	}
+	vals.Del("hash")
+	vals.Set("chat", `{"id":-9,"type":"CHAT"}`)
+	if u, err := c.VerifyInitData(sign("MTOKEN", vals), now); err != nil || u.ChatID != "" {
+		t.Errorf("из группового чата писать некуда: %+v %v", u, err)
+	}
+	if _, err := NewMax("OTHER", "b", "s").VerifyInitData(sign("MTOKEN", vals), now); !errors.Is(err, ErrForged) {
+		t.Errorf("подпись другого бота принята: %v", err)
+	}
+}
+
+// Кнопка «Открыть сайт» в MAX — ссылка на мини-приложение бота с параметром запуска.
+func TestMaxAppButton(t *testing.T) {
+	c := NewMax("T", "racion_bot", "s")
+	att := c.body(Message{Text: "x", Rows: [][]Button{{{Text: "Открыть", URL: "https://racion.app/plan/1", App: true, Start: "pKEY"}}, {{Text: "Главная", URL: "https://racion.app/", App: true}}}})["attachments"].([]any)[0].(map[string]any)
+	rows := att["payload"].(map[string]any)["buttons"].([][]maxButton)
+	if rows[0][0].Type != "link" || rows[0][0].URL != "https://max.ru/racion_bot?startapp=pKEY" || rows[1][0].URL != "https://max.ru/racion_bot?startapp=home" {
+		t.Errorf("кнопки %+v", rows)
 	}
 }
 

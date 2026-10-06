@@ -1824,5 +1824,15 @@
   "why.leftover": "avanzi di ieri",
   "why.lighter": "più leggero del previsto",
   "why.pricier": "oltre il budget, ma maggiore varietà",
-  "why.wanted": "hai richiesto: {0}"
+  "why.wanted": "hai richiesto: {0}",
+  "max.login": "Accedi con MAX",
+  "max.text": "Collega MAX: nell'app dentro MAX entri senza password, e il bot mostra le liste della spesa delle settimane di questo account.",
+  "max.open": "Apri MAX",
+  "max.wait": "Apri MAX: il bot collegherà l'account appena lo avvii. Il link vale 15 minuti.",
+  "max.linked": "Collegato: nell'app dentro MAX entri senza password, e il bot invia le liste delle settimane di questo account.",
+  "max.linked.short": "MAX collegato",
+  "max.unlink.confirm": "Scollegare MAX?",
+  "max.unlink.text": "Il bot non vedrà più le settimane di questo account, e l'app dentro MAX ti chiederà di accedere di nuovo.",
+  "max.unlinked": "MAX scollegato",
+  "remind.max": "Promemoria su MAX"
 }

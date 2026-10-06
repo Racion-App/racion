@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { inTelegram, telegram } from "../lib/telegram";
+import { inMiniApp, miniApp } from "../lib/miniapp";
 
-// TelegramBridge — мини-приложение и роутер: кнопка «Назад» в шапке Telegram, когда есть куда
-// вернуться (иначе там «Закрыть»), и переход по параметру запуска (неделя из ссылки startapp).
+// TelegramBridge — мини-приложение (Telegram, MAX) и роутер: кнопка «Назад» в шапке мессенджера, когда
+// есть куда вернуться (иначе там «Закрыть»), и переход по параметру запуска (неделя из ссылки startapp).
 export function TelegramBridge() {
   const loc = useLocation();
   const nav = useNavigate();
@@ -19,10 +19,10 @@ export function TelegramBridge() {
   }, [tg, loc.pathname, nav]);
 
   useEffect(() => {
-    if (!inTelegram()) return;
+    if (!inMiniApp()) return;
     let alive = true;
     let off: (() => void) | null = null;
-    void telegram().then((app) => {
+    void miniApp().then((app) => {
       if (!app || !alive) return;
       const depth = (window.history.state as { idx?: number } | null)?.idx ?? 0;
       if (depth > 0) {

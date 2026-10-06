@@ -5,8 +5,15 @@ package messenger
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,13 +26,15 @@ const (
 )
 
 // Button — кнопка под сообщением. Data — нажатие обрабатывает бот; URL — кнопка открывает ссылку.
-// App — открыть ссылку как мини-приложение внутри мессенджера, где он это умеет (Telegram);
-// в остальных это обычная ссылка.
+// App — открыть сайт мини-приложением внутри мессенджера. Telegram открывает сам URL, а MAX — только
+// мини-приложение бота с адресом из кабинета бизнеса, поэтому ему нужен Start: параметр запуска
+// («p<ключ недели>», «me»), по которому сайт откроет нужную страницу.
 type Button struct {
-	Text string
-	Data string
-	URL  string
-	App  bool
+	Text  string
+	Data  string
+	URL   string
+	App   bool
+	Start string
 }
 
 // Message — текст в HTML (только <b> и <i>: оба мессенджера понимают их одинаково) и ряды кнопок.
@@ -84,7 +93,7 @@ type Poller interface {
 	Poll(ctx context.Context, handle func(Update)) error
 }
 
-// MiniApp — мессенджер открывает сайт внутри себя и подписывает данные человека (Telegram).
+// MiniApp — мессенджер открывает сайт внутри себя и подписывает данные человека (Telegram, MAX).
 type MiniApp interface {
 	VerifyInitData(raw string, now time.Time) (WebAppUser, error)
 }
@@ -97,6 +106,62 @@ type WebAppUser struct {
 	Lang       string
 	Photo      string
 	StartParam string // параметр из ссылки запуска мини-приложения
+	// ChatID — личный чат человека с ботом: туда бот пишет. В Telegram это id человека, в MAX — свой id
+	// диалога, он приходит, только если мини-приложение открыли из этого диалога; иначе пусто.
+	ChatID string
+}
+
+// verifyWebAppData — подпись данных мини-приложения, одна у Telegram и MAX: HMAC-SHA256 полей без hash,
+// отсортированных по имени и соединённых переводом строки, ключом HMAC-SHA256("WebAppData", токен
+// бота), в hex. Данные старше суток не принимаем: по ним вошёл бы тот, кто перехватил старую ссылку.
+func verifyWebAppData(token, raw string, now time.Time) (WebAppUser, url.Values, error) {
+	vals, err := url.ParseQuery(raw)
+	hash := vals.Get("hash")
+	if err != nil || hash == "" {
+		return WebAppUser{}, nil, ErrForged
+	}
+	vals.Del("hash")
+	keys := make([]string, 0, len(vals))
+	for k := range vals {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	lines := make([]string, len(keys))
+	for i, k := range keys {
+		lines[i] = k + "=" + vals.Get(k)
+	}
+	secret := hmacSHA256([]byte("WebAppData"), []byte(token))
+	want := hex.EncodeToString(hmacSHA256(secret, []byte(strings.Join(lines, "\n"))))
+	if !hmac.Equal([]byte(want), []byte(strings.ToLower(hash))) {
+		return WebAppUser{}, nil, ErrForged
+	}
+	ts, _ := strconv.ParseInt(vals.Get("auth_date"), 10, 64)
+	if ts > 1e11 { // миллисекунды вместо секунд
+		ts /= 1000
+	}
+	signed := time.Unix(ts, 0)
+	if ts == 0 || now.Sub(signed) > 24*time.Hour || signed.Sub(now) > 5*time.Minute {
+		return WebAppUser{}, nil, ErrExpired
+	}
+	var u struct {
+		ID        int64  `json:"id"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Username  string `json:"username"`
+		Lang      string `json:"language_code"`
+		Photo     string `json:"photo_url"`
+	}
+	if json.Unmarshal([]byte(vals.Get("user")), &u) != nil || u.ID == 0 {
+		return WebAppUser{}, nil, ErrForged
+	}
+	return WebAppUser{ID: strconv.FormatInt(u.ID, 10), Name: strings.TrimSpace(u.FirstName + " " + u.LastName), Username: u.Username,
+		Lang: lang2(u.Lang), Photo: u.Photo, StartParam: vals.Get("start_param")}, vals, nil
+}
+
+func hmacSHA256(key, msg []byte) []byte {
+	m := hmac.New(sha256.New, key)
+	m.Write(msg)
+	return m.Sum(nil)
 }
 
 // ErrBlocked — человек заблокировал бота или ещё не начинал с ним чат: писать ему нельзя.

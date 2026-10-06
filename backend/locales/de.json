@@ -1825,5 +1825,15 @@
   "remind.stopped": "Erinnerungen sind aus",
   "quick.next": "Nächste Woche planen",
   "quick.next.sub": "{range}: gleiche Antworten, {store}",
-  "admin.push.devices": "+{n} ohne Konto"
+  "admin.push.devices": "+{n} ohne Konto",
+  "max.login": "Mit MAX anmelden",
+  "max.text": "Verknüpfen Sie MAX: In der App in MAX melden Sie sich ohne Passwort an, und der Bot zeigt die Einkaufslisten der Wochen dieses Kontos.",
+  "max.open": "MAX öffnen",
+  "max.wait": "Öffnen Sie MAX: Der Bot verknüpft das Konto, sobald Sie ihn starten. Der Link gilt 15 Minuten.",
+  "max.linked": "Verknüpft: In der App in MAX melden Sie sich ohne Passwort an, und der Bot schickt die Listen der Wochen dieses Kontos.",
+  "max.linked.short": "MAX verknüpft",
+  "max.unlink.confirm": "MAX trennen?",
+  "max.unlink.text": "Der Bot sieht die Wochen dieses Kontos nicht mehr, und die App in MAX fragt wieder nach der Anmeldung.",
+  "max.unlinked": "MAX getrennt",
+  "remind.max": "In MAX erinnern"
 }

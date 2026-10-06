@@ -58,8 +58,8 @@ func (s *Server) webAppAuth(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, r, err)
 		return
 	}
-	if body.Tz != nil {
-		_ = s.svc.Bots.SetTz(r.Context(), platform, wu.ID, *body.Tz) // в Telegram id личного чата — id человека
+	if body.Tz != nil && wu.ChatID != "" {
+		_ = s.svc.Bots.SetTz(r.Context(), platform, wu.ChatID, *body.Tz)
 	}
 	viewer := currentUser(r)
 	res, err := s.svc.Accounts.LoginExternal(r.Context(), service.OAuthProfile{Provider: platform, ID: wu.ID, Name: wu.Name, Avatar: wu.Photo}, viewer, body.Create, body.Plan)
@@ -72,9 +72,9 @@ func (s *Server) webAppAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	switch {
 	case res.User != nil:
-		_ = s.svc.Bots.Known(r.Context(), platform, wu.ID, res.User.ID)
+		_ = s.svc.Bots.Known(r.Context(), platform, wu.ChatID, res.User.ID)
 	case res.Status == "linked":
-		_ = s.svc.Bots.Known(r.Context(), platform, wu.ID, viewer.ID)
+		_ = s.svc.Bots.Known(r.Context(), platform, wu.ChatID, viewer.ID)
 	}
 	writeJSON(w, 200, map[string]any{"status": res.Status, "user": res.User, "open": s.svc.Bots.StartPath(wu.StartParam)})
 }

@@ -1838,5 +1838,15 @@
   "why.leftover": "wczorajsze resztki",
   "why.lighter": "lżejsze niż norma",
   "why.pricier": "ponad budżet, ale większa różnorodność",
-  "why.wanted": "według twoich życzeń: {0}"
+  "why.wanted": "według twoich życzeń: {0}",
+  "max.login": "Zaloguj się przez MAX",
+  "max.text": "Połącz MAX: w aplikacji w MAX logujesz się bez hasła, a bot pokazuje listy zakupów tygodni tego konta.",
+  "max.open": "Otwórz MAX",
+  "max.wait": "Otwórz MAX: bot połączy konto, gdy tylko go uruchomisz. Link działa 15 minut.",
+  "max.linked": "Połączono: w aplikacji w MAX logujesz się bez hasła, a bot wysyła listy tygodni tego konta.",
+  "max.linked.short": "MAX połączony",
+  "max.unlink.confirm": "Odłączyć MAX?",
+  "max.unlink.text": "Bot przestanie widzieć tygodnie tego konta, a aplikacja w MAX poprosi o ponowne logowanie.",
+  "max.unlinked": "MAX odłączony",
+  "remind.max": "Przypominaj w MAX"
 }

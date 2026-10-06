@@ -180,3 +180,19 @@ func TestPlanKeyRoundTrip(t *testing.T) {
 		t.Error("мусор принят за неделю")
 	}
 }
+
+// Параметр запуска мини-приложения туда и обратно: неделя, кабинет, главная (MAX открывает только
+// мини-приложение бота, путь до страницы передаётся этим параметром).
+func TestStartParam(t *testing.T) {
+	id := "0f87d218-131f-4034-8161-c787564601d2"
+	b := &Bots{}
+	if p := startParam("/plan/" + id + "?mode=shop"); len(p) > 128 || b.StartPath(p) != "/plan/"+id {
+		t.Fatalf("неделя: %q → %q", p, b.StartPath(p))
+	}
+	if startParam("/me") != "me" || b.StartPath("me") != "/me" {
+		t.Fatalf("кабинет")
+	}
+	if startParam("/") != "" || b.StartPath("home") != "" {
+		t.Fatalf("главная")
+	}
+}

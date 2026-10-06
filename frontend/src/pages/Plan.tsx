@@ -9,7 +9,7 @@ import { RecipeSheet } from "../components/RecipeSheet";
 import { CartSheet } from "../components/CartSheet";
 import { flushChecks, pendingCount, queueCheck } from "../lib/offline";
 import { api, type ApiError } from "../lib/api";
-import { haptic, inTelegram, openInTelegram, tgInitData } from "../lib/telegram";
+import { haptic, inMiniApp, miniInitData, miniPlatform, openInMessenger } from "../lib/miniapp";
 import { track } from "../lib/analytics";
 import { clearDraftLimits } from "../lib/draft";
 import { PlanChat } from "../components/PlanChat";
@@ -143,14 +143,14 @@ export function Plan() {
     if (next) track("item_checked", { extra: itemId.startsWith("extra:") });
   };
 
-  // Внутри Telegram список уходит прямо в чат с ботом, из приложения уходить не надо. Человек ещё не
-  // начинал чат с ботом — сервер отвечает 409, тогда открываем ссылку на бота: он подключит неделю сам.
+  // Внутри мини-приложения (Telegram, MAX) список уходит прямо в чат с ботом, из приложения уходить не надо.
+  // Человек ещё не начинал чат с ботом — сервер отвечает 409, тогда открываем ссылку на бота: он подключит неделю сам.
   const sendToChat = async (href: string) => {
     try {
-      await api.webAppList("telegram", tgInitData(), id);
+      await api.webAppList(miniPlatform(), miniInitData(), id);
       setToast(t("tg.sent"));
     } catch (e) {
-      if ((e as ApiError).status === 409) openInTelegram(href);
+      if ((e as ApiError).status === 409) openInMessenger(href);
       else setToast((e as Error).message);
     }
   };
@@ -828,7 +828,7 @@ export function Plan() {
             })}
           </section>
         ))}
-        {!storeMode && !plan.occasion && !plan.basket && !inTelegram() && <RemindCard planId={plan.id} telegram={plan.bots?.telegram} onToast={setToast} />}
+        {!storeMode && !plan.occasion && !plan.basket && !inMiniApp() && <RemindCard planId={plan.id} telegram={plan.bots?.telegram} max={plan.bots?.max} onToast={setToast} />}
 
         </div>
 
@@ -861,7 +861,7 @@ export function Plan() {
                 const href = plan.bots?.[p];
                 if (!href) return null;
                 return (
-                  <a key={p} className="btn btn-soft btn-sm" href={href} target="_blank" rel="noopener" onClick={(e) => { track("bot_open", { platform: p }); if (p === "telegram" && inTelegram()) { e.preventDefault(); void sendToChat(href); } }}>
+                  <a key={p} className="btn btn-soft btn-sm" href={href} target="_blank" rel="noopener" onClick={(e) => { track("bot_open", { platform: p }); if (p === miniPlatform()) { e.preventDefault(); void sendToChat(href); } }}>
                     {p === "telegram" ? <Send size={14} aria-hidden /> : <MessageCircle size={14} aria-hidden />} {t("plan.bot." + p)}
                   </a>
                 );

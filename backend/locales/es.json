@@ -1825,5 +1825,15 @@
   "why.leftover": "sobras de ayer",
   "why.lighter": "más ligero que la meta",
   "why.pricier": "supera el presupuesto, pero hay más variedad",
-  "why.wanted": "pediste: {0}"
+  "why.wanted": "pediste: {0}",
+  "max.login": "Entrar con MAX",
+  "max.text": "Vincule MAX: la aplicación dentro de MAX le deja entrar sin contraseña, y el bot muestra las listas de la compra de las semanas de esta cuenta.",
+  "max.open": "Abrir MAX",
+  "max.wait": "Abra MAX: el bot vinculará la cuenta en cuanto lo inicie. El enlace vale 15 minutos.",
+  "max.linked": "Vinculado: la aplicación dentro de MAX le deja entrar sin contraseña, y el bot envía las listas de las semanas de esta cuenta.",
+  "max.linked.short": "MAX vinculado",
+  "max.unlink.confirm": "¿Desvincular MAX?",
+  "max.unlink.text": "El bot dejará de ver las semanas de esta cuenta, y la aplicación dentro de MAX le pedirá entrar de nuevo.",
+  "max.unlinked": "MAX desvinculado",
+  "remind.max": "Recordarme en MAX"
 }

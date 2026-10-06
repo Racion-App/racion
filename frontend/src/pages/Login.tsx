@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AlertCircle, Send } from "lucide-react";
+import { AlertCircle, MessageCircle, Send } from "lucide-react";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { OAuthButtons } from "../components/OAuthButtons";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { track } from "../lib/analytics";
-import { inTelegram } from "../lib/telegram";
+import { inMiniApp, miniPlatform } from "../lib/miniapp";
 import { useT } from "../i18n";
 
 export function Login() {
@@ -28,14 +28,14 @@ export function Login() {
   const [error, setError] = useState<string | null>(sp.get("error") === "oauth" ? t("auth.oauth.error") : null);
   const [busy, setBusy] = useState(false);
 
-  // внутри Telegram вход в одно касание: мессенджер уже подписал, кто это
+  // внутри мини-приложения (Telegram, MAX) вход в одно касание: мессенджер уже подписал, кто это
   const tgSignIn = async () => {
     if (busy) return;
     setBusy(true);
     setError(null);
     try {
       await tgLogin(planId);
-      track("auth_telegram");
+      track("auth_" + miniPlatform());
       if (safeNext) {
         window.location.assign(safeNext); // SSR-страница рецепта живёт вне React-роутера
         return;
@@ -82,11 +82,11 @@ export function Login() {
         <div className="auth__card">
         <h1 className="auth__title">{mode === "login" ? t("auth.login") : mode === "register" ? t("auth.register") : mode === "forgot" ? t("auth.forgot.title") : t("auth.reset.title")}</h1>
         <p className="auth__lead">{mode === "login" ? t("auth.login.lead") : mode === "register" ? t("auth.register.lead") : mode === "forgot" ? t("auth.forgot.lead") : t("auth.reset.lead")}</p>
-        {/* внутри Telegram главный путь — одна кнопка, почта ниже запасным */}
-        {inTelegram() && (mode === "login" || mode === "register") && (
+        {/* внутри мессенджера главный путь — одна кнопка, почта ниже запасным */}
+        {inMiniApp() && (mode === "login" || mode === "register") && (
           <div className="auth__tg">
             <button type="button" className="btn btn-primary btn-lg" onClick={tgSignIn} disabled={busy} aria-busy={busy}>
-              <Send size={18} aria-hidden /> {t("tg.login")}
+              {miniPlatform() === "max" ? <MessageCircle size={18} aria-hidden /> : <Send size={18} aria-hidden />} {t(miniPlatform() === "max" ? "max.login" : "tg.login")}
             </button>
             <div className="oauth__sep"><span>{t("tg.or")}</span></div>
           </div>
@@ -140,7 +140,7 @@ export function Login() {
               <AlertCircle size={18} aria-hidden /> {error}
             </p>
           )}
-          <button type="submit" className={inTelegram() ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg"} disabled={busy}>
+          <button type="submit" className={inMiniApp() ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg"} disabled={busy}>
             {mode === "login" ? t("auth.signin") : mode === "register" ? t("auth.create") : mode === "forgot" ? t("auth.forgot.send") : t("auth.reset.save")}
           </button>
           {mode === "login" && <button type="button" className="auth__link" onClick={() => { setMode("forgot"); setError(null); }}>{t("auth.forgot")}</button>}

@@ -1824,5 +1824,15 @@
   "why.leftover": "restes d’hier",
   "why.lighter": "plus léger que prévu",
   "why.pricier": "au-delà du budget, mais plus de variété",
-  "why.wanted": "vous avez demandé : {0}"
+  "why.wanted": "vous avez demandé : {0}",
+  "max.login": "Se connecter avec MAX",
+  "max.text": "Liez MAX : l'application dans MAX vous connecte sans mot de passe, et le bot affiche les listes de courses des semaines de ce compte.",
+  "max.open": "Ouvrir MAX",
+  "max.wait": "Ouvrez MAX : le bot liera le compte dès que vous le lancerez. Le lien est valable 15 minutes.",
+  "max.linked": "Lié : l'application dans MAX vous connecte sans mot de passe, et le bot envoie les listes des semaines de ce compte.",
+  "max.linked.short": "MAX lié",
+  "max.unlink.confirm": "Délier MAX ?",
+  "max.unlink.text": "Le bot ne verra plus les semaines de ce compte, et l'application dans MAX vous demandera de vous reconnecter.",
+  "max.unlinked": "MAX délié",
+  "remind.max": "Rappels dans MAX"
 }

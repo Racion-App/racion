@@ -15,7 +15,7 @@ import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
 import { InstallCard } from "../components/InstallSheet";
 import { MessengerCard } from "../components/MessengerCard";
-import { inTelegram } from "../lib/telegram";
+import { inMiniApp } from "../lib/miniapp";
 import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -523,9 +523,10 @@ export function Account() {
               <LogOut size={16} aria-hidden /> {t("account.logout")}
             </button>
           </div>
-          <MessengerCard onToast={setToast} />
+          <MessengerCard platform="telegram" onToast={setToast} />
+          <MessengerCard platform="max" onToast={setToast} />
           <NotifyCard onToast={setToast} />
-          {!inTelegram() && <InstallCard />}
+          {!inMiniApp() && <InstallCard />}
         </section>
       </main>
       <SiteFooter />

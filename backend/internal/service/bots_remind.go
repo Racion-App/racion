@@ -86,7 +86,7 @@ func (b *Bots) reminder(ctx context.Context, r Reminder, lang i18n.Lang) (messen
 		return "<b>" + html.EscapeString(i18n.T(lang, k, args...)) + "</b>\n"
 	}
 	open := func(path string) []messenger.Button {
-		return []messenger.Button{{Text: i18n.T(lang, "bot.open"), URL: b.appURL(lang, path), App: true}}
+		return []messenger.Button{b.appButton(lang, i18n.T(lang, "bot.open"), path)}
 	}
 	plan := "/plan/" + r.PlanID
 	switch r.Kind {
@@ -132,7 +132,7 @@ func (b *Bots) reminder(ctx context.Context, r Reminder, lang i18n.Lang) (messen
 		}
 		return messenger.Message{
 			Text: title("push.week.title") + html.EscapeString(body),
-			Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.build"), URL: b.appURL(lang, "/"), App: true}}},
+			Rows: [][]messenger.Button{{b.appButton(lang, i18n.T(lang, "bot.build"), "/")}},
 		}, true
 	case "wean":
 		return messenger.Message{

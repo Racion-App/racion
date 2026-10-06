@@ -1838,5 +1838,15 @@
   "why.leftover": "včerejší zbytek",
   "why.lighter": "lehčí než stanovená norma",
   "why.pricier": "nad rozpočet, ale větší rozmanitost",
-  "why.wanted": "požadovali jste: {0}"
+  "why.wanted": "požadovali jste: {0}",
+  "max.login": "Přihlásit se přes MAX",
+  "max.text": "Propojte MAX: v aplikaci v MAX se přihlásíte bez hesla a bot ukáže nákupní seznamy týdnů tohoto účtu.",
+  "max.open": "Otevřít MAX",
+  "max.wait": "Otevřete MAX: bot propojí účet, jakmile ho spustíte. Odkaz platí 15 minut.",
+  "max.linked": "Propojeno: v aplikaci v MAX se přihlásíte bez hesla a bot posílá seznamy týdnů tohoto účtu.",
+  "max.linked.short": "MAX propojen",
+  "max.unlink.confirm": "Odpojit MAX?",
+  "max.unlink.text": "Bot přestane vidět týdny tohoto účtu a aplikace v MAX bude chtít nové přihlášení.",
+  "max.unlinked": "MAX odpojen",
+  "remind.max": "Připomínat v MAX"
 }

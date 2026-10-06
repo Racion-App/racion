@@ -1825,5 +1825,15 @@
   "why.leftover": "前日の余り物",
   "why.lighter": "目標より軽い",
   "why.pricier": "予算オーバー、でも種類が豊富",
-  "why.wanted": "ご希望どおり: {0}"
+  "why.wanted": "ご希望どおり: {0}",
+  "max.login": "MAXでログイン",
+  "max.text": "MAXを連携すると、MAX内のアプリにパスワードなしでログインでき、ボットがこのアカウントの週の買い物リストを表示します。",
+  "max.open": "MAXを開く",
+  "max.wait": "MAXを開いてボットを起動すると、アカウントが連携されます。リンクの有効期限は15分です。",
+  "max.linked": "連携済み：MAX内のアプリにパスワードなしでログインでき、ボットがこのアカウントの週のリストを送ります。",
+  "max.linked.short": "MAX連携済み",
+  "max.unlink.confirm": "MAXの連携を解除しますか？",
+  "max.unlink.text": "ボットはこのアカウントの週を見られなくなり、MAX内のアプリでは再ログインが必要になります。",
+  "max.unlinked": "MAXの連携を解除しました",
+  "remind.max": "MAXで受け取る"
 }

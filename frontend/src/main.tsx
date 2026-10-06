@@ -4,12 +4,12 @@ import "flag-icons/css/flag-icons.min.css";
 import "./styles/app.scss";
 import { App } from "./App";
 import { initAnalytics, track } from "./lib/analytics";
-import { initTelegram } from "./lib/telegram";
+import { initMiniApp } from "./lib/miniapp";
 import { adoptQueryLang, warmDict } from "./i18n";
 import { openCurrentWeek } from "./lib/weeks";
 
-// до первой отрисовки: данные запуска мини-приложения Telegram и язык из ?lang= (так бот открывает сайт)
-initTelegram();
+// до первой отрисовки: данные запуска мини-приложения (Telegram, MAX) и язык из ?lang= (так бот открывает сайт)
+initMiniApp();
 adoptQueryLang();
 // установленное приложение с идущей неделей открывается сразу на ней, а не на анкете
 const toWeek = openCurrentWeek();

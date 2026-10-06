@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, BellRing, Send, Smartphone } from "lucide-react";
+import { Bell, BellRing, MessageCircle, Send, Smartphone } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { track } from "../lib/analytics";
@@ -13,13 +13,13 @@ import { useT } from "../i18n";
 // Напоминания со страницы недели. Неделя кончалась, и человек не возвращался: вторую неделю собирали
 // единицы, а без аккаунта напомнить было нечем. Без аккаунта подписка привязывается к неделе (сервер
 // напоминает по неделям устройства), с аккаунтом — обычная подписка аккаунта с настройками в кабинете.
-// Где уведомлений нет (iPhone без установки, запрет в браузере), остаётся бот в Telegram: он напоминает
-// по той же неделе.
+// Где уведомлений нет (iPhone без установки, запрет в браузере), остаются боты в Telegram и MAX: они
+// напоминают по той же неделе.
 
 const LATER_KEY = "racion.remind.later";
 const LATER_MS = 14 * 24 * 3600 * 1000;
 
-export function RemindCard({ planId, telegram, onToast }: { planId: string; telegram?: string; onToast: (m: string) => void }) {
+export function RemindCard({ planId, telegram, max, onToast }: { planId: string; telegram?: string; max?: string; onToast: (m: string) => void }) {
   const { t } = useT();
   const { user } = useAuth();
   const [state, setState] = useState<PushState | null>(null);
@@ -119,7 +119,7 @@ export function RemindCard({ planId, telegram, onToast }: { planId: string; tele
   if (hidden) return null;
   const canPush = state === "off" && !iosNeedsApp;
   const note = iosNeedsApp ? t("remind.ios") : state === "denied" ? t("remind.denied") : state === "unsupported" ? t("remind.unsupported") : "";
-  if (!canPush && !iosNeedsApp && !telegram) return null; // предложить нечего
+  if (!canPush && !iosNeedsApp && !telegram && !max) return null; // предложить нечего
 
   return (
     <section className="day remind" aria-label={t("remind.title")}>
@@ -142,6 +142,11 @@ export function RemindCard({ planId, telegram, onToast }: { planId: string; tele
           {telegram && (
             <a className="btn btn-soft btn-sm" href={telegram} target="_blank" rel="noopener" onClick={() => track("remind_tg")}>
               <Send size={15} aria-hidden /> {t("remind.tg")}
+            </a>
+          )}
+          {max && (
+            <a className="btn btn-soft btn-sm" href={max} target="_blank" rel="noopener" onClick={() => track("remind_max")}>
+              <MessageCircle size={15} aria-hidden /> {t("remind.max")}
             </a>
           )}
           <button type="button" className="remind__link" onClick={later}>{t("remind.later")}</button>
