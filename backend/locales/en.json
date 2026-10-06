@@ -1631,7 +1631,6 @@
   "weaning.page.link": "Weaning table by month",
   "weaning.page.mo": "mo",
   "quiz.formula.when": "When you give formula",
-  "quiz.formula.when.all": "Nothing ticked: formula at every feed",
   "quiz.formula.when.sub": "Breast at the other feeds",
   "formula.feed.morning": "Morning",
   "formula.feed.day": "Daytime",
@@ -1704,5 +1703,10 @@
   "weaning.diary.ok.done": "Noted: from next week this food is in the menu, and the next one on the list becomes new.",
   "weaning.diary.reaction.done": "Removed from weaning. You can try again in 1–2 months; tell your paediatrician about the reaction.",
   "kid.bedtime.sub": "the fifth meal in the Russian feeding programme for ages 1–3",
-  "note.mom.kcal": "{0} kcal a day were added to mum's norm for this trimester (Russian norms MR 2.3.1.0253-21)."
+  "note.mom.kcal": "{0} kcal a day were added to mum's norm for this trimester (Russian norms MR 2.3.1.0253-21).",
+  "quiz.formula.breast": "Also breastfeeding",
+  "quiz.formula.breast.sub": "Mixed feeding: mark when you give formula",
+  "quiz.formula.when.mixed": "Mark the formula feeds; breast at the rest",
+  "quiz.formula.when.toddler": "Formula only at the marked times",
+  "quiz.formula.when.toddler.none": "Nothing marked: by the age norm"
 }

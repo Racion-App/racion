@@ -556,7 +556,8 @@ func feedSlot(t string) string {
 // markFormula — у ребёнка на смеси подписывает молочные кормления: смесь (сколько мл) или грудь.
 // Объём одного кормления — по возрасту, а если родители указали мл в день, он делится на кормления смесью.
 func markFormula(k Child, feeds []WeaningFeed) {
-	if !k.Formula {
+	// без смеси или смешанное вскармливание без отметок — не знаем, где грудь, где смесь: «грудь или смесь»
+	if !k.Formula || (k.Breast && len(k.FormulaFeeds) == 0) {
 		return
 	}
 	var idx []int

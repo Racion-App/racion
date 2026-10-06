@@ -34,8 +34,13 @@ type Child struct {
 	Formula      bool   `json:"formula"`      // на смеси
 	FormulaBrand string `json:"formulaBrand"` // код из FormulaBrands
 	FormulaMl    int    `json:"formulaMl"`    // мл в день; 0 — по возрастной норме
-	// FormulaFeeds — когда даёт смесь (FormulaSlots): только утром, на ночь и т. п.; пусто — во все кормления
+	// FormulaFeeds — когда даёт смесь (FormulaSlots): только утром, на ночь и т. п.; пусто — во все кормления.
+	// До года отметки нужны только при смешанном вскармливании (Breast), с года — смесь как напиток.
 	FormulaFeeds []string `json:"formulaFeeds,omitempty"`
+	// Breast — ещё и грудное молоко: смешанное вскармливание («грудное молоко в любом сочетании с
+	// адаптированной смесью», Программа вскармливания 2019). Тогда отмеченные кормления — смесь, остальные —
+	// грудь. Без этого флага ребёнок на смеси получает её во все молочные кормления.
+	Breast bool `json:"breast,omitempty"`
 	// Meals — в режиме «комбинирую»: приём (MealSlots) → home | jars | shared
 	Meals map[string]string `json:"meals,omitempty"`
 	// Introduced — продукты прикорма, которые ребёнок уже ест (id продуктов базы из WeaningFoods)
@@ -141,6 +146,12 @@ func (c Child) normalized() Child {
 				feeds = append(feeds, f)
 			}
 		}
+	}
+	if !c.Formula || c.AgeMonths >= 24 {
+		c.Breast = false
+	}
+	if c.Formula && !c.Breast && c.AgeMonths < 12 {
+		feeds = nil // только смесь — во все молочные кормления, отметки «когда» не нужны
 	}
 	c.FormulaFeeds = feeds
 	var meals map[string]string

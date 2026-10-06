@@ -54,6 +54,7 @@ export type Child = {
   formulaBrand: string;
   formulaMl: number;
   formulaFeeds?: string[]; // когда даёт смесь: morning | day | bedtime | night; пусто — во все кормления
+  breast?: boolean; // ещё и грудное молоко (смешанное вскармливание): тогда отмеченные кормления — смесь, остальные — грудь
   meals?: Record<string, string>; // режим «комбинирую»: приём → home | jars | shared
   allergens?: string[]; // аллергии самого ребёнка (коды как у семьи)
   ageAt?: string; // месяц (YYYY-MM), когда указан возраст: дальше он растёт сам

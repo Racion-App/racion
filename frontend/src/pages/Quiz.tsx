@@ -612,12 +612,12 @@ export function Quiz() {
                         <span>{t("quiz.formula.brand")}</span>
                         <Select aria-label={t("quiz.formula.brand")} value={k.formulaBrand} onChange={(v) => updateKid(i, { formulaBrand: v })} options={(meta?.formulaBrands ?? []).map((b) => ({ value: b.id, label: b.name, sub: b.note }))} />
                       </label>
-                      <FormulaFeeds value={k.formulaFeeds ?? []} onChange={(formulaFeeds) => updateKid(i, { formulaFeeds })} />
+                      <FormulaFeeds kid={k} onChange={(patch) => updateKid(i, patch)} />
                       <label className="kid__row">
                         <span>
-                          {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths, k.formulaFeeds) })}</small>
+                          {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths, k.breast || k.ageMonths >= 12 ? k.formulaFeeds : undefined) })}</small>
                         </span>
-                        <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths, k.formulaFeeds))} value={k.formulaMl || ""} onChange={(e) => updateKid(i, { formulaMl: Number(e.target.value) || 0 })} />
+                        <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths, k.breast || k.ageMonths >= 12 ? k.formulaFeeds : undefined))} value={k.formulaMl || ""} onChange={(e) => updateKid(i, { formulaMl: Number(e.target.value) || 0 })} />
                       </label>
                     </>
                   )}

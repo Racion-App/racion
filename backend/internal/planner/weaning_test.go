@@ -131,10 +131,20 @@ func TestKidsOnlyWeaning(t *testing.T) {
 	}
 }
 
-// Смесь только на ночь: в 22:00 смесь, остальные молочные кормления — грудь; норма в день — одно кормление.
+// Смешанное вскармливание, смесь только на ночь: в 22:00 смесь, остальные молочные кормления — грудь;
+// норма в день — одно кормление. Без груди смесь во все молочные кормления, отметки не нужны.
 func TestFormulaBedtimeOnly(t *testing.T) {
 	c := testCatalog(t)
-	k := Child{AgeMonths: 7, Feeding: FeedWeaning, Formula: true, FormulaBrand: "nan", FormulaFeeds: []string{"bedtime", "bogus"}}.normalized()
+	only := Child{AgeMonths: 7, Feeding: FeedWeaning, Formula: true, FormulaBrand: "nan", FormulaFeeds: []string{"bedtime"}}.normalized()
+	if len(only.FormulaFeeds) != 0 {
+		t.Fatalf("только смесь до года — отметки не нужны: %v", only.FormulaFeeds)
+	}
+	for _, f := range c.buildWeaning(only, i18n.RU, nil, nil).Days[0].Feeds {
+		if f.Milk && f.MilkKind != "formula" {
+			t.Fatalf("только смесь, а %s — %q", f.Time, f.MilkKind)
+		}
+	}
+	k := Child{AgeMonths: 7, Feeding: FeedWeaning, Formula: true, Breast: true, FormulaBrand: "nan", FormulaFeeds: []string{"bedtime", "bogus"}}.normalized()
 	if len(k.FormulaFeeds) != 1 || k.FormulaMlPerDay() != 200 {
 		t.Fatalf("кормления %v, мл %d", k.FormulaFeeds, k.FormulaMlPerDay())
 	}
@@ -154,7 +164,7 @@ func TestFormulaBedtimeOnly(t *testing.T) {
 		}
 	}
 	// утром и ночью, свой объём в день делится на кормления смесью
-	k = Child{AgeMonths: 10, Feeding: FeedWeaning, Formula: true, FormulaMl: 500, FormulaFeeds: []string{"morning", "night"}}.normalized()
+	k = Child{AgeMonths: 10, Feeding: FeedWeaning, Formula: true, Breast: true, FormulaMl: 500, FormulaFeeds: []string{"morning", "night"}}.normalized()
 	w = c.buildWeaning(k, i18n.RU, nil, nil)
 	got := map[string]int{}
 	for _, f := range w.Days[0].Feeds {
