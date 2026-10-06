@@ -55,6 +55,10 @@ export type Child = {
   formulaMl: number;
   formulaFeeds?: string[]; // когда даёт смесь: morning | day | bedtime | night; пусто — во все кормления
   meals?: Record<string, string>; // режим «комбинирую»: приём → home | jars | shared
+  allergens?: string[]; // аллергии самого ребёнка (коды как у семьи)
+  ageAt?: string; // месяц (YYYY-MM), когда указан возраст: дальше он растёт сам
+  avoid?: string[]; // продукты, на которые была реакция: в прикорм и меню ребёнка не ставятся
+  away?: string; // по будням: "" дома, kindergarten — в саду, school — в школе
   introduced?: string[]; // прикорм: продукты, которые малыш уже ест
 };
 
@@ -65,6 +69,7 @@ export type Weaning = {
   month: number;
   days: { index: number; label: string; feeds: WeaningFeed[] }[];
   new?: WeaningItem;
+  newName?: string; // название продукта недели без «Пюре:»
   ramp?: number[];
   next: string[];
   introduced: string[];
@@ -99,11 +104,14 @@ export type Params = {
 };
 
 // Едок семьи: цель, аппетит и приёмы дома (пусто — все).
-export type Member = { name: string; goal: string; appetite: "small" | "normal" | "big"; slots: string[] };
+export type Member = { name: string; goal: string; appetite: "small" | "normal" | "big"; slots: string[]; mom?: string };
+// беременность по триместрам или кормление грудью: прибавка к ккал мамы и блюда, которых при беременности избегают
+export const MOM_STATES = ["", "pregnant1", "pregnant2", "pregnant3", "nursing"] as const;
 export type MemberView = { name: string; goal: string; goalLabel: string; kcal: number; factor: number; slots: string[] };
 export const APPETITES = ["small", "normal", "big"] as const;
 
 export type Dish = {
+  kidNote?: string; // как подать малышу, который ест с общего стола: «виноград — на четвертинки»
   servings?: number; // стол: на сколько человек готовят это блюдо
   slot: string;
   recipeId: string;
@@ -173,7 +181,7 @@ export type Plan = {
   portions: number;
   days: Day[];
   shopping: ShopGroup[];
-  kidsMenus: { child: number; ageLabel: string; factor: number; note: string; weaning?: Weaning; days: { index: number; label: string; dishes: { slot: string; recipeId: string; title: string; timeMin: number; kcal: number; cost: number; kind?: "jars" | "shared"; ref?: string }[] }[] }[];
+  kidsMenus: { child: number; ageLabel: string; factor: number; note: string; norm?: string; weaning?: Weaning; days: { index: number; label: string; dishes: { slot: string; recipeId: string; title: string; timeMin: number; kcal: number; cost: number; kind?: "jars" | "shared" | "none" | "bedtime" | "away.kindergarten" | "away.school"; ref?: string; note?: string }[] }[] }[];
   totals: {
     cost: number;
     pantryCost: number;

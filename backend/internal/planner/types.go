@@ -304,6 +304,10 @@ type Dish struct {
 	Side     *Side     `json:"side,omitempty"`     // гарнир к основному (итоги выше — суммой с ним)
 	Prep     *PrepInfo `json:"prep,omitempty"`     // режим заготовок: когда и как приготовлено
 	Servings int       `json:"servings,omitempty"` // корзина: на сколько человек готовят именно это блюдо
+	// Portions — порций именно в этот день, если их меньше, чем в приёме обычно (ребёнок в будни в саду)
+	Portions float64 `json:"portions,omitempty"`
+	// KidNote — как подать блюдо малышу, который ест с общего стола: «виноград — на четвертинки»
+	KidNote string `json:"kidNote,omitempty"`
 }
 
 // WhyCode — из чего собрана подпись «почему»; по нему подпись пересобирается на другом языке.

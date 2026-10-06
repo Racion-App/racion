@@ -2,10 +2,12 @@ import { useMemo } from "react";
 import { Baby, Plus, Trash2, User } from "lucide-react";
 import { Select } from "./Select";
 import type { Child, Member, Meta } from "../lib/types";
-import { APPETITES } from "../lib/types";
-import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
+import { APPETITES, MOM_STATES } from "../lib/types";
+import { ageOptions, feedingOptions, formulaMlByAge, ymNow } from "../lib/kids";
+import { KidAway } from "./KidAway";
 import { FormulaFeeds } from "./FormulaFeeds";
 import { MealSources } from "./MealSources";
+import { KidAllergens } from "./KidAllergens";
 import { useT } from "../i18n";
 
 // Состав семьи: взрослые (имя, цель, аппетит, приёмы дома) и дети (имя, возраст, кормление, смесь).
@@ -71,6 +73,10 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
               </div>
             </div>
             <div className="member__row">
+              <span className="member__label">{t("member.mom")}</span>
+              <Select aria-label={t("member.mom")} value={m.mom ?? ""} onChange={(v) => setAdult(i, { mom: v })} options={MOM_STATES.map((s) => ({ value: s, label: t(s ? `member.mom.${s}` : "member.mom.none") }))} />
+            </div>
+            <div className="member__row">
               <span className="member__label">{t("quiz.member.slots")}</span>
               <div className="chips" role="group" aria-label={t("quiz.member.slots")}>
                 {slots.map((s) => {
@@ -113,7 +119,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
                 onChange={(v) => {
                   const m = Number(v);
                   const opts = feedingOptions(m);
-                  setKid(i, { ageMonths: m, feeding: opts.includes(k.feeding) ? k.feeding : opts[0], sharesMeals: false, formula: m < 36 ? k.formula : false });
+                  setKid(i, { ageMonths: m, ageAt: ymNow(), feeding: opts.includes(k.feeding) ? k.feeding : opts[0], sharesMeals: false, formula: m < 36 ? k.formula : false });
                 }}
               />
             </label>
@@ -130,6 +136,8 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
               </div>
             )}
             {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => setKid(i, { meals })} />}
+            {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => setKid(i, { away })} />}
+            {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => setKid(i, { allergens })} />}
             {k.ageMonths < 36 && (
               <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "nutrilon" : k.formulaBrand })}>
                 <span className="switch__text">

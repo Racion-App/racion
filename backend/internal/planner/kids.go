@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"slices"
 	"strings"
+	"time"
 
 	"racion/internal/i18n"
 )
@@ -39,6 +40,56 @@ type Child struct {
 	Meals map[string]string `json:"meals,omitempty"`
 	// Introduced — продукты прикорма, которые ребёнок уже ест (id продуктов базы из WeaningFoods)
 	Introduced []string `json:"introduced,omitempty"`
+	// Avoid — продукты, на которые была реакция («не подошло» в дневнике прикорма): в прикорм, детское
+	// меню и общие блюда ребёнка не ставятся, пока родители не вернут
+	Avoid []string `json:"avoid,omitempty"`
+	// Allergens — аллергии самого ребёнка (коды как у семьи: dairy, eggs, gluten…): прикорм, детское меню
+	// и, если ребёнок ест с общего стола, общие блюда их учитывают
+	Allergens []string `json:"allergens,omitempty"`
+	// AgeAt — месяц (YYYY-MM), когда указан возраст: в плане на более поздний месяц возраст растёт сам,
+	// родителям не нужно каждый месяц его править
+	AgeAt string `json:"ageAt,omitempty"`
+	// Away — где ребёнок ест по будням: "" — дома, kindergarten — в саду (завтрак, обед, полдник),
+	// school — в школе (обед). Порции и детское меню на будни это учитывают.
+	Away string `json:"away,omitempty"`
+}
+
+// Где ребёнок ест по будням.
+const (
+	AwayKindergarten = "kindergarten"
+	AwaySchool       = "school"
+)
+
+// AwaySlots — приёмы, которые ребёнок по будням ест не дома: в детском саду (10,5–12 ч) завтрак, второй
+// завтрак, обед и полдник, дома ужин; у школьника обед в школе.
+func (c Child) AwaySlots() []string {
+	switch c.Away {
+	case AwayKindergarten:
+		return []string{"breakfast", "lunch", "snack"}
+	case AwaySchool:
+		return []string{"lunch"}
+	}
+	return nil
+}
+
+// AwayOn — ест ли ребёнок этот приём в этот день не дома (дни плана с понедельника: 0–4 — будни).
+func (c Child) AwayOn(day int, slot string) bool {
+	return day < 5 && slices.Contains(c.AwaySlots(), slot)
+}
+
+// grow — возраст на дату начала плана: «8 мес» в октябре — это 10 мес в плане на декабрь.
+func (c *Child) grow(start time.Time) {
+	at, err := time.Parse("2006-01", c.AgeAt)
+	if err != nil {
+		c.AgeAt = ""
+		return
+	}
+	months := (start.Year()-at.Year())*12 + int(start.Month()) - int(at.Month())
+	if months <= 0 {
+		return
+	}
+	c.AgeMonths = min(c.AgeMonths+months, 17*12)
+	c.AgeAt = start.Format("2006-01")
 }
 
 // FeedingOptions — какие режимы доступны в этом возрасте (первый — рекомендуемый по умолчанию).
@@ -112,7 +163,72 @@ func (c Child) normalized() Child {
 		}
 	}
 	c.Introduced = intro
+	var avoid []string
+	for _, id := range c.Avoid {
+		if id != "" && !slices.Contains(avoid, id) && !slices.Contains(c.Introduced, id) && len(avoid) < 40 {
+			avoid = append(avoid, id)
+		}
+	}
+	c.Avoid = avoid
+	var al []string
+	for _, a := range c.Allergens {
+		if slices.Contains(Allergens, a) && !slices.Contains(al, a) {
+			al = append(al, a)
+		}
+	}
+	c.Allergens = al
+	switch {
+	case c.Feeding == FeedMilk || c.Feeding == FeedWeaning || c.AgeMonths < 12:
+		c.Away = ""
+	case c.Away == AwaySchool && c.AgeMonths < 72:
+		c.Away = AwayKindergarten
+	case c.Away == AwayKindergarten && c.AgeMonths >= 96:
+		c.Away = AwaySchool
+	case c.Away != AwayKindergarten && c.Away != AwaySchool:
+		c.Away = ""
+	}
 	return c
+}
+
+// avoids — нельзя ли продукт: исключён семьёй или в нём аллерген из списка.
+func (c *Catalog) avoids(id string, allergens, exclude []string) bool {
+	if slices.Contains(exclude, id) {
+		return true
+	}
+	if ing, ok := c.Ingredients[id]; ok {
+		for _, a := range ing.Allergens {
+			if slices.Contains(allergens, a) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// recipeAvoids — есть ли в рецепте продукт, который нельзя.
+func (c *Catalog) recipeAvoids(id string, allergens, exclude []string) bool {
+	r, ok := c.RecipeByID[id]
+	if !ok {
+		return true
+	}
+	for _, ri := range r.Ingredients {
+		if c.avoids(ri.IngredientID, allergens, exclude) {
+			return true
+		}
+	}
+	return false
+}
+
+// kidAvoid — аллергии и исключения для блюд ребёнка: семейные плюс его собственные (аллергии и продукты,
+// на которые была реакция).
+func kidAvoid(k Child, p Params) (allergens, exclude []string) {
+	allergens = slices.Clone(p.Allergens)
+	for _, a := range k.Allergens {
+		if !slices.Contains(allergens, a) {
+			allergens = append(allergens, a)
+		}
+	}
+	return allergens, append(slices.Clone(p.Exclude), k.Avoid...)
 }
 
 // Источники приёма пищи в режиме «комбинирую».
@@ -181,21 +297,23 @@ func (c Child) PortionFactor() float64 {
 }
 
 func (c Child) ageFactor() float64 {
+	// МР 2.3.1.0253-21, табл. 21: 1–2 года 1300 ккал, 3–6 лет 1800, 7–10 лет 2100, 11–14 лет 2300–2500,
+	// 15–17 лет 2500–2900. Общий стол даёт до 7 лет около 3/4 дневной нормы, дальше около 85%; взрослый — 2100.
 	switch {
 	case c.AgeMonths < 6:
 		return 0
 	case c.AgeMonths < 12:
-		return 0.15
+		return 0.15 // до года со стола — несколько ложек, остальное грудь, смесь и прикорм
 	case c.AgeMonths < 36:
-		return 0.4
-	case c.AgeMonths < 84: // до 7 лет
-		return 0.55
-	case c.AgeMonths < 132: // до 11
-		return 0.7
-	case c.AgeMonths < 168: // до 14
+		return 0.45
+	case c.AgeMonths < 84:
+		return 0.65
+	case c.AgeMonths < 132:
 		return 0.85
-	default:
+	case c.AgeMonths < 180:
 		return 1
+	default:
+		return 1.1
 	}
 }
 
@@ -210,8 +328,10 @@ func (c Child) MenuFactor() float64 {
 		return 1
 	case c.AgeMonths < 84:
 		return 1.3
-	default:
+	case c.AgeMonths < 132:
 		return 1.6
+	default:
+		return 1.8 // СанПиН 2.3/2.4.4282-26, прил. 9: порции 12+ почти вдвое больше, чем в 1–3 года
 	}
 }
 
@@ -314,6 +434,9 @@ func (c Child) FormulaStage() int {
 }
 
 func (c Child) AgeLabel(l i18n.Lang) string {
+	if c.AgeMonths == 0 {
+		return i18n.T(l, "age.newborn")
+	}
 	if c.AgeMonths < 24 {
 		return i18n.T(l, "age.months", c.AgeMonths)
 	}
@@ -402,7 +525,20 @@ const (
 // Ограничения для блюд с общего стола, если за столом маленький ребёнок.
 // До 3 лет: острое, грибы, колбасные изделия, морепродукты, майонез, цельные орехи и семечки, сыры с плесенью.
 // 3–7 лет: острое и сырое (тартар, устрицы).
-var kidsExcludeUnder3 = []string{"mushrooms", "sausages", "shrimp", "king_prawns", "mussels", "scallops", "oysters", "red_caviar", "blue_cheese", "mayo", "chili_flakes", "peanuts", "peanut_butter", "walnuts", "sunflower_seeds", "olives"}
+var kidsExcludeUnder3 = []string{
+	"honey", "mushrooms", // мёд — не раньше года (NHS), грибы — не раньше 3 лет (программа 1–3)
+	"sausages", "sausage_boiled", "chicken_sausages", "hunting_sausages", "salami", "ham", "bacon", // колбасные изделия
+	"shrimp", "king_prawns", "mussels", "scallops", "oysters", "red_caviar", // морепродукты и икра
+	"herring", "anchovies", "mackerel_smoked", // солёная и копчёная рыба
+	"blue_cheese", "mayo", "ketchup", "soy_sauce", "pickles", "capers", "carrot_korean", // соусы, маринады
+	"vinegar", "apple_cider_vinegar", "rice_vinegar", "chili_flakes", "mustard", "horseradish", "adjika",
+	"coffee", "coffee_instant", "dark_chocolate", "chocolate_milk", "chocolate_spread", // кофе, шоколад до 3 лет
+	"peanuts", "peanut_butter", "walnuts", "almonds", "cashews", "hazelnuts", "pistachios", "pine_nuts", "nut_mix", // целые орехи
+	"sunflower_seeds", "pumpkin_seeds", "olives", "olives_black",
+}
+
+// kidsExcludeAny — алкоголь в блюдах: если с общего стола ест ребёнок любого возраста, такие блюда не ставим.
+var kidsExcludeAny = []string{"white_wine", "red_wine", "beer_light"}
 
 func kidsRestrictions(kids []Child) (excludeIngredients []string, excludeTags []string, minAgeSharing int) {
 	minAgeSharing = -1
@@ -418,18 +554,18 @@ func kidsRestrictions(kids []Child) (excludeIngredients []string, excludeTags []
 		return nil, nil, minAgeSharing
 	}
 	if minAgeSharing < 36 {
-		return slices.Clone(kidsExcludeUnder3), []string{"spicy", "raw"}, minAgeSharing
+		return append(slices.Clone(kidsExcludeUnder3), kidsExcludeAny...), []string{"spicy", "raw"}, minAgeSharing
 	}
 	if minAgeSharing < 84 {
-		return nil, []string{"spicy", "raw"}, minAgeSharing
+		return slices.Clone(kidsExcludeAny), []string{"spicy", "raw"}, minAgeSharing
 	}
-	return nil, nil, minAgeSharing
+	return slices.Clone(kidsExcludeAny), nil, minAgeSharing
 }
 
 // jarNorm — дневные нормы баночного питания по возрасту, г. Ориентировочно, по методичкам педиатров.
 type jarNorm struct {
-	veg, fruit, meat, kasha, curd float64
-	milk                          float64 // мл детского молочка/кефира
+	veg, fruit, meat, fish, kasha, curd float64
+	milk                                float64 // мл детского молочка/кефира
 }
 
 func jarNormFor(age int) jarNorm {
@@ -467,7 +603,28 @@ func jarShare(n jarNorm, k Child) jarNorm {
 }
 
 // babyItems — строки списка покупок для детей: смесь, баночки, каши. Всё на неделю.
-func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
+// jarsFromWeaning — баночки по расписанию прикорма: сколько в среднем в день по группам. Каша в расписании —
+// готовая, в покупках — сухая: из 1 г сухой детской каши получается около 5 г готовой.
+func jarsFromWeaning(w *Weaning) (jarNorm, bool) {
+	if w == nil || len(w.Days) == 0 {
+		return jarNorm{}, false
+	}
+	sum := map[string]float64{}
+	for _, d := range w.Days {
+		for _, f := range d.Feeds {
+			for _, it := range f.Items {
+				if it.Jar {
+					sum[it.Group] += it.Grams
+				}
+			}
+		}
+	}
+	n := float64(len(w.Days))
+	return jarNorm{veg: sum["veg"] / n, fruit: sum["fruit"] / n, meat: sum["meat"] / n, fish: sum["fish"] / n,
+		kasha: sum["cereal"] / n / 5, curd: sum["curd"] / n, milk: sum["kefir"] / n}, true
+}
+
+func (c *Catalog) babyItems(kids []Child, menus []KidMenu, pr pricer) ([]ShopItem, []string) {
 	var items []ShopItem
 	var notes []string
 	l := pr.lang
@@ -492,6 +649,10 @@ func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
 	}
 	for i, k := range kids {
 		who := i18n.T(l, "baby.child", k.AgeLabel(l))
+		if k.Formula && slices.Contains(k.Allergens, "dairy") {
+			// КР «Пищевая аллергия», 2025: высокогидролизная или аминокислотная смесь, козья не подходит
+			notes = append(notes, i18n.T(l, "note.formula.cmpa", k.AgeLabel(l)))
+		}
 		if k.Formula {
 			b := formulaBrand(k.FormulaBrand)
 			if strings.HasPrefix(b.Name, "formula.") {
@@ -519,6 +680,14 @@ func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
 			if k.Feeding == FeedMix {
 				n = jarShare(n, k)
 			}
+			// до года баночки — по расписанию прикорма: те же продукты и граммы, что в плане
+			for _, km := range menus {
+				if km.Child == i && km.Weaning != nil {
+					if wn, ok := jarsFromWeaning(km.Weaning); ok {
+						n = wn
+					}
+				}
+			}
 			if n.veg > 0 {
 				items = append(items, jar(i, "baby_veg", "baby.veg", n.veg, 100, rosstatBabyVeg, fallbackBabyVeg, who, "g"))
 			}
@@ -527,6 +696,9 @@ func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
 			}
 			if n.meat > 0 {
 				items = append(items, jar(i, "baby_meat", "baby.meat", n.meat, 80, rosstatBabyMeat, fallbackBabyMeat, who, "g"))
+			}
+			if n.fish > 0 { // Росстат рыбные баночки отдельно не считает — цена как у мясных
+				items = append(items, jar(i, "baby_fish", "baby.fish", n.fish, 100, rosstatBabyMeat, fallbackBabyMeat, who, "g"))
 			}
 			if n.kasha > 0 {
 				items = append(items, jar(i, "baby_kasha", "baby.kasha", n.kasha, 200, 0, fallbackBabyKasha, who, "g"))
@@ -552,7 +724,34 @@ func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
 			}
 		}
 	}
-	return items, notes
+	return mergeBaby(items), notes
+}
+
+// mergeBaby — одинаковые строки детского питания (у близнецов одна смесь, одни баночки) сливаются в одну:
+// упаковки считаются от общей потребности, а не округляются для каждого ребёнка отдельно.
+func mergeBaby(items []ShopItem) []ShopItem {
+	var out []ShopItem
+	at := map[string]int{}
+	for _, it := range items {
+		key := it.Name + "|" + it.Unit + "|" + fmt.Sprint(it.Pack)
+		i, ok := at[key]
+		if !ok {
+			at[key] = len(out)
+			out = append(out, it)
+			continue
+		}
+		m := &out[i]
+		per := 0.0
+		if m.Buy > 0 {
+			per = m.Cost / m.Buy
+		}
+		m.Needed += it.Needed
+		m.Packs = int(math.Ceil(m.Needed/m.Pack - 1e-9))
+		m.Buy = float64(m.Packs) * m.Pack
+		m.Cost = math.Round(per * m.Buy)
+		m.UsedIn = append(m.UsedIn, it.UsedIn...)
+	}
+	return out
 }
 
 // ── Детское меню (режим «готовим отдельно») ────────────────────────────────
@@ -565,13 +764,50 @@ type KidDish struct {
 	TimeMin  int     `json:"timeMin"`
 	Kcal     float64 `json:"kcal"`
 	Cost     float64 `json:"cost"`
-	Kind     string  `json:"kind,omitempty"` // jars | shared — приём не из детского меню (режим «комбинирую»)
+	Kind     string  `json:"kind,omitempty"` // jars | shared — приём не из детского меню (режим «комбинирую»); none — подходящего рецепта нет
+	Note     string  `json:"note,omitempty"` // как подать малышу: нарезка против удушья
 	Ref      string  `json:"ref,omitempty"`  // shared: рецепт семьи в этот приём
 }
 
+// kidFallback — когда в детской базе на приём нет рецепта без аллергенов ребёнка (от 3 лет): обычные блюда
+// этого приёма с теми же ограничениями, что у общего стола для его возраста (без острого и сырого),
+// без его аллергенов и того, что исключила семья.
+func (c *Catalog) kidFallback(slot string, k Child, p Params, allergens []string) []Recipe {
+	q := p
+	q.Kids = []Child{{AgeMonths: k.AgeMonths, Feeding: FeedShared, Allergens: k.Allergens}}
+	q.Allergens = allergens
+	e := c.effective(q)
+	var out []Recipe
+	for _, r := range c.Recipes {
+		if r.Slot == slot && !isKidRecipe(r) && !IsSide(r) && c.allowed(r, e) {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// KidNone — приём, на который в детской базе нет рецепта под аллергии ребёнка.
+const KidNone = "none"
+
+// KidAway — приём в саду или школе (Kind: away.kindergarten, away.school).
+const KidAway = "away"
+
+// KidBedtime — кефир или молоко перед сном для детей 1–3 лет (пятый приём по программе питания 1–3 лет).
+const KidBedtime = "bedtime"
+
+// bedtimeKefirMl — сколько кефира перед сном, мл: дополнительный приём около 10% дневной калорийности.
+const bedtimeKefirMl = 200
+
 // kidDishTitle — подпись блюда детского меню на языке; для приёма-баночки и приёма с общего стола — своя.
 func (c *Catalog) kidDishTitle(d KidDish, l i18n.Lang) string {
+	if strings.HasPrefix(d.Kind, KidAway+".") {
+		return i18n.T(l, "kid."+d.Kind)
+	}
 	switch d.Kind {
+	case KidBedtime:
+		return i18n.T(l, "kid.bedtime", bedtimeKefirMl)
+	case KidNone:
+		return i18n.T(l, "kid.none")
 	case MealJars:
 		return i18n.T(l, "kid.jars."+d.Slot)
 	case MealShared:
@@ -595,6 +831,7 @@ type KidMenu struct {
 	Factor   float64  `json:"factor"` // множитель к рецепту
 	Days     []KidDay `json:"days"`
 	Note     string   `json:"note"`
+	Norm     string   `json:"norm,omitempty"`    // норма ккал, белка и питья по возрасту (МР 2.3.1.0253-21)
 	Weaning  *Weaning `json:"weaning,omitempty"` // прикорм по месяцам вместо меню из рецептов
 }
 
@@ -613,31 +850,33 @@ func kidRecipeMinAge(r Recipe) int {
 
 func isKidRecipe(r Recipe) bool { return slices.Contains(r.Tags, "kidmenu") }
 
+// kidRecipeFits — подходит ли детский рецепт по возрасту: не раньше своего тега ageN и не «малышовый» для
+// старших. Блюда прикорма (wean_) — до 15 мес, протёртые блюда с тегом baby («говяжье пюре с овощами») —
+// до 2 лет: пятилетке «треска, мелко измельчённая» ни к чему. Банан, каша и тефтели подходят всем.
+func kidRecipeFits(r Recipe, age int) bool {
+	if kidRecipeMinAge(r) > age {
+		return false
+	}
+	if strings.HasPrefix(r.ID, "wean_") {
+		return age < 15
+	}
+	if slices.Contains(r.Tags, "baby") {
+		return age < 24
+	}
+	return true
+}
+
 // buildKidMenu собирает неделю для одного ребёнка из детской базы (тег kidmenu) с учётом возраста и аллергий.
 func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.Rand) KidMenu {
 	l := pr.lang
 	menu := KidMenu{Child: idx, AgeLabel: k.AgeLabel(l), Factor: k.MenuFactor()}
+	allergens, exclude := kidAvoid(k, p)
 	pools := map[string][]Recipe{}
 	for _, r := range c.Recipes {
-		if !isKidRecipe(r) || kidRecipeMinAge(r) > k.AgeMonths || slices.Contains(p.ExcludeRecipes, r.ID) {
+		if !isKidRecipe(r) || r.Hidden || !kidRecipeFits(r, k.AgeMonths) || slices.Contains(p.ExcludeRecipes, r.ID) {
 			continue
 		}
-		ok := true
-		for _, ri := range r.Ingredients {
-			ing := c.Ingredients[ri.IngredientID]
-			if slices.Contains(p.Exclude, ri.IngredientID) {
-				ok = false
-				break
-			}
-			for _, a := range ing.Allergens {
-				if slices.Contains(p.Allergens, a) {
-					ok = false
-				}
-			}
-			if !ok {
-				break
-			}
-		}
+		ok := !c.recipeAvoids(r.ID, allergens, exclude)
 		for _, eq := range r.Equipment {
 			if !hasEquipment(p.Equipment, eq) {
 				ok = false
@@ -652,6 +891,12 @@ func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.
 	for d := 0; d < 7; d++ {
 		day := KidDay{Index: d, Label: DayLabel(l, d)}
 		for _, slot := range kidSlots {
+			if k.AwayOn(d, slot) {
+				dish := KidDish{Slot: slot, Kind: KidAway + "." + k.Away}
+				dish.Title = c.kidDishTitle(dish, l)
+				day.Dishes = append(day.Dishes, dish)
+				continue
+			}
 			if src := k.MealSource(slot); src == MealJars || src == MealShared {
 				dish := KidDish{Slot: slot, Kind: src}
 				dish.Title = c.kidDishTitle(dish, l)
@@ -661,7 +906,15 @@ func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.
 				continue
 			}
 			pool := pools[slot]
+			if len(pool) == 0 && k.AgeMonths >= 36 {
+				// с трёх лет можно взять обычное блюдо без острого и сырого; малышам — только детская база
+				pool = c.kidFallback(slot, k, p, allergens)
+			}
 			if len(pool) == 0 {
+				// детского рецепта без аллергенов ребёнка на этот приём нет — честно говорим, а не молчим
+				dish := KidDish{Slot: slot, Kind: KidNone}
+				dish.Title = c.kidDishTitle(dish, l)
+				day.Dishes = append(day.Dishes, dish)
 				continue
 			}
 			best, bestScore := Recipe{}, math.Inf(1)
@@ -683,6 +936,11 @@ func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.
 				Kcal: math.Round(kcal * menu.Factor), Cost: pr.round(c.costPerPortion(best, pr) * menu.Factor),
 			})
 		}
+		if k.AgeMonths >= 12 && k.AgeMonths < 36 && !c.avoids("kefir", allergens, exclude) {
+			dish := KidDish{Slot: "bedtime", Kind: KidBedtime}
+			dish.Title = c.kidDishTitle(dish, l)
+			day.Dishes = append(day.Dishes, dish)
+		}
 		menu.Days = append(menu.Days, day)
 	}
 	if k.AgeMonths < 12 {
@@ -691,4 +949,55 @@ func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.
 		menu.Note = i18n.T(l, "kidmenu.note.general")
 	}
 	return menu
+}
+
+// chokeRules — продукты, которыми маленькие дети чаще всего давятся, и как их подать (NHS «Preparing food
+// safely», AAP «Choking Prevention», CDC «Choking Hazards»). До какого возраста (мес) показывать подсказку.
+var chokeRules = []struct {
+	Key   string
+	Until int
+	IDs   []string
+}{
+	{"choke.quarter", 60, []string{"grapes", "cherry_tomatoes", "cherry_sweet", "blueberry", "strawberry", "olives", "olives_black"}},
+	{"choke.sausage", 60, []string{"sausages", "chicken_sausages", "hunting_sausages", "sausage_boiled"}},
+	{"choke.nuts", 60, []string{"walnuts", "peanuts", "almonds", "cashews", "hazelnuts", "pistachios", "pine_nuts", "nut_mix", "sunflower_seeds", "pumpkin_seeds"}},
+	{"choke.beans", 36, []string{"corn_can", "corn_cob", "chickpeas_can", "chickpeas_dry", "beans_can", "beans_dry", "beans_white_can", "beans_tomato_can", "green_peas"}},
+	{"choke.dried", 36, []string{"raisins", "cranberry_dried", "prunes", "dried_apricots"}},
+	{"choke.fish", 60, []string{"cod_fillet", "hake_fillet", "salmon_steak", "mackerel", "pike_perch", "trout", "pink_salmon", "tilapia", "flounder", "carp"}},
+}
+
+// ChokeNote — подсказка, как безопасно подать блюдо ребёнку этого возраста: «виноград — на четвертинки».
+func (c *Catalog) ChokeNote(r Recipe, ageMonths int, l i18n.Lang) string {
+	var out []string
+	for _, rule := range chokeRules {
+		if ageMonths >= rule.Until {
+			continue
+		}
+		for _, ri := range r.Ingredients {
+			if slices.Contains(rule.IDs, ri.IngredientID) {
+				out = append(out, i18n.T(l, rule.Key))
+				break
+			}
+		}
+	}
+	return strings.Join(out, " ")
+}
+
+// KidNorm — суточная норма ребёнка по МР 2.3.1.0253-21 (табл. 21 — энергия и белок, табл. 8 — вода и
+// напитки) одной строкой для детского меню. До года норму считают на кг веса — тогда пусто.
+func KidNorm(age int, l i18n.Lang) string {
+	switch {
+	case age < 12:
+		return ""
+	case age < 36:
+		return i18n.T(l, "kid.norm", "1300", 39, "600–700")
+	case age < 84:
+		return i18n.T(l, "kid.norm", "1800", 54, "800–900")
+	case age < 132:
+		return i18n.T(l, "kid.norm", "2100", 63, "1100–1300")
+	case age < 180:
+		return i18n.T(l, "kid.norm.nowater", "2300–2500", "69–75")
+	default:
+		return i18n.T(l, "kid.norm.nowater", "2500–2900", "75–87")
+	}
 }

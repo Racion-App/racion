@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Activity, BookOpen, CalendarDays, ChefHat, Eye, Heart, Link2, LogOut, MessageCircle, Plus, ShoppingBag, ThumbsDown, ThumbsUp, Trash2, Upload, Users } from "lucide-react";
 import { FamilyEditor } from "../components/FamilyEditor";
+import { grownKids } from "../lib/kids";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { OwnRecipeForm } from "../components/OwnRecipeForm";
@@ -46,7 +47,7 @@ export function Account() {
   const [favorites, setFavorites] = useState<Favorite[] | null>(null);
   const [familyRaw, setFamilyRaw] = useState<Family | null>(null);
   // Go отдаёт slots без поля, когда едят всё: приводим к пустому списку
-  const setFamily = (f: Family | null) => setFamilyRaw(f && { ...f, adults: f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })), kids: f.kids ?? [] });
+  const setFamily = (f: Family | null) => setFamilyRaw(f && { ...f, adults: f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })), kids: grownKids(f.kids) }); // возраст детей растёт сам с отметки ageAt
   const family = familyRaw;
   const [familyDirty, setFamilyDirty] = useState(false);
   const [familySaving, setFamilySaving] = useState(false);

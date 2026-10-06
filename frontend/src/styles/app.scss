@@ -561,6 +561,20 @@ a { text-underline-offset: 3px; }
   &__slot { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); }
   .segmented { background: var(--ds-fill-3); button { min-height: 36px; font-size: 13.5px; padding: 0 6px; white-space: nowrap; } } }
 .dish--plain .dish__main { cursor: default; }
+// как подать блюдо малышу: нарезка против удушья (под описанием блюда)
+.dish__kid { display: flex; gap: 5px; align-items: flex-start; margin-top: 4px; font-size: 12.5px; line-height: 1.35; color: var(--ds-orange); text-align: left;
+  svg { flex: 0 0 auto; margin-top: 2px; } }
+.kidrows__norm { margin: 2px 0 6px; font-size: 12.5px; line-height: 1.4; color: var(--ds-label-tertiary); }
+// аллергии ребёнка в карточке (components/KidAllergens.tsx): свёрнуто в строку, раскрывается по нажатию
+.kidall { border-radius: var(--ds-radius-md); background: var(--ds-fill-4); padding: 0 12px;
+  &__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; cursor: pointer; list-style: none; font-size: 15px;
+    &::-webkit-details-marker { display: none; }
+    small { display: block; font-size: 12.5px; color: var(--ds-label-tertiary); }
+    &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: var(--ds-radius-md); } }
+  &__chev { color: var(--ds-label-tertiary); transition: transform var(--ds-dur-fast); flex: 0 0 auto; }
+  &[open] &__chev { transform: rotate(180deg); }
+  &__hint { margin: 0 0 8px; font-size: 13px; color: var(--ds-label-secondary); }
+  .chips { padding-bottom: 12px; } }
 .option--compact { min-height: 52px; padding: 10px 14px; .option__title { font-size: 15px; } .option__sub { font-size: 12.5px; } }
 .switch {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -1112,8 +1126,9 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 // Детское меню внутри дня: те же строки, подпись с иконкой, лёгкая подложка.
 .kidrows {
   margin: 6px -8px 0; padding: 6px 8px 2px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);
-  &__head { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--ds-label-secondary); margin-bottom: 2px; svg { color: var(--ds-blue); } }
-  &__note { font-weight: 400; color: var(--ds-label-tertiary); }
+  &__head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 5px; font-size: 12px; font-weight: 600; color: var(--ds-label-secondary); margin-bottom: 2px; svg { color: var(--ds-blue); flex: 0 0 auto; } }
+  // заметка — отдельной строкой под «Ребёнок, 2 года», а не узкой колонкой рядом
+  &__note { flex-basis: 100%; font-weight: 400; color: var(--ds-label-tertiary); }
   .dish { padding: 6px 0; }
   .dish__title { font-size: 15px; font-weight: 500; }
 }
@@ -2112,7 +2127,12 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__newhead { display: flex; align-items: center; gap: 6px; font-weight: 700; }
   &__p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); }
   &__rules { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; line-height: 1.4; color: var(--ds-label-secondary); }
-  &__src { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 12px; line-height: 1.4; color: var(--ds-label-tertiary); svg { flex: 0 0 auto; margin-top: 2px; } } }
+  &__src { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 12px; line-height: 1.4; color: var(--ds-label-tertiary); svg { flex: 0 0 auto; margin-top: 2px; } }
+  // дневник прикорма: «ввели» / «была реакция» под наращиванием продукта недели
+  &__diarybtns { display: grid; gap: 6px; padding-top: 4px; font-size: 14px; color: var(--ds-label-secondary);
+    > div { display: flex; flex-wrap: wrap; gap: 8px; } .btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; } }
+  &__diary { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 14px; line-height: 1.4; color: var(--ds-label-secondary);
+    svg { flex: 0 0 auto; margin-top: 2px; } &.is-ok svg { color: var(--ds-green); } &.is-reaction svg { color: var(--ds-orange); } } }
 .weanramp { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none;
   li { display: grid; gap: 2px; justify-items: center; padding: 6px 2px; border-radius: 8px; background: var(--ds-bg-elevated); font-size: 12px; color: var(--ds-label-secondary); }
   b { font-size: 13px; color: var(--ds-label-primary); white-space: nowrap; } }

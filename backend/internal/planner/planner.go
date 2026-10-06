@@ -175,6 +175,16 @@ func (c *Catalog) Normalize(p Params) Params {
 	} else {
 		p.StartDate = t.Format("2006-01-02")
 	}
+	// возраст растёт сам: «8 мес» в октябре — в плане на декабрь уже 10
+	if start, err := time.Parse("2006-01-02", p.StartDate); err == nil {
+		for i := range p.Kids {
+			before := p.Kids[i].AgeMonths
+			p.Kids[i].grow(start)
+			if p.Kids[i].AgeMonths != before {
+				p.Kids[i] = p.Kids[i].normalized()
+			}
+		}
+	}
 	if p.Allergens == nil {
 		p.Allergens = []string{}
 	}
@@ -230,14 +240,31 @@ func hasEquipment(have []string, need string) bool {
 // effective — параметры с учётом детских ограничений (жёстко, как просили).
 type effective struct {
 	Params
-	kidExclude []string
-	kidTags    []string
-	storeLevel int // ассортимент выбранного магазина; без магазина — всё доступно
+	kidExclude   []string
+	kidTags      []string
+	kidAllergens []string // аллергии детей, которые едят с общего стола
+	momExclude   []string // беременность и кормление грудью: печень, сыры с плесенью, тунец, алкоголь…
+	momRaw       bool     // без сырого мяса и рыбы (тег raw)
+	storeLevel   int      // ассортимент выбранного магазина; без магазина — всё доступно
 }
 
 func (c *Catalog) effective(p Params) effective {
 	e := effective{Params: p, storeLevel: 3}
 	e.kidExclude, e.kidTags, _ = kidsRestrictions(p.Kids)
+	for _, k := range p.Kids {
+		if k.eatsShared() {
+			e.kidAllergens = append(e.kidAllergens, k.Allergens...)
+			e.kidExclude = append(e.kidExclude, k.Avoid...)
+		}
+	}
+	for _, m := range p.Members {
+		switch {
+		case strings.HasPrefix(m.Mom, "pregnant"):
+			e.momExclude, e.momRaw = append(e.momExclude, momExclude...), true
+		case m.Mom == "nursing":
+			e.momExclude, e.momRaw = append(e.momExclude, nursingExclude...), true
+		}
+	}
 	if st, ok := c.Stores[p.Store]; ok {
 		e.storeLevel = StoreLevel(st.Kind)
 	}
@@ -258,12 +285,12 @@ func (c *Catalog) allowed(r Recipe, e effective) bool {
 		return false
 	}
 	for _, t := range r.Tags {
-		if slices.Contains(e.ExcludeTags, t) || slices.Contains(e.kidTags, t) {
+		if slices.Contains(e.ExcludeTags, t) || slices.Contains(e.kidTags, t) || (e.momRaw && t == "raw") {
 			return false
 		}
 	}
 	for _, ri := range r.Ingredients {
-		if slices.Contains(e.Exclude, ri.IngredientID) || slices.Contains(e.kidExclude, ri.IngredientID) {
+		if slices.Contains(e.Exclude, ri.IngredientID) || slices.Contains(e.kidExclude, ri.IngredientID) || slices.Contains(e.momExclude, ri.IngredientID) {
 			return false
 		}
 		ing, ok := c.Ingredients[ri.IngredientID]
@@ -274,7 +301,7 @@ func (c *Catalog) allowed(r Recipe, e effective) bool {
 			return false // в «Пятёрочке» утки нет: не предлагать, пока не выбран магазин побольше
 		}
 		for _, a := range ing.Allergens {
-			if slices.Contains(e.Allergens, a) {
+			if slices.Contains(e.Allergens, a) || slices.Contains(e.kidAllergens, a) {
 				return false
 			}
 		}
@@ -799,6 +826,9 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 		for _, slot := range famSlots {
 			if lr, ok := leftover[d][slot]; ok {
 				dish := c.dish(lr, slot, pr)
+				if v := dayPortions(p, perSlot, d, slot); v != perSlot[slot] {
+					dish.Portions = v
+				}
 				dish.Leftover = true
 				dish.WhyCode = WhyCode{Leftover: true}
 				dish.Why = i18n.T(lang, "why.leftover")
@@ -819,7 +849,12 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 			tg.coll = p.CollectionIDs
 			// батч только для обедов и только в чётные дни (пн, ср, пт): суп на два дня
 			batchDay := slot == "lunch" && d%2 == 0 && d < 6
-			s, ok := c.pick(pool, d, slot, perSlot[slot], pr, tg, used, dayMains, ct, rng)
+			// пятничный суп на субботу не варим, если в субботу едоков больше (ребёнок в будни в саду)
+			if batchDay && dayPortions(p, perSlot, d+1, slot) != dayPortions(p, perSlot, d, slot) {
+				batchDay = false
+			}
+			portionsHere := dayPortions(p, perSlot, d, slot)
+			s, ok := c.pick(pool, d, slot, portionsHere, pr, tg, used, dayMains, ct, rng)
 			if !ok {
 				continue
 			}
@@ -827,6 +862,9 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 			used[r.ID]++
 			dayMains[d] = append(dayMains[d], mainIngredient(r))
 			dish := c.dish(r, slot, pr)
+			if portionsHere != perSlot[slot] {
+				dish.Portions = portionsHere
+			}
 			if pi, ok := prepAllowed(p.Prep, r, d); ok && p.Prep != PrepNone {
 				dish.Prep = &pi
 			}
@@ -852,13 +890,13 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 				if side, ok := c.pickSide(r, e, tg.kcal-dish.Kcal, sideRecent(days, d), nil, pr, rng); ok {
 					c.attachSide(&dish, side, pr)
 					for _, ri := range side.Ingredients {
-						ct.need[ri.IngredientID] += ri.Amount * perSlot[slot] * mult
+						ct.need[ri.IngredientID] += ri.Amount * portionsHere * mult
 					}
 				}
 			}
 			days[d].Dishes = append(days[d].Dishes, dish)
 			for _, ri := range r.Ingredients {
-				ct.need[ri.IngredientID] += ri.Amount * perSlot[slot] * mult
+				ct.need[ri.IngredientID] += ri.Amount * portionsHere * mult
 			}
 		}
 	}
@@ -868,7 +906,7 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 		switch k.Feeding {
 		case FeedSeparate:
 			kidsMenus = append(kidsMenus, c.buildKidMenu(i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*101+int64(swaps)*7919))))
-		case FeedMix:
+		case FeedMix, FeedJars:
 			if k.AgeMonths >= 12 {
 				km := c.buildKidMenu(i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*101+int64(swaps)*7919)))
 				// с общего стола — то, что в этот день готовят семье в этот приём
@@ -892,8 +930,9 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 			}
 			fallthrough
 		case FeedWeaning:
+			al, ex := kidAvoid(k, p)
 			kidsMenus = append(kidsMenus, KidMenu{Child: i, AgeLabel: k.AgeLabel(lang), Factor: 1, Days: []KidDay{},
-				Weaning: c.buildWeaning(k, lang), Note: i18n.T(lang, "weaning.note")})
+				Weaning: c.buildWeaning(k, lang, al, ex), Note: i18n.T(lang, "weaning.note")})
 		}
 	}
 
@@ -937,10 +976,17 @@ func (c *Catalog) warnings(p Params, lang i18n.Lang) []string {
 			warnings = append(warnings, i18n.T(lang, "warn.few", SlotLabel(lang, s), n))
 		}
 	}
-	if len(e.kidExclude) > 0 {
+	_, kidTags, minAge := kidsRestrictions(p.Kids)
+	if minAge >= 0 && minAge < 36 {
 		warnings = append(warnings, i18n.T(lang, "warn.kid3"))
-	} else if len(e.kidTags) > 0 {
+	} else if len(kidTags) > 0 {
 		warnings = append(warnings, i18n.T(lang, "warn.kid7"))
+	}
+	// соль и специи из общего блюда не убрать — порцию малышу откладывают до них
+	if minAge >= 0 && minAge < 12 {
+		warnings = append(warnings, i18n.T(lang, "warn.kid1.salt"))
+	} else if minAge >= 0 && minAge < 36 {
+		warnings = append(warnings, i18n.T(lang, "warn.kid3.salt"))
 	}
 	return warnings
 }
@@ -966,6 +1012,7 @@ func (c *Catalog) finish(plan *Plan) {
 	p := plan.Params
 	pr := c.pricerFor(p)
 	lang := pr.lang
+	c.kidNotes(plan, lang)
 	need := map[string]float64{}
 	usedIn := map[string][]string{}
 	var kcal, prot, fat, carb, usedCost float64
@@ -1049,6 +1096,13 @@ func (c *Catalog) finish(plan *Plan) {
 		}
 		for _, d := range km.Days {
 			for _, dish := range d.Dishes {
+				if dish.Kind == KidBedtime { // кефир перед сном малышу 1–3 лет
+					need["kefir"] += bedtimeKefirMl
+					if tag := i18n.T(lang, "kid.bedtime.tag"); !slices.Contains(usedIn["kefir"], tag) {
+						usedIn["kefir"] = append(usedIn["kefir"], tag)
+					}
+					continue
+				}
 				r, ok := c.RecipeByID[dish.RecipeID]
 				if !ok {
 					continue
@@ -1132,7 +1186,8 @@ func (c *Catalog) finish(plan *Plan) {
 		}
 		add(item, ing.Pantry || item.AtHome)
 	}
-	baby, notes := c.babyItems(p.Kids, pr)
+	baby, notes := c.babyItems(p.Kids, plan.KidsMenus, pr)
+	notes = append(notes, momNotes(p, lang)...)
 	for _, it := range baby {
 		add(it, false)
 		babyTotal += it.Cost
@@ -1310,11 +1365,16 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 	pool = prepPool(plan.Params.Prep, pool, day)
 	swaps := plan.Swaps + 1
 	rng := rand.New(rand.NewSource(plan.Seed + int64(swaps)*7919 + int64(day*10) + int64(len(slot))))
-	s, ok := c.pick(pool, day, slot, portions, pr, tg, used, dayMains, ct, rng)
+	// порции именно этого дня: в будни дети в саду или школе часть приёмов едят не дома
+	dayP := func(d int) float64 { return dayPortions(p, plan.SlotPortions, d, slot) }
+	s, ok := c.pick(pool, day, slot, dayP(day), pr, tg, used, dayMains, ct, rng)
 	if !ok {
 		return plan, fmt.Errorf("nothing to swap to")
 	}
 	newDish := c.dish(s.r, slot, pr)
+	if v := dayP(day); v != portions {
+		newDish.Portions = v
+	}
 	if pi, ok := prepAllowed(plan.Params.Prep, s.r, day); ok && plan.Params.Prep != PrepNone {
 		newDish.Prep = &pi
 	}
@@ -1336,6 +1396,9 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 		pi := dishIndex(plan.Days[pairDay], slot)
 		if batch {
 			lo := c.dish(s.r, slot, pr)
+			if v := dayP(pairDay); v != portions {
+				lo.Portions = v
+			}
 			lo.Leftover = true
 			lo.WhyCode = WhyCode{Leftover: true}
 			lo.Why = i18n.T(pr.lang, "why.leftover")
@@ -1347,9 +1410,12 @@ func (c *Catalog) Swap(plan Plan, day int, slot string) (Plan, error) {
 			for _, ri := range s.r.Ingredients {
 				ct.need[ri.IngredientID] += ri.Amount * portions
 			}
-			s2, ok2 := c.pick(pool, pairDay, slot, portions, pr, tg, used, dayMains, ct, rng)
+			s2, ok2 := c.pick(pool, pairDay, slot, dayP(pairDay), pr, tg, used, dayMains, ct, rng)
 			if ok2 {
 				d2 := c.dish(s2.r, slot, pr)
+				if v := dayP(pairDay); v != portions {
+					d2.Portions = v
+				}
 				sc2 := s2
 				sc2.r.Batch = false
 				d2.Why, d2.WhyCode = c.why(sc2, tg, pr.lang)
@@ -1450,4 +1516,67 @@ func (c *Catalog) swapOccasion(plan Plan, day int, slot string, pr pricer, tg ta
 	plan.Swaps++
 	c.finish(&plan)
 	return plan, nil
+}
+
+// kidNotes — детские подсказки к плану на его языке: как подать малышу блюдо с общего стола («виноград —
+// на четвертинки»), то же у блюд детского меню и норма ккал, белка и питья по возрасту в детском меню.
+func (c *Catalog) kidNotes(plan *Plan, l i18n.Lang) {
+	kids := plan.Params.Kids
+	for d := range plan.Days {
+		for j := range plan.Days[d].Dishes {
+			dish := &plan.Days[d].Dishes[j]
+			dish.KidNote = ""
+			young := -1 // самый младший, кто ест это блюдо с общего стола в этот день
+			for _, k := range kids {
+				if k.MealSource(dish.Slot) == MealShared && !k.AwayOn(d, dish.Slot) && (young < 0 || k.AgeMonths < young) {
+					young = k.AgeMonths
+				}
+			}
+			if young < 0 || plan.Occasion != nil {
+				continue
+			}
+			r := c.RecipeByID[dish.RecipeID]
+			if dish.Side != nil {
+				if sr, ok := c.RecipeByID[dish.Side.RecipeID]; ok {
+					r.Ingredients = append(slices.Clone(r.Ingredients), sr.Ingredients...)
+				}
+			}
+			dish.KidNote = c.ChokeNote(r, young, l)
+		}
+	}
+	for i := range plan.KidsMenus {
+		km := &plan.KidsMenus[i]
+		if km.Child >= len(kids) || km.Weaning != nil {
+			continue
+		}
+		age := kids[km.Child].AgeMonths
+		km.Norm = KidNorm(age, l)
+		for d := range km.Days {
+			for j := range km.Days[d].Dishes {
+				x := &km.Days[d].Dishes[j]
+				x.Note = ""
+				if r, ok := c.RecipeByID[x.RecipeID]; ok {
+					x.Note = c.ChokeNote(r, age, l)
+				}
+			}
+		}
+	}
+}
+
+// momNotes — заметки к плану, если в семье беременная или кормящая: что убрали из меню и почему.
+func momNotes(p Params, l i18n.Lang) []string {
+	var out []string
+	for _, key := range []string{"pregnant", "nursing"} {
+		for _, m := range p.Members {
+			if strings.HasPrefix(m.Mom, key) {
+				note := i18n.T(l, "note.mom."+key)
+				if add := momKcal[m.Mom]; key == "pregnant" && add > 0 {
+					note += " " + i18n.T(l, "note.mom.kcal", add)
+				}
+				out = append(out, note)
+				break
+			}
+		}
+	}
+	return out
 }

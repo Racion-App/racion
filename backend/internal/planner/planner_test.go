@@ -286,7 +286,7 @@ func TestKidsPortionsFormulaAndRestrictions(t *testing.T) {
 		{AgeMonths: 24, SharesMeals: true},
 	}
 	plan := c.Build(p)
-	want := 2 + 0.15 + 0.4
+	want := 2 + 0.15 + 0.45 // доли по МР 2.3.1.0253-21: 8 мес — несколько ложек, 2 года — 0,45 взрослой
 	if plan.Portions != want {
 		t.Fatalf("portions %.2f, want %.2f", plan.Portions, want)
 	}
@@ -444,14 +444,19 @@ func TestFeedingModes(t *testing.T) {
 	if plan.Portions != 2 {
 		t.Fatalf("portions %.2f: separate/jars/milk kids must not add adult portions", plan.Portions)
 	}
-	if len(plan.KidsMenus) != 1 || len(plan.KidsMenus[0].Days) != 7 {
+	// отдельное меню для 20 мес и расписание баночек для 9 мес
+	if len(plan.KidsMenus) != 2 || len(plan.KidsMenus[0].Days) != 7 || plan.KidsMenus[1].Weaning == nil {
 		t.Fatalf("kids menus: %+v", plan.KidsMenus)
 	}
 	for _, d := range plan.KidsMenus[0].Days {
-		if len(d.Dishes) != 4 {
+		// четыре приёма и кефир перед сном (программа питания 1–3 лет: пятый приём — молочный напиток)
+		if len(d.Dishes) != 5 || d.Dishes[4].Kind != KidBedtime {
 			t.Fatalf("kid day %s has %d dishes", d.Label, len(d.Dishes))
 		}
 		for _, x := range d.Dishes {
+			if x.Kind != "" {
+				continue
+			}
 			r := c.RecipeByID[x.RecipeID]
 			if !isKidRecipe(r) || kidRecipeMinAge(r) > 20 {
 				t.Fatalf("%s is not a kid recipe for 20 months", r.Title)
@@ -469,9 +474,11 @@ func TestFeedingModes(t *testing.T) {
 			}
 		}
 	}
-	// 9 мес на баночках + смесь: смесь, овощное, фруктовое, мясное пюре, каша, творожок
-	if len(baby) != 6 {
-		t.Fatalf("baby items: %v", baby)
+	// 9 мес на баночках + смесь: смесь, овощное, фруктовое, мясное пюре, каша, творожок и другое по расписанию
+	for _, want := range []string{"Смесь", "Овощное пюре", "Фруктовое пюре", "Мясное пюре", "Детская каша", "Детский творожок"} {
+		if !slices.ContainsFunc(baby, func(n string) bool { return strings.HasPrefix(n, want) }) {
+			t.Fatalf("нет %q в %v", want, baby)
+		}
 	}
 	// взрослые блюда не должны содержать детских рецептов, и наоборот ограничения общего стола не применяются
 	for _, d := range plan.Days {
@@ -500,6 +507,9 @@ func TestKidMenuRespectsAgeAndAllergens(t *testing.T) {
 	}
 	for _, d := range plan.KidsMenus[0].Days {
 		for _, x := range d.Dishes {
+			if x.Kind != "" {
+				continue // «подходящего рецепта нет» — без рецепта
+			}
 			r := c.RecipeByID[x.RecipeID]
 			if kidRecipeMinAge(r) > 7 {
 				t.Fatalf("%s needs %d months", r.Title, kidRecipeMinAge(r))

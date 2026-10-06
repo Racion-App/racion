@@ -1,3 +1,6 @@
+import type { Child } from "./types";
+import { DRAFT_KEY, readDraft } from "./draft";
+import { writeJSON } from "./storage";
 // Возраст и кормление детей: общие помощники квиза и раздела «Семья».
 import { pluralKey, type Lang } from "../i18n";
 
@@ -61,4 +64,47 @@ export function mealSlots(m: number): string[] {
 
 export function mealSourceOptions(m: number): string[] {
   return m < 36 ? ["home", "jars", "shared"] : ["home", "shared"];
+}
+
+// ymNow — текущий месяц в виде YYYY-MM: отметка, когда указан возраст ребёнка.
+export function ymNow(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// grownKid — возраст вырос с отметки ageAt: «8 мес» в октябре — в декабре уже 10. Без отметки — ставим
+// текущий месяц, дальше возраст растёт сам. Режим кормления меняется, если по новому возрасту прежний
+// недоступен (в год прикорм по месяцам заканчивается). То же делает бэкенд к дате начала плана.
+export function grownKid(k: Child, now = new Date()): Child {
+  const cur = ymNow(now);
+  if (!k.ageAt || !/^\d{4}-\d{2}$/.test(k.ageAt)) return { ...k, ageAt: cur };
+  const [y, m] = k.ageAt.split("-").map(Number);
+  const diff = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
+  if (diff <= 0) return k;
+  const ageMonths = Math.min(k.ageMonths + diff, 17 * 12);
+  const opts = feedingOptions(ageMonths);
+  return { ...k, ageMonths, ageAt: cur, feeding: opts.includes(k.feeding) ? k.feeding : opts[0] };
+}
+
+export const grownKids = (kids: Child[] | undefined): Child[] => (kids ?? []).map((k) => grownKid(k));
+
+// Дневник прикорма. Неделю строят из черновика квиза, поэтому отметки «ввели» и «была реакция» пишем
+// туда: следующая неделя сама предложит новый продукт или обойдёт неподошедший. Кнопки показываем,
+// только если в черновике тот же ребёнок (номер, режим, возраст ±1 мес): у гостя по чужой ссылке
+// черновика с этим ребёнком нет.
+export function draftKid(planKid: Child | undefined, idx: number): Child | null {
+  if (!planKid) return null;
+  const k = readDraft().kids?.[idx];
+  if (!k || k.feeding !== planKid.feeding || Math.abs(k.ageMonths - planKid.ageMonths) > 1) return null;
+  return k;
+}
+
+export function markWeaning(idx: number, food: string, how: "ok" | "reaction") {
+  const d = readDraft();
+  const kids = (d.kids ?? []).map((k, i) => {
+    if (i !== idx) return k;
+    const introduced = (k.introduced ?? []).filter((x) => x !== food);
+    const avoid = (k.avoid ?? []).filter((x) => x !== food);
+    return how === "ok" ? { ...k, introduced: [...introduced, food], avoid } : { ...k, introduced, avoid: [...avoid, food] };
+  });
+  writeJSON(DRAFT_KEY, { ...d, kids });
 }

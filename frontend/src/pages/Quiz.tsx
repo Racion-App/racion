@@ -18,12 +18,14 @@ import { rememberNames } from "../lib/names";
 import { readDraft } from "../lib/draft";
 import { approx, money, weekRange } from "../lib/format";
 import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../lib/types";
-import { APPETITES } from "../lib/types";
+import { APPETITES, MOM_STATES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
-import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
+import { ageOptions, feedingOptions, formulaMlByAge, grownKids, ymNow } from "../lib/kids";
+import { KidAway } from "../components/KidAway";
 import { FormulaFeeds } from "../components/FormulaFeeds";
 import { MealSources } from "../components/MealSources";
+import { KidAllergens } from "../components/KidAllergens";
 import { WeaningPicker } from "../components/Weaning";
 
 const KEY = "racion.quiz.v4";
@@ -107,6 +109,7 @@ export function Quiz() {
       // взрослых может не быть, если есть дети: «меню только для ребёнка»
       init.members = Array.from({ length: Math.max(init.kids?.length ? 0 : 1, init.adults) }, () => ({ ...EMPTY_MEMBER, goal: init.goal }));
     }
+    init.kids = grownKids(init.kids);
     if (!init.wants) init.wants = [];
     if (!init.have) init.have = [];
     return init;
@@ -170,7 +173,7 @@ export function Quiz() {
     if (!user) return;
     api.family().then((f) => {
       if (f.adults.length === 0 && f.kids.length === 0) return;
-      setP((prev) => ({ ...prev, members: f.adults.length ? f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })) : prev.members, adults: f.adults.length || prev.adults, goal: f.adults[0]?.goal ?? prev.goal, kids: f.kids }));
+      setP((prev) => ({ ...prev, members: f.adults.length ? f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })) : prev.members, adults: f.adults.length || prev.adults, goal: f.adults[0]?.goal ?? prev.goal, kids: grownKids(f.kids) }));
       setFromFamily(true);
     }).catch(() => undefined);
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -237,7 +240,7 @@ export function Quiz() {
     }
     if (done === user.id) return;
     const d = user.defaults as Partial<Params>;
-    setP((prev) => ({ ...prev, ...d, members: d.members && d.members.length ? d.members : prev.members, wants: d.wants ?? [], have: d.have ?? prev.have ?? [], kids: d.kids ?? prev.kids }));
+    setP((prev) => ({ ...prev, ...d, members: d.members && d.members.length ? d.members : prev.members, wants: d.wants ?? [], have: d.have ?? prev.have ?? [], kids: d.kids ? grownKids(d.kids) : prev.kids }));
     try {
       localStorage.setItem(PREFILL_KEY, user.id);
     } catch {
@@ -367,7 +370,7 @@ export function Quiz() {
   const goalKcal = meta?.goals.find((g) => g.id === p.goal)?.kcal ?? 0;
 
   const updateKid = (i: number, patch: Partial<Child>) => set({ kids: p.kids.map((k, j) => (j === i ? { ...k, ...patch } : k)) });
-  const addKid = () => set({ kids: [...p.kids, { ageMonths: 60, feeding: "shared", sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 }] });
+  const addKid = () => set({ kids: [...p.kids, { ageMonths: 60, ageAt: ymNow(), feeding: "shared", sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 }] });
 
   return (
     <div className="shell">
@@ -535,6 +538,10 @@ export function Quiz() {
                     </div>
                   </div>
                   <div className="member__row">
+                    <span className="member__label">{t("member.mom")}</span>
+                    <Select aria-label={t("member.mom")} value={m.mom ?? ""} onChange={(v) => updateMember(i, { mom: v })} options={MOM_STATES.map((s) => ({ value: s, label: t(s ? `member.mom.${s}` : "member.mom.none") }))} />
+                  </div>
+                  <div className="member__row">
                     <span className="member__label">{t("quiz.member.slots")}</span>
                     <div className="chips" role="group" aria-label={t("quiz.member.slots")}>
                       {meta?.slots.map((s) => {
@@ -574,7 +581,7 @@ export function Quiz() {
                       onChange={(v) => {
                         const m = Number(v);
                         const opts = feedingOptions(m);
-                        updateKid(i, { ageMonths: m, feeding: opts.includes(k.feeding) ? k.feeding : opts[0], sharesMeals: false, formula: m < 36 ? k.formula : false });
+                        updateKid(i, { ageMonths: m, ageAt: ymNow(), feeding: opts.includes(k.feeding) ? k.feeding : opts[0], sharesMeals: false, formula: m < 36 ? k.formula : false });
                       }}
                     />
                   </label>
@@ -591,7 +598,9 @@ export function Quiz() {
                     </div>
                   )}
                   {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => updateKid(i, { meals })} />}
-                  {(k.feeding === "weaning" || (k.feeding === "mix" && k.ageMonths >= 6 && k.ageMonths < 12 && Object.values(k.meals ?? {}).some((v) => v !== "jars" && v !== "shared"))) && meta?.weaningFoods && (
+                  {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => updateKid(i, { away })} />}
+                  {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => updateKid(i, { allergens })} />}
+                  {(k.feeding === "weaning" || ((k.feeding === "jars" || k.feeding === "mix") && k.ageMonths < 12)) && meta?.weaningFoods && (
                     <WeaningPicker foods={meta.weaningFoods} month={k.ageMonths} value={k.introduced ?? []} onChange={(introduced) => updateKid(i, { introduced })} />
                   )}
                   {k.ageMonths < 36 && (

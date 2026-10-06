@@ -106,23 +106,47 @@ func weaningFood(id string) (WeaningFood, bool) {
 	return WeaningFood{}, false
 }
 
-// WeaningNext — следующий продукт для введения: первый по порядку, который уже можно по возрасту и ещё не
-// введён. Фрукты — только когда есть хотя бы одна каша или овощ: по программе они не первый прикорм.
-func WeaningNext(month int, introduced []string) (WeaningFood, bool) {
-	hasBase := false
+// weaningDue — к какому месяцу группа уже должна быть в рационе: через месяц после срока введения по
+// таблице 5.1 (овощи и каша — к 6 мес, мясо — к 7, желток — к 8, творог, кефир, рыба и хлеб — к 9).
+// Если ребёнок начал прикорм поздно, такие группы вводят раньше, чем новые овощи и крупы: иначе до мяса
+// и желтка очередь дойдёт через несколько месяцев.
+var weaningDue = []struct {
+	Group string
+	Month int
+}{{"veg", 6}, {"cereal", 6}, {"meat", 7}, {"fruit", 7}, {"yolk", 8}, {"curd", 9}, {"kefir", 9}, {"fish", 9}, {"bread", 9}}
+
+// WeaningNext — следующий продукт для введения. Сначала группа, которая по возрасту уже должна быть, а её
+// ещё нет; иначе — первый по порядку WeaningFoods, который можно по возрасту и ещё не введён. Фрукты —
+// только когда есть хотя бы одна каша или овощ: по программе они не первый прикорм. skip — продукты,
+// которые ребёнку нельзя (аллергия, исключён семьёй); nil — все можно.
+func WeaningNext(month int, introduced []string, skip func(WeaningFood) bool) (WeaningFood, bool) {
+	has := map[string]bool{}
 	for _, id := range introduced {
-		if f, ok := weaningFood(id); ok && (f.Group == "veg" || f.Group == "cereal") {
-			hasBase = true
+		if f, ok := weaningFood(id); ok {
+			has[f.Group] = true
+		}
+	}
+	hasBase := has["veg"] || has["cereal"]
+	ok := func(f WeaningFood) bool {
+		if f.From > month || slices.Contains(introduced, f.ID) || (skip != nil && skip(f)) {
+			return false
+		}
+		return f.Group != "fruit" || hasBase
+	}
+	for _, d := range weaningDue {
+		if month < d.Month || has[d.Group] {
+			continue
+		}
+		for _, f := range WeaningFoods {
+			if f.Group == d.Group && ok(f) {
+				return f, true
+			}
 		}
 	}
 	for _, f := range WeaningFoods {
-		if f.From > month || slices.Contains(introduced, f.ID) {
-			continue
+		if ok(f) {
+			return f, true
 		}
-		if f.Group == "fruit" && !hasBase {
-			continue
-		}
-		return f, true
 	}
 	return WeaningFood{}, false
 }
@@ -132,12 +156,24 @@ func WeaningNext(month int, introduced []string) (WeaningFood, bool) {
 func WeaningRamp(full float64) []float64 {
 	steps := []float64{0.03, 0.1, 0.2, 0.35, 0.55, 0.8, 1}
 	out := make([]float64, len(steps))
+	if full < 1 { // желток в штуках: первые три дня — половина нормы, но не меньше четвертинки
+		for i := range out {
+			out[i] = full
+			if i < 3 {
+				out[i] = math.Max(0.25, roundWeaning(full/2))
+			}
+		}
+		return out
+	}
 	for i, s := range steps {
 		v := full * s
 		if full >= 1 && v < 5 && i == 0 {
 			v = math.Min(5, full)
 		}
 		out[i] = roundWeaning(v)
+		if i > 0 && out[i] < out[i-1] { // первый день подтянут до 5 г — дальше не меньше
+			out[i] = out[i-1]
+		}
 	}
 	return out
 }
@@ -161,6 +197,7 @@ type WeaningItem struct {
 	Grams  float64 `json:"grams"`            // г, для кефира мл, для желтка штуки
 	Unit   string  `json:"unit"`             // g, ml, pcs
 	New    bool    `json:"new"`              // продукт вводится на этой неделе
+	Jar    bool    `json:"jar,omitempty"`    // покупная баночка или детская каша вместо домашнего
 }
 
 // WeaningFeed — кормление: время по примерному режиму и что в нём.
@@ -183,18 +220,34 @@ type WeaningDay struct {
 type Weaning struct {
 	Month      int          `json:"month"`
 	Days       []WeaningDay `json:"days"`
-	New        *WeaningItem `json:"new,omitempty"`  // продукт недели
-	Ramp       []float64    `json:"ramp,omitempty"` // его количество по дням
-	Next       []string     `json:"next"`           // что вводить потом, по порядку (названия)
-	Introduced []string     `json:"introduced"`     // введённые продукты базы (id)
-	Texture    string       `json:"texture"`        // puree | mashed
-	MilkMl     int          `json:"milkMl"`         // смесь в сутки по норме, 0 — грудь
+	New        *WeaningItem `json:"new,omitempty"`     // продукт недели
+	NewName    string       `json:"newName,omitempty"` // его название без «Пюре:» — для заголовка «Продукт недели: кабачок»
+	Ramp       []float64    `json:"ramp,omitempty"`    // его количество по дням
+	Next       []string     `json:"next"`              // что вводить потом, по порядку (названия)
+	Introduced []string     `json:"introduced"`        // введённые продукты базы (id)
+	Texture    string       `json:"texture"`           // puree | mashed
+	MilkMl     int          `json:"milkMl"`            // смесь в сутки по норме, 0 — грудь
 }
 
 // buildWeaning — неделя прикорма: примерный режим дня (5 кормлений), введённые продукты по кругу внутри
-// группы, один новый продукт в первой половине дня с постепенным увеличением.
-func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
+// группы, один новый продукт в первой половине дня с постепенным увеличением. allergens и exclude —
+// аллергии ребёнка и семьи и исключённые продукты: такие продукты не вводятся и не ставятся в меню,
+// а при аллергии на молоко кашу заправляют растительным маслом вместо сливочного.
+func (c *Catalog) buildWeaning(k Child, l i18n.Lang, allergens, exclude []string) *Weaning {
 	m := k.AgeMonths
+	avoid := func(id string) bool { return c.avoids(id, allergens, exclude) }
+	skip := func(f WeaningFood) bool { return avoid(f.ID) }
+	butter := "butter"
+	if avoid("butter") {
+		butter = "oil"
+	}
+	item := func(f WeaningFood, grams float64) WeaningItem {
+		it := c.weaningItem(f, grams, l)
+		if it.Recipe != "" && c.recipeAvoids(it.Recipe, allergens, exclude) {
+			it.Recipe = "" // рецепт с молоком или яйцом не подходит, хотя сам продукт можно
+		}
+		return it
+	}
 	w := &Weaning{Month: m, Texture: "puree", Next: []string{}, Introduced: []string{}}
 	if m >= 9 {
 		w.Texture = "mashed"
@@ -203,9 +256,18 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 		w.MilkMl = k.FormulaMlPerDay()
 	}
 	name := func(id string) string { return c.WeaningName(id, l) }
+	// на баночках родители часто не отмечают, что малыш уже ест: тогда считаем, что введено всё,
+	// что положено по возрасту (до текущего месяца), а новое — по одному, как обычно
+	if k.Feeding == FeedJars && len(k.Introduced) == 0 {
+		for _, f := range WeaningFoods {
+			if f.From < m {
+				k.Introduced = append(k.Introduced, f.ID)
+			}
+		}
+	}
 	byGroup := map[string][]string{}
 	for _, f := range WeaningFoods {
-		if slices.Contains(k.Introduced, f.ID) && f.From <= m {
+		if slices.Contains(k.Introduced, f.ID) && f.From <= m && !skip(f) {
 			byGroup[f.Group] = append(byGroup[f.Group], f.ID)
 			w.Introduced = append(w.Introduced, f.ID)
 		}
@@ -219,7 +281,7 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 			break
 		}
 	}
-	newFood, hasNew := WeaningNext(m, k.Introduced)
+	newFood, hasNew := WeaningNext(m, k.Introduced, skip)
 	hasNew = hasNew && newAt >= 0
 	if hasNew {
 		full := WeaningGrams(newFood.Group, m)
@@ -227,12 +289,24 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 			full = WeaningGrams(newFood.Group, m+1)
 		}
 		w.Ramp = WeaningRamp(full)
-		it := c.weaningItem(newFood, full, l)
+		it := item(newFood, full)
 		it.New = true
+		if k.MealSource(feedSlots[newAt]) == MealJars {
+			if j, ok := c.jarItem(it, l); ok {
+				it = j
+			}
+		}
 		w.New = &it
+		w.NewName = name(newFood.ID)
+		if newFood.Group == "yolk" {
+			w.NewName = i18n.T(l, "weaning.yolk")
+		}
+		if it.Jar {
+			w.NewName = i18n.T(l, "weaning.jar.of", w.NewName)
+		}
 		rest := append(slices.Clone(k.Introduced), newFood.ID)
 		for len(w.Next) < 4 {
-			nf, ok := WeaningNext(m+1, rest)
+			nf, ok := WeaningNext(m+1, rest, skip)
 			if !ok {
 				break
 			}
@@ -257,40 +331,40 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 		evening := WeaningFeed{Time: "18:00", Items: []WeaningItem{}}
 		// утро: каша со сливочным маслом и фрукты
 		if f, ok := pick("cereal", d); ok {
-			morning.Items = append(morning.Items, c.weaningItem(f, WeaningGrams("cereal", m), l))
-			morning.Items = append(morning.Items, c.weaningExtra("butter", weaningButter[band], l))
+			morning.Items = append(morning.Items, item(f, WeaningGrams("cereal", m)))
+			morning.Items = append(morning.Items, c.weaningExtra(butter, weaningButter[band], l))
 		}
 		if f, ok := pick("fruit", d); ok {
-			morning.Items = append(morning.Items, c.weaningItem(f, WeaningGrams("fruit", m), l))
+			morning.Items = append(morning.Items, item(f, WeaningGrams("fruit", m)))
 		}
 		// обед: овощи с растительным маслом, мясо (рыба дважды в неделю с 8 мес), желток через день
 		if f, ok := pick("veg", d); ok {
-			midday.Items = append(midday.Items, c.weaningItem(f, WeaningGrams("veg", m), l))
+			midday.Items = append(midday.Items, item(f, WeaningGrams("veg", m)))
 			midday.Items = append(midday.Items, c.weaningExtra("oil", weaningOil[band], l))
 		}
 		fishDay := d == 2 || d == 5
 		if f, ok := pick("fish", d); ok && fishDay && m >= 8 {
-			midday.Items = append(midday.Items, c.weaningItem(f, WeaningGrams("fish", m), l))
+			midday.Items = append(midday.Items, item(f, WeaningGrams("fish", m)))
 		} else if f, ok := pick("meat", d); ok {
-			midday.Items = append(midday.Items, c.weaningItem(f, WeaningGrams("meat", m), l))
+			midday.Items = append(midday.Items, item(f, WeaningGrams("meat", m)))
 		}
 		if f, ok := pick("yolk", d); ok && d%2 == 0 {
-			midday.Items = append(midday.Items, c.weaningItem(f, WeaningGrams("yolk", m), l))
+			midday.Items = append(midday.Items, item(f, WeaningGrams("yolk", m)))
 		}
 		// ужин с 8 мес: творог или кефир с хлебом
 		if f, ok := pick("curd", d); ok {
-			evening.Items = append(evening.Items, c.weaningItem(f, WeaningGrams("curd", m), l))
+			evening.Items = append(evening.Items, item(f, WeaningGrams("curd", m)))
 		}
 		if f, ok := pick("kefir", d); ok {
-			evening.Items = append(evening.Items, c.weaningItem(f, WeaningGrams("kefir", m), l))
+			evening.Items = append(evening.Items, item(f, WeaningGrams("kefir", m)))
 		}
 		if f, ok := pick("bread", d); ok {
-			evening.Items = append(evening.Items, c.weaningItem(f, WeaningGrams("bread", m), l))
+			evening.Items = append(evening.Items, item(f, WeaningGrams("bread", m)))
 		}
 		// новый продукт — в первой половине дня, в утреннее кормление; если в этот день уже есть блюдо его
 		// группы, новое не добавляется сверху, а постепенно занимает часть порции
 		meals := []*WeaningFeed{&morning, &midday, &evening}
-		if k.Feeding == FeedMix {
+		if k.Feeding == FeedMix || k.Feeding == FeedJars {
 			for i, s := range feedSlots {
 				switch k.MealSource(s) {
 				case MealJars:
@@ -311,14 +385,23 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 						feed.Items[j].Grams = roundWeaning(math.Max(0, feed.Items[j].Grams-it.Grams))
 					}
 				}
-				feed.Items = slices.DeleteFunc(feed.Items, func(x WeaningItem) bool { return x.Grams == 0 && x.Group != "oil" && x.Group != "butter" && x.Group != "shared" })
+				feed.Items = slices.DeleteFunc(feed.Items, func(x WeaningItem) bool {
+					return x.Grams == 0 && x.Group != "oil" && x.Group != "butter" && x.Group != "shared"
+				})
+			}
+			if k.MealSource(feedSlots[newAt]) == MealJars {
+				if j, ok := c.jarItem(it, l); ok {
+					it = j
+				}
 			}
 			meals[newAt].Items = append([]WeaningItem{it}, meals[newAt].Items...)
 		}
 		feeds := []WeaningFeed{milk("06:00")}
 		for _, f := range []WeaningFeed{morning, midday, evening} {
-			if len(f.Items) == 0 {
-				f.Milk = true // прикорма в это кормление ещё нет — грудь или смесь
+			// прикорма в это кормление ещё нет или его мало (первые ложки нового продукта, один творог) —
+			// после него грудь или смесь, иначе малыш останется голодным
+			if len(f.Items) == 0 || weaningMealGrams(f.Items) < weaningFullMeal {
+				f.Milk = true
 			}
 			feeds = append(feeds, f)
 		}
@@ -414,7 +497,7 @@ func (c *Catalog) WeaningSample(month int, l i18n.Lang) *Weaning {
 			intro = append(intro, f.ID)
 		}
 	}
-	return c.buildWeaning(Child{AgeMonths: month, Feeding: FeedWeaning, Introduced: intro}, l)
+	return c.buildWeaning(Child{AgeMonths: month, Feeding: FeedWeaning, Introduced: intro}, l, nil, nil)
 }
 
 // WeaningName — название продукта для прикорма: без пометок каталога в скобках («Брокколи (заморозка)» → «Брокколи»).
@@ -438,6 +521,25 @@ func lowerFirst(l i18n.Lang, s string) string {
 	return string(unicode.ToLower(r)) + s[size:]
 }
 
+// weaningFullMeal — сколько прикорма в кормлении достаточно, чтобы не докармливать молоком, г: в 6–12 мес
+// объём одного кормления около 200 мл, после 150 г пюре или каши малыш обычно сыт.
+const weaningFullMeal = 150
+
+// weaningMealGrams — граммы еды в кормлении: без масла и желтка (он в штуках); «с общего стола» — полноценный приём.
+func weaningMealGrams(items []WeaningItem) float64 {
+	var g float64
+	for _, it := range items {
+		switch {
+		case it.Group == "shared":
+			return weaningFullMeal
+		case it.Group == "oil" || it.Group == "butter" || it.Unit == "pcs":
+		default:
+			g += it.Grams
+		}
+	}
+	return g
+}
+
 // feedSlot — часть суток кормления по примерному режиму.
 func feedSlot(t string) string {
 	switch t {
@@ -459,7 +561,14 @@ func markFormula(k Child, feeds []WeaningFeed) {
 	}
 	var idx []int
 	for i := range feeds {
-		if !feeds[i].Milk || len(feeds[i].Items) > 0 {
+		if !feeds[i].Milk {
+			continue
+		}
+		if len(feeds[i].Items) > 0 { // докорм после прикорма: объём по аппетиту, без мл
+			feeds[i].MilkKind = "breast"
+			if k.GivesFormula(feedSlot(feeds[i].Time)) {
+				feeds[i].MilkKind = "formula"
+			}
 			continue
 		}
 		if k.GivesFormula(feedSlot(feeds[i].Time)) {
@@ -480,16 +589,31 @@ func markFormula(k Child, feeds []WeaningFeed) {
 	}
 }
 
-// weaningJars — кормление из баночек вместо домашнего: те же группы и граммы, но покупная баночка
-// (её считает babyItems), поэтому Food пустой и в список продуктов прикорма она не попадает.
-// Желток, хлеб и масло — домашние, в баночное кормление их не ставим.
+// weaningJars — кормление из баночек вместо домашнего: те же продукты и граммы, но покупные (их считает
+// babyItems), поэтому Food пустой и в список продуктов прикорма они не попадают. Желток, хлеб и масло —
+// домашние, в баночное кормление их не ставим.
 func (c *Catalog) weaningJars(items []WeaningItem, l i18n.Lang) []WeaningItem {
 	out := []WeaningItem{}
 	for _, it := range items {
-		switch it.Group {
-		case "veg", "fruit", "meat", "fish", "cereal", "curd", "kefir":
-			out = append(out, WeaningItem{Group: "jar", Name: i18n.T(l, "weaning.jar."+it.Group), Grams: it.Grams, Unit: it.Unit})
+		if j, ok := c.jarItem(it, l); ok {
+			out = append(out, j)
 		}
 	}
 	return out
+}
+
+// jarItem — то же блюдо прикорма, но покупное: «Пюре: кабачок (баночка)», «Детская каша: гречка».
+func (c *Catalog) jarItem(it WeaningItem, l i18n.Lang) (WeaningItem, bool) {
+	switch it.Group {
+	case "veg", "fruit", "meat", "fish":
+		it.Name = i18n.T(l, "weaning.jar.of", it.Name)
+	case "cereal":
+		it.Name = i18n.T(l, "weaning.jar.cereal.of", lowerFirst(l, c.WeaningName(it.Food, l)))
+	case "curd", "kefir":
+		it.Name = i18n.T(l, "weaning.jar."+it.Group)
+	default:
+		return it, false
+	}
+	it.Food, it.Recipe, it.Jar = "", "", true
+	return it, true
 }

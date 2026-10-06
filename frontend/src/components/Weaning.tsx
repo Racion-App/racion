@@ -1,4 +1,4 @@
-import { Baby, Info, Sparkles } from "lucide-react";
+import { Baby, Check, Info, Sparkles } from "lucide-react";
 import { useT } from "../i18n";
 import type { Weaning, WeaningFeed, WeaningFood, WeaningItem } from "../lib/types";
 
@@ -65,7 +65,13 @@ function Feed({ feed, t, onOpen }: { feed: WeaningFeed; t: (k: string, p?: Recor
         ))}
         {feed.milk && (
           <span className={"weanfeed__milk" + (feed.milkKind === "formula" ? " is-formula" : "")}>
-            {feed.milkKind === "formula" ? t("weaning.milk.formula", { n: feed.milkMl ?? 0 }) : feed.milkKind === "breast" ? t("weaning.milk.breast") : feed.items.length > 0 ? t("weaning.milk.after") : t("weaning.milk")}
+            {feed.items.length > 0
+              ? t(feed.milkKind === "formula" ? "weaning.milk.after.formula" : feed.milkKind === "breast" ? "weaning.milk.after.breast" : "weaning.milk.after")
+              : feed.milkKind === "formula"
+                ? t("weaning.milk.formula", { n: feed.milkMl ?? 0 })
+                : feed.milkKind === "breast"
+                  ? t("weaning.milk.breast")
+                  : t("weaning.milk")}
           </span>
         )}
       </span>
@@ -92,8 +98,35 @@ export function WeaningDayRows({ w, day, ageLabel, onOpen }: { w: Weaning; day: 
   );
 }
 
+// Diary — отметка о продукте недели: ввели без реакции или была реакция (пишется в черновик квиза).
+export type Diary = { state: "" | "ok" | "reaction"; onMark: (how: "ok" | "reaction") => void };
+
+function DiaryButtons({ diary }: { diary: Diary }) {
+  const { t } = useT();
+  if (diary.state) {
+    return (
+      <p className={"weancard__diary is-" + diary.state} role="status">
+        {diary.state === "ok" ? <Check size={15} aria-hidden /> : <Info size={15} aria-hidden />} {t(`weaning.diary.${diary.state}.done`)}
+      </p>
+    );
+  }
+  return (
+    <div className="weancard__diarybtns">
+      <span>{t("weaning.diary.ask")}</span>
+      <div>
+        <button type="button" className="btn btn-soft btn-sm" onClick={() => diary.onMark("ok")}>
+          <Check size={15} aria-hidden /> {t("weaning.diary.ok")}
+        </button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => diary.onMark("reaction")}>
+          {t("weaning.diary.reaction")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // WeaningCard — сводка недели: продукт недели с наращиванием по дням, что дальше, правила и источник.
-export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: string; labels: string[] }) {
+export function WeaningCard({ w, ageLabel, labels, diary }: { w: Weaning; ageLabel: string; labels: string[]; diary?: Diary }) {
   const { t, lang } = useT();
   return (
     <section className="weancard" aria-label={t("weaning.title", { age: ageLabel })}>
@@ -103,7 +136,7 @@ export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: str
       {w.new && w.ramp ? (
         <div className="weancard__new">
           <div className="weancard__newhead">
-            <Sparkles size={16} aria-hidden /> {t("weaning.new.title", { name: w.new.name })}
+            <Sparkles size={16} aria-hidden /> {t("weaning.new.title", { name: w.newName || w.new.name })}
           </div>
           <p className="weancard__p">{t("weaning.new.how")}</p>
           <ol className="weanramp">
@@ -114,6 +147,7 @@ export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: str
               </li>
             ))}
           </ol>
+          {diary && <DiaryButtons diary={diary} />}
         </div>
       ) : (
         <p className="weancard__p">{t("weaning.new.none")}</p>

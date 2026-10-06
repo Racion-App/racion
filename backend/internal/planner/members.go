@@ -3,6 +3,7 @@ package planner
 import (
 	"math"
 	"slices"
+	"strings"
 
 	"racion/internal/i18n"
 )
@@ -16,7 +17,24 @@ type Member struct {
 	Goal     string   `json:"goal"`            // lose | healthy | gain | none
 	Appetite string   `json:"appetite"`        // small | normal | big
 	Slots    []string `json:"slots,omitempty"` // приёмы дома; пусто — все
+	// Mom — беременность или кормление грудью: pregnant1 | pregnant2 | pregnant3 | nursing. Прибавка к ккал
+	// по МР 2.3.1.0253-21 (табл. 19) и блюда, которых при беременности избегают
+	Mom string `json:"mom,omitempty"`
 }
+
+// MomStates — беременность по триместрам и кормление грудью.
+var MomStates = []string{"pregnant1", "pregnant2", "pregnant3", "nursing"}
+
+// momKcal — прибавка к дневной норме, ккал (МР 2.3.1.0253-21, табл. 19): 1-й триместр — без прибавки,
+// 2-й +250, 3-й +350, кормление грудью +500 (в 1–6 мес; в 7–12 мес +450).
+var momKcal = map[string]float64{"pregnant2": 250, "pregnant3": 350, "nursing": 500}
+
+// momExclude — чего при беременности избегают (КР «Нормальная беременность», 2023; NHS): печень (витамин A),
+// сыры с плесенью и бри, тунец, холодное копчение, алкоголь. Сырое мясо и рыба — тег raw.
+var momExclude = []string{"beef_liver", "liver_chicken", "liver_pate", "cod_liver", "cheese_brie", "blue_cheese", "tuna_steak", "tuna_can", "mackerel_smoked", "white_wine", "red_wine", "beer_light"}
+
+// nursingExclude — при кормлении грудью (Программа вскармливания 2019, гл. 2): без алкоголя; сырое — тег raw.
+var nursingExclude = []string{"white_wine", "red_wine", "beer_light"}
 
 // MemberView — едок на чеке: подписи, ккал и коэффициент порции.
 type MemberView struct {
@@ -54,7 +72,7 @@ func (m Member) kcalOf() float64 {
 	if k == 0 {
 		k = refKcal
 	}
-	return k * appetiteMult[m.Appetite]
+	return k*appetiteMult[m.Appetite] + momKcal[m.Mom]
 }
 
 func (m Member) eats(slot string) bool {
@@ -64,6 +82,12 @@ func (m Member) eats(slot string) bool {
 func (m Member) normalized(slots []string) Member {
 	if !slices.Contains(Goals, m.Goal) {
 		m.Goal = "none"
+	}
+	if !slices.Contains(MomStates, m.Mom) {
+		m.Mom = ""
+	}
+	if strings.HasPrefix(m.Mom, "pregnant") && m.Goal == "lose" {
+		m.Goal = "healthy" // худеть во время беременности не советуют — меню «правильное питание»
 	}
 	if _, ok := appetiteMult[m.Appetite]; !ok {
 		m.Appetite = "normal"
@@ -218,12 +242,26 @@ func memberViews(p Params, l i18n.Lang) []MemberView {
 	return out
 }
 
+// dayPortions — порции приёма в конкретный день: в будни дети в саду или школе едят часть приёмов не дома.
+func dayPortions(p Params, perSlot map[string]float64, day int, slot string) float64 {
+	v := perSlot[slot]
+	for _, k := range p.Kids {
+		if k.AwayOn(day, slot) {
+			v -= k.SlotPortionFactor(slot)
+		}
+	}
+	return math.Round(math.Max(v, 0)*100) / 100
+}
+
 // portionsFor — порций на приём; старые планы без SlotPortions считаются по общему числу.
 // portionsForDish — сколько порций у конкретного блюда. В корзине человек задаёт это сам
 // (салат на восьмерых, курица на четверых), в остальных планах порции общие для приёма пищи.
 func (p Plan) portionsForDish(d Dish) float64 {
 	if d.Servings > 0 {
 		return float64(d.Servings)
+	}
+	if d.Portions > 0 {
+		return d.Portions
 	}
 	return p.portionsFor(d.Slot)
 }

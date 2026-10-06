@@ -17,10 +17,11 @@ import { IngredientPic } from "../components/IngredientPic";
 import { approx, dateShort, minutes, money, people, qty, weekRange } from "../lib/format";
 import { readJSON, writeJSON } from "../lib/storage";
 import { withNames } from "../lib/names";
-import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan as PlanT } from "../lib/types";
+import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan as PlanT, type Weaning } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { useT } from "../i18n";
 import { WeaningCard, WeaningDayRows } from "../components/Weaning";
+import { draftKid, markWeaning } from "../lib/kids";
 
 // порции в списке заготовок: 4 или 2,5
 const fmtPortions = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ","));
@@ -34,6 +35,8 @@ export function Plan() {
   const { t, tn, lang } = useT();
 
   const [rawPlan, setPlan] = useState<PlanT | null>(initial && initial.id === id ? initial : null);
+  // дневник прикорма в этой сессии: «ввели» / «была реакция» по номеру ребёнка (до ранних return — это хук)
+  const [diary, setDiary] = useState<Record<number, "ok" | "reaction">>({});
   // по ссылке сервер отдаёт план без имён едоков; автору гостевого плана подставляем их из браузера
   const plan = useMemo(() => (rawPlan ? withNames(rawPlan) : null), [rawPlan]);
   const [error, setError] = useState<string | null>(null);
@@ -468,6 +471,26 @@ export function Plan() {
   // меню только для детей: взрослых нет, семейных блюд нет — взрослые цифры (цель, ккал, минуты у плиты) не показываем
 
   const kidsOnly = plan.params.adults === 0 && dishCount === 0;
+  // дневник прикорма: отметка о продукте недели уходит в черновик квиза — следующая неделя её учтёт
+  const diaryFor = (child: number, w: Weaning) => {
+    const food = w.new?.food;
+    const k = draftKid(plan.params.kids?.[child], child);
+    if (!food || !k) return undefined;
+    const known = k.introduced?.includes(food) ? "ok" : k.avoid?.includes(food) ? "reaction" : "";
+    return {
+      state: diary[child] ?? known,
+      onMark: (how: "ok" | "reaction") => {
+        markWeaning(child, food, how);
+        setDiary((d) => ({ ...d, [child]: how }));
+        track("weaning_diary", { how, food });
+      },
+    };
+  };
+  // подпись ребёнка в плане: имя из семьи, если есть, и возраст — «Маша, 8 мес»
+  const kidLabel = (km: { child: number; ageLabel: string }) => {
+    const name = plan.params.kids?.[km.child]?.name?.trim();
+    return name ? `${name}, ${km.ageLabel}` : km.ageLabel;
+  };
   const cy: Country | undefined = plan.country;
   const rub = (v: number) => money(v, cy, lang);
   const approxRub = (v: number) => approx(v, cy, lang);
@@ -604,7 +627,7 @@ export function Plan() {
         )}
 
         <div className="receipt__menu">
-        {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningCard key={"wc" + km.child} w={km.weaning} ageLabel={km.ageLabel} labels={km.weaning.days.map((d) => d.label)} /> : null))}
+        {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningCard key={"wc" + km.child} w={km.weaning} ageLabel={kidLabel(km)} labels={km.weaning.days.map((d) => d.label)} diary={diaryFor(km.child, km.weaning)} /> : null))}
         {plan.kidsMenus && plan.kidsMenus.length > 0 && !kidsOnly && (
           <div className="viewswitch" role="radiogroup" aria-label={t("plan.view")}>
             {(["all", "adult", "kids"] as const).map((v) => (
@@ -725,16 +748,17 @@ export function Plan() {
                 }}
               />
             ))}
-            {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningDayRows key={"w" + km.child} w={km.weaning} day={day.index} ageLabel={km.ageLabel} onOpen={(id) => { setRecipeId(id); track("recipe_open", { id, weaning: true }); }} /> : null))}
+            {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningDayRows key={"w" + km.child} w={km.weaning} day={day.index} ageLabel={kidLabel(km)} onOpen={(id) => { setRecipeId(id); track("recipe_open", { id, weaning: true }); }} /> : null))}
             {plan.kidsMenus?.map((km) => {
               const kd = km.days[day.index];
               if (!kd || kd.dishes.length === 0) return null;
               return (
                 <div className="kidrows" key={km.child}>
                   <div className="kidrows__head">
-                    <Baby size={13} aria-hidden /> {t("plan.kid", { age: km.ageLabel })}
-                    {day.index === 0 && km.note && <span className="kidrows__note"> · {km.note}</span>}
+                    <Baby size={13} aria-hidden /> {plan.params.kids?.[km.child]?.name?.trim() ? kidLabel(km) : t("plan.kid", { age: km.ageLabel })}
+                    {day.index === 0 && km.note && <span className="kidrows__note">{km.note}</span>}
                   </div>
+                  {day.index === 0 && km.norm && <p className="kidrows__norm">{km.norm}</p>}
                   {kd.dishes.map((x) =>
                     x.kind ? (
                       <div className="dish dish--kid dish--plain" key={x.slot}>
@@ -743,7 +767,7 @@ export function Plan() {
                           <div className="dish__title">{x.title}</div>
                           <div className="dish__why">
                             <span className="dish__slot-inline">{slotLabel(lang, x.slot)}</span>
-                            {t(x.kind === "jars" ? "kid.jars.sub" : "kid.shared.sub")}
+                            {t(x.kind === "jars" ? "kid.jars.sub" : x.kind === "none" ? "kid.none.sub" : x.kind === "bedtime" ? "kid.bedtime.sub" : x.kind.startsWith("away.") ? "kid.away.sub" : "kid.shared.sub")}
                           </div>
                         </div>
                       </div>
@@ -764,6 +788,11 @@ export function Plan() {
                             <span className="dish__slot-inline">{slotLabel(lang, x.slot)}</span>
                             <Clock size={13} aria-hidden /> {x.timeMin} {t("min")}
                           </div>
+                          {x.note && (
+                            <div className="dish__kid">
+                              <Baby size={12} aria-hidden /> {x.note}
+                            </div>
+                          )}
                         </button>
                         <div className="dish__nums">
                           <b className="num">{approxRub(x.cost)}</b>
@@ -1121,6 +1150,11 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, o
             </>
           )}
         </div>
+        {dish.kidNote && (
+          <div className="dish__kid">
+            <Baby size={12} aria-hidden /> {dish.kidNote}
+          </div>
+        )}
       </button>
       <div className="dish__nums">
         <b className="num">{approx(dish.cost, cy, lang)}</b>
