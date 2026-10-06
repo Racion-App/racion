@@ -194,7 +194,7 @@ func slotPortions(p Params) map[string]float64 {
 			}
 		}
 		for _, k := range p.Kids {
-			v += k.PortionFactor()
+			v += k.SlotPortionFactor(s)
 		}
 		out[s] = math.Round(v*100) / 100
 	}

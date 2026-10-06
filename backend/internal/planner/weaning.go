@@ -165,9 +165,12 @@ type WeaningItem struct {
 
 // WeaningFeed — кормление: время по примерному режиму и что в нём.
 type WeaningFeed struct {
-	Time  string        `json:"time"`
-	Milk  bool          `json:"milk"` // грудь или смесь (после прикорма — докармливание)
-	Items []WeaningItem `json:"items"`
+	Time string `json:"time"`
+	Milk bool   `json:"milk"` // грудь или смесь (после прикорма — докармливание)
+	// MilkKind — что в молочном кормлении у ребёнка на смеси: formula | breast; пусто — не на смеси
+	MilkKind string        `json:"milkKind,omitempty"`
+	MilkMl   int           `json:"milkMl,omitempty"` // смесь в это кормление, мл
+	Items    []WeaningItem `json:"items"`
 }
 
 type WeaningDay struct {
@@ -207,7 +210,17 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 			w.Introduced = append(w.Introduced, f.ID)
 		}
 	}
+	// в режиме «комбинирую» новый продукт вводят в первое домашнее кормление; если дома не кормят, его нет
+	feedSlots := []string{"breakfast", "lunch", "dinner"} // 10:00, 14:00, 18:00
+	newAt := -1
+	for i, s := range feedSlots {
+		if k.Feeding != FeedMix || k.MealSource(s) == MealHome {
+			newAt = i
+			break
+		}
+	}
 	newFood, hasNew := WeaningNext(m, k.Introduced)
+	hasNew = hasNew && newAt >= 0
 	if hasNew {
 		full := WeaningGrams(newFood.Group, m)
 		if full == 0 { // по таблице группа ещё не положена — значит, возраст на границе, берём следующий столбец
@@ -276,18 +289,31 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 		}
 		// новый продукт — в первой половине дня, в утреннее кормление; если в этот день уже есть блюдо его
 		// группы, новое не добавляется сверху, а постепенно занимает часть порции
+		meals := []*WeaningFeed{&morning, &midday, &evening}
+		if k.Feeding == FeedMix {
+			for i, s := range feedSlots {
+				switch k.MealSource(s) {
+				case MealJars:
+					meals[i].Items = c.weaningJars(meals[i].Items, l)
+				case MealShared:
+					if len(meals[i].Items) > 0 || m >= 8 { // с 8 мес и ужин — уже еда, не молоко
+						meals[i].Items = []WeaningItem{{Group: "shared", Name: i18n.T(l, "weaning.shared")}}
+					}
+				}
+			}
+		}
 		if hasNew {
 			it := *w.New
 			it.Grams = w.Ramp[d]
-			for _, feed := range []*WeaningFeed{&morning, &midday, &evening} {
+			for _, feed := range meals {
 				for j := range feed.Items {
 					if feed.Items[j].Group == it.Group && !feed.Items[j].New {
 						feed.Items[j].Grams = roundWeaning(math.Max(0, feed.Items[j].Grams-it.Grams))
 					}
 				}
-				feed.Items = slices.DeleteFunc(feed.Items, func(x WeaningItem) bool { return x.Grams == 0 && x.Group != "oil" && x.Group != "butter" })
+				feed.Items = slices.DeleteFunc(feed.Items, func(x WeaningItem) bool { return x.Grams == 0 && x.Group != "oil" && x.Group != "butter" && x.Group != "shared" })
 			}
-			morning.Items = append([]WeaningItem{it}, morning.Items...)
+			meals[newAt].Items = append([]WeaningItem{it}, meals[newAt].Items...)
 		}
 		feeds := []WeaningFeed{milk("06:00")}
 		for _, f := range []WeaningFeed{morning, midday, evening} {
@@ -297,6 +323,10 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 			feeds = append(feeds, f)
 		}
 		feeds = append(feeds, milk("22:00"))
+		if k.GivesFormula("night") && len(k.FormulaFeeds) > 0 {
+			feeds = append(feeds, milk("02:00"))
+		}
+		markFormula(k, feeds)
 		day.Feeds = feeds
 		w.Days = append(w.Days, day)
 	}
@@ -406,4 +436,60 @@ func lowerFirst(l i18n.Lang, s string) string {
 	}
 	r, size := utf8.DecodeRuneInString(s)
 	return string(unicode.ToLower(r)) + s[size:]
+}
+
+// feedSlot — часть суток кормления по примерному режиму.
+func feedSlot(t string) string {
+	switch t {
+	case "06:00":
+		return "morning"
+	case "22:00":
+		return "bedtime"
+	case "02:00":
+		return "night"
+	}
+	return "day"
+}
+
+// markFormula — у ребёнка на смеси подписывает молочные кормления: смесь (сколько мл) или грудь.
+// Объём одного кормления — по возрасту, а если родители указали мл в день, он делится на кормления смесью.
+func markFormula(k Child, feeds []WeaningFeed) {
+	if !k.Formula {
+		return
+	}
+	var idx []int
+	for i := range feeds {
+		if !feeds[i].Milk || len(feeds[i].Items) > 0 {
+			continue
+		}
+		if k.GivesFormula(feedSlot(feeds[i].Time)) {
+			idx = append(idx, i)
+		} else {
+			feeds[i].MilkKind = "breast"
+		}
+	}
+	if len(idx) == 0 {
+		return
+	}
+	ml := formulaPerFeed(k.AgeMonths)
+	if k.FormulaMl > 0 {
+		ml = int(math.Round(float64(k.FormulaMl)/float64(len(idx))/10) * 10)
+	}
+	for _, i := range idx {
+		feeds[i].MilkKind, feeds[i].MilkMl = "formula", ml
+	}
+}
+
+// weaningJars — кормление из баночек вместо домашнего: те же группы и граммы, но покупная баночка
+// (её считает babyItems), поэтому Food пустой и в список продуктов прикорма она не попадает.
+// Желток, хлеб и масло — домашние, в баночное кормление их не ставим.
+func (c *Catalog) weaningJars(items []WeaningItem, l i18n.Lang) []WeaningItem {
+	out := []WeaningItem{}
+	for _, it := range items {
+		switch it.Group {
+		case "veg", "fruit", "meat", "fish", "cereal", "curd", "kefir":
+			out = append(out, WeaningItem{Group: "jar", Name: i18n.T(l, "weaning.jar."+it.Group), Grams: it.Grams, Unit: it.Unit})
+		}
+	}
+	return out
 }

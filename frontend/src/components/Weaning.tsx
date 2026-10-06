@@ -40,6 +40,7 @@ export function WeaningPicker({ foods, month, value, onChange }: { foods: Weanin
 }
 
 function amount(t: (k: string, p?: Record<string, string | number>) => string, it: WeaningItem) {
+  if (!it.unit) return "";
   if (it.unit === "pcs") return it.grams === 0.25 ? "¼" : it.grams === 0.5 ? "½" : String(it.grams);
   return `${it.grams} ${t(it.unit === "ml" ? "unit.ml" : "unit.g")}`;
 }
@@ -62,7 +63,11 @@ function Feed({ feed, t, onOpen }: { feed: WeaningFeed; t: (k: string, p?: Recor
             {it.new && <span className="weanfeed__badge">{t("weaning.new.badge")}</span>}
           </span>
         ))}
-        {feed.milk && <span className="weanfeed__milk">{feed.items.length > 0 ? t("weaning.milk.after") : t("weaning.milk")}</span>}
+        {feed.milk && (
+          <span className={"weanfeed__milk" + (feed.milkKind === "formula" ? " is-formula" : "")}>
+            {feed.milkKind === "formula" ? t("weaning.milk.formula", { n: feed.milkMl ?? 0 }) : feed.milkKind === "breast" ? t("weaning.milk.breast") : feed.items.length > 0 ? t("weaning.milk.after") : t("weaning.milk")}
+          </span>
+        )}
       </span>
     </li>
   );
@@ -119,7 +124,7 @@ export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: str
         <li>{t("weaning.rule.one")}</li>
         <li>{t("weaning.rule.health")}</li>
         <li>{t("weaning.rule.water")}</li>
-        {w.milkMl > 0 && <li>{t("weaning.rule.formula", { n: w.milkMl })}</li>}
+        {w.milkMl > 0 && <li>{t(w.days.some((d) => d.feeds.some((f) => f.milkKind === "breast")) ? "weaning.rule.formula.mixed" : "weaning.rule.formula", { n: w.milkMl })}</li>}
       </ul>
       <p className="weancard__src">
         <Info size={13} aria-hidden /> {t("weaning.source")}

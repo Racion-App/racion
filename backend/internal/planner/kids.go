@@ -17,9 +17,10 @@ const (
 	FeedJars     = "jars"     // баночки и детские каши по возрастным нормам
 	FeedMilk     = "milk"     // только смесь или грудное молоко
 	FeedWeaning  = "weaning"  // прикорм по месяцам: режим дня и новый продукт недели (weaning.go)
+	FeedMix      = "mix"      // комбинирую: у каждого приёма свой источник (Child.Meals)
 )
 
-var FeedingModes = []string{FeedShared, FeedSeparate, FeedJars, FeedMilk, FeedWeaning}
+var FeedingModes = []string{FeedShared, FeedSeparate, FeedJars, FeedMilk, FeedWeaning, FeedMix}
 
 func FeedingLabel(l i18n.Lang, mode string) string { return i18n.T(l, "feeding."+mode) }
 
@@ -32,6 +33,10 @@ type Child struct {
 	Formula      bool   `json:"formula"`      // на смеси
 	FormulaBrand string `json:"formulaBrand"` // код из FormulaBrands
 	FormulaMl    int    `json:"formulaMl"`    // мл в день; 0 — по возрастной норме
+	// FormulaFeeds — когда даёт смесь (FormulaSlots): только утром, на ночь и т. п.; пусто — во все кормления
+	FormulaFeeds []string `json:"formulaFeeds,omitempty"`
+	// Meals — в режиме «комбинирую»: приём (MealSlots) → home | jars | shared
+	Meals map[string]string `json:"meals,omitempty"`
 	// Introduced — продукты прикорма, которые ребёнок уже ест (id продуктов базы из WeaningFoods)
 	Introduced []string `json:"introduced,omitempty"`
 }
@@ -44,11 +49,11 @@ func FeedingOptions(ageMonths int) []string {
 	case ageMonths < 6: // прикорм с 4–6 мес по решению педиатра; по умолчанию пока молоко
 		return []string{FeedMilk, FeedWeaning}
 	case ageMonths < 12:
-		return []string{FeedWeaning, FeedJars, FeedSeparate, FeedShared}
+		return []string{FeedWeaning, FeedJars, FeedSeparate, FeedShared, FeedMix}
 	case ageMonths < 36:
-		return []string{FeedShared, FeedSeparate, FeedJars}
+		return []string{FeedShared, FeedSeparate, FeedJars, FeedMix}
 	default:
-		return []string{FeedShared, FeedSeparate}
+		return []string{FeedShared, FeedSeparate, FeedMix}
 	}
 }
 
@@ -78,6 +83,27 @@ func (c Child) normalized() Child {
 	if c.FormulaMl < 0 || c.FormulaMl > 1500 {
 		c.FormulaMl = 0
 	}
+	var feeds []string
+	if c.Formula {
+		for _, f := range c.FormulaFeeds {
+			if slices.Contains(FormulaSlots, f) && !slices.Contains(feeds, f) {
+				feeds = append(feeds, f)
+			}
+		}
+	}
+	c.FormulaFeeds = feeds
+	var meals map[string]string
+	if c.Feeding == FeedMix {
+		meals = map[string]string{}
+		for _, s := range MealSlots(c.AgeMonths) {
+			v := c.Meals[s]
+			if !slices.Contains([]string{MealHome, MealJars, MealShared}, v) || (v == MealJars && c.AgeMonths >= 36) {
+				v = MealHome
+			}
+			meals[s] = v
+		}
+	}
+	c.Meals = meals
 	// введённые продукты — только из списка прикорма, без повторов
 	var intro []string
 	for _, id := range c.Introduced {
@@ -89,11 +115,72 @@ func (c Child) normalized() Child {
 	return c
 }
 
-// PortionFactor — доля взрослой порции по возрасту (для тех, кто ест с общего стола).
-func (c Child) PortionFactor() float64 {
-	if c.Feeding != FeedShared {
+// Источники приёма пищи в режиме «комбинирую».
+const (
+	MealHome   = "home"   // готовим сами: прикорм по программе или детское меню
+	MealJars   = "jars"   // баночки, детские каши и творожки
+	MealShared = "shared" // с общего стола, порция по возрасту
+)
+
+// MealSlots — приёмы, для которых в режиме «комбинирую» выбирают источник: до года без полдника.
+func MealSlots(ageMonths int) []string {
+	if ageMonths < 12 {
+		return []string{"breakfast", "lunch", "dinner"}
+	}
+	return []string{"breakfast", "lunch", "dinner", "snack"}
+}
+
+// MealSource — откуда ребёнок ест этот приём: home | jars | shared; пусто — не ест (только молоко).
+func (c Child) MealSource(slot string) string {
+	switch c.Feeding {
+	case FeedMix:
+		return c.Meals[slot]
+	case FeedShared:
+		return MealShared
+	case FeedJars:
+		return MealJars
+	case FeedSeparate, FeedWeaning:
+		return MealHome
+	}
+	return ""
+}
+
+// eatsShared — ест ли хоть один приём с общего стола (тогда общие блюда фильтруются под возраст).
+func (c Child) eatsShared() bool {
+	for _, s := range SlotOrder {
+		if c.MealSource(s) == MealShared {
+			return true
+		}
+	}
+	return false
+}
+
+// SlotPortionFactor — доля взрослой порции в этом приёме, если ребёнок ест его с общего стола.
+func (c Child) SlotPortionFactor(slot string) float64 {
+	if c.MealSource(slot) != MealShared {
 		return 0
 	}
+	return c.ageFactor()
+}
+
+// PortionFactor — доля взрослой порции по возрасту в среднем за день (для тех, кто ест с общего стола).
+func (c Child) PortionFactor() float64 {
+	switch c.Feeding {
+	case FeedShared:
+		return c.ageFactor()
+	case FeedMix:
+		n := 0
+		for _, s := range MealSlots(c.AgeMonths) {
+			if c.Meals[s] == MealShared {
+				n++
+			}
+		}
+		return math.Round(c.ageFactor()*float64(n)/float64(len(MealSlots(c.AgeMonths)))*100) / 100
+	}
+	return 0
+}
+
+func (c Child) ageFactor() float64 {
 	switch {
 	case c.AgeMonths < 6:
 		return 0
@@ -133,6 +220,13 @@ func (c Child) FormulaMlPerDay() int {
 	if c.FormulaMl > 0 {
 		return c.FormulaMl
 	}
+	if len(c.FormulaFeeds) > 0 {
+		n := 0
+		for _, f := range c.FormulaFeeds {
+			n += formulaFeedsIn(f, c.AgeMonths)
+		}
+		return n * formulaPerFeed(c.AgeMonths)
+	}
 	switch {
 	case c.AgeMonths < 1:
 		return 600
@@ -153,6 +247,58 @@ func (c Child) FormulaMlPerDay() int {
 	default:
 		return 200
 	}
+}
+
+// FormulaSlots — части суток, когда ребёнок может получать смесь: утром после сна, днём, на ночь, ночью.
+var FormulaSlots = []string{"morning", "day", "bedtime", "night"}
+
+// formulaPerFeed — смесь за одно кормление по возрасту, мл (таблицы на банках смесей, усреднённо).
+func formulaPerFeed(m int) int {
+	switch {
+	case m < 1:
+		return 80
+	case m < 2:
+		return 110
+	case m < 4:
+		return 140
+	case m < 6:
+		return 180
+	default:
+		return 200
+	}
+}
+
+// formulaFeedsIn — сколько молочных кормлений приходится на часть суток в этом возрасте. С 6 месяцев
+// дневные кормления занимает прикорм: в 6–7 месяцев остаётся одно в 18:00, с 8 — ни одного.
+func formulaFeedsIn(slot string, m int) int {
+	switch slot {
+	case "morning", "bedtime":
+		return 1
+	case "night":
+		switch {
+		case m < 2:
+			return 2
+		default:
+			return 1
+		}
+	case "day":
+		switch {
+		case m < 1:
+			return 4
+		case m < 4:
+			return 3
+		case m < 6:
+			return 2
+		case m < 8:
+			return 1
+		}
+	}
+	return 0
+}
+
+// GivesFormula — получает ли ребёнок смесь в эту часть суток.
+func (c Child) GivesFormula(slot string) bool {
+	return c.Formula && (len(c.FormulaFeeds) == 0 || slices.Contains(c.FormulaFeeds, slot))
 }
 
 // FormulaStage — ступень смеси по возрасту: 1 (0–6 мес), 2 (6–12), 3 (12+).
@@ -261,7 +407,7 @@ var kidsExcludeUnder3 = []string{"mushrooms", "sausages", "shrimp", "king_prawns
 func kidsRestrictions(kids []Child) (excludeIngredients []string, excludeTags []string, minAgeSharing int) {
 	minAgeSharing = -1
 	for _, k := range kids {
-		if k.Feeding != FeedShared {
+		if !k.eatsShared() {
 			continue
 		}
 		if minAgeSharing < 0 || k.AgeMonths < minAgeSharing {
@@ -301,6 +447,23 @@ func jarNormFor(age int) jarNorm {
 	default:
 		return jarNorm{veg: 150, fruit: 100, meat: 70, kasha: 30, curd: 50, milk: 200}
 	}
+}
+
+// jarShare — баночки только на приёмы, отмеченные «баночки»: утром каша и фрукты, в обед овощи и мясо,
+// вечером творожок и кефир, в полдник вторая половина фруктов.
+func jarShare(n jarNorm, k Child) jarNorm {
+	on := func(s string) float64 {
+		if k.MealSource(s) == MealJars {
+			return 1
+		}
+		return 0
+	}
+	fruit := on("breakfast")
+	if slices.Contains(MealSlots(k.AgeMonths), "snack") {
+		fruit = (on("breakfast") + on("snack")) / 2
+	}
+	return jarNorm{veg: n.veg * on("lunch"), meat: n.meat * on("lunch"), kasha: n.kasha * on("breakfast"),
+		fruit: n.fruit * fruit, curd: n.curd * on("dinner"), milk: n.milk * on("dinner")}
 }
 
 // babyItems — строки списка покупок для детей: смесь, баночки, каши. Всё на неделю.
@@ -351,8 +514,11 @@ func (c *Catalog) babyItems(kids []Child, pr pricer) ([]ShopItem, []string) {
 			})
 		}
 		switch k.Feeding {
-		case FeedJars:
+		case FeedJars, FeedMix:
 			n := jarNormFor(k.AgeMonths)
+			if k.Feeding == FeedMix {
+				n = jarShare(n, k)
+			}
 			if n.veg > 0 {
 				items = append(items, jar(i, "baby_veg", "baby.veg", n.veg, 100, rosstatBabyVeg, fallbackBabyVeg, who, "g"))
 			}
@@ -399,6 +565,22 @@ type KidDish struct {
 	TimeMin  int     `json:"timeMin"`
 	Kcal     float64 `json:"kcal"`
 	Cost     float64 `json:"cost"`
+	Kind     string  `json:"kind,omitempty"` // jars | shared — приём не из детского меню (режим «комбинирую»)
+	Ref      string  `json:"ref,omitempty"`  // shared: рецепт семьи в этот приём
+}
+
+// kidDishTitle — подпись блюда детского меню на языке; для приёма-баночки и приёма с общего стола — своя.
+func (c *Catalog) kidDishTitle(d KidDish, l i18n.Lang) string {
+	switch d.Kind {
+	case MealJars:
+		return i18n.T(l, "kid.jars."+d.Slot)
+	case MealShared:
+		if r, ok := c.RecipeByID[d.Ref]; ok {
+			return i18n.T(l, "kid.shared.dish", r.LocalTitle(l))
+		}
+		return i18n.T(l, "kid.shared")
+	}
+	return c.RecipeByID[d.RecipeID].LocalTitle(l)
 }
 
 type KidDay struct {
@@ -470,6 +652,14 @@ func (c *Catalog) buildKidMenu(idx int, k Child, p Params, pr pricer, rng *rand.
 	for d := 0; d < 7; d++ {
 		day := KidDay{Index: d, Label: DayLabel(l, d)}
 		for _, slot := range kidSlots {
+			if src := k.MealSource(slot); src == MealJars || src == MealShared {
+				dish := KidDish{Slot: slot, Kind: src}
+				dish.Title = c.kidDishTitle(dish, l)
+				day.Dishes = append(day.Dishes, dish)
+				continue
+			} else if src != MealHome {
+				continue
+			}
 			pool := pools[slot]
 			if len(pool) == 0 {
 				continue

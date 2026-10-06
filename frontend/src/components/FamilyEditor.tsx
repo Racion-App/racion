@@ -4,6 +4,8 @@ import { Select } from "./Select";
 import type { Child, Member, Meta } from "../lib/types";
 import { APPETITES } from "../lib/types";
 import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
+import { FormulaFeeds } from "./FormulaFeeds";
+import { MealSources } from "./MealSources";
 import { useT } from "../i18n";
 
 // Состав семьи: взрослые (имя, цель, аппетит, приёмы дома) и дети (имя, возраст, кормление, смесь).
@@ -127,6 +129,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
                 ))}
               </div>
             )}
+            {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => setKid(i, { meals })} />}
             {k.ageMonths < 36 && (
               <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "nutrilon" : k.formulaBrand })}>
                 <span className="switch__text">
@@ -144,11 +147,12 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
                   <span>{t("quiz.formula.brand")}</span>
                   <Select aria-label={t("quiz.formula.brand")} value={k.formulaBrand} onChange={(v) => setKid(i, { formulaBrand: v })} options={(meta?.formulaBrands ?? []).map((b) => ({ value: b.id, label: b.name, sub: b.note }))} />
                 </label>
+                      <FormulaFeeds value={k.formulaFeeds ?? []} onChange={(formulaFeeds) => setKid(i, { formulaFeeds })} />
                 <label className="kid__row">
                   <span>
-                    {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths) })}</small>
+                    {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths, k.formulaFeeds) })}</small>
                   </span>
-                  <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths))} value={k.formulaMl || ""} onChange={(e) => setKid(i, { formulaMl: Number(e.target.value) || 0 })} />
+                  <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths, k.formulaFeeds))} value={k.formulaMl || ""} onChange={(e) => setKid(i, { formulaMl: Number(e.target.value) || 0 })} />
                 </label>
               </>
             )}

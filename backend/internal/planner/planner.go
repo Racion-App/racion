@@ -676,7 +676,7 @@ func (c *Catalog) Localize(plan Plan, l i18n.Lang) Plan {
 			km.Days[j].Label = DayLabel(l, km.Days[j].Index)
 			km.Days[j].Dishes = slices.Clone(km.Days[j].Dishes)
 			for k := range km.Days[j].Dishes {
-				km.Days[j].Dishes[k].Title = c.RecipeByID[km.Days[j].Dishes[k].RecipeID].LocalTitle(l)
+				km.Days[j].Dishes[k].Title = c.kidDishTitle(km.Days[j].Dishes[k], l)
 			}
 		}
 		puree := false
@@ -761,9 +761,12 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 	goal := goalOf(p)
 
 	// общий стол: нет взрослых и детей с общего стола — блюд для семьи нет, только детские меню
+	// без взрослых готовим семье только те приёмы, что ребёнок ест со стола (режим «комбинирую»)
 	famSlots := p.Slots
 	if portions <= 0 {
 		famSlots = nil
+	} else if p.Adults == 0 {
+		famSlots = slices.DeleteFunc(slices.Clone(p.Slots), func(s string) bool { return perSlot[s] <= 0 })
 	}
 	var shareSum float64
 	for _, s := range famSlots {
@@ -865,6 +868,29 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 		switch k.Feeding {
 		case FeedSeparate:
 			kidsMenus = append(kidsMenus, c.buildKidMenu(i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*101+int64(swaps)*7919))))
+		case FeedMix:
+			if k.AgeMonths >= 12 {
+				km := c.buildKidMenu(i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*101+int64(swaps)*7919)))
+				// с общего стола — то, что в этот день готовят семье в этот приём
+				for d := range km.Days {
+					for j, x := range km.Days[d].Dishes {
+						if x.Kind != MealShared || d >= len(days) {
+							continue
+						}
+						for _, fd := range days[d].Dishes {
+							if fd.Slot == x.Slot {
+								x.Ref = fd.RecipeID
+								break
+							}
+						}
+						x.Title = c.kidDishTitle(x, lang)
+						km.Days[d].Dishes[j] = x
+					}
+				}
+				kidsMenus = append(kidsMenus, km)
+				break
+			}
+			fallthrough
 		case FeedWeaning:
 			kidsMenus = append(kidsMenus, KidMenu{Child: i, AgeLabel: k.AgeLabel(lang), Factor: 1, Days: []KidDay{},
 				Weaning: c.buildWeaning(k, lang), Note: i18n.T(lang, "weaning.note")})

@@ -735,33 +735,46 @@ export function Plan() {
                     <Baby size={13} aria-hidden /> {t("plan.kid", { age: km.ageLabel })}
                     {day.index === 0 && km.note && <span className="kidrows__note"> · {km.note}</span>}
                   </div>
-                  {kd.dishes.map((x) => (
-                    <div className="dish dish--kid" key={x.slot}>
-                      <div className="dish__slot">{slotLabel(lang, x.slot)}</div>
-                      <button
-                        type="button"
-                        className="dish__main"
-                        onClick={() => {
-                          setRecipeId(x.recipeId);
-                          track("recipe_open", { id: x.recipeId, kid: true });
-                        }}
-                        aria-label={t("dish.open", { title: x.title })}
-                      >
-                        <div className="dish__title">{x.title}</div>
-                        <div className="dish__why">
-                          <span className="dish__slot-inline">{slotLabel(lang, x.slot)}</span>
-                          <Clock size={13} aria-hidden /> {x.timeMin} {t("min")}
+                  {kd.dishes.map((x) =>
+                    x.kind ? (
+                      <div className="dish dish--kid dish--plain" key={x.slot}>
+                        <div className="dish__slot">{slotLabel(lang, x.slot)}</div>
+                        <div className="dish__main">
+                          <div className="dish__title">{x.title}</div>
+                          <div className="dish__why">
+                            <span className="dish__slot-inline">{slotLabel(lang, x.slot)}</span>
+                            {t(x.kind === "jars" ? "kid.jars.sub" : "kid.shared.sub")}
+                          </div>
                         </div>
-                      </button>
-                      <div className="dish__nums">
-                        <b className="num">{approxRub(x.cost)}</b>
-                        <span className="num">
-                          <Flame size={11} aria-hidden style={{ verticalAlign: -1 }} /> {x.kcal}
-                        </span>
                       </div>
-                      <span className="dish__actions" aria-hidden />
-                    </div>
-                  ))}
+                    ) : (
+                      <div className="dish dish--kid" key={x.slot}>
+                        <div className="dish__slot">{slotLabel(lang, x.slot)}</div>
+                        <button
+                          type="button"
+                          className="dish__main"
+                          onClick={() => {
+                            setRecipeId(x.recipeId);
+                            track("recipe_open", { id: x.recipeId, kid: true });
+                          }}
+                          aria-label={t("dish.open", { title: x.title })}
+                        >
+                          <div className="dish__title">{x.title}</div>
+                          <div className="dish__why">
+                            <span className="dish__slot-inline">{slotLabel(lang, x.slot)}</span>
+                            <Clock size={13} aria-hidden /> {x.timeMin} {t("min")}
+                          </div>
+                        </button>
+                        <div className="dish__nums">
+                          <b className="num">{approxRub(x.cost)}</b>
+                          <span className="num">
+                            <Flame size={11} aria-hidden style={{ verticalAlign: -1 }} /> {x.kcal}
+                          </span>
+                        </div>
+                        <span className="dish__actions" aria-hidden />
+                      </div>
+                    )
+                  )}
                 </div>
               );
             })}

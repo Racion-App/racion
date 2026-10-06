@@ -22,6 +22,8 @@ import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
 import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
+import { FormulaFeeds } from "../components/FormulaFeeds";
+import { MealSources } from "../components/MealSources";
 import { WeaningPicker } from "../components/Weaning";
 
 const KEY = "racion.quiz.v4";
@@ -251,6 +253,13 @@ export function Quiz() {
   }, [step]);
 
   const go = useCallback((n: number) => setSp({ s: String(n) }), [setSp]);
+  // Меню только для детей: шаг цели пустой (цели у взрослых), его пропускаем в обе стороны.
+  const skipGoal = p.members.length === 0;
+  const nextStep = step + 1 === 3 && skipGoal ? 4 : step + 1;
+  const prevStep = step - 1 === 3 && skipGoal ? 2 : step - 1;
+  useEffect(() => {
+    if (step === 3 && skipGoal) setSp({ s: "4" }, { replace: true });
+  }, [step, skipGoal, setSp]);
   const set = (patch: Partial<Params>) => setP((prev) => ({ ...prev, ...patch }));
 
   const country = useMemo(() => meta?.countries.find((c) => c.code === p.country), [meta, p.country]);
@@ -581,7 +590,8 @@ export function Quiz() {
                       ))}
                     </div>
                   )}
-                  {k.feeding === "weaning" && meta?.weaningFoods && (
+                  {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => updateKid(i, { meals })} />}
+                  {(k.feeding === "weaning" || (k.feeding === "mix" && k.ageMonths >= 6 && k.ageMonths < 12 && Object.values(k.meals ?? {}).some((v) => v !== "jars" && v !== "shared"))) && meta?.weaningFoods && (
                     <WeaningPicker foods={meta.weaningFoods} month={k.ageMonths} value={k.introduced ?? []} onChange={(introduced) => updateKid(i, { introduced })} />
                   )}
                   {k.ageMonths < 36 && (
@@ -593,11 +603,12 @@ export function Quiz() {
                         <span>{t("quiz.formula.brand")}</span>
                         <Select aria-label={t("quiz.formula.brand")} value={k.formulaBrand} onChange={(v) => updateKid(i, { formulaBrand: v })} options={(meta?.formulaBrands ?? []).map((b) => ({ value: b.id, label: b.name, sub: b.note }))} />
                       </label>
+                      <FormulaFeeds value={k.formulaFeeds ?? []} onChange={(formulaFeeds) => updateKid(i, { formulaFeeds })} />
                       <label className="kid__row">
                         <span>
-                          {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths) })}</small>
+                          {t("quiz.formula.ml")} <small>{t("quiz.formula.ml.sub", { n: formulaMlByAge(k.ageMonths, k.formulaFeeds) })}</small>
                         </span>
-                        <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths))} value={k.formulaMl || ""} onChange={(e) => updateKid(i, { formulaMl: Number(e.target.value) || 0 })} />
+                        <input className="form-control kid__num" type="number" inputMode="numeric" min={100} max={1500} step={50} placeholder={String(formulaMlByAge(k.ageMonths, k.formulaFeeds))} value={k.formulaMl || ""} onChange={(e) => updateKid(i, { formulaMl: Number(e.target.value) || 0 })} />
                       </label>
                     </>
                   )}
@@ -907,12 +918,12 @@ export function Quiz() {
       <div className="actionbar actionbar--flow">
         <div className="actionbar__inner">
           {step > 1 && (
-            <button type="button" className="btn btn-ghost" onClick={() => go(step - 1)} aria-label={t("back")}>
+            <button type="button" className="btn btn-ghost" onClick={() => go(prevStep)} aria-label={t("back")}>
               <ArrowLeft size={20} aria-hidden />
             </button>
           )}
           {step < STEPS ? (
-            <button type="button" className="btn btn-primary" disabled={!canNext || !meta} onClick={() => go(step + 1)}>
+            <button type="button" className="btn btn-primary" disabled={!canNext || !meta} onClick={() => go(nextStep)}>
               {t("next")}
               <ArrowRight size={18} aria-hidden />
             </button>

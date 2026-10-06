@@ -550,8 +550,17 @@ a { text-underline-offset: 3px; }
   &__remove { width: 36px; height: 36px; border: 0; border-radius: var(--ds-radius-md); background: transparent; color: var(--ds-label-tertiary); display: grid; place-items: center; cursor: pointer; &:hover { background: var(--ds-red-tint); color: var(--ds-red); } &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
   &__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: center; gap: 12px; font-size: 15px; margin: 0; small { display: block; font-size: 12px; color: var(--ds-label-tertiary); } .form-select, .form-control { min-height: 44px; } }
   &__num { text-align: right; }
+  &__feeds { display: grid; gap: 8px; }
+  &__feedslabel { font-size: 15px; small { display: block; font-size: 12px; color: var(--ds-label-tertiary); } }
 }
 .kid__feeding { display: grid; gap: 6px; }
+// режим «комбинирую»: источник для каждого приёма (components/MealSources.tsx)
+.mealsrc { display: grid; gap: 8px; padding: 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);
+  &__hint { font-size: 13px; color: var(--ds-label-secondary); }
+  &__row { display: grid; gap: 4px; @media (min-width: 560px) { grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 10px; } }
+  &__slot { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); }
+  .segmented { background: var(--ds-fill-3); button { min-height: 36px; font-size: 13.5px; padding: 0 6px; white-space: nowrap; } } }
+.dish--plain .dish__main { cursor: default; }
 .option--compact { min-height: 52px; padding: 10px 14px; .option__title { font-size: 15px; } .option__sub { font-size: 12.5px; } }
 .switch {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -2113,7 +2122,7 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__what { display: flex; flex-wrap: wrap; gap: 4px 12px; }
   &__item.is-new { color: var(--ds-green); font-weight: 600; }
   &__badge { margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: var(--ds-green-tint); color: var(--ds-green); font-size: 11px; font-weight: 700; }
-  &__milk { color: var(--ds-label-tertiary); }
+  &__milk { color: var(--ds-label-tertiary); &.is-formula { color: var(--ds-label-secondary); font-weight: 500; } }
   &__link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-decoration-color: var(--ds-separator); text-underline-offset: 3px; cursor: pointer; } }
 
 // Страница /weaning: таблица граммов (первая колонка закреплена, на телефоне таблица листается вбок),
