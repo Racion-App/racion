@@ -565,6 +565,8 @@ a { text-underline-offset: 3px; }
 .dish__kid { display: flex; gap: 5px; align-items: flex-start; margin-top: 4px; font-size: 12.5px; line-height: 1.35; color: var(--ds-orange); text-align: left;
   svg { flex: 0 0 auto; margin-top: 2px; } }
 .kidrows__norm { margin: 2px 0 6px; font-size: 12.5px; line-height: 1.4; color: var(--ds-label-tertiary); }
+// порция детям за общим столом по СанПиН — под описанием блюда, спокойным цветом
+.dish__portion { margin-top: 4px; font-size: 12.5px; line-height: 1.35; color: var(--ds-label-secondary); text-align: left; }
 // аллергии ребёнка в карточке (components/KidAllergens.tsx): свёрнуто в строку, раскрывается по нажатию
 .kidall { border-radius: var(--ds-radius-md); background: var(--ds-fill-4); padding: 0 12px;
   &__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; cursor: pointer; list-style: none; font-size: 15px;

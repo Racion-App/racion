@@ -2,12 +2,13 @@ import { Baby, Plus, Trash2, User } from "lucide-react";
 import { Select } from "./Select";
 import type { Child, Member, Meta } from "../lib/types";
 import { APPETITES, MOM_STATES } from "../lib/types";
-import { ageOptions, feedingOptions, formulaMlByAge, kidId, ymNow } from "../lib/kids";
+import { ageOptions, feedingOptions, formulaMlByAge, kidId, medicalFormula, ymNow } from "../lib/kids";
 import { KidAway } from "./KidAway";
 import { KidDiary } from "./KidDiary";
 import { FormulaFeeds } from "./FormulaFeeds";
 import { MealSources } from "./MealSources";
 import { KidAllergens } from "./KidAllergens";
+import { KidSex } from "./KidSex";
 import { useT } from "../i18n";
 
 // Состав семьи: взрослые (имя, цель, аппетит, приёмы дома) и дети (имя, возраст, кормление, смесь).
@@ -137,7 +138,8 @@ export function FamilyEditor({ adults, kids, meta, onChange, onDiary }: Props) {
             )}
             {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => setKid(i, { meals })} />}
             {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => setKid(i, { away })} />}
-            {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => setKid(i, { allergens })} />}
+            {k.ageMonths >= 132 && <KidSex value={k.sex ?? ""} onChange={(sex) => setKid(i, { sex })} />}
+            {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => setKid(i, { allergens, ...medicalFormula(k, allergens) })} />}
             <KidDiary kid={k} foods={meta?.weaningFoods ?? []} onUndo={onDiary && k.id ? (food) => onDiary(k.id!, food) : undefined} />
             {k.ageMonths < 36 && (
               <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "other" : k.formulaBrand })}>

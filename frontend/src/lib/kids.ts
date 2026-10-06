@@ -140,3 +140,10 @@ export function markKid(k: Child, food: string, how: "ok" | "reaction" | "", dat
   return { ...k, introduced, avoid, diary };
 }
 
+// medicalFormula — отметили у ребёнка на смеси аллергию на молоко: обычная и козья смеси ему не подходят
+// (КР «Пищевая аллергия», 2025), подставляем высокогидролизную лечебную — с её настоящей ценой.
+export function medicalFormula(k: Child, allergens: string[]): Partial<Child> {
+  const medical = k.formulaBrand === "hydrolysate" || k.formulaBrand === "aminoacid";
+  if (k.formula && allergens.includes("dairy") && !(k.allergens ?? []).includes("dairy") && !medical) return { formulaBrand: "hydrolysate" };
+  return {};
+}

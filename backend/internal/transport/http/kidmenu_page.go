@@ -154,7 +154,7 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		faq = append(faq, domain.QA{Q: q, A: i18n.T(l, key+".a")})
 	}
 	if len(faq) > 0 {
-		faq[0].A = planner.KidNorm(m.Age, l) // калории и белок — по норме возраста, одной строкой с источником
+		faq[0].A = planner.KidNorm(m.Age, "", l) // калории и белок — по норме возраста, одной строкой с источником
 	}
 	type link struct{ Name, Href string }
 	var others []link
@@ -173,7 +173,7 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/menu/" + m.Slug,
 			OGImage: brandOG(base, l), OGWide: true, OGType: "article", Alternates: alts, JSONLD: kidMenuLD(base, pl, h1, desc, m.Slug, faq)},
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
-		"H1": h1, "Intro": intro, "Norm": planner.KidNorm(m.Age, l), "Rules": rules, "Days": days, "Groups": groups, "FAQ": faq, "Others": others,
+		"H1": h1, "Intro": intro, "Norm": planner.KidNorm(m.Age, "", l), "Rules": rules, "Days": days, "Groups": groups, "FAQ": faq, "Others": others,
 		"Week": week, "PerDay": perDay, "KcalDay": int(math.Round(kcalSum / 7)), "Items": plan.Totals.Items, "Dishes": dishes, "Age": age,
 		"StartDate": start, "PlanHref": "/?s=2&kid=" + strconv.Itoa(m.Age),
 	}

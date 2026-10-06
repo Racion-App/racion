@@ -52,6 +52,8 @@ type Child struct {
 	ID string `json:"id,omitempty"`
 	// Diary — дневник прикорма: что и когда ввели, на что была реакция; свежие записи сверху
 	Diary []DiaryEntry `json:"diary,omitempty"`
+	// Sex — m | f: с 11 лет нормы калорий и белка у мальчиков и девочек разные (МР 2.3.1.0253-21); пусто — не знаем
+	Sex string `json:"sex,omitempty"`
 	// Allergens — аллергии самого ребёнка (коды как у семьи: dairy, eggs, gluten…): прикорм, детское меню
 	// и, если ребёнок ест с общего стола, общие блюда их учитывают
 	Allergens []string `json:"allergens,omitempty"`
@@ -197,6 +199,9 @@ func (c Child) normalized() Child {
 	c.Avoid = avoid
 	if len(c.ID) > 40 || strings.ContainsAny(c.ID, " /?#&") {
 		c.ID = ""
+	}
+	if c.Sex != "m" && c.Sex != "f" {
+		c.Sex = ""
 	}
 	var diary []DiaryEntry
 	seen := map[string]bool{}
@@ -354,9 +359,19 @@ func (c Child) ageFactor() float64 {
 		return 0.65
 	case c.AgeMonths < 132:
 		return 0.85
-	case c.AgeMonths < 180:
+	case c.AgeMonths < 180: // 11–14 лет: мальчики 2500, девочки 2300 ккал
+		switch c.Sex {
+		case "f":
+			return 0.95
+		}
 		return 1
-	default:
+	default: // 15–17 лет: юноши 2900, девушки 2500 ккал
+		switch c.Sex {
+		case "m":
+			return 1.2
+		case "f":
+			return 1
+		}
 		return 1.1
 	}
 }
@@ -526,6 +541,12 @@ var FormulaBrands = []FormulaBrand{
 	{"malyutka", "formula.malyutka", 600, 0.7, ""},
 	{"bellakt", "formula.bellakt", 400, 0.65, ""},
 	{"kabrita", "formula.kabrita", 800, 2.2, "formula.note.goat"},
+	// лечебные смеси при аллергии на белок коровьего молока: высокогидролизные (Nutrilon Пепти Аллергия
+	// 800 г ≈ 3400 ₽, Alfaré Allergy 400 г ≈ 2100–2270 ₽ — около 4800 ₽/кг) и аминокислотные (Неокейт LCP
+	// 400 г ≈ 3450–4230 ₽, Alfaré Amino 400 г ≈ 4380–4830 ₽ — около 10 900 ₽/кг); множитель к средней цене
+	// смеси Росстата (1291 ₽/кг в октябре 2026)
+	{"hydrolysate", "formula.hydrolysate", 400, 3.7, "formula.note.medical"},
+	{"aminoacid", "formula.aminoacid", 400, 8.4, "formula.note.medical"},
 	{"other", "formula.other", 600, 1.0, ""},
 }
 
@@ -727,7 +748,7 @@ func (c *Catalog) babyItems(kids []Child, menus []KidMenu, pr pricer) ([]ShopIte
 			perKg, fromRosstat := kgPrice(rosstatFormula, fallbackFormula)
 			items = append(items, ShopItem{
 				IngredientID: fmt.Sprintf("formula_%d", i),
-				Name:         i18n.T(l, "baby.formula", b.Name, k.FormulaStage()),
+				Name:         formulaLabel(l, b, k),
 				Category:     "baby", Unit: "g",
 				Needed: math.Round(grams), Buy: float64(packs) * b.PackG, Packs: packs, Pack: b.PackG,
 				Cost: pr.round(float64(packs) * b.PackG / 1000 * perKg * b.Factor * pr.idx), Rosstat: fromRosstat,
@@ -824,9 +845,10 @@ type KidDish struct {
 	TimeMin  int     `json:"timeMin"`
 	Kcal     float64 `json:"kcal"`
 	Cost     float64 `json:"cost"`
-	Kind     string  `json:"kind,omitempty"` // jars | shared — приём не из детского меню (режим «комбинирую»); none — подходящего рецепта нет
-	Note     string  `json:"note,omitempty"` // как подать малышу: нарезка против удушья
-	Ref      string  `json:"ref,omitempty"`  // shared: рецепт семьи в этот приём
+	Kind     string  `json:"kind,omitempty"`   // jars | shared — приём не из детского меню (режим «комбинирую»); none — подходящего рецепта нет
+	Note     string  `json:"note,omitempty"`   // как подать малышу: нарезка против удушья
+	Factor   float64 `json:"factor,omitempty"` // множитель порции именно этого блюда, если он не как у меню
+	Ref      string  `json:"ref,omitempty"`    // shared: рецепт семьи в этот приём
 }
 
 // kidFallback — когда в детской базе на приём нет рецепта без аллергенов ребёнка (от 3 лет): обычные блюда
@@ -854,6 +876,10 @@ const KidAway = "away"
 
 // KidBedtime — кефир или молоко перед сном для детей 1–3 лет (пятый приём по программе питания 1–3 лет).
 const KidBedtime = "bedtime"
+
+// SlotLunchbox — перекус с собой в школу по будням (тег lunchbox: печенье, маффины, фрукты, бутерброды —
+// то, что переживёт полдня в рюкзаке).
+const SlotLunchbox = "lunchbox"
 
 // bedtimeKefirMl — сколько кефира перед сном, мл: дополнительный приём около 10% дневной калорийности.
 const bedtimeKefirMl = 200
@@ -1044,8 +1070,19 @@ func (c *Catalog) ChokeNote(r Recipe, ageMonths int, l i18n.Lang) string {
 }
 
 // KidNorm — суточная норма ребёнка по МР 2.3.1.0253-21 (табл. 21 — энергия и белок, табл. 8 — вода и
-// напитки) одной строкой для детского меню. До года норму считают на кг веса — тогда пусто.
-func KidNorm(age int, l i18n.Lang) string {
+// напитки) одной строкой для детского меню. До года норму считают на кг веса — тогда пусто. С 11 лет
+// при известном поле — норма мальчика или девочки, иначе диапазон.
+func KidNorm(age int, sex string, l i18n.Lang) string {
+	switch {
+	case age >= 132 && age < 180 && sex == "m":
+		return i18n.T(l, "kid.norm.nowater", "2500", 75)
+	case age >= 132 && age < 180 && sex == "f":
+		return i18n.T(l, "kid.norm.nowater", "2300", 69)
+	case age >= 180 && sex == "m":
+		return i18n.T(l, "kid.norm.nowater", "2900", 87)
+	case age >= 180 && sex == "f":
+		return i18n.T(l, "kid.norm.nowater", "2500", 75)
+	}
 	switch {
 	case age < 12:
 		return ""
@@ -1080,4 +1117,142 @@ func (c *Child) MarkDiary(food, how, date string) {
 	if len(c.Diary) > maxDiary {
 		c.Diary = c.Diary[:maxDiary]
 	}
+}
+
+// MedicalFormula — лечебная смесь: у неё нет ступеней, назначает врач.
+func MedicalFormula(id string) bool { return id == "hydrolysate" || id == "aminoacid" }
+
+// formulaLabel — строка смеси в покупках: «Смесь NAN, ступень 2», «Детская смесь, ступень 1» (любая марка),
+// «Лечебная смесь: высокогидролизная» (без ступени).
+func formulaLabel(l i18n.Lang, b FormulaBrand, k Child) string {
+	switch {
+	case MedicalFormula(b.ID):
+		return b.Name
+	case b.ID == "other":
+		return i18n.T(l, "baby.formula.any", k.FormulaStage())
+	}
+	return i18n.T(l, "baby.formula", b.Name, k.FormulaStage())
+}
+
+// ── Порция ребёнку за общим столом: СанПиН 2.3/2.4.4282-26, прил. 9, табл. 1 (масса порций по возрасту)
+
+// kidPortionBand — группа порций: 1–3, 3–7, 7–11 и 12 лет и старше.
+func kidPortionBand(age int) int {
+	switch {
+	case age < 36:
+		return 0
+	case age < 84:
+		return 1
+	case age < 144:
+		return 2
+	default:
+		return 3
+	}
+}
+
+var kidPortions = map[string][4]string{
+	"breakfast": {"130–150", "150–200", "150–200", "200–250"}, // каша, запеканка, яичное и творожное блюдо
+	"salad":     {"30–40", "50–60", "60–100", "100–150"},
+	"soup":      {"150–180", "180–200", "200–250", "250–300"},
+	"main":      {"50–60", "70–80", "90–120", "100–120"}, // мясо, рыба, птица
+	"side":      {"110–120", "130–150", "150–200", "180–230"},
+	"drink":     {"150–180", "180–200", "180–200", "180–200"},
+	"onepot":    {"160–180", "200–230", "240–320", "280–350"}, // второе с гарниром в одной тарелке: сумма двух строк
+}
+
+// dishPortionKind — что это за блюдо для таблицы порций; пусто — норма не задана (десерт, перекус).
+func dishPortionKind(r Recipe, slot string, hasSide bool) string {
+	has := func(t string) bool { return slices.Contains(r.Tags, t) }
+	switch {
+	case has("drink"):
+		return "drink"
+	case has("soup"):
+		return "soup"
+	case has("salad") || has("starter"):
+		return "salad"
+	case has("dessert") || slot == "snack":
+		return ""
+	case slot == "breakfast":
+		return "breakfast"
+	case hasSide || has("needs_side"):
+		return "main"
+	}
+	return "onepot"
+}
+
+// KidPortion — сколько положить ребёнку этого возраста: «суп 150–180 г», «второе 50–60 г и гарнир 110–120 г».
+func KidPortion(kind string, hasSide bool, age int, l i18n.Lang) string {
+	if kind == "" || age < 12 {
+		return ""
+	}
+	b := kidPortionBand(age)
+	switch kind {
+	case "main":
+		if hasSide {
+			return i18n.T(l, "kid.portion.mainside", kidPortions["main"][b], kidPortions["side"][b])
+		}
+		return i18n.T(l, "kid.portion.main", kidPortions["main"][b])
+	case "drink":
+		return i18n.T(l, "kid.portion.ml", kidPortions["drink"][b])
+	}
+	return i18n.T(l, "kid.portion."+kind, kidPortions[kind][b])
+}
+
+// addLunchbox — перекус с собой школьнику по будням: блюдо с тегом lunchbox без его аллергенов, каждый день
+// другое. Если у ребёнка есть детское меню — перекус дописывается в него, если ест с общего стола — для него
+// заводится меню только из перекусов. Детские рецепты рассчитаны на 1–3 года и масштабируются по возрасту,
+// обычные — одна порция.
+func (c *Catalog) addLunchbox(menus []KidMenu, idx int, k Child, p Params, pr pricer, rng *rand.Rand) []KidMenu {
+	if k.Away != AwaySchool {
+		return menus
+	}
+	allergens, exclude := kidAvoid(k, p)
+	var pool []Recipe
+	for _, r := range c.Recipes {
+		if r.Hidden || !slices.Contains(r.Tags, "lunchbox") || c.recipeAvoids(r.ID, allergens, exclude) || slices.Contains(p.ExcludeRecipes, r.ID) {
+			continue
+		}
+		ok := true
+		for _, eq := range r.Equipment {
+			if !hasEquipment(p.Equipment, eq) {
+				ok = false
+			}
+		}
+		if ok {
+			pool = append(pool, r)
+		}
+	}
+	if len(pool) == 0 {
+		return menus
+	}
+	l := pr.lang
+	mi := -1
+	for i := range menus {
+		if menus[i].Child == idx && menus[i].Weaning == nil {
+			mi = i
+		}
+	}
+	if mi < 0 {
+		days := make([]KidDay, 7)
+		for d := range days {
+			days[d] = KidDay{Index: d, Label: DayLabel(l, d), Dishes: []KidDish{}}
+		}
+		menus = append(menus, KidMenu{Child: idx, AgeLabel: k.AgeLabel(l), Factor: 1, Days: days, Note: i18n.T(l, "kid.lunchbox.note")})
+		mi = len(menus) - 1
+	}
+	rng.Shuffle(len(pool), func(i, j int) { pool[i], pool[j] = pool[j], pool[i] })
+	for d := 0; d < 5; d++ {
+		r := pool[d%len(pool)]
+		f := 1.0
+		if isKidRecipe(r) {
+			f = k.MenuFactor()
+		}
+		kcal, _, _, _ := c.Nutrition(r)
+		dish := KidDish{Slot: SlotLunchbox, RecipeID: r.ID, Title: r.LocalTitle(l), TimeMin: r.TimeMin, Kcal: math.Round(kcal * f), Cost: pr.round(c.costPerPortion(r, pr) * f)}
+		if f != menus[mi].Factor {
+			dish.Factor = f
+		}
+		menus[mi].Days[d].Dishes = append(menus[mi].Days[d].Dishes, dish)
+	}
+	return menus
 }

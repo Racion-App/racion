@@ -1155,6 +1155,7 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, o
             </>
           )}
         </div>
+        {dish.kidPortion && <div className="dish__portion">{dish.kidPortion}</div>}
         {dish.kidNote && (
           <div className="dish__kid">
             <Baby size={12} aria-hidden /> {dish.kidNote}

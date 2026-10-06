@@ -1,5 +1,29 @@
 [
  {
+  "version": "1.11",
+  "date": "2026-10-06",
+  "title": {
+   "ru": "Порции детям, перекус в школу и лечебные смеси",
+   "en": "Kids' portions, school snacks and medical formulas"
+  },
+  "items": {
+   "ru": [
+    "У блюд общего стола видно, сколько положить ребёнку: «2 года — суп 150–180 г», «8 лет — второе 90–120 г и гарнир 150–200 г». Порции по СанПиН 2.3/2.4.4282-26.",
+    "Школьнику по будням — перекус с собой: печенье, маффины, фрукты, бутерброды или пирожки, каждый день разные. Продукты уже в списке покупок.",
+    "Лечебные смеси при аллергии на белок коровьего молока: высокогидролизная и аминокислотная с настоящими аптечными ценами. Если отметить аллергию у ребёнка на смеси, лечебная подставится сама.",
+    "С 11 лет можно указать пол: нормы и порции мальчиков и девочек по МР 2.3.1.0253-21 разные.",
+    "Марки смесей больше не помечены «Premium» и «Organic», по умолчанию — любая смесь по средней цене."
+   ],
+   "en": [
+    "Family dishes show how much to serve a child: \"2 years: soup 150–180 g\", \"8 years: main 90–120 g and side 150–200 g\". Portions follow Russian sanitary rules SanPiN 2.3/2.4.4282-26.",
+    "A snack to take to school on weekdays: cookies, muffins, fruit, sandwiches or pies, different every day. The food is already on the shopping list.",
+    "Medical formulas for cow's milk protein allergy: extensively hydrolysed and amino acid based, with real pharmacy prices. Mark the allergy for a formula-fed child and the medical formula is picked automatically.",
+    "From age 11 you can set the child's sex: norms and portions for boys and girls differ (Russian norms MR 2.3.1.0253-21).",
+    "Formula brands no longer carry \"Premium\" or \"Organic\" labels; by default it is any formula at the average price."
+   ]
+  }
+ },
+ {
   "version": "1.10",
   "date": "2026-10-06",
   "title": {

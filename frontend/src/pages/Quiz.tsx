@@ -21,11 +21,12 @@ import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../
 import { APPETITES, MOM_STATES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
-import { ageOptions, feedingOptions, formulaMlByAge, grownKids, kidId, ymNow } from "../lib/kids";
+import { ageOptions, feedingOptions, formulaMlByAge, grownKids, kidId, medicalFormula, ymNow } from "../lib/kids";
 import { KidAway } from "../components/KidAway";
 import { FormulaFeeds } from "../components/FormulaFeeds";
 import { MealSources } from "../components/MealSources";
 import { KidAllergens } from "../components/KidAllergens";
+import { KidSex } from "../components/KidSex";
 import { WeaningPicker } from "../components/Weaning";
 
 const KEY = "racion.quiz.v4";
@@ -606,7 +607,8 @@ export function Quiz() {
                   )}
                   {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => updateKid(i, { meals })} />}
                   {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => updateKid(i, { away })} />}
-                  {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => updateKid(i, { allergens })} />}
+                  {k.ageMonths >= 132 && <KidSex value={k.sex ?? ""} onChange={(sex) => updateKid(i, { sex })} />}
+                  {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => updateKid(i, { allergens, ...medicalFormula(k, allergens) })} />}
                   {(k.feeding === "weaning" || ((k.feeding === "jars" || k.feeding === "mix") && k.ageMonths < 12)) && meta?.weaningFoods && (
                     <WeaningPicker foods={meta.weaningFoods} month={k.ageMonths} value={k.introduced ?? []} onChange={(introduced) => updateKid(i, { introduced })} />
                   )}

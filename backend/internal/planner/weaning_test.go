@@ -437,3 +437,71 @@ func TestDiaryMarks(t *testing.T) {
 		t.Fatal("дневник попал в план")
 	}
 }
+
+// Порция ребёнку за общим столом по СанПиН: у супа для 2 лет — 150–180 г, у второго с гарниром для 8 лет —
+// мясо 90–120 г и гарнир 150–200 г.
+func TestKidPortion(t *testing.T) {
+	if p := KidPortion("soup", false, 24, i18n.RU); p != "суп 150–180 г" {
+		t.Fatalf("суп в 2 года: %q", p)
+	}
+	if p := KidPortion("main", true, 96, i18n.RU); p != "второе 90–120 г и гарнир 150–200 г" {
+		t.Fatalf("второе в 8 лет: %q", p)
+	}
+	if p := KidPortion("soup", false, 8, i18n.RU); p != "" {
+		t.Fatalf("до года порций по СанПиН нет: %q", p)
+	}
+	c := testCatalog(t)
+	plan := c.Build(Params{Country: "RU", Adults: 2, Slots: []string{"breakfast", "lunch", "dinner"}, Goal: "none", Kids: []Child{{AgeMonths: 24, Feeding: FeedShared}}})
+	found := false
+	for _, d := range plan.Days {
+		for _, x := range d.Dishes {
+			if strings.Contains(x.KidPortion, "2 года — ") {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Fatal("у блюд общего стола нет порции для ребёнка 2 лет")
+	}
+}
+
+// Школьнику по будням — перекус с собой из блюд с тегом lunchbox; в выходные его нет.
+func TestLunchbox(t *testing.T) {
+	c := testCatalog(t)
+	plan := c.Build(Params{Country: "RU", Adults: 2, Slots: []string{"breakfast", "lunch", "dinner"}, Goal: "none",
+		Kids: []Child{{AgeMonths: 96, Feeding: FeedShared, Away: AwaySchool}}})
+	if len(plan.KidsMenus) != 1 {
+		t.Fatalf("нет меню с перекусами: %+v", plan.KidsMenus)
+	}
+	km := plan.KidsMenus[0]
+	for d := 0; d < 7; d++ {
+		n := len(km.Days[d].Dishes)
+		if d < 5 && (n != 1 || km.Days[d].Dishes[0].Slot != SlotLunchbox || !slices.Contains(c.RecipeByID[km.Days[d].Dishes[0].RecipeID].Tags, "lunchbox")) {
+			t.Fatalf("будний день %d: %+v", d, km.Days[d].Dishes)
+		}
+		if d >= 5 && n != 0 {
+			t.Fatalf("в выходные перекус в школу не нужен: %+v", km.Days[d].Dishes)
+		}
+	}
+}
+
+// Лечебная смесь: без ступени, цена в разы выше обычной; нормы подростка — по полу.
+func TestMedicalFormulaAndTeenSex(t *testing.T) {
+	b := formulaBrand("hydrolysate")
+	if !MedicalFormula(b.ID) || b.Factor < 3 {
+		t.Fatalf("высокогидролизная смесь: %+v", b)
+	}
+	if got := formulaLabel(i18n.RU, b, Child{AgeMonths: 4}); strings.Contains(got, "ступень") {
+		t.Fatalf("у лечебной смеси нет ступени: %q", got)
+	}
+	if got := formulaLabel(i18n.RU, formulaBrand("other"), Child{AgeMonths: 4}); got != "Детская смесь, ступень 1" {
+		t.Fatalf("любая смесь: %q", got)
+	}
+	boy, girl := Child{AgeMonths: 190, Feeding: FeedShared, Sex: "m"}, Child{AgeMonths: 190, Feeding: FeedShared, Sex: "f"}
+	if boy.PortionFactor() <= girl.PortionFactor() {
+		t.Fatalf("в 15–17 лет порция юноши больше: %v и %v", boy.PortionFactor(), girl.PortionFactor())
+	}
+	if n := KidNorm(150, "f", i18n.RU); !strings.Contains(n, "2300") {
+		t.Fatalf("норма девочки 12 лет: %q", n)
+	}
+}

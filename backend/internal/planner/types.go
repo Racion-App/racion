@@ -308,6 +308,8 @@ type Dish struct {
 	Portions float64 `json:"portions,omitempty"`
 	// KidNote — как подать блюдо малышу, который ест с общего стола: «виноград — на четвертинки»
 	KidNote string `json:"kidNote,omitempty"`
+	// KidPortion — сколько положить детям за общим столом: «2 года — суп 150–180 г» (СанПиН 2.3/2.4.4282-26)
+	KidPortion string `json:"kidPortion,omitempty"`
 }
 
 // WhyCode — из чего собрана подпись «почему»; по нему подпись пересобирается на другом языке.

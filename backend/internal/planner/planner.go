@@ -940,6 +940,10 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 		}
 	}
 
+	for i, k := range p.Kids {
+		kidsMenus = c.addLunchbox(kidsMenus, i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*131+int64(swaps)*7919)))
+	}
+
 	store.Note = StoreKindLabel(lang, store.Kind)
 	plan := Plan{
 		Params:       p,
@@ -1112,8 +1116,12 @@ func (c *Catalog) finish(plan *Plan) {
 					continue
 				}
 				kidsMenuCost += dish.Cost
+				f := km.Factor
+				if dish.Factor > 0 {
+					f = dish.Factor
+				}
 				for _, ri := range r.Ingredients {
-					need[ri.IngredientID] += ri.Amount * km.Factor
+					need[ri.IngredientID] += ri.Amount * f
 					tag := i18n.T(lang, "kid.tag", r.LocalTitle(lang))
 					if !slices.Contains(usedIn[ri.IngredientID], tag) {
 						usedIn[ri.IngredientID] = append(usedIn[ri.IngredientID], tag)
@@ -1537,15 +1545,31 @@ func (c *Catalog) kidNotes(plan *Plan, l i18n.Lang) {
 	for d := range plan.Days {
 		for j := range plan.Days[d].Dishes {
 			dish := &plan.Days[d].Dishes[j]
-			dish.KidNote = ""
+			dish.KidNote, dish.KidPortion = "", ""
 			young := -1 // самый младший, кто ест это блюдо с общего стола в этот день
+			var portions []string
+			seen := map[string]bool{}
+			r0 := c.RecipeByID[dish.RecipeID]
+			kind := dishPortionKind(r0, dish.Slot, dish.Side != nil)
 			for _, k := range kids {
-				if k.MealSource(dish.Slot) == MealShared && !k.AwayOn(d, dish.Slot) && (young < 0 || k.AgeMonths < young) {
+				if k.MealSource(dish.Slot) != MealShared || k.AwayOn(d, dish.Slot) {
+					continue
+				}
+				if young < 0 || k.AgeMonths < young {
 					young = k.AgeMonths
+				}
+				if p := KidPortion(kind, dish.Side != nil, k.AgeMonths, l); p != "" {
+					if line := k.AgeLabel(l) + " — " + p; !seen[line] {
+						seen[line] = true
+						portions = append(portions, line)
+					}
 				}
 			}
 			if young < 0 || plan.Occasion != nil {
 				continue
+			}
+			if len(portions) > 0 {
+				dish.KidPortion = i18n.T(l, "kid.portion.line", strings.Join(portions, "; "))
 			}
 			r := c.RecipeByID[dish.RecipeID]
 			if dish.Side != nil {
@@ -1562,7 +1586,7 @@ func (c *Catalog) kidNotes(plan *Plan, l i18n.Lang) {
 			continue
 		}
 		age := kids[km.Child].AgeMonths
-		km.Norm = KidNorm(age, l)
+		km.Norm = KidNorm(age, kids[km.Child].Sex, l)
 		for d := range km.Days {
 			for j := range km.Days[d].Dishes {
 				x := &km.Days[d].Dishes[j]
