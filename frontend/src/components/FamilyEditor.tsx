@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Baby, Plus, Trash2, User } from "lucide-react";
 import { Select } from "./Select";
 import type { Child, Member, Meta } from "../lib/types";
@@ -25,7 +24,6 @@ export const EMPTY_KID: Child = { name: "", ageMonths: 60, feeding: "shared", sh
 
 export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
   const { t, lang } = useT();
-  const AGES = useMemo(() => ageOptions(t, lang), [t, lang]);
   const slots = meta?.slots ?? [];
   const setAdult = (i: number, patch: Partial<Member>) => onChange({ adults: adults.map((m, j) => (j === i ? { ...m, ...patch } : m)), kids });
   const setKid = (i: number, patch: Partial<Child>) => onChange({ adults, kids: kids.map((k, j) => (j === i ? { ...k, ...patch } : k)) });
@@ -115,7 +113,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
               <Select
                 aria-label={t("quiz.age")}
                 value={String(k.ageMonths)}
-                options={AGES.map((a) => ({ value: String(a.months), label: a.label }))}
+                options={ageOptions(t, lang, k.ageMonths).map((a) => ({ value: String(a.months), label: a.label }))}
                 onChange={(v) => {
                   const m = Number(v);
                   const opts = feedingOptions(m);

@@ -154,6 +154,9 @@ func (c *Catalog) Normalize(p Params) Params {
 		p.Equipment = []string{"stove"}
 	}
 	p = normalizeMembers(p)
+	if p.Adults == 0 {
+		p.Prep = PrepNone // меню только для детей: ребёнку готовят каждый день, заготовок на неделю нет
+	}
 	wants := []string{}
 	for _, id := range p.Wants {
 		if _, ok := c.Ingredients[id]; ok && !slices.Contains(wants, id) && len(wants) < 10 {
@@ -1188,6 +1191,14 @@ func (c *Catalog) finish(plan *Plan) {
 	}
 	baby, notes := c.babyItems(p.Kids, plan.KidsMenus, pr)
 	notes = append(notes, momNotes(p, lang)...)
+	if p.Prep != PrepNone {
+		for _, k := range p.Kids {
+			if k.AgeMonths < 36 && k.eatsShared() {
+				notes = append(notes, i18n.T(lang, "note.kid.fresh"))
+				break
+			}
+		}
+	}
 	for _, it := range baby {
 		add(it, false)
 		babyTotal += it.Cost

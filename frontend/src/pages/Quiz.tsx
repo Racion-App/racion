@@ -114,7 +114,6 @@ export function Quiz() {
     if (!init.have) init.have = [];
     return init;
   });
-  const AGE_OPTIONS = useMemo(() => ageOptions(t, lang), [t, lang]);
   const limitsCount = p.allergens.length + p.excludeTags.length + p.exclude.length;
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -258,6 +257,8 @@ export function Quiz() {
   const go = useCallback((n: number) => setSp({ s: String(n) }), [setSp]);
   // Меню только для детей: шаг цели пустой (цели у взрослых), его пропускаем в обе стороны.
   const skipGoal = p.members.length === 0;
+  // малыш до 3 лет, которому что-то готовят: ему лучше свежее каждый день, заготовки — для взрослых
+  const youngCooked = p.kids.some((k) => k.ageMonths < 36 && k.feeding !== "milk");
   const nextStep = step + 1 === 3 && skipGoal ? 4 : step + 1;
   const prevStep = step - 1 === 3 && skipGoal ? 2 : step - 1;
   useEffect(() => {
@@ -577,7 +578,7 @@ export function Quiz() {
                     <Select
                       aria-label={t("quiz.age")}
                       value={String(k.ageMonths)}
-                      options={AGE_OPTIONS.map((a) => ({ value: String(a.months), label: a.label }))}
+                      options={ageOptions(t, lang, k.ageMonths).map((a) => ({ value: String(a.months), label: a.label }))}
                       onChange={(v) => {
                         const m = Number(v);
                         const opts = feedingOptions(m);
@@ -829,6 +830,7 @@ export function Quiz() {
                 );
               })}
             </div>
+            {!skipGoal && (
             <div className="quiz__group">
               <p className="quiz__label">{t("quiz.slots")}</p>
               <div className="chips" role="group" aria-label={t("quiz.slots.aria")}>
@@ -845,6 +847,13 @@ export function Quiz() {
                 </p>
               )}
             </div>
+            )}
+            {skipGoal ? (
+              <div className="quiz__group quiz__fresh">
+                <p className="quiz__label">{t("quiz.prep")}</p>
+                <p className="quiz__note">{t("quiz.prep.kids")}</p>
+              </div>
+            ) : (
             <div className="quiz__group">
               <p className="quiz__label">{t("quiz.prep")}</p>
               <div className="options" role="radiogroup" aria-label={t("quiz.prep")}>
@@ -858,16 +867,20 @@ export function Quiz() {
                   </button>
                 ))}
               </div>
+              {youngCooked && <p className="quiz__note">{t("quiz.prep.kidnote")}</p>}
             </div>
+            )}
           </section>
         )}
 
         {step === 7 && (
           <section className={stepClass} key="s7">
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>
-              {t("quiz.q7")}
+              {t(skipGoal ? "quiz.q7.kids" : "quiz.q7")}
             </h1>
-            <p className="quiz__hint">{t("quiz.q7.hint")}</p>
+            <p className="quiz__hint">{t(skipGoal ? "quiz.q7.kids.hint" : "quiz.q7.hint")}</p>
+            {!skipGoal && (
+            <>
             <div className="segmented" role="radiogroup" aria-label={t("quiz.budget.mode")}>
               <button type="button" role="radio" aria-checked={p.budgetMode === "perPersonDay"} onClick={() => set({ budgetMode: "perPersonDay", budgetValue: 0 })}>
                 {t("quiz.budget.perDay")}
@@ -909,11 +922,15 @@ export function Quiz() {
             <div className="quiz__group">
               <Switch label={t("quiz.compact")} sub={t("quiz.compact.sub")} checked={!!p.compact} onChange={(v) => set({ compact: v })} />
             </div>
+            </>
+            )}
             <div className="quiz__group">
-              <label className="quiz__label" htmlFor="start">
-                {t("quiz.week")}
-              </label>
-              <Select id="start" value={p.startDate ?? ""} onChange={(v) => set({ startDate: v || undefined })} options={nextMondays(4, lang, t("quiz.week.this"), t("quiz.week.next")).map((m, i) => ({ value: i === 0 ? "" : m.iso, label: m.label }))} />
+              {!skipGoal && (
+                <label className="quiz__label" htmlFor="start">
+                  {t("quiz.week")}
+                </label>
+              )}
+              <Select id="start" aria-label={t("quiz.week")} value={p.startDate ?? ""} onChange={(v) => set({ startDate: v || undefined })} options={nextMondays(4, lang, t("quiz.week.this"), t("quiz.week.next")).map((m, i) => ({ value: i === 0 ? "" : m.iso, label: m.label }))} />
             </div>
             {submitError && (
               <p className="error-inline" role="alert">

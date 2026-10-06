@@ -4,15 +4,24 @@ import { writeJSON } from "./storage";
 // Возраст и кормление детей: общие помощники квиза и раздела «Семья».
 import { pluralKey, type Lang } from "../i18n";
 
-// Возраст ребёнка: до 2 лет — по месяцам, дальше — по годам.
-export function ageOptions(t: (k: string, p?: Record<string, string | number>) => string, lang: Lang): { months: number; label: string }[] {
-  return [
-    ...Array.from({ length: 24 }, (_, m) => ({ months: m, label: t("age.months", { n: m }) })),
-    ...Array.from({ length: 16 }, (_, i) => {
-      const y = i + 2;
-      return { months: y * 12, label: `${y} ${t(`age.years.${pluralKey(lang, y)}`)}` };
-    }),
-  ];
+type T = (k: string, p?: Record<string, string | number>) => string;
+
+// ageLabel — возраст как говорят родители: до года — «8 мес», до трёх лет — «1 год 3 мес», дальше — «5 лет».
+// Так же подписывает бэкенд (planner.Child.AgeLabel).
+export function ageLabel(t: T, lang: Lang, m: number): string {
+  if (m === 0) return t("age.newborn");
+  if (m < 12) return t("age.months", { n: m });
+  const y = Math.floor(m / 12);
+  const years = `${y} ${t(`age.years.${pluralKey(lang, y)}`)}`;
+  return m < 36 && m % 12 ? t("age.ym", { y: years, m: m % 12 }) : years;
+}
+
+// Возраст ребёнка в списке: до трёх лет — по месяцам (программы питания делят возраст на 1–1,5 и 1,5–3 года),
+// дальше — по годам. Возраст растёт сам, поэтому текущее значение ребёнка добавляем, если его нет в сетке.
+export function ageOptions(t: T, lang: Lang, current?: number): { months: number; label: string }[] {
+  const months = [...Array.from({ length: 36 }, (_, m) => m), ...Array.from({ length: 15 }, (_, i) => (i + 3) * 12)];
+  if (current !== undefined && current >= 0 && !months.includes(current)) months.push(current);
+  return months.sort((a, b) => a - b).map((m) => ({ months: m, label: ageLabel(t, lang, m) }));
 }
 
 // Режимы кормления по возрасту, как в backend/internal/planner/kids.go (первый — по умолчанию).

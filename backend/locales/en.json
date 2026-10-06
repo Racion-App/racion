@@ -1708,5 +1708,11 @@
   "quiz.formula.breast.sub": "Mixed feeding: mark when you give formula",
   "quiz.formula.when.mixed": "Mark the formula feeds; breast at the rest",
   "quiz.formula.when.toddler": "Formula only at the marked times",
-  "quiz.formula.when.toddler.none": "Nothing marked: by the age norm"
+  "quiz.formula.when.toddler.none": "Nothing marked: by the age norm",
+  "age.ym": "{y} {m} mo",
+  "quiz.prep.kids": "We cook for the child every day so everything is fresh. The kids' menu has no batch cooking for the week.",
+  "quiz.prep.kidnote": "Little ones are best fed freshly cooked food every day. Batch cooking is for the adults' dishes.",
+  "quiz.q7.kids": "For which week?",
+  "quiz.q7.kids.hint": "The kids' menu follows the child's age, not a budget. The receipt shows what the week costs.",
+  "note.kid.fresh": "Give the little one family dishes freshly cooked: leave the batch-cooked food for the adults."
 }

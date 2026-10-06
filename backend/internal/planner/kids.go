@@ -448,11 +448,16 @@ func (c Child) AgeLabel(l i18n.Lang) string {
 	if c.AgeMonths == 0 {
 		return i18n.T(l, "age.newborn")
 	}
-	if c.AgeMonths < 24 {
+	if c.AgeMonths < 12 {
 		return i18n.T(l, "age.months", c.AgeMonths)
 	}
+	// до трёх лет — «1 год 3 мес», как говорят родители; дальше — только годы
 	y := c.AgeMonths / 12
-	return fmt.Sprintf("%d %s", y, i18n.Plural(l, y, "age.year"))
+	years := fmt.Sprintf("%d %s", y, i18n.Plural(l, y, "age.year"))
+	if c.AgeMonths < 36 && c.AgeMonths%12 != 0 {
+		return i18n.T(l, "age.ym", years, c.AgeMonths%12)
+	}
+	return years
 }
 
 func plural(n int, one, few, many string) string {
