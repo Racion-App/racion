@@ -139,6 +139,7 @@ type Meta struct {
 	Feeding        []Labeled              `json:"feeding"`
 	BudgetPresets  []planner.BudgetPreset `json:"budgetPresets"`
 	FormulaBrands  []planner.FormulaBrand `json:"formulaBrands"`
+	WeaningFoods   []WeaningFoodView      `json:"weaningFoods"` // продукты прикорма по порядку введения
 	ExcludePresets []ExcludePreset        `json:"excludePresets"`
 	Ingredients    []Labeled              `json:"ingredients"`
 	Recipes        int                    `json:"recipes"`
@@ -217,6 +218,16 @@ func (c *Catalog) Meta(lang i18n.Lang, country planner.Country, geoCountry strin
 	m.BudgetPresets = planner.BudgetPresetsFor(lang, country)
 	m.Sample = c.Sample(country, lang)
 	m.FormulaBrands = planner.FormulaBrandsFor(lang)
+	for _, f := range planner.WeaningFoods {
+		v := WeaningFoodView{ID: f.ID, Group: f.Group, From: f.From}
+		if ing, ok := c.catalog.Load().Ingredients[f.ID]; ok {
+			v.Name, v.Image = ing.LocalName(lang), ing.Image
+		}
+		if f.Group == "yolk" {
+			v.Name = i18n.T(lang, "weaning.yolk")
+		}
+		m.WeaningFoods = append(m.WeaningFoods, v)
+	}
 	return m
 }
 
@@ -287,4 +298,13 @@ func (e *Events) Track(ctx context.Context, sid string, in []EventIn) error {
 		return nil
 	}
 	return e.repo.AddBatch(ctx, sid, events)
+}
+
+// WeaningFoodView — продукт прикорма для квиза: «что малыш уже ест».
+type WeaningFoodView struct {
+	ID    string `json:"id"`
+	Group string `json:"group"`
+	From  int    `json:"from"` // с какого месяца по программе вскармливания
+	Name  string `json:"name"`
+	Image string `json:"img,omitempty"`
 }

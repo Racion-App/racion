@@ -33,6 +33,7 @@ export type Meta = {
   feeding: Labeled[];
   budgetPresets: { id: string; label: string; perDay: number }[];
   formulaBrands: FormulaBrand[];
+  weaningFoods?: WeaningFood[];
   excludePresets: { id: string; label: string; kind: "ingredient" | "tag" }[];
   ingredients: Labeled[];
   recipes: number;
@@ -52,7 +53,23 @@ export type Child = {
   formula: boolean;
   formulaBrand: string;
   formulaMl: number;
+  introduced?: string[]; // прикорм: продукты, которые малыш уже ест
 };
+
+// Неделя прикорма ребёнка 4–11 мес (backend/internal/planner/weaning.go).
+export type WeaningItem = { food: string; name: string; group: string; grams: number; unit: "g" | "ml" | "pcs" | string; new: boolean };
+export type WeaningFeed = { time: string; milk: boolean; items: WeaningItem[] };
+export type Weaning = {
+  month: number;
+  days: { index: number; label: string; feeds: WeaningFeed[] }[];
+  new?: WeaningItem;
+  ramp?: number[];
+  next: string[];
+  introduced: string[];
+  texture: "puree" | "mashed" | string;
+  milkMl: number;
+};
+export type WeaningFood = { id: string; group: string; from: number; name: string; img?: string };
 
 export type Params = {
   lang?: string;
@@ -154,7 +171,7 @@ export type Plan = {
   portions: number;
   days: Day[];
   shopping: ShopGroup[];
-  kidsMenus: { child: number; ageLabel: string; factor: number; note: string; days: { index: number; label: string; dishes: { slot: string; recipeId: string; title: string; timeMin: number; kcal: number; cost: number }[] }[] }[];
+  kidsMenus: { child: number; ageLabel: string; factor: number; note: string; weaning?: Weaning; days: { index: number; label: string; dishes: { slot: string; recipeId: string; title: string; timeMin: number; kcal: number; cost: number }[] }[] }[];
   totals: {
     cost: number;
     pantryCost: number;

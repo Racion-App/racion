@@ -20,6 +20,7 @@ import { withNames } from "../lib/names";
 import { slotLabel, type Country, type Dish, type Extra, type Params, type Plan as PlanT } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { useT } from "../i18n";
+import { WeaningCard, WeaningDayRows } from "../components/Weaning";
 
 // порции в списке заготовок: 4 или 2,5
 const fmtPortions = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ","));
@@ -463,6 +464,10 @@ export function Plan() {
   }
 
   const dishCount = plan.days.reduce((n, d) => n + d.dishes.filter((x) => !x.leftover).length, 0);
+
+  // меню только для детей: взрослых нет, семейных блюд нет — взрослые цифры (цель, ккал, минуты у плиты) не показываем
+
+  const kidsOnly = plan.params.adults === 0 && dishCount === 0;
   const cy: Country | undefined = plan.country;
   const rub = (v: number) => money(v, cy, lang);
   const approxRub = (v: number) => approx(v, cy, lang);
@@ -512,17 +517,19 @@ export function Plan() {
               <StoreIcon size={14} aria-hidden /> {plan.store.name}
             </span>
             <span>
-              <Users size={14} aria-hidden /> {plan.occasion ? `${plan.occasion.guests} ${tn("guests", plan.occasion.guests)}` : people(plan.params.adults, plan.params.kids?.length ?? 0, lang)}
+              <Users size={14} aria-hidden /> {plan.occasion ? `${plan.occasion.guests} ${tn("guests", plan.occasion.guests)}` : kidsOnly ? t("plan.kidsonly") : people(plan.params.adults, plan.params.kids?.length ?? 0, lang)}
             </span>
-            {plan.goal.level !== "none" && (
+            {plan.goal.level !== "none" && !kidsOnly && (
               <span>
                 <Target size={14} aria-hidden /> {plan.goal.label}
                 {plan.goal.kcalTarget > 0 && <> · {plan.goal.kcalTarget} {t("kcal")}</>}
               </span>
             )}
-            <span>
-              <ScrollText size={14} aria-hidden /> {dishCount} {tn("dishes", dishCount)}
-            </span>
+            {!kidsOnly && (
+              <span>
+                <ScrollText size={14} aria-hidden /> {dishCount} {tn("dishes", dishCount)}
+              </span>
+            )}
           </div>
           {family && (
             <ul className="eaters" aria-label={t("plan.members")}>
@@ -551,12 +558,16 @@ export function Plan() {
             <span>
               <b className="num text-green">{approxRub(plan.totals.cost)}</b> {t("plan.sum.products")}
             </span>
-            <span>
-              <b className="num">{plan.totals.kcalPerDay}</b> {t(plan.occasion ? "plan.sum.kcal.guest" : "plan.sum.kcal")}
-            </span>
-            <span>
-              <b className="num">{minutes(plan.totals.cookMin)}</b> {t("plan.sum.cook")}
-            </span>
+            {!kidsOnly && (
+              <>
+                <span>
+                  <b className="num">{plan.totals.kcalPerDay}</b> {t(plan.occasion ? "plan.sum.kcal.guest" : "plan.sum.kcal")}
+                </span>
+                <span>
+                  <b className="num">{minutes(plan.totals.cookMin)}</b> {t("plan.sum.cook")}
+                </span>
+              </>
+            )}
           </div>
           {plan.family && plan.family.length > 0 && (
             <p className="eaters__family" aria-label={t("plan.family")}>
@@ -593,7 +604,8 @@ export function Plan() {
         )}
 
         <div className="receipt__menu">
-        {plan.kidsMenus && plan.kidsMenus.length > 0 && (
+        {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningCard key={"wc" + km.child} w={km.weaning} ageLabel={km.ageLabel} labels={km.weaning.days.map((d) => d.label)} /> : null))}
+        {plan.kidsMenus && plan.kidsMenus.length > 0 && !kidsOnly && (
           <div className="viewswitch" role="radiogroup" aria-label={t("plan.view")}>
             {(["all", "adult", "kids"] as const).map((v) => (
               <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => setView(v)}>
@@ -663,7 +675,7 @@ export function Plan() {
                 {day.label} <small>{dateShort(day.date, lang)}</small>
               </h2>
               <div className="day__sum">
-                {day.skipped ? (
+                {kidsOnly ? null : day.skipped ? (
                   <span className="day__away">{t("day.skipped")}</span>
                 ) : (
                   <>
@@ -671,7 +683,7 @@ export function Plan() {
                     <span className="num">{approxRub(day.cost)}</span>
                   </>
                 )}
-                {!storeMode && !plan.occasion && (
+                {!storeMode && !plan.occasion && !kidsOnly && (
                   <button type="button" className={"day__skip" + (day.skipped ? " is-on" : "")} onClick={() => skipDay(day.index, !day.skipped)} aria-pressed={!!day.skipped} aria-label={day.skipped ? t("day.unskip") : `${day.label}: ${t("day.skip")}`} title={day.skipped ? t("day.unskip") : t("day.skip.title")}>
                     {day.skipped ? <CalendarPlus size={15} aria-hidden /> : <CalendarOff size={15} aria-hidden />}
                   </button>
@@ -713,6 +725,7 @@ export function Plan() {
                 }}
               />
             ))}
+            {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningDayRows key={"w" + km.child} w={km.weaning} day={day.index} ageLabel={km.ageLabel} /> : null))}
             {plan.kidsMenus?.map((km) => {
               const kd = km.days[day.index];
               if (!kd || kd.dishes.length === 0) return null;
@@ -946,7 +959,7 @@ export function Plan() {
               {rub(plan.budget.targetWeek)} → {approxRub(plan.totals.usedCost)}
             </span>
           </div>
-          <div className="totals__row totals__row--stack">
+          <div className="totals__row totals__row--stack" hidden={kidsOnly}>
             <span>
               {t(plan.occasion ? "totals.perGuest" : "totals.perDay")}
               {plan.goal.kcalTarget > 0 && <> {t("totals.goal", { n: plan.goal.kcalTarget })}</>}

@@ -12,9 +12,12 @@ export function ageOptions(t: (k: string, p?: Record<string, string | number>) =
   ];
 }
 
+// Режимы кормления по возрасту, как в backend/internal/planner/kids.go (первый — по умолчанию).
+// Прикорм с 4–6 мес по решению педиатра, поэтому в 4–5 мес он есть, но не по умолчанию.
 export function feedingOptions(m: number): string[] {
-  if (m < 6) return ["milk"];
-  if (m < 12) return ["jars", "separate", "shared"];
+  if (m < 4) return ["milk"];
+  if (m < 6) return ["milk", "weaning"];
+  if (m < 12) return ["weaning", "jars", "separate", "shared"];
   if (m < 36) return ["shared", "separate", "jars"];
   return ["shared", "separate"];
 }

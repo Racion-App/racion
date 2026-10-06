@@ -22,6 +22,7 @@ import { APPETITES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
 import { ageOptions, feedingOptions, formulaMlByAge } from "../lib/kids";
+import { WeaningPicker } from "../components/Weaning";
 
 const KEY = "racion.quiz.v4";
 const COUNTRY_KEY = "racion.country.chosen"; // страна выбрана вручную, по IP не переопределяем
@@ -101,7 +102,8 @@ export function Quiz() {
     const init = { ...DEFAULTS, country: langCountry(lang), ...stored };
     if (!stored.members || stored.members.length === 0) {
       // ответы старого квиза или из аккаунта: N одинаковых взрослых с общей целью
-      init.members = Array.from({ length: Math.max(1, init.adults) }, () => ({ ...EMPTY_MEMBER, goal: init.goal }));
+      // взрослых может не быть, если есть дети: «меню только для ребёнка»
+      init.members = Array.from({ length: Math.max(init.kids?.length ? 0 : 1, init.adults) }, () => ({ ...EMPTY_MEMBER, goal: init.goal }));
     }
     if (!init.wants) init.wants = [];
     if (!init.have) init.have = [];
@@ -296,6 +298,8 @@ export function Quiz() {
     switch (step) {
       case 1:
         return p.store !== "";
+      case 2:
+        return p.members.length + p.kids.length > 0;
       case 3:
         return p.members.every((m) => m.goal !== "");
       case 6:
@@ -505,7 +509,7 @@ export function Quiz() {
                       <User size={18} aria-hidden />
                       <input className="form-control" value={m.name} maxLength={40} placeholder={t("quiz.member.name", { n: i + 1 })} onChange={(e) => updateMember(i, { name: e.target.value })} aria-label={t("quiz.member.name.aria", { n: i + 1 })} />
                     </label>
-                    {p.members.length > 1 && (
+                    {(p.members.length > 1 || p.kids.length > 0) && (
                       <button type="button" className="kid__remove" onClick={() => setMembers(p.members.filter((_, j) => j !== i))} aria-label={t("quiz.member.remove")}>
                         <Trash2 size={16} aria-hidden />
                       </button>
@@ -536,6 +540,7 @@ export function Quiz() {
                   </div>
                 </div>
               ))}
+              {p.members.length === 0 && <p className="quiz__note">{t("quiz.kidsonly")}</p>}
               {p.members.length < 8 && (
                 <button type="button" className="btn btn-soft" onClick={() => setMembers([...p.members, { ...EMPTY_MEMBER }])}>
                   <Plus size={18} aria-hidden /> {t("quiz.member.add")}
@@ -564,7 +569,7 @@ export function Quiz() {
                       }}
                     />
                   </label>
-                  {k.ageMonths >= 6 && (
+                  {k.ageMonths >= 4 && (
                     <div className="kid__feeding" role="radiogroup" aria-label={t("quiz.feeding")}>
                       {feedingOptions(k.ageMonths).map((f) => (
                         <button key={f} type="button" role="radio" aria-checked={k.feeding === f} className="option option--compact" onClick={() => updateKid(i, { feeding: f })}>
@@ -575,6 +580,9 @@ export function Quiz() {
                         </button>
                       ))}
                     </div>
+                  )}
+                  {k.feeding === "weaning" && meta?.weaningFoods && (
+                    <WeaningPicker foods={meta.weaningFoods} month={k.ageMonths} value={k.introduced ?? []} onChange={(introduced) => updateKid(i, { introduced })} />
                   )}
                   {k.ageMonths < 36 && (
                     <Switch label={t("quiz.formula")} sub={k.ageMonths < 6 ? t("quiz.formula.sub.young") : t("quiz.formula.sub")} checked={k.formula} onChange={(v) => updateKid(i, { formula: v, formulaBrand: v && !k.formulaBrand ? "nutrilon" : k.formulaBrand })} />

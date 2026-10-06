@@ -2087,3 +2087,30 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__star { background: none; border: 0; padding: 2px; color: var(--ds-fill-1); cursor: pointer; line-height: 0; transition: color var(--ds-dur-fast), transform var(--ds-dur-fast);
     &.is-on { color: var(--ds-orange); } &:hover { transform: scale(1.15); } }
   &__meta { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); } }
+
+// Прикорм по месяцам: отметки «уже ест» в квизе, карточка недели и кормления дня в плане (components/Weaning.tsx)
+.weanpick { display: grid; gap: 10px; padding: 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);
+  &__head { display: grid; gap: 2px; b { font-size: 15px; } span { font-size: 13px; color: var(--ds-label-secondary); } }
+  &__group { display: grid; gap: 6px; }
+  &__label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-label-tertiary); } }
+.chip--img { display: inline-flex; align-items: center; gap: 6px; padding-left: 4px;
+  img, .chip__dot { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+  .chip__dot { background: var(--ds-green-tint); } }
+.quiz__note { margin: 0; font-size: 14px; color: var(--ds-label-secondary); }
+.weancard { display: grid; gap: 10px; margin: 0 0 16px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); box-shadow: var(--ds-shadow-sm);
+  &__title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  &__new { display: grid; gap: 8px; padding: 12px; border-radius: var(--ds-radius-md); background: var(--ds-green-tint); }
+  &__newhead { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  &__p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); }
+  &__rules { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; line-height: 1.4; color: var(--ds-label-secondary); }
+  &__src { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 12px; line-height: 1.4; color: var(--ds-label-tertiary); svg { flex: 0 0 auto; margin-top: 2px; } } }
+.weanramp { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none;
+  li { display: grid; gap: 2px; justify-items: center; padding: 6px 2px; border-radius: 8px; background: var(--ds-bg-elevated); font-size: 12px; color: var(--ds-label-secondary); }
+  b { font-size: 13px; color: var(--ds-label-primary); white-space: nowrap; } }
+.weanfeeds { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.weanfeed { display: grid; grid-template-columns: 48px 1fr; gap: 8px; font-size: 14px; line-height: 1.4;
+  &__time { color: var(--ds-label-tertiary); }
+  &__what { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  &__item.is-new { color: var(--ds-green); font-weight: 600; }
+  &__badge { margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: var(--ds-green-tint); color: var(--ds-green); font-size: 11px; font-weight: 700; }
+  &__milk { color: var(--ds-label-tertiary); } }

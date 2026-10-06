@@ -16,9 +16,10 @@ const (
 	FeedSeparate = "separate" // готовим отдельно — своё детское меню на неделю
 	FeedJars     = "jars"     // баночки и детские каши по возрастным нормам
 	FeedMilk     = "milk"     // только смесь или грудное молоко
+	FeedWeaning  = "weaning"  // прикорм по месяцам: режим дня и новый продукт недели (weaning.go)
 )
 
-var FeedingModes = []string{FeedShared, FeedSeparate, FeedJars, FeedMilk}
+var FeedingModes = []string{FeedShared, FeedSeparate, FeedJars, FeedMilk, FeedWeaning}
 
 func FeedingLabel(l i18n.Lang, mode string) string { return i18n.T(l, "feeding."+mode) }
 
@@ -31,15 +32,19 @@ type Child struct {
 	Formula      bool   `json:"formula"`      // на смеси
 	FormulaBrand string `json:"formulaBrand"` // код из FormulaBrands
 	FormulaMl    int    `json:"formulaMl"`    // мл в день; 0 — по возрастной норме
+	// Introduced — продукты прикорма, которые ребёнок уже ест (id продуктов базы из WeaningFoods)
+	Introduced []string `json:"introduced,omitempty"`
 }
 
 // FeedingOptions — какие режимы доступны в этом возрасте (первый — рекомендуемый по умолчанию).
 func FeedingOptions(ageMonths int) []string {
 	switch {
-	case ageMonths < 6:
+	case ageMonths < 4:
 		return []string{FeedMilk}
+	case ageMonths < 6: // прикорм с 4–6 мес по решению педиатра; по умолчанию пока молоко
+		return []string{FeedMilk, FeedWeaning}
 	case ageMonths < 12:
-		return []string{FeedJars, FeedSeparate, FeedShared}
+		return []string{FeedWeaning, FeedJars, FeedSeparate, FeedShared}
 	case ageMonths < 36:
 		return []string{FeedShared, FeedSeparate, FeedJars}
 	default:
@@ -54,7 +59,7 @@ func (c Child) normalized() Child {
 		} else if c.AgeMonths < 6 {
 			c.Feeding = FeedMilk
 		} else if c.AgeMonths < 12 {
-			c.Feeding = FeedJars
+			c.Feeding = FeedWeaning
 		} else {
 			c.Feeding = FeedShared
 		}
@@ -73,6 +78,14 @@ func (c Child) normalized() Child {
 	if c.FormulaMl < 0 || c.FormulaMl > 1500 {
 		c.FormulaMl = 0
 	}
+	// введённые продукты — только из списка прикорма, без повторов
+	var intro []string
+	for _, id := range c.Introduced {
+		if _, ok := weaningFood(id); ok && !slices.Contains(intro, id) {
+			intro = append(intro, id)
+		}
+	}
+	c.Introduced = intro
 	return c
 }
 
@@ -400,6 +413,7 @@ type KidMenu struct {
 	Factor   float64  `json:"factor"` // множитель к рецепту
 	Days     []KidDay `json:"days"`
 	Note     string   `json:"note"`
+	Weaning  *Weaning `json:"weaning,omitempty"` // прикорм по месяцам вместо меню из рецептов
 }
 
 var kidSlots = []string{"breakfast", "lunch", "dinner", "snack"}

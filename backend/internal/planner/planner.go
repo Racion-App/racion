@@ -102,7 +102,8 @@ func (c *Catalog) Normalize(p Params) Params {
 			p.Region = "643"
 		}
 	}
-	if p.Adults < 1 {
+	// без взрослых можно, только если есть дети: «меню только для ребёнка»
+	if p.Adults < 0 || (p.Adults < 1 && len(p.Kids) == 0) {
 		p.Adults = 1
 	}
 	if p.Adults > 8 {
@@ -715,6 +716,8 @@ func (c *Catalog) budget(p Params, portions float64) Budget {
 	cy := CountryOf(p.Country)
 	b := Budget{Mode: p.BudgetMode, Value: p.BudgetValue}
 	switch {
+	case portions <= 0: // меню только для детей, которые едят отдельно: общего стола нет
+		b.TargetWeek = p.BudgetValue
 	case p.BudgetMode == "week" && p.BudgetValue > 0:
 		b.TargetWeek = p.BudgetValue
 		b.PerDay = cy.RoundMoney(p.BudgetValue / (portions * 7))
@@ -757,14 +760,19 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 	budget := c.budget(p, portions)
 	goal := goalOf(p)
 
+	// общий стол: нет взрослых и детей с общего стола — блюд для семьи нет, только детские меню
+	famSlots := p.Slots
+	if portions <= 0 {
+		famSlots = nil
+	}
 	var shareSum float64
-	for _, s := range p.Slots {
+	for _, s := range famSlots {
 		shareSum += slotShare[s]
 	}
 
 	lang := i18n.Lang(p.Lang)
 	pools := map[string][]Recipe{}
-	for _, s := range p.Slots {
+	for _, s := range famSlots {
 		for _, r := range c.Recipes {
 			if r.Slot == s && !isKidRecipe(r) && !IsSide(r) && c.allowed(r, e) {
 				pools[s] = append(pools[s], r)
@@ -785,7 +793,7 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 	leftover := map[int]map[string]Recipe{}
 
 	for d := 0; d < 7; d++ {
-		for _, slot := range p.Slots {
+		for _, slot := range famSlots {
 			if lr, ok := leftover[d][slot]; ok {
 				dish := c.dish(lr, slot, pr)
 				dish.Leftover = true
@@ -854,8 +862,12 @@ func (c *Catalog) build(p Params, seed int64, swaps int) Plan {
 
 	kidsMenus := []KidMenu{}
 	for i, k := range p.Kids {
-		if k.Feeding == FeedSeparate {
+		switch k.Feeding {
+		case FeedSeparate:
 			kidsMenus = append(kidsMenus, c.buildKidMenu(i, k, p, pr, rand.New(rand.NewSource(seed+int64(i)*101+int64(swaps)*7919))))
+		case FeedWeaning:
+			kidsMenus = append(kidsMenus, KidMenu{Child: i, AgeLabel: k.AgeLabel(lang), Factor: 1, Days: []KidDay{},
+				Weaning: c.buildWeaning(k, lang), Note: i18n.T(lang, "weaning.note")})
 		}
 	}
 
@@ -1000,6 +1012,15 @@ func (c *Catalog) finish(plan *Plan) {
 	// Детские меню: продукты идут в общий список, стоимость — отдельной строкой и в «съедите за неделю».
 	var kidsMenuCost float64
 	for _, km := range plan.KidsMenus {
+		if km.Weaning != nil {
+			tag := i18n.T(lang, "weaning.tag")
+			for id, v := range weaningNeed(km.Weaning) {
+				need[id] += v
+				if !slices.Contains(usedIn[id], tag) {
+					usedIn[id] = append(usedIn[id], tag)
+				}
+			}
+		}
 		for _, d := range km.Days {
 			for _, dish := range d.Dishes {
 				r, ok := c.RecipeByID[dish.RecipeID]
