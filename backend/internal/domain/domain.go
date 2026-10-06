@@ -196,6 +196,7 @@ type NotifySettings struct {
 	Week      bool `json:"week"`      // воскресенье: собрать следующую неделю
 	Digest    bool `json:"digest"`    // раз в неделю: новые рецепты и подборки
 	NoAsk     bool `json:"noAsk"`     // не спрашивать вечером «как было?» (по умолчанию спрашиваем)
+	NoWean    bool `json:"noWean"`    // не напоминать про прикорм: продукт недели и «как прошла неделя» (по умолчанию напоминаем)
 	Tz        int  `json:"tz"`        // минуты к UTC, как -(new Date()).getTimezoneOffset()
 }
 
@@ -245,6 +246,17 @@ type PlanReminderInfo struct {
 	PrepDays  []PrepDayInfo       // режим заготовок: дни готовки
 	Dishes    map[string][]string // дата → названия блюд
 	Dinner    map[string]DishRef  // дата → ужин (для вопроса «как было?»)
+	Weaning   []WeaningReminder   // прикорм: продукт недели у каждого ребёнка
+}
+
+// WeaningReminder — прикорм ребёнка в неделе плана: продукт недели, с чего начать и к чему прийти, что дальше.
+type WeaningReminder struct {
+	Age   string  // «8 мес»
+	Food  string  // продукт недели
+	First float64 // в понедельник
+	Last  float64 // к воскресенью
+	Unit  string  // g | ml | pcs
+	Next  string  // следующий по списку
 }
 
 // PrepDayInfo — день заготовок для напоминаний: дата, число блюд и оценка времени у плиты.

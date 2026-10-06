@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Activity, BookOpen, CalendarDays, ChefHat, Eye, Heart, Link2, LogOut, MessageCircle, Plus, ShoppingBag, ThumbsDown, ThumbsUp, Trash2, Upload, Users } from "lucide-react";
 import { FamilyEditor } from "../components/FamilyEditor";
-import { grownKids } from "../lib/kids";
+import { grownKids, markKid } from "../lib/kids";
 import { SiteFooter } from "../components/SiteFooter";
 import { TopBar } from "../components/TopBar";
 import { OwnRecipeForm } from "../components/OwnRecipeForm";
@@ -373,7 +373,17 @@ export function Account() {
             {family === null && <div className="skeleton" style={{ height: 120 }} />}
             {family && (
               <>
-                <FamilyEditor adults={family.adults} kids={family.kids} meta={meta} onChange={(next) => { setFamily({ ...family, ...next }); setFamilyDirty(true); }} />
+                <FamilyEditor
+                  adults={family.adults}
+                  kids={family.kids}
+                  meta={meta}
+                  onChange={(next) => { setFamily({ ...family, ...next }); setFamilyDirty(true); }}
+                  onDiary={async (kidId, food) => {
+                    // снимаем отметку сразу на сервере, а в форме меняем только этого ребёнка: несохранённые правки семьи не теряются
+                    await api.familyDiary(kidId, food, "").catch(() => undefined);
+                    setFamily({ ...family, kids: family.kids.map((k) => (k.id === kidId ? markKid(k, food, "", "") : k)) });
+                  }}
+                />
                 {familyDirty && (
                   <button type="button" className="btn btn-primary" onClick={saveFamily} disabled={familySaving}>
                     {t("account.family.save")}

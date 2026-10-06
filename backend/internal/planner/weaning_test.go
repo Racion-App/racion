@@ -409,3 +409,31 @@ func TestChokeNote(t *testing.T) {
 		t.Fatalf("в 6 лет подсказка не нужна, а %q", n)
 	}
 }
+
+// Дневник прикорма: «ввели» → в «уже ест», «была реакция» → в «не подошло», повторная отметка заменяет
+// прежнюю, пустая снимает; в плане дневника нет — только в семье.
+func TestDiaryMarks(t *testing.T) {
+	k := Child{AgeMonths: 8, Feeding: FeedWeaning}
+	k.MarkDiary("broccoli", "ok", "2026-10-05")
+	k.MarkDiary("turkey_fillet", "ok", "2026-10-12")
+	if !slices.Contains(k.Introduced, "broccoli") || len(k.Diary) != 2 || k.Diary[0].Food != "turkey_fillet" {
+		t.Fatalf("после двух отметок: %+v", k)
+	}
+	k.MarkDiary("broccoli", "reaction", "2026-10-13")
+	if slices.Contains(k.Introduced, "broccoli") || !slices.Contains(k.Avoid, "broccoli") || len(k.Diary) != 2 || k.Diary[0].How != "reaction" {
+		t.Fatalf("реакция вместо «ввели»: %+v", k)
+	}
+	k.MarkDiary("broccoli", "", "")
+	if slices.Contains(k.Avoid, "broccoli") || len(k.Diary) != 1 {
+		t.Fatalf("снятая отметка: %+v", k)
+	}
+	k.Diary = append(k.Diary, DiaryEntry{Food: "nope", How: "ok", Date: "2026-10-01"}, DiaryEntry{Food: "apple", How: "maybe", Date: "2026-10-01"})
+	if n := k.normalized(); len(n.Diary) != 1 {
+		t.Fatalf("мусор в дневнике остался: %+v", n.Diary)
+	}
+	c := testCatalog(t)
+	p := c.Normalize(Params{Adults: 1, Kids: []Child{k}})
+	if p.Kids[0].Diary != nil {
+		t.Fatal("дневник попал в план")
+	}
+}

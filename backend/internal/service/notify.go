@@ -180,7 +180,15 @@ func (n *Notifications) notification(ctx context.Context, r Reminder, lang i18n.
 			return domain.Notification{Title: i18n.T(lang, "push.digest.title"), Body: i18n.T(lang, "push.digest.body", recipes, cols), URL: n.baseURL + "/collections", Tag: "digest"}, true
 		}
 	case "week":
-		return domain.Notification{Title: i18n.T(lang, "push.week.title"), Body: i18n.T(lang, "push.week.body"), URL: n.baseURL + "/", Tag: "week"}, true
+		body := i18n.T(lang, "push.week.body")
+		if len(r.Weaning) > 0 && r.Weaning[0].Next != "" {
+			body = i18n.T(lang, "push.week.wean", r.Weaning[0].Next)
+		}
+		return domain.Notification{Title: i18n.T(lang, "push.week.title"), Body: body, URL: n.baseURL + "/", Tag: "week"}, true
+	case "wean":
+		return domain.Notification{Title: i18n.T(lang, "push.wean.title"), Body: strings.Join(weanLines(lang, r.Weaning), "\n") + "\n" + i18n.T(lang, "push.wean.how"), URL: plan + "#weaning", Tag: "wean"}, true
+	case "wean-diary":
+		return domain.Notification{Title: i18n.T(lang, "push.weandiary.title", r.Weaning[0].Food), Body: i18n.T(lang, "push.weandiary.body"), URL: plan + "#weaning", Tag: "wean-diary"}, true
 	}
 	return domain.Notification{}, false
 }

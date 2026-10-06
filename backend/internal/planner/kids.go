@@ -48,6 +48,10 @@ type Child struct {
 	// Avoid — продукты, на которые была реакция («не подошло» в дневнике прикорма): в прикорм, детское
 	// меню и общие блюда ребёнка не ставятся, пока родители не вернут
 	Avoid []string `json:"avoid,omitempty"`
+	// ID — постоянный номер ребёнка в семье: по нему отметка дневника из плана находит ребёнка в аккаунте
+	ID string `json:"id,omitempty"`
+	// Diary — дневник прикорма: что и когда ввели, на что была реакция; свежие записи сверху
+	Diary []DiaryEntry `json:"diary,omitempty"`
 	// Allergens — аллергии самого ребёнка (коды как у семьи: dairy, eggs, gluten…): прикорм, детское меню
 	// и, если ребёнок ест с общего стола, общие блюда их учитывают
 	Allergens []string `json:"allergens,omitempty"`
@@ -58,6 +62,16 @@ type Child struct {
 	// school — в школе (обед). Порции и детское меню на будни это учитывают.
 	Away string `json:"away,omitempty"`
 }
+
+// DiaryEntry — запись дневника прикорма: продукт (id из WeaningFoods), как прошло (ok | reaction) и день.
+type DiaryEntry struct {
+	Food string `json:"food"`
+	How  string `json:"how"`
+	Date string `json:"date"` // YYYY-MM-DD
+}
+
+// maxDiary — сколько записей дневника хранить: продуктов прикорма меньше, по одной записи на продукт.
+const maxDiary = 60
 
 // Где ребёнок ест по будням.
 const (
@@ -181,6 +195,25 @@ func (c Child) normalized() Child {
 		}
 	}
 	c.Avoid = avoid
+	if len(c.ID) > 40 || strings.ContainsAny(c.ID, " /?#&") {
+		c.ID = ""
+	}
+	var diary []DiaryEntry
+	seen := map[string]bool{}
+	for _, e := range c.Diary {
+		if _, ok := weaningFood(e.Food); !ok || seen[e.Food] || (e.How != "ok" && e.How != "reaction") {
+			continue
+		}
+		if _, err := time.Parse("2006-01-02", e.Date); err != nil {
+			continue
+		}
+		seen[e.Food] = true
+		diary = append(diary, e)
+		if len(diary) == maxDiary {
+			break
+		}
+	}
+	c.Diary = diary
 	var al []string
 	for _, a := range c.Allergens {
 		if slices.Contains(Allergens, a) && !slices.Contains(al, a) {
@@ -1026,5 +1059,25 @@ func KidNorm(age int, l i18n.Lang) string {
 		return i18n.T(l, "kid.norm.nowater", "2300–2500", "69–75")
 	default:
 		return i18n.T(l, "kid.norm.nowater", "2500–2900", "75–87")
+	}
+}
+
+// MarkDiary — отметка дневника прикорма: «ввели» — продукт в «уже ест», «была реакция» — в «не подошло»,
+// пустая — снять отметку. Запись дня встаёт в начало дневника, прежняя запись о том же продукте уходит.
+func (c *Child) MarkDiary(food, how, date string) {
+	c.Introduced = slices.DeleteFunc(c.Introduced, func(x string) bool { return x == food })
+	c.Avoid = slices.DeleteFunc(c.Avoid, func(x string) bool { return x == food })
+	c.Diary = slices.DeleteFunc(c.Diary, func(e DiaryEntry) bool { return e.Food == food })
+	switch how {
+	case "ok":
+		c.Introduced = append(c.Introduced, food)
+	case "reaction":
+		c.Avoid = append(c.Avoid, food)
+	default:
+		return
+	}
+	c.Diary = append([]DiaryEntry{{Food: food, How: how, Date: date}}, c.Diary...)
+	if len(c.Diary) > maxDiary {
+		c.Diary = c.Diary[:maxDiary]
 	}
 }

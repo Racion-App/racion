@@ -21,7 +21,7 @@ import type { Child, Member, Meta, OccasionView, Params, PlanSummary } from "../
 import { APPETITES, MOM_STATES } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { intlLocale, langCountry, useT, type Lang } from "../i18n";
-import { ageOptions, feedingOptions, formulaMlByAge, grownKids, ymNow } from "../lib/kids";
+import { ageOptions, feedingOptions, formulaMlByAge, grownKids, kidId, ymNow } from "../lib/kids";
 import { KidAway } from "../components/KidAway";
 import { FormulaFeeds } from "../components/FormulaFeeds";
 import { MealSources } from "../components/MealSources";
@@ -377,7 +377,7 @@ export function Quiz() {
   const goalKcal = meta?.goals.find((g) => g.id === p.goal)?.kcal ?? 0;
 
   const updateKid = (i: number, patch: Partial<Child>) => set({ kids: p.kids.map((k, j) => (j === i ? { ...k, ...patch } : k)) });
-  const addKid = () => set({ kids: [...p.kids, { ageMonths: 60, ageAt: ymNow(), feeding: "shared", sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 }] });
+  const addKid = () => set({ kids: [...p.kids, { id: kidId(), ageMonths: 60, ageAt: ymNow(), feeding: "shared", sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 }] });
 
   return (
     <div className="shell">

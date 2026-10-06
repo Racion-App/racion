@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Bell, BellOff, CalendarPlus, ChefHat, CookingPot, MessageCircleQuestion, ShoppingBasket, Smartphone, Sparkles, Sunrise } from "lucide-react";
+import { Baby, Bell, BellOff, CalendarPlus, ChefHat, CookingPot, MessageCircleQuestion, ShoppingBasket, Smartphone, Sparkles, Sunrise } from "lucide-react";
 import { api } from "../lib/api";
 import { pushState, pushSubscribe, pushTestResult, pushUnsubscribe, type PushState } from "../lib/push";
 import { isIOS, isStandalone } from "../lib/install";
@@ -166,6 +166,7 @@ export function NotifyCard({ onToast }: { onToast: (m: string) => void }) {
           />
           <Row icon={<CalendarPlus size={18} aria-hidden />} title={t("notify.week")} sub={t("notify.week.sub")} on={s.week} onToggle={() => save({ ...s, week: !s.week })} />
           <Row icon={<MessageCircleQuestion size={18} aria-hidden />} title={t("notify.ask")} sub={t("notify.ask.sub")} on={!s.noAsk} onToggle={() => save({ ...s, noAsk: !s.noAsk })} />
+          <Row icon={<Baby size={18} aria-hidden />} title={t("notify.wean")} sub={t("notify.wean.sub")} on={!s.noWean} onToggle={() => save({ ...s, noWean: !s.noWean })} />
           <Row icon={<Sparkles size={18} aria-hidden />} title={t("notify.digest")} sub={t("notify.digest.sub")} on={s.digest} onToggle={() => save({ ...s, digest: !s.digest })} />
         </div>
       )}

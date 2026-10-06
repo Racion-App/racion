@@ -1,10 +1,12 @@
 package service
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"racion/internal/domain"
+	"racion/internal/i18n"
 )
 
 // Напоминания: что пора сказать человеку в этот час по его местному времени. Считает одна функция,
@@ -21,6 +23,8 @@ type Reminder struct {
 	Dishes []string           // today, prep: что готовим
 	Prep   domain.PrepDayInfo // prepday-eve, prepday
 	Dinner domain.DishRef     // ask: ужин, о котором спрашиваем
+	// wean, wean-diary, week: прикорм — продукт недели по детям
+	Weaning []domain.WeaningReminder
 }
 
 // dueReminders — напоминания на этот час. local — время человека (UTC со сдвигом из настроек),
@@ -87,18 +91,69 @@ func dueReminders(local time.Time, s domain.NotifySettings, plans []domain.PlanR
 	if s.Digest && local.Weekday() == time.Friday && hour == 18 {
 		out = append(out, Reminder{Kind: "digest", Key: "digest:" + today, Date: today})
 	}
-	// воскресенье в полдень: на следующую неделю плана нет
+	// воскресенье в полдень: на следующую неделю плана нет; если в этой неделе был прикорм — назовём следующий продукт
+	thisMonday := local.AddDate(0, 0, -6).Format("2006-01-02")
 	if s.Week && local.Weekday() == time.Sunday && hour == 12 {
 		monday := tomorrow
 		has := false
+		var wean []domain.WeaningReminder
 		for _, p := range plans {
 			if p.StartDate == monday {
 				has = true
 			}
+			if p.StartDate == thisMonday && wean == nil {
+				wean = p.Weaning
+			}
 		}
 		if !has {
-			out = append(out, Reminder{Kind: "week", Key: "week:" + monday, Date: monday})
+			out = append(out, Reminder{Kind: "week", Key: "week:" + monday, Date: monday, Weaning: wean})
 		}
+	}
+	// прикорм: в понедельник утром — продукт недели и как его наращивать, в воскресенье в 18 — отметить,
+	// как прошла неделя (дневник в плане: «ввели» или «была реакция»)
+	if !s.NoWean {
+		if local.Weekday() == time.Monday && hour == s.TodayHour {
+			for _, p := range plans {
+				if p.StartDate == today && len(p.Weaning) > 0 {
+					out = append(out, Reminder{Kind: "wean", Key: "wean:" + p.ID + ":" + today, PlanID: p.ID, Date: today, Weaning: p.Weaning})
+					break
+				}
+			}
+		}
+		if local.Weekday() == time.Sunday && hour == 18 {
+			for _, p := range plans {
+				if p.StartDate == thisMonday && len(p.Weaning) > 0 {
+					out = append(out, Reminder{Kind: "wean-diary", Key: "wean-diary:" + p.ID, PlanID: p.ID, Date: today, Weaning: p.Weaning})
+					break
+				}
+			}
+		}
+	}
+	return out
+}
+
+// weanAmount — «5 г», «200 мл», «¼ желтка» для напоминаний.
+func weanAmount(l i18n.Lang, v float64, unit string) string {
+	switch unit {
+	case "pcs":
+		switch v {
+		case 0.25:
+			return "¼"
+		case 0.5:
+			return "½"
+		}
+		return fmt.Sprint(v)
+	case "ml":
+		return fmt.Sprintf("%.0f %s", v, i18n.T(l, "unit.ml"))
+	}
+	return fmt.Sprintf("%.0f %s", v, i18n.T(l, "unit.g"))
+}
+
+// weanLines — по строке на ребёнка: «8 мес: брокколи, сегодня 5 г, к воскресенью 150 г».
+func weanLines(l i18n.Lang, ws []domain.WeaningReminder) []string {
+	var out []string
+	for _, w := range ws {
+		out = append(out, i18n.T(l, "push.wean.line", w.Age, w.Food, weanAmount(l, w.First, w.Unit), weanAmount(l, w.Last, w.Unit)))
 	}
 	return out
 }

@@ -1770,5 +1770,18 @@
   "kidpage.faq.preschool.table.a": "Yes, most family dishes already suit. Until seven Racion leaves spicy and raw food out of the family menu, and until five give nuts only ground.",
   "kidpage.others": "Menus by age",
   "kidpage.source": "Routine, norms and limits follow the Russian feeding programme for ages 1–3 (National Medical Research Center for Children's Health, Union of Paediatricians of Russia, 2019), norms MR 2.3.1.0253-21 and sanitary rules SanPiN 2.3/2.4.4282-26. This is guidance, not a prescription: your paediatrician knows your child best.",
-  "cookmode.title": "Cooking: {title}"
+  "cookmode.title": "Cooking: {title}",
+  "push.wean.title": "Weaning: food of the week",
+  "push.wean.line": "{0}: {1}, {2} today, {3} by Sunday",
+  "push.wean.how": "Give the new food in the morning, from a spoon, before breast or formula.",
+  "push.weandiary.title": "How did the week with {0} go?",
+  "push.weandiary.body": "Mark it in the plan as introduced or a reaction, and next week takes it into account.",
+  "push.week.wean": "Next weaning food: {0}. Build the week and we'll set the amounts day by day.",
+  "bot.set.wean": "Weaning",
+  "notify.wean": "Weaning",
+  "notify.wean.sub": "Monday: food of the week; Sunday: mark how it went",
+  "account.diary.title": "Weaning diary",
+  "account.diary.ok": "introduced",
+  "account.diary.reaction": "reaction",
+  "account.diary.undo": "remove"
 }

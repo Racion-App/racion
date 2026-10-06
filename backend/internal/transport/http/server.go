@@ -238,6 +238,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/me/family/join", s.limited(s.lim.write, s.familyJoin))
 	mux.HandleFunc("POST /api/me/family/leave", s.familyLeave)
 	mux.HandleFunc("DELETE /api/me/family/accounts/{user}", s.familyRemove)
+	mux.HandleFunc("POST /api/me/family/kids/{id}/diary", s.limited(s.lim.write, s.familyDiary))
 	// push
 	mux.HandleFunc("GET /api/push/key", s.pushKey)
 	mux.HandleFunc("POST /api/me/push", s.limited(s.lim.write, s.pushSubscribe))

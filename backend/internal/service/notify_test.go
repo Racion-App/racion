@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
 	"racion/internal/domain"
+	"racion/internal/i18n"
 )
 
 type memPush struct {
@@ -120,5 +123,40 @@ func TestReminders(t *testing.T) {
 	// через неделю плана нет — напоминание собрать
 	if sent, _ := n.Tick(ctx, time.Date(2026, 9, 27, 9, 0, 0, 0, time.UTC)); sent != 1 || got[0].Tag != "week" {
 		t.Fatalf("week reminder expected: sent=%d got=%+v", sent, got)
+	}
+}
+
+// Прикорм: в понедельник утром — продукт недели, в воскресенье в 18 — «как прошла неделя», в воскресенье
+// в полдень без плана на следующую неделю — какой продукт следующий. NoWean выключает оба первых.
+func TestWeaningReminders(t *testing.T) {
+	s := domain.DefaultNotify()
+	plan := domain.PlanReminderInfo{ID: "p1", StartDate: "2026-10-12", Dishes: map[string][]string{}, Dinner: map[string]domain.DishRef{},
+		Weaning: []domain.WeaningReminder{{Age: "8 мес", Food: "Брокколи", First: 5, Last: 150, Unit: "g", Next: "Тыква"}}}
+	kinds := func(local time.Time, s domain.NotifySettings) []string {
+		var out []string
+		for _, r := range dueReminders(local, s, []domain.PlanReminderInfo{plan}) {
+			out = append(out, r.Kind)
+		}
+		return out
+	}
+	monday := time.Date(2026, 10, 12, s.TodayHour, 0, 0, 0, time.UTC)
+	if k := kinds(monday, s); !slices.Contains(k, "wean") {
+		t.Fatalf("понедельник утром: %v", k)
+	}
+	sunday := time.Date(2026, 10, 18, 18, 0, 0, 0, time.UTC)
+	if k := kinds(sunday, s); !slices.Contains(k, "wean-diary") {
+		t.Fatalf("воскресенье в 18: %v", k)
+	}
+	noon := time.Date(2026, 10, 18, 12, 0, 0, 0, time.UTC)
+	rs := dueReminders(noon, s, []domain.PlanReminderInfo{plan})
+	if len(rs) == 0 || rs[0].Kind != "week" || len(rs[0].Weaning) == 0 || rs[0].Weaning[0].Next != "Тыква" {
+		t.Fatalf("воскресенье в полдень: %+v", rs)
+	}
+	s.NoWean = true
+	if k := kinds(monday, s); slices.Contains(k, "wean") {
+		t.Fatalf("напоминания про прикорм выключены, а пришло: %v", k)
+	}
+	if got := weanLines(i18n.RU, plan.Weaning); len(got) != 1 || !strings.Contains(got[0], "5 г") || !strings.Contains(got[0], "150 г") {
+		t.Fatalf("строка напоминания: %v", got)
 	}
 }

@@ -37,6 +37,10 @@ export function Plan() {
   const [rawPlan, setPlan] = useState<PlanT | null>(initial && initial.id === id ? initial : null);
   // дневник прикорма в этой сессии: «ввели» / «была реакция» по номеру ребёнка (до ранних return — это хук)
   const [diary, setDiary] = useState<Record<number, "ok" | "reaction">>({});
+  // из напоминания о прикорме: /plan/…#weaning — карточка прикорма рисуется после загрузки, прокручиваем сами
+  useEffect(() => {
+    if (rawPlan && window.location.hash === "#weaning") window.setTimeout(() => document.getElementById("weaning")?.scrollIntoView({ block: "start" }), 300);
+  }, [rawPlan?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // по ссылке сервер отдаёт план без имён едоков; автору гостевого плана подставляем их из браузера
   const plan = useMemo(() => (rawPlan ? withNames(rawPlan) : null), [rawPlan]);
   const [error, setError] = useState<string | null>(null);
@@ -480,7 +484,8 @@ export function Plan() {
     return {
       state: diary[child] ?? known,
       onMark: (how: "ok" | "reaction") => {
-        markWeaning(child, food, how);
+        const id = markWeaning(child, food, how);
+        if (user && id) void api.familyDiary(id, food, how).catch(() => {}); // нет такого ребёнка в семье — останется в черновике
         setDiary((d) => ({ ...d, [child]: how }));
         track("weaning_diary", { how, food });
       },

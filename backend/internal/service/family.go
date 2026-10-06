@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"strings"
+	"time"
 
 	"racion/internal/domain"
 	"racion/internal/planner"
@@ -62,6 +63,9 @@ func (f *Family) view(ctx context.Context, h domain.Household, userID string) (F
 	for i := range accounts {
 		accounts[i].You = accounts[i].UserID == userID
 	}
+	if kidIDs(h.Kids) {
+		_ = f.repo.Save(ctx, h) // детям из старых записей — постоянные id для дневника прикорма
+	}
 	v := FamilyView{ID: h.ID, Name: h.Name, Adults: h.Adults, Kids: h.Kids, Accounts: accounts, Owner: h.OwnerID == userID}
 	if v.Adults == nil {
 		v.Adults = []planner.Member{}
@@ -107,6 +111,7 @@ func (f *Family) Save(ctx context.Context, userID string, in FamilyInput) (Famil
 	p := planner.Params{Members: in.Adults, Kids: in.Kids, Slots: planner.SlotOrder}
 	p = planner.NormalizeFamily(p)
 	h.Adults, h.Kids = p.Members, p.Kids
+	kidIDs(h.Kids)
 	if err := f.repo.Save(ctx, h); err != nil {
 		return FamilyView{}, err
 	}
@@ -204,4 +209,43 @@ func (f *Family) AccountNames(ctx context.Context, userID string) []string {
 		out = append(out, a.Name)
 	}
 	return out
+}
+
+// kidIDs раздаёт постоянные id детям без id; true — что-то поменялось и семью стоит сохранить.
+func kidIDs(kids []planner.Child) bool {
+	changed := false
+	for i := range kids {
+		if kids[i].ID == "" {
+			b := make([]byte, 6)
+			_, _ = rand.Read(b)
+			kids[i].ID = hex.EncodeToString(b)
+			changed = true
+		}
+	}
+	return changed
+}
+
+// Diary — отметка дневника прикорма из плана: «ввели» или «была реакция» (пусто — снять отметку) у ребёнка
+// семьи с этим id. Так отметка с телефона видна и на компьютере, и в следующей неделе любого аккаунта семьи.
+func (f *Family) Diary(ctx context.Context, userID, kidID, food, how string) (FamilyView, error) {
+	if how != "" && how != "ok" && how != "reaction" {
+		return FamilyView{}, domain.Invalid("family.err.diary")
+	}
+	h, err := f.repo.ByUser(ctx, userID)
+	if err != nil {
+		return FamilyView{}, err
+	}
+	for i := range h.Kids {
+		if h.Kids[i].ID != kidID {
+			continue
+		}
+		h.Kids[i].MarkDiary(food, how, time.Now().Format("2006-01-02"))
+		p := planner.NormalizeFamily(planner.Params{Members: h.Adults, Kids: h.Kids, Slots: planner.SlotOrder})
+		h.Kids = p.Kids
+		if err := f.repo.Save(ctx, h); err != nil {
+			return FamilyView{}, err
+		}
+		return f.view(ctx, h, userID)
+	}
+	return FamilyView{}, domain.ErrNotFound
 }

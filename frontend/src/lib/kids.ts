@@ -83,8 +83,16 @@ export function ymNow(d = new Date()): string {
 // grownKid — возраст вырос с отметки ageAt: «8 мес» в октябре — в декабре уже 10. Без отметки — ставим
 // текущий месяц, дальше возраст растёт сам. Режим кормления меняется, если по новому возрасту прежний
 // недоступен (в год прикорм по месяцам заканчивается). То же делает бэкенд к дате начала плана.
+// kidId — постоянный номер ребёнка (как на сервере, service.kidIDs): по нему дневник находит ребёнка в семье.
+export function kidId(): string {
+  const b = new Uint8Array(6);
+  crypto.getRandomValues(b);
+  return Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+}
+
 export function grownKid(k: Child, now = new Date()): Child {
   const cur = ymNow(now);
+  if (!k.id) k = { ...k, id: kidId() };
   if (!k.ageAt || !/^\d{4}-\d{2}$/.test(k.ageAt)) return { ...k, ageAt: cur };
   const [y, m] = k.ageAt.split("-").map(Number);
   const diff = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
@@ -107,13 +115,28 @@ export function draftKid(planKid: Child | undefined, idx: number): Child | null 
   return k;
 }
 
-export function markWeaning(idx: number, food: string, how: "ok" | "reaction") {
+// markWeaning — отметка в черновике; возвращает id ребёнка, чтобы вошедший записал её и в аккаунт.
+export function markWeaning(idx: number, food: string, how: "ok" | "reaction"): string | undefined {
   const d = readDraft();
+  const today = new Date().toISOString().slice(0, 10);
+  let id: string | undefined;
   const kids = (d.kids ?? []).map((k, i) => {
     if (i !== idx) return k;
-    const introduced = (k.introduced ?? []).filter((x) => x !== food);
-    const avoid = (k.avoid ?? []).filter((x) => x !== food);
-    return how === "ok" ? { ...k, introduced: [...introduced, food], avoid } : { ...k, introduced, avoid: [...avoid, food] };
+    id = k.id;
+    return markKid(k, food, how, today);
   });
   writeJSON(DRAFT_KEY, { ...d, kids });
+  return id;
 }
+
+// markKid — то же, что planner.Child.MarkDiary: «ввели» — в «уже ест», «была реакция» — в «не подошло»,
+// пустая отметка снимает; запись дня — в начало дневника.
+export function markKid(k: Child, food: string, how: "ok" | "reaction" | "", date: string): Child {
+  const introduced = (k.introduced ?? []).filter((x) => x !== food);
+  const avoid = (k.avoid ?? []).filter((x) => x !== food);
+  const diary = (k.diary ?? []).filter((e) => e.food !== food);
+  if (how === "ok") return { ...k, introduced: [...introduced, food], avoid, diary: [{ food, how, date }, ...diary].slice(0, 60) };
+  if (how === "reaction") return { ...k, introduced, avoid: [...avoid, food], diary: [{ food, how, date }, ...diary].slice(0, 60) };
+  return { ...k, introduced, avoid, diary };
+}
+

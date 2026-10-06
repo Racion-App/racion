@@ -45,6 +45,9 @@ export type Meta = {
   sample?: { country: string; dishes: number; items: number; cost: number; store: string }; // неделя на двоих при стартовых ответах
 };
 
+// DiaryEntry — запись дневника прикорма: продукт, как прошло и день (YYYY-MM-DD).
+export type DiaryEntry = { food: string; how: "ok" | "reaction"; date: string };
+
 export type Child = {
   name?: string;
   ageMonths: number;
@@ -59,6 +62,8 @@ export type Child = {
   allergens?: string[]; // аллергии самого ребёнка (коды как у семьи)
   ageAt?: string; // месяц (YYYY-MM), когда указан возраст: дальше он растёт сам
   avoid?: string[]; // продукты, на которые была реакция: в прикорм и меню ребёнка не ставятся
+  id?: string; // постоянный номер ребёнка: по нему отметка дневника из плана находит ребёнка в аккаунте
+  diary?: DiaryEntry[]; // дневник прикорма: что и когда ввели, на что была реакция; свежие сверху
   away?: string; // по будням: "" дома, kindergarten — в саду, school — в школе
   introduced?: string[]; // прикорм: продукты, которые малыш уже ест
 };
@@ -279,7 +284,7 @@ export type FamilyAccount = { userId: string; name: string; nick: string; owner:
 export type Family = { id: string; name: string; adults: Member[]; kids: Child[]; accounts: FamilyAccount[]; owner: boolean; inviteToken?: string };
 export type Favorite = { id: string; title: string; slot: string; own: boolean; image?: string };
 export type PlanSummary = { id: string; title: string; startDate: string; store: string; cost: number; country?: Country; portions: number; createdAt: string; checked: number; items: number; shared?: boolean; occasion?: { id: string; title: string; guests: number }; date?: string };
-export type NotifySettings = { shopDay: number; shopHour: number; today: boolean; todayHour: number; prep: boolean; prepHour: number; prepDay: boolean; week: boolean; digest: boolean; noAsk?: boolean; tz: number }; // shopHour -1 — напоминание о магазине выключено
+export type NotifySettings = { shopDay: number; shopHour: number; today: boolean; todayHour: number; prep: boolean; prepHour: number; prepDay: boolean; week: boolean; digest: boolean; noAsk?: boolean; noWean?: boolean; tz: number }; // shopHour -1 — напоминание о магазине выключено
 export type AdminOverview = {
   counters: { users: number; usersWeek: number; activeWeek: number; plans: number; plansWeek: number; plansOwned: number; ownRecipes: number; households: number; pushUsers: number; comments: number; feedback: number; purchasesWeek: number; errorsWeek: number; secondWeekBase: number; secondWeek: number };
   daily: { day: string; users: number; plans: number; visitors: number; quizStarts: number; errors: number }[];

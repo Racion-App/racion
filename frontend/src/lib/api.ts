@@ -185,6 +185,7 @@ export const api = {
   familyJoin: (token: string) => request<Family>("/api/me/family/join", { method: "POST", body: JSON.stringify({ token }) }),
   familyLeave: () => request<void>("/api/me/family/leave", { method: "POST" }),
   familyRemove: (userId: string) => request<void>(`/api/me/family/accounts/${userId}`, { method: "DELETE" }),
+  familyDiary: (kidId: string, food: string, how: "ok" | "reaction" | "") => request<Family>(`/api/me/family/kids/${encodeURIComponent(kidId)}/diary`, { method: "POST", body: JSON.stringify({ food, how }) }),
   // семья и уведомления
   joinPlan: (id: string) => request<void>(`/api/plans/${encodeURIComponent(id)}/join`, { method: "POST" }),
   pushKey: () => request<{ key: string }>("/api/push/key"),

@@ -156,6 +156,18 @@ func reminderPlans(ctx context.Context, pool *pgxpool.Pool, rows pgx.Rows) ([]do
 				Items    []any  `json:"items"`
 				TotalMin int    `json:"totalMin"`
 			} `json:"prepDays"`
+			KidsMenus []struct {
+				AgeLabel string `json:"ageLabel"`
+				Weaning  *struct {
+					New *struct {
+						Name string `json:"name"`
+						Unit string `json:"unit"`
+					} `json:"new"`
+					NewName string    `json:"newName"`
+					Ramp    []float64 `json:"ramp"`
+					Next    []string  `json:"next"`
+				} `json:"weaning"`
+			} `json:"kidsMenus"`
 		}
 		if json.Unmarshal(raw, &pl) != nil {
 			continue
@@ -165,6 +177,20 @@ func reminderPlans(ctx context.Context, pool *pgxpool.Pool, rows pgx.Rows) ([]do
 			if len(pd.Items) > 0 {
 				info.PrepDays = append(info.PrepDays, domain.PrepDayInfo{Date: pd.Date, Items: len(pd.Items), TotalMin: pd.TotalMin})
 			}
+		}
+		for _, km := range pl.KidsMenus {
+			w := km.Weaning
+			if w == nil || w.New == nil || len(w.Ramp) == 0 {
+				continue
+			}
+			wr := domain.WeaningReminder{Age: km.AgeLabel, Food: w.NewName, First: w.Ramp[0], Last: w.Ramp[len(w.Ramp)-1], Unit: w.New.Unit}
+			if wr.Food == "" {
+				wr.Food = w.New.Name
+			}
+			if len(w.Next) > 0 {
+				wr.Next = w.Next[0]
+			}
+			info.Weaning = append(info.Weaning, wr)
 		}
 		for _, d := range pl.Days {
 			for _, x := range d.Dishes {

@@ -126,9 +126,23 @@ func (b *Bots) reminder(ctx context.Context, r Reminder, lang i18n.Lang) (messen
 			},
 		}, true
 	case "week":
+		body := i18n.T(lang, "bot.week.body")
+		if len(r.Weaning) > 0 && r.Weaning[0].Next != "" {
+			body = i18n.T(lang, "push.week.wean", r.Weaning[0].Next)
+		}
 		return messenger.Message{
-			Text: title("push.week.title") + html.EscapeString(i18n.T(lang, "bot.week.body")),
+			Text: title("push.week.title") + html.EscapeString(body),
 			Rows: [][]messenger.Button{{{Text: i18n.T(lang, "bot.build"), URL: b.appURL(lang, "/"), App: true}}},
+		}, true
+	case "wean":
+		return messenger.Message{
+			Text: title("push.wean.title") + bullets(weanLines(lang, r.Weaning)) + "\n" + html.EscapeString(i18n.T(lang, "push.wean.how")),
+			Rows: [][]messenger.Button{open(plan + "#weaning")},
+		}, true
+	case "wean-diary":
+		return messenger.Message{
+			Text: title("push.weandiary.title", r.Weaning[0].Food) + html.EscapeString(i18n.T(lang, "push.weandiary.body")),
+			Rows: [][]messenger.Button{open(plan + "#weaning")},
 		}, true
 	}
 	return messenger.Message{}, false
@@ -187,7 +201,7 @@ func (b *Bots) settingsMessage(chat domain.MessengerChat, lang i18n.Lang) messen
 	if s.Prep {
 		rows = append(rows, []messenger.Button{at(s.PrepHour, "n:h:prep")})
 	}
-	rows = append(rows, toggle("bot.set.prepday", s.PrepDay, "n:t:prepday"), toggle("bot.set.week", s.Week, "n:t:week"))
+	rows = append(rows, toggle("bot.set.prepday", s.PrepDay, "n:t:prepday"), toggle("bot.set.week", s.Week, "n:t:week"), toggle("bot.set.wean", !s.NoWean, "n:t:wean"))
 	if chat.UserID != nil { // «как было?» записывается в аккаунт: без привязки спрашивать незачем
 		rows = append(rows, toggle("bot.set.ask", !s.NoAsk, "n:t:ask"))
 	}
@@ -220,6 +234,8 @@ func (b *Bots) settingsTap(ctx context.Context, c messenger.Client, u messenger.
 			s.Week = !s.Week
 		case "ask":
 			s.NoAsk = !s.NoAsk
+		case "wean":
+			s.NoWean = !s.NoWean
 		default:
 			return nil
 		}

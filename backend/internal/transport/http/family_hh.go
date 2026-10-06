@@ -93,3 +93,24 @@ func (s *Server) familyRemove(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(204)
 }
+
+// familyDiary — POST /api/me/family/kids/{id}/diary {"food": "broccoli", "how": "ok"|"reaction"|""}.
+func (s *Server) familyDiary(w http.ResponseWriter, r *http.Request) {
+	u := requireUser(w, r)
+	if u == nil {
+		return
+	}
+	var body struct {
+		Food string `json:"food"`
+		How  string `json:"how"`
+	}
+	if !decode(w, r, 4<<10, &body) {
+		return
+	}
+	v, err := s.svc.Family.Diary(r.Context(), u.ID, r.PathValue("id"), body.Food, body.How)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	writeJSON(w, 200, v)
+}

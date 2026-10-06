@@ -2175,3 +2175,13 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 // «Меню ребёнка в N лет» (/menu/child-*): норма по возрасту и подсказка по нарезке у блюда
 .kidpage__norm { max-width: 720px; margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: var(--ds-label-secondary); }
 .kidpage__note { display: block; margin-top: 2px; color: var(--ds-orange); font-weight: 400; }
+
+// Дневник прикорма в карточке ребёнка (кабинет → Семья)
+.kiddiary { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);
+  &__title { font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); }
+  &__list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  &__row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto auto; align-items: baseline; gap: 8px; font-size: 14px; }
+  &__date { color: var(--ds-label-tertiary); font-size: 13px; }
+  &__how { font-size: 13px; color: var(--ds-green); }
+  .is-reaction &__how { color: var(--ds-orange); }
+  &__undo { border: 0; background: none; padding: 4px 0 4px 6px; font: inherit; font-size: 13px; color: var(--ds-blue); cursor: pointer; } }

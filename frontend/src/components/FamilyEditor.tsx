@@ -2,8 +2,9 @@ import { Baby, Plus, Trash2, User } from "lucide-react";
 import { Select } from "./Select";
 import type { Child, Member, Meta } from "../lib/types";
 import { APPETITES, MOM_STATES } from "../lib/types";
-import { ageOptions, feedingOptions, formulaMlByAge, ymNow } from "../lib/kids";
+import { ageOptions, feedingOptions, formulaMlByAge, kidId, ymNow } from "../lib/kids";
 import { KidAway } from "./KidAway";
+import { KidDiary } from "./KidDiary";
 import { FormulaFeeds } from "./FormulaFeeds";
 import { MealSources } from "./MealSources";
 import { KidAllergens } from "./KidAllergens";
@@ -17,12 +18,13 @@ type Props = {
   kids: Child[];
   meta: Meta | null;
   onChange: (next: { adults: Member[]; kids: Child[] }) => void;
+  onDiary?: (kidId: string, food: string) => void; // снять отметку дневника прикорма (сразу на сервер)
 };
 
 export const EMPTY_ADULT: Member = { name: "", goal: "none", appetite: "normal", slots: [] };
 export const EMPTY_KID: Child = { name: "", ageMonths: 60, feeding: "shared", sharesMeals: false, formula: false, formulaBrand: "", formulaMl: 0 };
 
-export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
+export function FamilyEditor({ adults, kids, meta, onChange, onDiary }: Props) {
   const { t, lang } = useT();
   const slots = meta?.slots ?? [];
   const setAdult = (i: number, patch: Partial<Member>) => onChange({ adults: adults.map((m, j) => (j === i ? { ...m, ...patch } : m)), kids });
@@ -136,6 +138,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
             {k.feeding === "mix" && <MealSources month={k.ageMonths} value={k.meals ?? {}} onChange={(meals) => setKid(i, { meals })} />}
             {k.ageMonths >= 12 && k.feeding !== "milk" && k.feeding !== "weaning" && <KidAway month={k.ageMonths} value={k.away ?? ""} onChange={(away) => setKid(i, { away })} />}
             {meta?.allergens && <KidAllergens options={meta.allergens} value={k.allergens ?? []} onChange={(allergens) => setKid(i, { allergens })} />}
+            <KidDiary kid={k} foods={meta?.weaningFoods ?? []} onUndo={onDiary && k.id ? (food) => onDiary(k.id!, food) : undefined} />
             {k.ageMonths < 36 && (
               <button type="button" className="switch" role="switch" aria-checked={k.formula} onClick={() => setKid(i, { formula: !k.formula, formulaBrand: !k.formula && !k.formulaBrand ? "other" : k.formulaBrand })}>
                 <span className="switch__text">
@@ -165,7 +168,7 @@ export function FamilyEditor({ adults, kids, meta, onChange }: Props) {
           </div>
         ))}
         {kids.length < 8 && (
-          <button type="button" className="btn btn-soft" onClick={() => onChange({ adults, kids: [...kids, { ...EMPTY_KID }] })}>
+          <button type="button" className="btn btn-soft" onClick={() => onChange({ adults, kids: [...kids, { ...EMPTY_KID, id: kidId() }] })}>
             <Plus size={18} aria-hidden /> {t("quiz.child.add")}
           </button>
         )}

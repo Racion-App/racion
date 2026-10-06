@@ -121,6 +121,7 @@ func (c *Catalog) Normalize(p Params) Params {
 			k.AgeMonths = 17 * 12
 		}
 		*k = k.normalized()
+		k.Diary = nil // история дневника живёт в семье и черновике, плану она не нужна
 	}
 	if !slices.Contains(Goals, p.Goal) {
 		p.Goal = "none"

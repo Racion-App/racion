@@ -129,7 +129,7 @@ function DiaryButtons({ diary }: { diary: Diary }) {
 export function WeaningCard({ w, ageLabel, labels, diary }: { w: Weaning; ageLabel: string; labels: string[]; diary?: Diary }) {
   const { t, lang } = useT();
   return (
-    <section className="weancard" aria-label={t("weaning.title", { age: ageLabel })}>
+    <section className="weancard" id="weaning" aria-label={t("weaning.title", { age: ageLabel })}>
       <h2 className="weancard__title">
         <Baby size={18} aria-hidden /> {t("weaning.title", { age: ageLabel })}
       </h2>
