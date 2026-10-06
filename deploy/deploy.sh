@@ -5,6 +5,10 @@
 #   /opt/racion/deploy/deploy.sh            — бэкенд и фронтенд
 #   /opt/racion/deploy/deploy.sh backend    — только бэкенд (деплой репозитория data)
 set -euo pipefail
+# Выкладки data и main, запущенные почти одновременно, мешали друг другу: одна снимала контейнер, который
+# уже снимала другая («removal of container … is already in progress», 07.10). Вторая ждёт первую.
+exec 9>/tmp/racion-deploy.lock
+flock -w 900 9 || { echo "deploy: другая выкладка идёт дольше 15 минут"; exit 1; }
 cd "${RACION_DIR:-/opt/racion}"
 SERVICES=${*:-backend frontend}
 HEALTH_URL=${HEALTH_URL:-https://racion.app/healthz}
