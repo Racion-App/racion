@@ -92,6 +92,7 @@
       <a href="{{.P}}/recipes?slot=lunch">{{t .L "slot.lunch"}}</a>
       <a href="{{.P}}/recipes?slot=dinner">{{t .L "slot.dinner"}}</a>
       <a href="{{.P}}/recipes?tag=kidmenu">{{t .L "foot.kids"}}</a>
+      {{if topicLang .L}}<a href="{{.P}}/weaning">{{t .L "weaning.page.h1"}}</a>{{end}}
     </div>
     {{with featured .L .P}}<div class="sitefoot__col">
       <h3>{{t $.L "foot.cook"}}</h3>

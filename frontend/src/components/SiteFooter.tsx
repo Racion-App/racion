@@ -37,6 +37,7 @@ export function SiteFooter() {
           <a href={`${p}/recipes?slot=lunch`}>{t("slot.lunch")}</a>
           <a href={`${p}/recipes?slot=dinner`}>{t("slot.dinner")}</a>
           <a href={`${p}/recipes?tag=kidmenu`}>{t("foot.kids")}</a>
+          {["ru", "en", "de"].includes(lang) && <a href={`${p}/weaning`}>{t("weaning.page.h1")}</a>}
         </div>
         {featured.length > 0 && (
           <div className="sitefoot__col">

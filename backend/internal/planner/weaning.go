@@ -3,6 +3,9 @@ package planner
 import (
 	"math"
 	"slices"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"racion/internal/i18n"
 )
@@ -27,35 +30,36 @@ type WeaningFood struct {
 	Group      string  // veg, cereal, meat, fruit, yolk, curd, kefir, fish, bread
 	From       int     // с какого месяца
 	RawPerUnit float64 // сколько продукта купить на 1 г блюда: каша из сухой крупы, мясо из сырого
+	Recipe     string  // как приготовить: рецепт из recipes_weaning.json
 }
 
 // WeaningFoods — продукты в порядке, в каком их обычно вводят: внутри группы сначала самые мягкие для
 // пищеварения (кабачок, цветная капуста, брокколи; рис и гречка без глютена; индейка и кролик).
 var WeaningFoods = []WeaningFood{
-	{"zucchini", "veg", 4, 1.15},
-	{"cauliflower", "veg", 4, 1.1},
-	{"broccoli", "veg", 4, 1.1},
-	{"buckwheat", "cereal", 4, 0.12},
-	{"rice_round", "cereal", 4, 0.12},
-	{"cornmeal", "cereal", 4, 0.12},
-	{"pumpkin", "veg", 5, 1.25},
-	{"carrot", "veg", 6, 1.15},
-	{"potato", "veg", 6, 1.2},
-	{"turkey_fillet", "meat", 6, 1.4},
-	{"rabbit", "meat", 6, 1.6},
-	{"oats", "cereal", 6, 0.12},
-	{"apple", "fruit", 6, 1.2},
-	{"pear", "fruit", 6, 1.2},
-	{"veal", "meat", 6, 1.4},
-	{"chicken_breast", "meat", 6, 1.4},
-	{"banana", "fruit", 7, 1.3},
-	{"plum", "fruit", 7, 1.2},
-	{"eggs", "yolk", 7, 1},
-	{"cottage_soft", "curd", 8, 1},
-	{"kefir", "kefir", 8, 1},
-	{"cod_fillet", "fish", 8, 1.3},
-	{"hake_fillet", "fish", 8, 1.3},
-	{"bread_white", "bread", 8, 1},
+	{"zucchini", "veg", 4, 1.15, "wean_zucchini_puree"},
+	{"cauliflower", "veg", 4, 1.1, "wean_cauliflower_puree"},
+	{"broccoli", "veg", 4, 1.1, "wean_broccoli_puree"},
+	{"buckwheat", "cereal", 4, 0.12, "wean_buckwheat_porridge"},
+	{"rice_round", "cereal", 4, 0.12, "wean_rice_porridge"},
+	{"cornmeal", "cereal", 4, 0.12, "wean_corn_porridge"},
+	{"pumpkin", "veg", 5, 1.25, "wean_pumpkin_puree"},
+	{"carrot", "veg", 6, 1.15, "wean_carrot_puree"},
+	{"potato", "veg", 6, 1.2, "wean_potato_zucchini_puree"},
+	{"turkey_fillet", "meat", 6, 1.4, "wean_turkey_puree"},
+	{"rabbit", "meat", 6, 1.6, "wean_rabbit_puree"},
+	{"oats", "cereal", 6, 0.12, "wean_oat_porridge"},
+	{"apple", "fruit", 6, 1.2, "wean_apple_puree"},
+	{"pear", "fruit", 6, 1.2, "wean_pear_puree"},
+	{"veal", "meat", 6, 1.4, "wean_veal_puree"},
+	{"chicken_breast", "meat", 6, 1.4, "wean_chicken_puree"},
+	{"banana", "fruit", 7, 1.3, "wean_banana_puree"},
+	{"plum", "fruit", 7, 1.2, "wean_plum_puree"},
+	{"eggs", "yolk", 7, 1, "wean_yolk_veg"},
+	{"cottage_soft", "curd", 8, 1, "wean_cottage_fruit"},
+	{"kefir", "kefir", 8, 1, ""},
+	{"cod_fillet", "fish", 8, 1.3, "wean_cod_puree"},
+	{"hake_fillet", "fish", 8, 1.3, "wean_hake_puree"},
+	{"bread_white", "bread", 8, 1, ""},
 }
 
 // weaningGrams — объём блюда в сутки по группе и возрасту из таблицы 5.1 (для мяса и рыбы — отварное
@@ -150,12 +154,13 @@ func roundWeaning(v float64) float64 {
 
 // WeaningItem — что дать в кормление.
 type WeaningItem struct {
-	Food  string  `json:"food"`  // id продукта базы; пусто — грудь или смесь
-	Name  string  `json:"name"`  // название на языке недели
-	Group string  `json:"group"` // группа прикорма или "milk"
-	Grams float64 `json:"grams"` // г, для кефира мл, для желтка штуки
-	Unit  string  `json:"unit"`  // g, ml, pcs
-	New   bool    `json:"new"`   // продукт вводится на этой неделе
+	Food   string  `json:"food"`             // id продукта базы; пусто — грудь или смесь
+	Recipe string  `json:"recipe,omitempty"` // как приготовить
+	Name   string  `json:"name"`             // название на языке недели
+	Group  string  `json:"group"`            // группа прикорма или "milk"
+	Grams  float64 `json:"grams"`            // г, для кефира мл, для желтка штуки
+	Unit   string  `json:"unit"`             // g, ml, pcs
+	New    bool    `json:"new"`              // продукт вводится на этой неделе
 }
 
 // WeaningFeed — кормление: время по примерному режиму и что в нём.
@@ -194,12 +199,7 @@ func (c *Catalog) buildWeaning(k Child, l i18n.Lang) *Weaning {
 	if k.Formula {
 		w.MilkMl = k.FormulaMlPerDay()
 	}
-	name := func(id string) string {
-		if ing, ok := c.Ingredients[id]; ok {
-			return ing.LocalName(l)
-		}
-		return id
-	}
+	name := func(id string) string { return c.WeaningName(id, l) }
 	byGroup := map[string][]string{}
 	for _, f := range WeaningFoods {
 		if slices.Contains(k.Introduced, f.ID) && f.From <= m {
@@ -311,19 +311,16 @@ func (c *Catalog) weaningItem(f WeaningFood, grams float64, l i18n.Lang) Weaning
 	case "yolk":
 		unit = "pcs"
 	}
-	n := f.ID
-	if ing, ok := c.Ingredients[f.ID]; ok {
-		n = ing.LocalName(l)
-	}
+	n := c.WeaningName(f.ID, l)
 	switch f.Group {
 	case "yolk":
 		n = i18n.T(l, "weaning.yolk")
 	case "veg", "fruit", "meat", "fish":
-		n = i18n.T(l, "weaning.form.puree", n) // «Кабачок: пюре» — граммы готового пюре, не сырого продукта
+		n = i18n.T(l, "weaning.form.puree", lowerFirst(l, n)) // «Пюре: кабачок» — граммы готового пюре, не сырого продукта
 	case "cereal":
-		n = i18n.T(l, "weaning.form.cereal", n)
+		n = i18n.T(l, "weaning.form.cereal", lowerFirst(l, n))
 	}
-	return WeaningItem{Food: f.ID, Name: n, Group: f.Group, Grams: roundWeaning(grams), Unit: unit}
+	return WeaningItem{Food: f.ID, Recipe: f.Recipe, Name: n, Group: f.Group, Grams: roundWeaning(grams), Unit: unit}
 }
 
 // weaningExtra — масло к пюре и каше.
@@ -332,11 +329,7 @@ func (c *Catalog) weaningExtra(kind string, grams float64, l i18n.Lang) WeaningI
 	if kind == "butter" {
 		id, unit = "butter", "g"
 	}
-	n := id
-	if ing, ok := c.Ingredients[id]; ok {
-		n = ing.LocalName(l)
-	}
-	return WeaningItem{Food: id, Name: n, Group: kind, Grams: grams, Unit: unit}
+	return WeaningItem{Food: id, Name: c.WeaningName(id, l), Group: kind, Grams: grams, Unit: unit}
 }
 
 // weaningNeed — сколько продуктов купить на неделю прикорма (в единицах продукта базы).
@@ -357,4 +350,60 @@ func weaningNeed(w *Weaning) map[string]float64 {
 		}
 	}
 	return need
+}
+
+// WeaningRow — строка таблицы 5.1 для страницы «Прикорм по месяцам»: объёмы как в программе, диапазонами.
+type WeaningRow struct {
+	Group string
+	Cells [5]string // 4–5, 6, 7, 8, 9–12 мес
+}
+
+// WeaningTable — таблица 5.1 программы вскармливания (без соков и печенья, их планировщик не ставит).
+// Мясо и рыба — отварные домашнего приготовления.
+func WeaningTable() []WeaningRow {
+	return []WeaningRow{
+		{"veg", [5]string{"10–150", "150", "150", "150", "150"}},
+		{"cereal", [5]string{"10–150", "150", "150", "180", "200"}},
+		{"meat", [5]string{"—", "3–15", "20–30", "30–35", "40–50"}},
+		{"fruit", [5]string{"5–50", "60", "70", "80", "90–100"}},
+		{"yolk", [5]string{"—", "—", "¼", "½", "½"}},
+		{"curd", [5]string{"—", "—", "—", "10–40", "50"}},
+		{"fish", [5]string{"—", "—", "—", "5–30", "30–60"}},
+		{"kefir", [5]string{"—", "—", "—", "200", "200"}},
+		{"bread", [5]string{"—", "—", "—", "5", "10"}},
+		{"oil", [5]string{"1–3", "5", "5", "6", "6"}},
+		{"butter", [5]string{"1–3", "4", "4", "5", "5"}},
+	}
+}
+
+// WeaningSample — примерный день в этом возрасте, когда введено всё, что положено к этому месяцу.
+func (c *Catalog) WeaningSample(month int, l i18n.Lang) *Weaning {
+	var intro []string
+	for _, f := range WeaningFoods {
+		if f.From <= month {
+			intro = append(intro, f.ID)
+		}
+	}
+	return c.buildWeaning(Child{AgeMonths: month, Feeding: FeedWeaning, Introduced: intro}, l)
+}
+
+// WeaningName — название продукта для прикорма: без пометок каталога в скобках («Брокколи (заморозка)» → «Брокколи»).
+func (c *Catalog) WeaningName(id string, l i18n.Lang) string {
+	n := id
+	if ing, ok := c.Ingredients[id]; ok {
+		n = ing.LocalName(l)
+	}
+	if i := strings.Index(n, " ("); i > 0 {
+		n = n[:i]
+	}
+	return n
+}
+
+// lowerFirst — строчная первая буква для подстановки в «Пюре: {0}»; в немецком существительные с заглавной.
+func lowerFirst(l i18n.Lang, s string) string {
+	if l == i18n.DE {
+		return s
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[size:]
 }

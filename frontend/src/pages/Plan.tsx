@@ -725,7 +725,7 @@ export function Plan() {
                 }}
               />
             ))}
-            {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningDayRows key={"w" + km.child} w={km.weaning} day={day.index} ageLabel={km.ageLabel} /> : null))}
+            {view !== "adult" && plan.kidsMenus?.map((km) => (km.weaning ? <WeaningDayRows key={"w" + km.child} w={km.weaning} day={day.index} ageLabel={km.ageLabel} onOpen={(id) => { setRecipeId(id); track("recipe_open", { id, weaning: true }); }} /> : null))}
             {plan.kidsMenus?.map((km) => {
               const kd = km.days[day.index];
               if (!kd || kd.dishes.length === 0) return null;

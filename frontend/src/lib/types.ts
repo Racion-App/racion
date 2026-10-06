@@ -57,7 +57,7 @@ export type Child = {
 };
 
 // Неделя прикорма ребёнка 4–11 мес (backend/internal/planner/weaning.go).
-export type WeaningItem = { food: string; name: string; group: string; grams: number; unit: "g" | "ml" | "pcs" | string; new: boolean };
+export type WeaningItem = { food: string; recipe?: string; name: string; group: string; grams: number; unit: "g" | "ml" | "pcs" | string; new: boolean };
 export type WeaningFeed = { time: string; milk: boolean; items: WeaningItem[] };
 export type Weaning = {
   month: number;

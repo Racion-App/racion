@@ -220,8 +220,10 @@ func (c *Catalog) Meta(lang i18n.Lang, country planner.Country, geoCountry strin
 	m.FormulaBrands = planner.FormulaBrandsFor(lang)
 	for _, f := range planner.WeaningFoods {
 		v := WeaningFoodView{ID: f.ID, Group: f.Group, From: f.From}
-		if ing, ok := c.catalog.Load().Ingredients[f.ID]; ok {
-			v.Name, v.Image = ing.LocalName(lang), ing.Image
+		cat := c.catalog.Load()
+		v.Name = cat.WeaningName(f.ID, lang)
+		if ing, ok := cat.Ingredients[f.ID]; ok {
+			v.Image = ing.Image
 		}
 		if f.Group == "yolk" {
 			v.Name = i18n.T(lang, "weaning.yolk")

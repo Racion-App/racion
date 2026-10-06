@@ -44,14 +44,21 @@ function amount(t: (k: string, p?: Record<string, string | number>) => string, i
   return `${it.grams} ${t(it.unit === "ml" ? "unit.ml" : "unit.g")}`;
 }
 
-function Feed({ feed, t }: { feed: WeaningFeed; t: (k: string, p?: Record<string, string | number>) => string }) {
+function Feed({ feed, t, onOpen }: { feed: WeaningFeed; t: (k: string, p?: Record<string, string | number>) => string; onOpen?: (recipe: string) => void }) {
   return (
     <li className="weanfeed">
       <span className="weanfeed__time num">{feed.time}</span>
       <span className="weanfeed__what">
         {feed.items.map((it, i) => (
           <span key={i} className={"weanfeed__item" + (it.new ? " is-new" : "")}>
-            {it.name} <span className="num">{amount(t, it)}</span>
+            {it.recipe && onOpen ? (
+              <button type="button" className="weanfeed__link" onClick={() => onOpen(it.recipe!)} aria-label={t("dish.open", { title: it.name })}>
+                {it.name}
+              </button>
+            ) : (
+              it.name
+            )}{" "}
+            <span className="num">{amount(t, it)}</span>
             {it.new && <span className="weanfeed__badge">{t("weaning.new.badge")}</span>}
           </span>
         ))}
@@ -62,7 +69,7 @@ function Feed({ feed, t }: { feed: WeaningFeed; t: (k: string, p?: Record<string
 }
 
 // WeaningDay — кормления одного дня в карточке дня плана.
-export function WeaningDayRows({ w, day, ageLabel }: { w: Weaning; day: number; ageLabel: string }) {
+export function WeaningDayRows({ w, day, ageLabel, onOpen }: { w: Weaning; day: number; ageLabel: string; onOpen?: (recipe: string) => void }) {
   const { t } = useT();
   const d = w.days[day];
   if (!d) return null;
@@ -73,7 +80,7 @@ export function WeaningDayRows({ w, day, ageLabel }: { w: Weaning; day: number; 
       </div>
       <ol className="weanfeeds">
         {d.feeds.map((f) => (
-          <Feed key={f.time} feed={f} t={t} />
+          <Feed key={f.time} feed={f} t={t} onOpen={onOpen} />
         ))}
       </ol>
     </div>
@@ -82,7 +89,7 @@ export function WeaningDayRows({ w, day, ageLabel }: { w: Weaning; day: number; 
 
 // WeaningCard — сводка недели: продукт недели с наращиванием по дням, что дальше, правила и источник.
 export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: string; labels: string[] }) {
-  const { t } = useT();
+  const { t, lang } = useT();
   return (
     <section className="weancard" aria-label={t("weaning.title", { age: ageLabel })}>
       <h2 className="weancard__title">
@@ -116,6 +123,12 @@ export function WeaningCard({ w, ageLabel, labels }: { w: Weaning; ageLabel: str
       </ul>
       <p className="weancard__src">
         <Info size={13} aria-hidden /> {t("weaning.source")}
+        {["ru", "en", "de"].includes(lang) && (
+          <>
+            {" "}
+            <a href={`${lang === "ru" ? "" : `/${lang}`}/weaning`}>{t("weaning.page.link")}</a>
+          </>
+        )}
       </p>
     </section>
   );

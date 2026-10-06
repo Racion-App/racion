@@ -2113,4 +2113,25 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__what { display: flex; flex-wrap: wrap; gap: 4px 12px; }
   &__item.is-new { color: var(--ds-green); font-weight: 600; }
   &__badge { margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: var(--ds-green-tint); color: var(--ds-green); font-size: 11px; font-weight: 700; }
-  &__milk { color: var(--ds-label-tertiary); } }
+  &__milk { color: var(--ds-label-tertiary); }
+  &__link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-decoration-color: var(--ds-separator); text-underline-offset: 3px; cursor: pointer; } }
+
+// Страница /weaning: таблица граммов (первая колонка закреплена, на телефоне таблица листается вбок),
+// порядок введения, правила и примерные дни карточками
+.wtable-wrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; -webkit-overflow-scrolling: touch; @media (min-width: 720px) { margin: 0; padding: 0; } }
+.wtable { width: 100%; min-width: 520px; border-collapse: separate; border-spacing: 0; font-size: 14.5px;
+  th, td { padding: 9px 10px; border-bottom: 1px solid var(--ds-separator); text-align: right; white-space: nowrap; }
+  thead th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-label-tertiary); }
+  th:first-child { position: sticky; left: 0; z-index: 1; text-align: left; white-space: normal; min-width: 150px; background: var(--ds-bg-base); font-weight: 600; }
+  tbody th { font-size: 14px; }
+  td { font-variant-numeric: tabular-nums; color: var(--ds-label-primary); }
+  tbody tr:last-child > * { border-bottom: 0; } }
+.worder { display: grid; gap: 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 15px; line-height: 1.5;
+  li { padding: 10px 14px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4); }
+  b { margin-right: 4px; }
+  a { color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } } }
+.wrules { display: grid; gap: 6px; margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.5; color: var(--ds-label-secondary); }
+.weanfeeds--page { gap: 0; padding: 4px 14px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); box-shadow: var(--ds-shadow-sm);
+  .weanfeed { grid-template-columns: 56px 1fr; padding: 10px 0; font-size: 15px; border-bottom: 1px solid var(--ds-fill-4); &:last-child { border-bottom: 0; } }
+  a { color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } } }
+.wsource { margin-top: 24px; }
