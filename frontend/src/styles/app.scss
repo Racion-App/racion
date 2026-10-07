@@ -276,7 +276,8 @@ a { text-underline-offset: 3px; }
   border: 1px solid var(--ds-separator);
   border-radius: var(--ds-radius-xl);
   box-shadow: var(--ds-shadow-md);
-  overflow: clip;
+  // обрезка по внешнему краю рамки: выемки линии отрыва прорезают и рамку, а не упираются в неё
+  overflow: clip; overflow-clip-margin: 1px;
 
   &__head {
     padding: 20px 20px 16px;
@@ -2414,6 +2415,7 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
     @media (min-width: 1024px) { font-size: 38px; } }
   &__lead { margin: 10px 0 0; max-width: 60ch; font-size: 16px; line-height: 1.55; color: var(--ds-label-secondary); }
   &__receipt { margin-top: 22px; padding: 20px 20px 22px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+    overflow: clip; overflow-clip-margin: 1px; // как у чека недели: от кружков линии отрыва остаются выемки
     .tear { display: flex; margin: 4px -21px 0; } }
   &__rtitle { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
   &__sub { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--ds-label-secondary); }
