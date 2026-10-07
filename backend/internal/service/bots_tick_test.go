@@ -23,6 +23,7 @@ type memBotRepo struct {
 	blocked         map[string]bool
 	busy            int // сколько первых попыток блокировка опроса занята
 	leads, released int
+	logins          map[string]*memLogin
 }
 
 func newMemBotRepo() *memBotRepo {
@@ -343,4 +344,48 @@ func TestBotSettingsAndFeedback(t *testing.T) {
 	if len(taste.got) != 1 || taste.got[0] != "u1:borsch_classic:meh" || !repo.chats["telegram55"].Settings.NoAsk {
 		t.Errorf("ответ %v, noAsk %v", taste.got, repo.chats["telegram55"].Settings.NoAsk)
 	}
+}
+
+func (m *memBotRepo) CreateLogin(_ context.Context, l domain.MessengerLogin, _ time.Time) error {
+	if m.logins == nil {
+		m.logins = map[string]*memLogin{}
+	}
+	m.logins[l.TokenHash] = &memLogin{l: l}
+	return nil
+}
+func (m *memBotRepo) PendingLogin(_ context.Context, h string) (domain.MessengerLogin, error) {
+	if x, ok := m.logins[h]; ok && x.user == "" {
+		return x.l, nil
+	}
+	return domain.MessengerLogin{}, domain.ErrNotFound
+}
+func (m *memBotRepo) ConfirmLogin(_ context.Context, h, userID string) error {
+	x, ok := m.logins[h]
+	if !ok || x.user != "" {
+		return domain.ErrNotFound
+	}
+	x.user = userID
+	return nil
+}
+func (m *memBotRepo) DropLogin(_ context.Context, h string) error {
+	delete(m.logins, h)
+	return nil
+}
+func (m *memBotRepo) TakeLogin(_ context.Context, poll string) (string, string, error) {
+	for h, x := range m.logins {
+		if x.l.PollHash != poll {
+			continue
+		}
+		if x.user == "" {
+			return "", "", nil
+		}
+		delete(m.logins, h)
+		return x.user, x.l.PlanID, nil
+	}
+	return "", "", domain.ErrNotFound
+}
+
+type memLogin struct {
+	l    domain.MessengerLogin
+	user string
 }

@@ -1,5 +1,23 @@
 [
  {
+  "version": "1.17",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Вход через MAX и Telegram",
+   "en": "Sign in with MAX and Telegram"
+  },
+  "items": {
+   "ru": [
+    "На странице входа появились кнопки MAX и Telegram. Бот спрашивает «Войти на racion.app?», а после «Войти» страница в браузере открывается сама. С компьютера можно навести камеру телефона на QR-код.",
+    "Если вход начинали не вы, кнопка «Это не я» в боте его отменяет: тот, кто прислал ссылку, доступа не получит."
+   ],
+   "en": [
+    "The sign-in page now has MAX and Telegram buttons. The bot asks “Sign in to racion.app?”, and after “Sign in” the page in your browser opens by itself. On a computer you can point your phone's camera at a QR code.",
+    "If you didn't start the sign-in, the “Not me” button in the bot cancels it: whoever sent the link won't get access."
+   ]
+  }
+ },
+ {
   "version": "1.16",
   "date": "2026-10-07",
   "title": {

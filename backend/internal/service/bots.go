@@ -77,6 +77,11 @@ type MessengerRepo interface {
 	ForgetUser(ctx context.Context, platform, userID string) error
 	CreateLink(ctx context.Context, tokenHash, userID string, expires time.Time) error
 	TakeLink(ctx context.Context, tokenHash string) (string, error)
+	CreateLogin(ctx context.Context, l domain.MessengerLogin, expires time.Time) error
+	PendingLogin(ctx context.Context, tokenHash string) (domain.MessengerLogin, error)
+	ConfirmLogin(ctx context.Context, tokenHash, userID string) error
+	DropLogin(ctx context.Context, tokenHash string) error
+	TakeLogin(ctx context.Context, pollHash string) (userID, planID string, err error)
 	ReminderPlans(ctx context.Context, platform, chatID string, userID *string) ([]domain.PlanReminderInfo, error)
 	Lead(ctx context.Context, key int64) (release func(), ok bool, err error)
 	Chat(ctx context.Context, platform, chatID string) (domain.MessengerChat, error)
@@ -92,6 +97,7 @@ type MessengerRepo interface {
 type BotAccounts interface {
 	ByLink(ctx context.Context, provider, id string) (domain.User, error)
 	Link(ctx context.Context, userID, provider, id string, move bool) error
+	EnsureExternal(ctx context.Context, provider, id string) (domain.User, error)
 }
 
 // LinkTTL — сколько живёт ссылка «Привязать Telegram» из кабинета.
@@ -319,12 +325,16 @@ func (b *Bots) handle(ctx context.Context, u messenger.Update) error {
 		return b.settingsTap(ctx, c, u, chat, lang)
 	case strings.HasPrefix(u.Data, "f:"):
 		return b.feedbackTap(ctx, c, u, chat, lang)
+	case strings.HasPrefix(u.Data, "a:"):
+		return b.loginTap(ctx, c, u, lang)
 	case u.Callback != "":
 		return b.callback(ctx, c, u, lang)
 	case u.Start && strings.HasPrefix(u.Payload, "p"):
 		return b.connect(ctx, c, u.ChatID, strings.TrimPrefix(u.Payload, "p"), lang)
 	case u.Start && strings.HasPrefix(u.Payload, "u"):
 		return b.link(ctx, c, u, strings.TrimPrefix(u.Payload, "u"), lang)
+	case u.Start && strings.HasPrefix(u.Payload, "l"):
+		return b.loginAsk(ctx, c, u, strings.TrimPrefix(u.Payload, "l"), lang)
 	case command(u.Text) == "/settings":
 		return b.send(ctx, c, u.ChatID, b.settingsMessage(chat, lang))
 	default:

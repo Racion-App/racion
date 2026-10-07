@@ -2122,6 +2122,16 @@ body:has(.tablebar:not([hidden])) .sitefoot {
     &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--ds-separator); } }
   &__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
   &__btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; font-weight: 600; text-decoration: none; svg { flex: 0 0 auto; } } }
+// Вход через бота: ждём «Войти» в мессенджере. Ссылка в мессенджер, на компьютере ещё QR-код для
+// телефона — на белом даже в тёмной теме, иначе камера его не прочитает
+.mlogin { display: grid; gap: 12px; justify-items: center; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4); text-align: center;
+  &__text { margin: 0; max-width: 40ch; font-size: 15px; line-height: 1.45; color: var(--ds-label-primary); }
+  &__open { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; }
+  &__qr { display: grid; gap: 6px; justify-items: center; margin: 0;
+    span { display: block; width: 168px; height: 168px; padding: 8px; border-radius: var(--ds-radius-md); background: #fff; }
+    svg { display: block; width: 100%; height: 100%; }
+    figcaption { font-size: 13px; color: var(--ds-label-secondary); } }
+  &__cancel { min-height: 40px; } }
 .tagchip--warn { background: color-mix(in srgb, var(--ds-orange) 18%, transparent); color: var(--ds-orange); }
 
 // Страница «Меню на неделю»: шапка без фото, неделя карточками по дням, строки без миниатюр

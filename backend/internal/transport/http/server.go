@@ -188,6 +188,9 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /api/auth/register", s.limited(s.lim.auth, s.register))
 	mux.HandleFunc("POST /api/auth/login", s.limited(s.lim.auth, s.login))
 	mux.HandleFunc("GET /api/auth/providers", s.oauthProviders)
+	// вход через бота: старт с лимитом входа, опрос раз в пару секунд — без него, ответы дешёвые
+	mux.HandleFunc("POST /api/auth/messenger/{platform}/start", s.limited(s.lim.auth, s.messengerLoginStart))
+	mux.HandleFunc("POST /api/auth/messenger/{platform}/poll", s.messengerLoginPoll)
 	mux.HandleFunc("GET /api/auth/oauth/{provider}/start", s.limited(s.lim.auth, s.oauthStart))
 	mux.HandleFunc("GET /api/auth/oauth/{provider}/callback", s.oauthCallback)
 	mux.HandleFunc("POST /api/auth/oauth/{provider}/callback", s.oauthCallback)

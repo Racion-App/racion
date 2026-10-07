@@ -454,3 +454,33 @@ func (a *Accounts) Purchases(ctx context.Context, userID string, days int) ([]do
 	}
 	return a.purchases.Recent(ctx, userID, days)
 }
+
+// EnsureExternal — аккаунт человека из мессенджера или другого внешнего сервиса: привязанный, а если
+// такого нет — новый, со служебной почтой и привязкой (почту и пароль человек потом задаст в кабинете).
+func (a *Accounts) EnsureExternal(ctx context.Context, provider, id string) (domain.User, error) {
+	if u, err := a.users.ByOAuth(ctx, provider, id); err == nil || !errors.Is(err, domain.ErrNotFound) {
+		return u, err
+	}
+	email := provider + "-" + id + "@login.racion.app"
+	u, _, err := a.users.ByEmail(ctx, email)
+	if errors.Is(err, domain.ErrNotFound) {
+		u, err = a.users.Create(ctx, email, "", "")
+	}
+	if err != nil {
+		return domain.User{}, err
+	}
+	if err := a.users.LinkOAuth(ctx, provider, id, u.ID, email); err != nil {
+		return domain.User{}, err
+	}
+	return u, nil
+}
+
+// SessionFor — сессия для аккаунта, который уже подтвердил себя (вход через бота); неделю забирает в аккаунт.
+func (a *Accounts) SessionFor(ctx context.Context, userID, claimPlan string) (domain.User, domain.Session, error) {
+	s, err := a.startSession(ctx, userID, claimPlan)
+	if err != nil {
+		return domain.User{}, domain.Session{}, err
+	}
+	u, err := a.sessions.UserByToken(ctx, s.Token)
+	return u, s, err
+}

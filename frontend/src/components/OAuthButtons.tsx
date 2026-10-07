@@ -1,8 +1,11 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { useT } from "../i18n";
+import type { MiniPlatform } from "../lib/miniapp";
+import { MessengerLoginButton, MessengerWait, useMessengerBots } from "./MessengerLogin";
 
 // Вход через внешние сервисы. Список даёт сервер: для России VK и Яндекс, остальным все включённые.
 // Кнопка — обычная ссылка на /api/auth/oauth/{id}/start: дальше редиректы, React тут не нужен.
+// В том же ряду — MAX и Telegram, если боты подключены: вход подтверждают в боте (MessengerLogin).
 
 type Provider = { id: string; name: string };
 
@@ -42,6 +45,9 @@ const ICONS: Record<string, ReactElement> = {
 export function OAuthButtons({ plan, next }: { plan?: string; next?: string }) {
   const { t } = useT();
   const [list, setList] = useState<Provider[]>([]);
+  const bots = useMessengerBots();
+  const [waiting, setWaiting] = useState<MiniPlatform | null>(null);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let alive = true;
     fetch("/api/auth/providers", { credentials: "same-origin" })
@@ -50,7 +56,7 @@ export function OAuthButtons({ plan, next }: { plan?: string; next?: string }) {
       .catch(() => {});
     return () => { alive = false; };
   }, []);
-  if (list.length === 0) return null;
+  if (list.length === 0 && bots.length === 0) return null;
   const q = new URLSearchParams();
   if (plan) q.set("plan", plan);
   if (next) q.set("next", next);
@@ -59,6 +65,9 @@ export function OAuthButtons({ plan, next }: { plan?: string; next?: string }) {
     <div className="oauth">
       <div className="oauth__sep"><span>{t("auth.via")}</span></div>
       <div className="oauth__row">
+        {bots.map((p) => (
+          <MessengerLoginButton key={p} platform={p} onStart={(x) => { setWaiting(x); setAttempt((n) => n + 1); }} />
+        ))}
         {list.map((p) => (
           <a key={p.id} className="btn btn-soft oauth__btn" href={`/api/auth/oauth/${p.id}/start${qs}`} aria-label={t("auth.via.one", { name: p.name })}>
             {ICONS[p.id]}
@@ -66,6 +75,9 @@ export function OAuthButtons({ plan, next }: { plan?: string; next?: string }) {
           </a>
         ))}
       </div>
+      {waiting && (
+        <MessengerWait key={waiting + attempt} platform={waiting} plan={plan} next={next || (plan ? `/plan/${plan}` : "/me")} onClose={() => setWaiting(null)} />
+      )}
     </div>
   );
 }

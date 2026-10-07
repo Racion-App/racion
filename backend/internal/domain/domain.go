@@ -491,3 +491,13 @@ type HealthDay struct {
 	Total     int
 	OK        int
 }
+
+// MessengerLogin — вход на сайт через бота: запрос страницы входа, который человек подтверждает в боте.
+type MessengerLogin struct {
+	TokenHash string // sha256 токена из ссылки на бота
+	PollHash  string // sha256 секрета браузера, который ждёт подтверждения
+	Platform  string
+	Lang      string
+	PlanID    string // неделя, которую забрать в аккаунт после входа
+	Agent     string // «Chrome, Windows»: бот показывает, откуда входят
+}
