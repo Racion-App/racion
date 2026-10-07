@@ -1,0 +1,75 @@
+{{define "layout"}}<!doctype html>
+<html lang="{{.Lang}}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{{.Subject}}</title>
+{{msoHead}}
+<style>
+:root { color-scheme: light dark; supported-color-schemes: light dark; }
+body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+table { border-collapse: separate; mso-table-lspace: 0; mso-table-rspace: 0; }
+a.r-btn:hover { background: #0062C4 !important; }
+@media (prefers-color-scheme: dark) {
+  .r-page { background: #000000 !important; }
+  .r-sheet { background: #1C1C1E !important; }
+  .r-t1 { color: #F2F2F7 !important; }
+  .r-t2 { color: #AEAEB2 !important; }
+  .r-board { background: #2C2C2E !important; }
+  .r-cap { color: #D1D1D6 !important; }
+  .r-rule { border-top-color: #38383A !important; }
+}
+[data-ogsc] .r-t1 { color: #F2F2F7 !important; }
+[data-ogsc] .r-t2 { color: #AEAEB2 !important; }
+[data-ogsc] .r-cap { color: #D1D1D6 !important; }
+[data-ogsb] .r-page { background: #000000 !important; }
+[data-ogsb] .r-sheet { background: #1C1C1E !important; }
+[data-ogsb] .r-board { background: #2C2C2E !important; }
+@media (max-width: 400px) {
+  .r-outer { padding-left: 16px !important; padding-right: 16px !important; }
+  .r-inner { padding-left: 20px !important; padding-right: 20px !important; }
+}
+</style>
+</head>
+<body class="r-page" style="margin:0;padding:0;background:#F2F2F7;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">{{.Preheader}}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="r-page" style="background:#F2F2F7;">
+<tr><td align="center" class="r-outer" style="padding:16px 24px 24px;">
+{{msoOpen}}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="r-sheet" bgcolor="#FFFFFF" style="max-width:560px;background:#FFFFFF;border-radius:16px;">
+<tr><td class="r-inner" style="padding:28px 24px 23px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="vertical-align:middle;"><img src="{{.Icon}}" width="20" height="25" alt="" style="display:block;width:20px;height:25px;"></td>
+<td class="r-t1" style="vertical-align:middle;padding-left:10px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:21px;line-height:24px;font-weight:700;letter-spacing:-0.2px;color:#0B0B0C;">{{.Brand}}</td>
+</tr></table>
+</td></tr>
+{{template "body" .}}
+</table>
+</td></tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+<tr><td align="center" class="r-t2" style="padding:10px 0 0;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:11px;line-height:14px;color:#676C7A;">{{.Footer}}</td></tr>
+</table>
+{{msoClose}}
+</td></tr>
+</table>
+</body>
+</html>{{end}}
+
+{{define "board"}}<tr><td style="padding-top:13px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td align="center" class="r-board" bgcolor="#F0F1F6" style="background:#F0F1F6;border-radius:14px;padding:23px 16px 14px;">
+<div class="r-t1" style="font-family:ui-monospace,'SF Mono',SFMono-Regular,'JetBrains Mono',Menlo,Consolas,'Roboto Mono','Liberation Mono',monospace;font-size:71px;line-height:58px;font-weight:800;letter-spacing:1px;color:#111113;">{{.Board.Value}}</div>
+<div class="r-cap" style="padding-top:9px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:18px;color:#3C4655;">{{.Board.Caption}}</div>
+</td></tr></table></td></tr>{{end}}
+
+{{define "button"}}<tr><td style="padding-top:21px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td align="center" class="r-btn-cell" bgcolor="#0071E3" style="background:#0071E3;border-radius:12px;">
+{{msoButton .Link .Button}}{{notMso}}<a href="{{.Link}}" class="r-btn" style="display:block;padding:13px 16px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:17px;line-height:21px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:12px;background:#0071E3;">{{.Button}}</a>{{notMsoClose}}
+</td></tr></table></td></tr>{{end}}

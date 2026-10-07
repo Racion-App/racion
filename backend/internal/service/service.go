@@ -3,13 +3,14 @@
 package service
 
 import (
-	"strings"
-	"go.uber.org/zap"
 	"context"
 	"encoding/json"
+	"go.uber.org/zap"
+	"strings"
 	"time"
 
 	"racion/internal/domain"
+	letters "racion/internal/mail"
 	"racion/internal/planner"
 )
 
@@ -40,7 +41,7 @@ type ResetRepo interface {
 
 // Mailer шлёт письма (восстановление пароля)
 type Mailer interface {
-	Send(to, subject, text string) error
+	SendLetter(to string, l letters.Letter) error
 }
 
 type SessionRepo interface {

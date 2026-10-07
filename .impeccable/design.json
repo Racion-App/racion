@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "generatedAt": "2026-10-07T12:00:00Z",
+ "generatedAt": "2026-10-07T15:00:00Z",
  "title": "Design System: Рацион",
  "extensions": {
   "source": {
@@ -36,6 +36,20 @@
     "styles": "frontend/src/styles/app.scss — раздел «Страницы возраста», плюс .faq у .colfaq",
     "script": "frontend/public/ssr.js — плавный FAQ",
     "brief": ".impeccable/surfaces/end-internal-transport-http-templates-kidmenu-html.md"
+   },
+   "mail": {
+    "templates": [
+     "backend/internal/mail/templates/layout.html",
+     "backend/internal/mail/templates/reset.html",
+     "backend/internal/mail/templates/welcome.html"
+    ],
+    "code": [
+     "backend/internal/mail/letter.go",
+     "backend/internal/mail/mail.go"
+    ],
+    "brandRaster": "frontend/public/mail/receipt.png (lucide ReceiptText, #007AFF, 75x92, показан 20x25; происхождение в PNG tEXt impeccable:prompt)",
+    "preview": "backend/cmd/mailpreview",
+    "brief": ".impeccable/surfaces/backend-internal-mail-templates-layout-html.md"
    }
   },
   "colorMeta": {
@@ -446,6 +460,303 @@
      "rgba(116,116,128,0.02)",
      "rgba(116,116,128,0.01)"
     ]
+   },
+   "mail-ink": {
+    "role": "neutral",
+    "displayName": "Чернила письма",
+    "canonical": "#0B0B0C",
+    "scope": "email",
+    "purpose": "Слово «Рацион» и заголовок письма (.r-t1).",
+    "tonalRamp": [
+     "#030303",
+     "#050505",
+     "#070708",
+     "#09090A",
+     "#0B0B0C",
+     "#545455",
+     "#9D9D9E",
+     "#DADADB"
+    ],
+    "darkToken": "mail-dark-ink"
+   },
+   "mail-digits": {
+    "role": "neutral",
+    "displayName": "Цифры табло",
+    "canonical": "#111113",
+    "scope": "email",
+    "purpose": "Число на табло письма (.r-t1).",
+    "tonalRamp": [
+     "#040405",
+     "#080809",
+     "#0B0B0C",
+     "#0E0E10",
+     "#111113",
+     "#58585A",
+     "#A0A0A1",
+     "#DBDBDC"
+    ],
+    "darkToken": "mail-dark-ink"
+   },
+   "mail-secondary": {
+    "role": "neutral",
+    "displayName": "Вторичный текст письма",
+    "canonical": "#636874",
+    "scope": "email",
+    "purpose": "Подводка, «Кнопка не нажимается?», примечание (.r-t2).",
+    "tonalRamp": [
+     "#191A1D",
+     "#2D2F34",
+     "#40444B",
+     "#545863",
+     "#636874",
+     "#92959E",
+     "#C1C3C7",
+     "#E8E8EA"
+    ],
+    "darkToken": "mail-dark-secondary"
+   },
+   "mail-link": {
+    "role": "neutral",
+    "displayName": "Запасная ссылка",
+    "canonical": "#5B6473",
+    "scope": "email",
+    "purpose": "Адрес под кнопкой, моно 13.5px (.r-t2).",
+    "tonalRamp": [
+     "#17191D",
+     "#292D34",
+     "#3B414B",
+     "#4D5562",
+     "#5B6473",
+     "#8C929D",
+     "#BDC1C7",
+     "#E6E8EA"
+    ],
+    "darkToken": "mail-dark-secondary"
+   },
+   "mail-caption": {
+    "role": "neutral",
+    "displayName": "Подпись табло",
+    "canonical": "#3C4655",
+    "scope": "email",
+    "purpose": "Подпись под числом на плашке (.r-cap); темнее вторичного, потому что стоит на плашке.",
+    "tonalRamp": [
+     "#0F1215",
+     "#1B2026",
+     "#272E37",
+     "#333C48",
+     "#3C4655",
+     "#767E88",
+     "#B1B5BB",
+     "#E2E3E6"
+    ],
+    "darkToken": "mail-dark-caption"
+   },
+   "mail-board": {
+    "role": "neutral",
+    "displayName": "Плашка табло",
+    "canonical": "#F0F1F6",
+    "scope": "email",
+    "purpose": "Фон табло (.r-board).",
+    "tonalRamp": [
+     "#3C3C3E",
+     "#6C6C6F",
+     "#9C9DA0",
+     "#CCCDD1",
+     "#F0F1F6",
+     "#F4F5F9",
+     "#F9F9FB",
+     "#FDFDFE"
+    ],
+    "darkToken": "mail-dark-board"
+   },
+   "mail-rule": {
+    "role": "neutral",
+    "displayName": "Линия письма",
+    "canonical": "#E8E9EE",
+    "scope": "email",
+    "purpose": "Волосяная линия над примечанием (.r-rule).",
+    "tonalRamp": [
+     "#3A3A3C",
+     "#68696B",
+     "#97979B",
+     "#C5C6CA",
+     "#E8E9EE",
+     "#EFF0F3",
+     "#F6F6F8",
+     "#FCFCFC"
+    ],
+    "darkToken": "mail-dark-rule"
+   },
+   "mail-footer": {
+    "role": "neutral",
+    "displayName": "Подвал письма",
+    "canonical": "#676C7A",
+    "scope": "email",
+    "purpose": "Подвал «Рацион · info@racion.app» 11px на грунте вне листа (.r-t2).",
+    "tonalRamp": [
+     "#1A1B1E",
+     "#2E3137",
+     "#43464F",
+     "#585C68",
+     "#676C7A",
+     "#9598A2",
+     "#C2C4CA",
+     "#E8E9EB"
+    ],
+    "darkToken": "mail-dark-secondary"
+   },
+   "mail-blue": {
+    "role": "primary",
+    "displayName": "Синий письма",
+    "canonical": "#0071E3",
+    "scope": "email",
+    "purpose": "Только кнопка письма и fillcolor VML-кнопки (константа ButtonBlue): 4.7:1 с белым. Сайт держит #007AFF.",
+    "tonalRamp": [
+     "#001C39",
+     "#003366",
+     "#004994",
+     "#0060C1",
+     "#0071E3",
+     "#4C9CEB",
+     "#99C6F4",
+     "#D9EAFB"
+    ]
+   },
+   "mail-blue-hover": {
+    "role": "primary",
+    "displayName": "Синий письма, hover",
+    "canonical": "#0062C4",
+    "scope": "email",
+    "purpose": "a.r-btn:hover в клиентах, которые понимают <style>.",
+    "tonalRamp": [
+     "#001831",
+     "#002C58",
+     "#00407F",
+     "#0053A7",
+     "#0062C4",
+     "#4C91D6",
+     "#99C0E7",
+     "#D9E7F6"
+    ]
+   },
+   "mail-dark-page": {
+    "role": "neutral",
+    "displayName": "Грунт письма, тёмная тема",
+    "canonical": "#000000",
+    "scope": "email",
+    "purpose": ".r-page в prefers-color-scheme: dark и [data-ogsb].",
+    "tonalRamp": [
+     "#000000",
+     "#000000",
+     "#000000",
+     "#000000",
+     "#000000",
+     "#4C4C4C",
+     "#999999",
+     "#D9D9D9"
+    ]
+   },
+   "mail-dark-sheet": {
+    "role": "neutral",
+    "displayName": "Лист письма, тёмная тема",
+    "canonical": "#1C1C1E",
+    "scope": "email",
+    "purpose": ".r-sheet в тёмной теме и [data-ogsb].",
+    "tonalRamp": [
+     "#070708",
+     "#0D0D0E",
+     "#121214",
+     "#18181A",
+     "#1C1C1E",
+     "#606062",
+     "#A4A4A5",
+     "#DDDDDD"
+    ]
+   },
+   "mail-dark-board": {
+    "role": "neutral",
+    "displayName": "Табло, тёмная тема",
+    "canonical": "#2C2C2E",
+    "scope": "email",
+    "purpose": ".r-board в тёмной теме и [data-ogsb].",
+    "tonalRamp": [
+     "#0B0B0C",
+     "#141415",
+     "#1D1D1E",
+     "#252527",
+     "#2C2C2E",
+     "#6B6B6D",
+     "#ABABAB",
+     "#DFDFE0"
+    ]
+   },
+   "mail-dark-ink": {
+    "role": "neutral",
+    "displayName": "Чернила, тёмная тема",
+    "canonical": "#F2F2F7",
+    "scope": "email",
+    "purpose": ".r-t1 (бренд, заголовок, цифры) в тёмной теме и [data-ogsc].",
+    "tonalRamp": [
+     "#3C3C3E",
+     "#6D6D6F",
+     "#9D9DA1",
+     "#CECED2",
+     "#F2F2F7",
+     "#F6F6F9",
+     "#FAFAFC",
+     "#FDFDFE"
+    ]
+   },
+   "mail-dark-secondary": {
+    "role": "neutral",
+    "displayName": "Вторичный, тёмная тема",
+    "canonical": "#AEAEB2",
+    "scope": "email",
+    "purpose": ".r-t2 (подводка, ссылка, примечание, подвал) в тёмной теме и [data-ogsc].",
+    "tonalRamp": [
+     "#2C2C2C",
+     "#4E4E50",
+     "#717174",
+     "#949497",
+     "#AEAEB2",
+     "#C6C6C9",
+     "#DFDFE0",
+     "#F3F3F3"
+    ]
+   },
+   "mail-dark-caption": {
+    "role": "neutral",
+    "displayName": "Подпись табло, тёмная тема",
+    "canonical": "#D1D1D6",
+    "scope": "email",
+    "purpose": ".r-cap в тёмной теме и [data-ogsc].",
+    "tonalRamp": [
+     "#343436",
+     "#5E5E60",
+     "#88888B",
+     "#B2B2B6",
+     "#D1D1D6",
+     "#DFDFE2",
+     "#EDEDEF",
+     "#F8F8F9"
+    ]
+   },
+   "mail-dark-rule": {
+    "role": "neutral",
+    "displayName": "Линия, тёмная тема",
+    "canonical": "#38383A",
+    "scope": "email",
+    "purpose": ".r-rule в тёмной теме.",
+    "tonalRamp": [
+     "#0E0E0E",
+     "#19191A",
+     "#242426",
+     "#303031",
+     "#38383A",
+     "#747475",
+     "#AFAFB0",
+     "#E1E1E1"
+    ]
    }
   },
   "typographyMeta": {
@@ -488,6 +799,46 @@
    "num": {
     "displayName": "Num (mono)",
     "purpose": "Класс .num: любое число — ₽, ккал, мин, г, мл, шт, %, номера строк, надстрочный номер в шаге (11). JetBrains Mono 500/600/700 самохостинг, tnum lnum, zero 0. Размер наследует от контекста 11–26px."
+   },
+   "mail-brand": {
+    "displayName": "Бренд письма",
+    "purpose": "«Рацион» 21/24 700 −0.2px рядом со знаком 20×25 в строке бренда."
+   },
+   "mail-title": {
+    "displayName": "Заголовок письма",
+    "purpose": "35/40 700 −0.7px, mail-ink; системный стек без веб-шрифтов."
+   },
+   "mail-board": {
+    "displayName": "Цифры табло",
+    "purpose": "71/58 800 +1px, системный моно; «60:00» — срок ссылки, в приветствии — число блюд недели. Никогда не рубли."
+   },
+   "mail-lead": {
+    "displayName": "Подводка письма",
+    "purpose": "16.5/22 mail-secondary, max-width 330px."
+   },
+   "mail-button": {
+    "displayName": "Кнопка письма",
+    "purpose": "17/21 600 белым на mail-blue; тот же размер в VML-кнопке Outlook (Segoe UI)."
+   },
+   "mail-caption": {
+    "displayName": "Подпись табло",
+    "purpose": "15/18 mail-caption под цифрами."
+   },
+   "mail-note": {
+    "displayName": "Примечание письма",
+    "purpose": "15/21 mail-secondary под линией, max-width 300px."
+   },
+   "mail-fallback": {
+    "displayName": "Строка запасной ссылки",
+    "purpose": "14.5/20 mail-secondary: «Кнопка не нажимается? Откройте ссылку:»."
+   },
+   "mail-link": {
+    "displayName": "Запасная ссылка",
+    "purpose": "13.5/20 моно mail-link, адрес целиком без https://, word-break: break-all."
+   },
+   "mail-footer": {
+    "displayName": "Подвал письма",
+    "purpose": "11/14 mail-footer, по центру под листом."
    }
   },
   "fonts": [
@@ -758,6 +1109,11 @@
     "name": "week-3col",
     "value": "1000px",
     "purpose": "≥1000px: неделя в 3 колонки, список покупок на 2 колонки и в два столбца."
+   },
+   {
+    "name": "mail-narrow",
+    "value": "400px",
+    "purpose": "Письма, max-width 400px: внешние поля по бокам 16px (.r-outer), внутренние 20px (.r-inner)."
    }
   ],
   "layout": {
@@ -788,6 +1144,68 @@
    "weekPhone": "grid-auto-flow: column; grid-auto-columns: 86%; scroll-snap x mandatory; bleed 16px",
    "dayRowGrid": "40px minmax(0, 1fr) auto",
    "weaningStepGrid": "84px minmax(0, 1fr) → 1fr @≤560"
+  },
+  "mail": {
+   "scope": "Транзакционные письма: сброс пароля (reset) и приветствие после регистрации (welcome). Родственное расширение «Чека», не замена.",
+   "layout": {
+    "technique": "таблицы role=presentation, инлайн-стили; <style> только для тёмной темы, узкого экрана и hover",
+    "page": "внешняя таблица 100%, фон bg-base, поля 16px 24px 24px",
+    "sheetMax": "560px",
+    "sheetRadius": "16px",
+    "sheetPadding": "28px 24px 23px",
+    "narrow": "max-width 400px: внешние поля 16px по бокам, внутренние 20px",
+    "order": "знак 20x25 + «Рацион» → заголовок (22) → подводка (13, max-width 330) → табло (13) → кнопка (21) → запасная ссылка (18) → линия (15) → примечание (15, max-width 300); подвал вне листа (10)",
+    "leadMaxWidth": "330px",
+    "noteMaxWidth": "300px",
+    "preheader": "скрытый div первым в body, заполнитель &#847;&zwnj;&nbsp;"
+   },
+   "fonts": {
+    "sans": "-apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "mono": "ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, 'Roboto Mono', 'Liberation Mono', monospace",
+    "webFonts": false
+   },
+   "darkMode": {
+    "triggers": [
+     "@media (prefers-color-scheme: dark)",
+     "[data-ogsc] (Outlook.com, цвет текста)",
+     "[data-ogsb] (Outlook.com, фон)"
+    ],
+    "classes": {
+     ".r-page": "mail-dark-page",
+     ".r-sheet": "mail-dark-sheet",
+     ".r-board": "mail-dark-board",
+     ".r-t1": "mail-dark-ink",
+     ".r-t2": "mail-dark-secondary",
+     ".r-cap": "mail-dark-caption",
+     ".r-rule": "mail-dark-rule"
+    },
+    "meta": [
+     "<meta name=\"color-scheme\" content=\"light dark\">",
+     "<meta name=\"supported-color-schemes\" content=\"light dark\">"
+    ],
+    "button": "не меняется: mail-blue с белым текстом в обеих темах"
+   },
+   "outlook": {
+    "funcs": [
+     "msoHead",
+     "msoOpen",
+     "msoClose",
+     "notMso",
+     "notMsoClose",
+     "msoButton"
+    ],
+    "why": "html/template вырезает комментарии из файла шаблона; условные комментарии приходят только из функций как template.HTML",
+    "sheet": "таблица фиксированной ширины 560 вместо max-width",
+    "button": "v:roundrect 47x512px, arcsize 26%, stroke f, fillcolor = ButtonBlue, текст Segoe UI 17/600 белым"
+   },
+   "board": {
+    "reset": "ResetBoard: минуты как «60:00» + «столько работает ссылка»; срок ссылки, не отсчёт",
+    "welcome": "WelcomeBoard: число блюд недели + plural + «в вашей неделе»; без недели (dishes <= 0) табло не выводится",
+    "never": "рубли и любые суммы"
+   },
+   "fallbackLink": "linkText снимает только https:// или http://; адрес целиком, без обрезки",
+   "typesetting": "nbsp(): в ru и uk однобуквенные предлоги и союзы связываются с следующим словом U+00A0, два прохода; применяется к заголовку, подводке, примечанию, строке запасной ссылки и подписи табло",
+   "transport": "SendLetter: multipart/alternative, text/plain затем text/html, обе части quoted-printable; текст собирается в Render из тех же строк, что и HTML"
   }
  },
  "components": [
@@ -973,11 +1391,35 @@
    "description": "details.faq: вопрос 15.5/600 с нарисованным плюсом, который поворачивается в крестик; высота ответа анимируется в ssr.js.",
    "html": "<details class=\"ds-faq\"><summary>Можно ли давать соль?</summary><p>До года — нет, после — понемногу.</p></details>",
    "css": ".ds-faq { border-top: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); border-bottom: 1px solid var(--ds-separator, rgba(60,60,67,0.18)); } .ds-faq summary { cursor: pointer; min-height: 48px; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 15.5px; font-weight: 600; } .ds-faq summary::-webkit-details-marker { display: none; } .ds-faq summary::after { content: ''; flex: 0 0 auto; width: 18px; height: 18px; background: var(--ds-label-secondary, rgba(60,60,67,0.65)); transition: transform 220ms cubic-bezier(0.32,0.72,0,1); -webkit-mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E\") center / contain no-repeat; mask: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E\") center / contain no-repeat; } .ds-faq[open] summary::after { transform: rotate(45deg); } .ds-faq summary:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0,122,255,0.22); border-radius: 6px; } .ds-faq p { margin: 0; padding: 0 0 14px; color: var(--ds-label-secondary, rgba(60,60,67,0.65)); }"
+  },
+  {
+   "name": "Mail Board",
+   "kind": "custom",
+   "refersTo": "mail-board",
+   "description": "Табло письма: одно число 71px моно на плашке #F0F1F6 с подписью; «60:00» — срок ссылки, в приветствии — число блюд. Никогда не рубли.",
+   "html": "<div class=\"ds-mail-board\"><div class=\"ds-mail-board__value\">60:00</div><div class=\"ds-mail-board__cap\">столько работает ссылка</div></div>",
+   "css": ".ds-mail-board { background: #F0F1F6; border-radius: 14px; padding: 23px 16px 14px; text-align: center; } .ds-mail-board__value { font-family: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, 'Roboto Mono', 'Liberation Mono', monospace; font-size: 71px; line-height: 58px; font-weight: 800; letter-spacing: 1px; color: #111113; } .ds-mail-board__cap { padding-top: 9px; font-family: -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 18px; color: #3C4655; } @media (prefers-color-scheme: dark) { .ds-mail-board { background: #2C2C2E; } .ds-mail-board__value { color: #F2F2F7; } .ds-mail-board__cap { color: #D1D1D6; } }"
+  },
+  {
+   "name": "Mail Button",
+   "kind": "button",
+   "refersTo": "mail-button",
+   "description": "Единственная кнопка письма: плоская #0071E3, 47px, радиус 12, на всю ширину листа; в Outlook — VML roundrect того же цвета.",
+   "html": "<a class=\"ds-mail-btn\" href=\"#\">Сменить пароль</a>",
+   "css": ".ds-mail-btn { display: block; text-align: center; padding: 13px 16px; font-family: -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; line-height: 21px; font-weight: 600; color: #FFFFFF; text-decoration: none; border-radius: 12px; background: #0071E3; } .ds-mail-btn:hover { background: #0062C4; } .ds-mail-btn:focus-visible { outline: 2px solid #0071E3; outline-offset: 2px; }"
+  },
+  {
+   "name": "Mail Sheet",
+   "kind": "card",
+   "refersTo": "mail-sheet",
+   "description": "Лист письма на грунте #F2F2F7: знак и «Рацион», заголовок 35px, подводка, табло, кнопка, запасная ссылка моно целиком, линия, примечание; подвал 11px вне листа.",
+   "html": "<div class=\"ds-mail-page\"><div class=\"ds-mail-sheet\"><div class=\"ds-mail-brand\">Рацион</div><h1 class=\"ds-mail-title\">Новый пароль</h1><p class=\"ds-mail-lead\">Кто-то, надеемся, вы, попросил сменить пароль на racion.app.</p><p class=\"ds-mail-fb\">Кнопка не нажимается? Откройте ссылку:<br><a class=\"ds-mail-link\" href=\"#\">racion.app/login?reset=79169fbe9f6b8702e6106e4d7e163c0b0b301532b12f81dc3728350aa6a38ea8</a></p><hr class=\"ds-mail-rule\"><p class=\"ds-mail-note\">Если это были не вы, ничего не делайте: пароль останется прежним.</p></div><div class=\"ds-mail-foot\">Рацион · info@racion.app</div></div>",
+   "css": ".ds-mail-page { background: #F2F2F7; padding: 16px 24px 24px; font-family: -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; } .ds-mail-sheet { max-width: 560px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 28px 24px 23px; box-sizing: border-box; } .ds-mail-brand { font-size: 21px; line-height: 24px; font-weight: 700; letter-spacing: -0.2px; color: #0B0B0C; } .ds-mail-title { margin: 22px 0 0; font-size: 35px; line-height: 40px; font-weight: 700; letter-spacing: -0.7px; color: #0B0B0C; } .ds-mail-lead { margin: 13px 0 0; max-width: 330px; font-size: 16.5px; line-height: 22px; color: #636874; } .ds-mail-fb { margin: 18px 0 0; font-size: 14.5px; line-height: 20px; color: #636874; } .ds-mail-link { font-family: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, 'Roboto Mono', 'Liberation Mono', monospace; font-size: 13.5px; line-height: 20px; color: #5B6473; text-decoration: none; word-break: break-all; } .ds-mail-rule { margin: 15px 0 0; border: 0; border-top: 1px solid #E8E9EE; } .ds-mail-note { margin: 15px 0 0; max-width: 300px; font-size: 15px; line-height: 21px; color: #636874; } .ds-mail-foot { max-width: 560px; margin: 0 auto; padding-top: 10px; text-align: center; font-size: 11px; line-height: 14px; color: #676C7A; } @media (prefers-color-scheme: dark) { .ds-mail-page { background: #000000; } .ds-mail-sheet { background: #1C1C1E; } .ds-mail-brand, .ds-mail-title { color: #F2F2F7; } .ds-mail-lead, .ds-mail-fb, .ds-mail-link, .ds-mail-note, .ds-mail-foot { color: #AEAEB2; } .ds-mail-rule { border-top-color: #38383A; } } @media (max-width: 400px) { .ds-mail-page { padding-left: 16px; padding-right: 16px; } .ds-mail-sheet { padding-left: 20px; padding-right: 20px; } }"
   }
  ],
  "narrative": {
   "northStar": "«Чек» (seed cd59ffcb)",
-  "overview": "Визуальный мир унаследован от Rubby Design System (Apple HIG поверх Bootstrap 5.3), завендоренной в frontend/src/styles/design-system/. Все токены --ds-* — источник правды; этот файл описывает слой поверхности: как система легла на продукт «квиз → чек → рецепт» и какие локальные правила он к ней добавил. Локальные токены: --r-sheet-max 560px, --r-gutter 16px, --r-bar-h 64px, --r-tabular, --r-safe-bottom и вычисляемый --rp-tint.\n\nПродукт — не дашборд, а один непрерывный документ. Результат квиза печатается как чек; страница рецепта (SSR, тот же app.css) — тот же лист, устроенный как карточка товара: шапка с фактами, слева продукты и шаги, справа панель фактов, внизу похожие. Плотность высокая, воздух держится на разделителях. Единственный «бумажный» приём — линия отрыва.\n\nЦвет сдержан до предела: нейтрали Apple, синий только на одном действии и выборе, зелёный только на деньгах, тинт приёма пищи только как подложка. Числа — JetBrains Mono tnum через .num в React и в Go-шаблонах. Иконки — только lucide (react или инлайн-SVG), эмодзи запрещены. Топбар один и тот же в обоих каркасах.",
+  "overview": "Визуальный мир унаследован от Rubby Design System (Apple HIG поверх Bootstrap 5.3), завендоренной в frontend/src/styles/design-system/. Все токены --ds-* — источник правды; этот файл описывает слой поверхности: как система легла на продукт «квиз → чек → рецепт» и какие локальные правила он к ней добавил. Локальные токены: --r-sheet-max 560px, --r-gutter 16px, --r-bar-h 64px, --r-tabular, --r-safe-bottom и вычисляемый --rp-tint.\n\nПродукт — не дашборд, а один непрерывный документ. Результат квиза печатается как чек; страница рецепта (SSR, тот же app.css) — тот же лист, устроенный как карточка товара: шапка с фактами, слева продукты и шаги, справа панель фактов, внизу похожие. Плотность высокая, воздух держится на разделителях. Единственный «бумажный» приём — линия отрыва.\n\nЦвет сдержан до предела: нейтрали Apple, синий только на одном действии и выборе, зелёный только на деньгах, тинт приёма пищи только как подложка. Числа — JetBrains Mono tnum через .num в React и в Go-шаблонах. Иконки — только lucide (react или инлайн-SVG), эмодзи запрещены. Топбар один и тот же в обоих каркасах.\n\nПисьма — родственное расширение того же мира, а не отдельная система (backend/internal/mail/templates/: layout.html + reset.html, welcome.html; сборка — letter.go). Почтовые клиенты не знают var(--ds-*), веб-шрифтов и SVG, поэтому «Чек» переведён на их язык: таблицы и инлайн-стили, системные стеки шрифтов, литеральные цвета из набора mail-*. Мир узнаётся по тем же приметам: серый грунт, один белый лист, почти чёрный жирный заголовок, серый вторичный текст, моноширинные числа и ссылки, знак-чек рядом со словом «Рацион», одна плоская синяя кнопка. Своё у письма одно — «табло»: главное число крупно и моноширинно на серой плашке прямо над кнопкой.",
   "keyCharacteristics": [
    "Rubby DS как источник правды; поверхность добавляет только --r-*, --rp-tint и классы чека/квиза/рецепта.",
    "Одна возвышенная белая карточка (--ds-bg-elevated) на сером грунте: чек, лист рецепта, карточка входа.",
@@ -986,7 +1428,8 @@
    "Пружинная анимация --ds-ease-spring; авторский момент чека — «печать», на рецепте только reprint пересчитанных граммовок, на страницах возраста — раскладка «тарелки дня» plate-in.",
    "Каждая оценка в рублях несёт «≈»; цифра без «≈» — только целевой бюджет пользователя.",
    "Один и тот же топбар в React и SSR: бренд · «Рецепты» · кабинет · тема.",
-   "Страницы возраста (/menu/child-*, /weaning) — тот же мир без листа: белые плоские блоки с границей на сером грунте, шкала возраста сверху, «тарелка дня» с настоящими фото блюд в первом экране."
+   "Страницы возраста (/menu/child-*, /weaning) — тот же мир без листа: белые плоские блоки с границей на сером грунте, шкала возраста сверху, «тарелка дня» с настоящими фото блюд в первом экране.",
+   "Письма — тот же мир на языке почтовых клиентов: таблицы, инлайн-стили, системные шрифты, литералы mail-*; одно число на табло, под ним одна плоская кнопка; у каждого письма текстовая часть из тех же строк."
   ],
   "rules": [
    {
@@ -1011,7 +1454,7 @@
    },
    {
     "name": "The Token-Only Rule",
-    "body": "Поверхность не пишет hex: каждый цвет — var(--ds-*). Единственные литералы — #fff на галочке купленного, на счётчике фильтров и на текущем возрасте шкалы, rgba(0,0,0,0.38) у ::backdrop нижнего листа, rgba(0,0,0,0.08) в мягкой тени фото «тарелки дня», color-mix(in srgb, var(--ds-blue) 88%, black 12%) на hover плоской кнопки .ctapanel и #fff фона в @media print.",
+    "body": "Поверхность не пишет hex: каждый цвет — var(--ds-*). Единственные литералы — #fff на галочке купленного, на счётчике фильтров и на текущем возрасте шкалы, rgba(0,0,0,0.38) у ::backdrop нижнего листа, rgba(0,0,0,0.08) в мягкой тени фото «тарелки дня», color-mix(in srgb, var(--ds-blue) 88%, black 12%) на hover плоской кнопки .ctapanel и #fff фона в @media print. Письма живут по своему правилу (The Email Literal Rule).",
     "section": "colors"
    },
    {
@@ -1036,7 +1479,7 @@
    },
    {
     "name": "The Russian Plural Rule",
-    "body": "Счётчики склоняются функцией plural(n, «рецепт», «рецепта», «рецептов»); «294 рецептов» — дефект копирайта, а не стиль.",
+    "body": "Счётчики склоняются функцией plural(n, «рецепт», «рецепта», «рецептов»); «294 рецептов» — дефект копирайта, а не стиль. В письмах то же через i18n.Plural («21 блюдо в вашей неделе»).",
     "section": "typography"
    },
    {
@@ -1078,6 +1521,21 @@
     "name": "The Plate Geometry Rule",
     "body": "«Тарелка дня» раскладывается только переменными --a0 --rx --ry --cy --ph --cw --capw в cqw и cos()/sin() от угла a0 + i·360°/n; телефонная геометрия под 520px, четыре приёма — по диагоналям (.plate__ring--4). Новый случай — новый набор переменных, не ручные координаты.",
     "section": "layout"
+   },
+   {
+    "name": "The Email Literal Rule",
+    "section": "colors",
+    "body": "В шаблонах писем литеральные цвета и размеры разрешены: почтовые клиенты не поддерживают CSS custom properties. Разрешены только значения из токенов mail-*, bg-base, bg-elevated и белый текст кнопки; новому оттенку в письме сначала нужен токен здесь, потом место в шаблоне. Каждый цветной элемент письма несёт класс тёмной темы, иначе в тёмном клиенте он останется светлым."
+   },
+   {
+    "name": "The Email Blue Rule",
+    "section": "colors",
+    "body": "#0071E3 живёт только в письмах, сайт держит --ds-blue #007AFF. Синий письма не переезжает на сайт, синий сайта не возвращается в кнопку письма."
+   },
+   {
+    "name": "The No-Hanging-Letter Rule",
+    "section": "typography",
+    "body": "В русских и украинских письмах однобуквенные предлоги и союзы (в, с, к, о, у, а, и, я, з, і, й, ж) держатся за следующее слово неразрывным пробелом U+00A0. nbsp() в letter.go прогоняет заголовок, подводку, примечание, строку запасной ссылки и подпись табло в два прохода, чтобы связать и цепочку («и с телефона»). Новая строка письма проходит через тот же список."
    }
   ],
   "dos": [
@@ -1088,21 +1546,26 @@
    "Do ставить тинт приёма пищи только как подложку: градиент шапки .rpage--{slot} и полоска 4px .rcard__cover--{slot}.",
    "Do помечать продукт в тексте шага инлайн-ссылкой .steps__ref с надстрочным номером строки; нумерация шага — CSS-счётчик, продукта — .ings__n, номера совпадают.",
    "Do давать интерактивам ≥44px (плитки 88, чипы 44, счётчик 44, опции 64, кнопки панели 48, поля 48; иконки топбара 36, порции 36, замена 36 и .chip--sm 34 — исключения внутри строки/шапки), :focus-visible с --ds-shadow-focus, роли radio/checkbox/progressbar/separator/listbox/group/search, aria-label на иконочных кнопках, aria-hidden на иконках, aria-labelledby на разделах листа.",
-   "Do использовать lucide (13–22px, strokeWidth 2–3) для любой пиктограммы: lucide-react в React, те же контуры инлайн-SVG в шаблонах; иконка перед текстом с зазором 5–6px.",
+   "Do использовать lucide (13–22px, strokeWidth 2–3) для любой пиктограммы: lucide-react в React, те же контуры инлайн-SVG в шаблонах; иконка перед текстом с зазором 5–6px. В письмах знак — растр /mail/receipt.png из того же lucide-контура.",
    "Do писать по-русски, коротко и по делу: заголовки разделов одним словом («Продукты», «Как готовить», «Коротко», «Похожие», «Стоимость»), подписи объясняют метод, не хвалят; склонять счётчики через plural.",
-   "Do уважать prefers-reduced-motion, env(safe-area-inset-bottom) и тёмную тему: [data-theme] на <html> из localStorage[\"racion.theme\"] (один ключ и цикл в React и SSR), <meta name=\"color-scheme\"> и два theme-color; поверхность не переопределяет ни одного тёмного значения.",
+   "Do уважать prefers-reduced-motion, env(safe-area-inset-bottom) и тёмную тему: [data-theme] на <html> из localStorage[\"racion.theme\"] (один ключ и цикл в React и SSR), <meta name=\"color-scheme\"> и два theme-color; поверхность не переопределяет ни одного тёмного значения. Письма — исключение: их тёмная палитра mail-dark-* своя, потому что --ds-* в почту не попадают.",
    "Do делать боковую панель рецепта липкой только при ≥1024px и min-height: 760px; иначе она скроллится с листом.",
    "Do давать стилю печати снять топбар, панель, кнопки замены/отрыва и чекбоксы — чек печатается как чек.",
    "Do ставить на страницах возраста настоящие фото блюд в круглые рамки — на тарелке и в каждой строке дня; фото продукта на белом фоне — на диске --ds-fill-3 с mix-blend-mode: multiply.",
    "Do раскладывать «тарелку дня» геометрией в cqw и cos()/sin() из переменных --a0 --rx --ry --cy --ph --cw --capw; новый случай (другое число приёмов, длинные подписи) — новый набор переменных, не ручные координаты.",
    "Do делать вкладки без JS, если все варианты уже в HTML: радиокнопки + :checked ~ + :has().",
-   "Do набирать мелкий текст на белом --ds-label-secondary на страницах для чтения (The Secondary On White Rule)."
+   "Do набирать мелкий текст на белом --ds-label-secondary на страницах для чтения (The Secondary On White Rule).",
+   "Do держать в письме одно большое число на табло прямо над единственной кнопкой: заголовок → подводка → табло → кнопка → запасная ссылка → линия → примечание.",
+   "Do выводить запасную ссылку письма целиком, моно 13.5px с word-break: break-all.",
+   "Do вставлять условные комментарии Outlook только через функции шаблона (msoHead, msoOpen, msoClose, notMso, notMsoClose, msoButton): html/template вырезает комментарии, написанные в файле.",
+   "Do собирать текстовую часть каждого письма из тех же строк, что и HTML, и прогонять русские и украинские строки через nbsp().",
+   "Do брать цвета и размеры письма только из токенов mail-* и давать каждому цветному элементу класс тёмной темы (.r-t1, .r-t2, .r-cap, .r-board, .r-sheet, .r-rule, .r-page)."
   ],
   "donts": [
    "Don't вводить hex или новые цвета в app.scss; не красить кнопки зелёным, не красить «в бюджете» / «дороже цели» — эти слова остаются label-tertiary; не использовать --ds-orange / --ds-purple как текст или рамку.",
    "Don't ставить второй .btn-primary на страницу — ни в топбаре, ни в подвале, ни в шапке листа; навигация там только текстом и иконками.",
    "Don't дробить результат на вкладки «Меню / Список / КБЖУ» или показывать фейковый лоадер — загрузка это skeleton внутри той же карточки.",
-   "Don't ставить эмодзи, иконочные шрифты, растровые иконки или системный шрифт вместо самохостных Inter / JetBrains Mono; в шаблонах — только инлайн-SVG.",
+   "Don't ставить эмодзи, иконочные шрифты, растровые иконки или системный шрифт вместо самохостных Inter / JetBrains Mono; в шаблонах — только инлайн-SVG. Исключение — письма: там системные стеки и растровый знак, потому что почтовые клиенты не грузят веб-шрифты и не рисуют SVG.",
    "Don't выносить слот приёма пищи («Завтрак») в эйрброу над названием блюда; на карточке рецепта слот — первое слово мета-строки, на странице рецепта — второе звено крошек.",
    "Don't выводить продукты шага отдельным списком, чипами или в квадратных скобках — только .steps__ref внутри предложения.",
    "Don't повторять в «Коротко» факты из плиток шапки; если сказать нечего — раздел не рендерится. Не писать «по вкусу» в .num и не выводить сотые грамма.",
@@ -1112,7 +1575,12 @@
    "Don't показывать линию отрыва на десктопе или в режиме магазина.",
    "Don't заменять кольцо фокуса на outline и не совмещать кольцо фокуса с inset-кольцом выбора в одном box-shadow.",
    "Don't переносить плоскую кнопку .ctapanel в квиз, чек, рецепт или кабинет и не ставить глянцевую кнопку DS на страницы возраста: исключение ограничено .ctapanel.",
-   "Don't поднимать тенью блоки страниц возраста: они плоские белые с границей на грунте."
+   "Don't поднимать тенью блоки страниц возраста: они плоские белые с границей на грунте.",
+   "Don't показывать деньги на табло письма: ни «≈ ₽», ни бюджет, после регистрации сумма читается как счёт. Нет недели — нет табло, а не другое число ради числа.",
+   "Don't обрезать запасную ссылку письма многоточием: её копируют, когда кнопка не нажимается, и обрезанная никуда не ведёт.",
+   "Don't писать <!--[if mso]> прямо в шаблоне письма: html/template его удалит, и Outlook останется без фиксированной ширины и VML-кнопки.",
+   "Don't делать «60:00» живым отсчётом или анимированной картинкой: это срок ссылки.",
+   "Don't ставить синий сайта #007AFF в кнопку письма или синий письма на сайт; не добавлять в письма веб-шрифты, SVG, большие картинки и цветную шапку-баннер."
   ],
   "notCanonized": "Захваты .impeccable/review/r2-*.png сняты до правок: синяя кнопка «Собрать неделю» в топбаре, чипы-ссылки продуктов под шагом, цветные обложки карточек с текстом, «294 рецептов» и серый ≈ ₽ — это дефекты, исправленные в этом раунде, а не образцы; система записана по шаблонам и app.scss. Оставшийся `.pages__crumbs` (13px без шеврона) в app.scss не используется шаблонами и не является правилом. Страницы возраста (2026-10-07): не записаны в систему локальные заплатки — сдвиг центра тарелки --cdy: 3cqw при контейнере ≤320px, снятие собственной карточки у .weanfeeds--page внутри .plate, перекраска .wtable thead и .rpage__note в secondary через .agesec вместо правки общих компонентов, кадрирование бутылочки object-position: 30% 50%; это починки конкретного кадра, а не правила."
  }

@@ -61,6 +61,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, 8<<10, &c) {
 		return
 	}
+	c.Lang = i18n.FromRequest(r)
 	u, sess, err := s.svc.Accounts.Register(r.Context(), c, r.URL.Query().Get("plan"))
 	if err != nil {
 		if ve, ok := service.IsValidation(err); ok && ve.Key == "auth.exists" {

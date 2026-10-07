@@ -1,0 +1,9 @@
+{{define "body"}}
+<tr><td style="padding-top:22px;"><h1 class="r-t1" style="margin:0;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:35px;line-height:40px;font-weight:700;letter-spacing:-0.7px;color:#0B0B0C;">{{.Title}}</h1></td></tr>
+<tr><td style="padding-top:13px;"><div class="r-t2" style="max-width:330px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:16.5px;line-height:22px;color:#636874;">{{.Lead}}</div></td></tr>
+{{if .Board.Value}}{{template "board" .}}{{end}}
+{{template "button" .}}
+<tr><td class="r-t2" style="padding-top:18px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14.5px;line-height:20px;color:#636874;">{{.Fallback}}<br><a href="{{.Link}}" class="r-t2" style="font-family:ui-monospace,'SF Mono',SFMono-Regular,'JetBrains Mono',Menlo,Consolas,'Roboto Mono','Liberation Mono',monospace;font-size:13.5px;line-height:20px;color:#5B6473;text-decoration:none;word-break:break-all;">{{.LinkText}}</a></td></tr>
+<tr><td style="padding-top:15px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="r-rule" style="border-top:1px solid #E8E9EE;font-size:0;line-height:0;height:1px;">&nbsp;</td></tr></table></td></tr>
+<tr><td style="padding-top:15px;"><div class="r-t2" style="max-width:300px;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:21px;color:#636874;">{{.Note}}</div></td></tr>
+{{end}}

@@ -3,9 +3,13 @@
 package mail
 
 import (
+	"bytes"
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"mime"
+	"mime/quotedprintable"
 	"net"
 	"net/smtp"
 	"strings"
@@ -33,9 +37,24 @@ func New(cfg Config, log *zap.Logger) *Mailer { return &Mailer{cfg: cfg, log: lo
 func (m *Mailer) Enabled() bool { return m.cfg.Host != "" }
 
 // Send шлёт простое текстовое письмо. В режиме лога печатает тему и текст.
-func (m *Mailer) Send(to, subject, text string) error {
+func (m *Mailer) Send(to, subject, text string) error { return m.send(to, subject, text, "") }
+
+// SendLetter — письмо по шаблону (Render): текст и HTML в одном письме, клиент покажет то, что умеет.
+func (m *Mailer) SendLetter(to string, l Letter) error {
+	subject, text, html, err := Render(l)
+	if err != nil {
+		return err
+	}
+	if err := m.send(to, subject, text, html); err != nil {
+		m.log.Warn("mail: letter not sent", zap.String("kind", l.Kind), zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (m *Mailer) send(to, subject, text, html string) error {
 	if !m.Enabled() {
-		m.log.Info("mail (not configured, logged only)", zap.String("to", to), zap.String("subject", subject), zap.String("text", text))
+		m.log.Info("mail (not configured, logged only)", zap.String("to", to), zap.String("subject", subject), zap.String("text", text), zap.Int("html", len(html)))
 		return nil
 	}
 	from := m.cfg.From
@@ -46,17 +65,7 @@ func (m *Mailer) Send(to, subject, text string) error {
 	if i := strings.Index(from, "<"); i >= 0 {
 		fromAddr = strings.Trim(from[i:], "<>")
 	}
-	msg := strings.Join([]string{
-		"From: " + encodeName(from),
-		"To: " + to,
-		"Subject: " + mime.QEncoding.Encode("utf-8", subject),
-		"Date: " + time.Now().Format(time.RFC1123Z),
-		"MIME-Version: 1.0",
-		"Content-Type: text/plain; charset=utf-8",
-		"Content-Transfer-Encoding: 8bit",
-		"",
-		text,
-	}, "\r\n")
+	msg := buildMessage(encodeName(from), to, subject, text, html, time.Now())
 
 	addr := net.JoinHostPort(m.cfg.Host, m.cfg.Port)
 	var c *smtp.Client
@@ -95,7 +104,7 @@ func (m *Mailer) Send(to, subject, text string) error {
 	if err != nil {
 		return fmt.Errorf("mail: data: %w", err)
 	}
-	if _, err := w.Write([]byte(msg)); err != nil {
+	if _, err := w.Write(msg); err != nil {
 		return fmt.Errorf("mail: write: %w", err)
 	}
 	if err := w.Close(); err != nil {
@@ -112,4 +121,49 @@ func encodeName(from string) string {
 	}
 	name := strings.TrimSpace(from[:i])
 	return mime.QEncoding.Encode("utf-8", name) + " " + from[i:]
+}
+
+// buildMessage — заголовки и тело письма. С HTML — multipart/alternative: сначала текст, потом HTML
+// (клиент показывает последнюю часть, которую умеет). Части в quoted-printable: строки HTML бывают
+// длиннее 998 знаков, а SMTP такие не пропускает.
+func buildMessage(from, to, subject, text, html string, now time.Time) []byte {
+	var b bytes.Buffer
+	head := func(k, v string) { b.WriteString(k + ": " + v + "\r\n") }
+	head("From", from)
+	head("To", to)
+	head("Subject", mime.QEncoding.Encode("utf-8", subject))
+	head("Date", now.Format(time.RFC1123Z))
+	head("MIME-Version", "1.0")
+	if html == "" {
+		head("Content-Type", "text/plain; charset=utf-8")
+		head("Content-Transfer-Encoding", "quoted-printable")
+		b.WriteString("\r\n")
+		writeQP(&b, text)
+		return b.Bytes()
+	}
+	boundary := "racion-" + randomHex(12)
+	head("Content-Type", `multipart/alternative; boundary="`+boundary+`"`)
+	b.WriteString("\r\n")
+	for _, part := range []struct{ kind, body string }{{"text/plain", text}, {"text/html", html}} {
+		b.WriteString("--" + boundary + "\r\n")
+		b.WriteString("Content-Type: " + part.kind + "; charset=utf-8\r\n")
+		b.WriteString("Content-Transfer-Encoding: quoted-printable\r\n\r\n")
+		writeQP(&b, part.body)
+		b.WriteString("\r\n")
+	}
+	b.WriteString("--" + boundary + "--\r\n")
+	return b.Bytes()
+}
+
+// writeQP — текст в quoted-printable с переводами строк CRLF, как требует почта.
+func writeQP(b *bytes.Buffer, s string) {
+	w := quotedprintable.NewWriter(b)
+	_, _ = w.Write([]byte(strings.ReplaceAll(strings.ReplaceAll(s, "\r\n", "\n"), "\n", "\r\n")))
+	_ = w.Close()
+}
+
+func randomHex(n int) string {
+	p := make([]byte, n)
+	_, _ = rand.Read(p)
+	return hex.EncodeToString(p)
 }

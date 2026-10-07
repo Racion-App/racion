@@ -1,5 +1,25 @@
 [
  {
+  "version": "1.16",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Письма в стиле Рациона",
+   "en": "Emails in Racion style"
+  },
+  "items": {
+   "ru": [
+    "Письмо о смене пароля теперь оформлено как сам сайт: крупно срок ссылки, одна синяя кнопка и ссылка запасным путём. В тёмной теме почты оно тоже читается.",
+    "После регистрации приходит приветственное письмо: сколько блюд в вашей неделе и кнопка, чтобы к ней вернуться.",
+    "Письма приходят на языке сайта, на всех 15 языках."
+   ],
+   "en": [
+    "The password reset email now looks like the site itself: the link's lifetime in big numbers, one blue button and a plain link as a fallback. It reads well in dark mode too.",
+    "After sign-up you get a welcome email with the number of dishes in your week and a button back to it.",
+    "Emails come in the language of the site, in all 15 languages."
+   ]
+  }
+ },
+ {
   "version": "1.15",
   "date": "2026-10-07",
   "title": {

@@ -284,6 +284,19 @@ type Params struct {
 	Meh   []string `json:"meh,omitempty"`
 }
 
+// DishCount — сколько блюд в неделе без «доедаем вчерашнее», как в шапке недели на сайте.
+func (p Plan) DishCount() int {
+	n := 0
+	for _, d := range p.Days {
+		for _, x := range d.Dishes {
+			if !x.Leftover {
+				n++
+			}
+		}
+	}
+	return n
+}
+
 // Dish — одна ячейка недели.
 type Dish struct {
 	Slot     string    `json:"slot"`

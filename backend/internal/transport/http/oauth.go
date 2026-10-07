@@ -9,6 +9,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"racion/internal/i18n"
 	"racion/internal/oauth"
 	"racion/internal/service"
 )
@@ -96,7 +97,7 @@ func (s *Server) oauthCallback(w http.ResponseWriter, r *http.Request) {
 		fail("exchange", err)
 		return
 	}
-	u, sess, err := s.svc.Accounts.LoginOAuth(r.Context(), service.OAuthProfile{Provider: p.ID, ID: pr.ID, Email: pr.Email, Name: pr.Name, Avatar: pr.Avatar}, st.Plan)
+	u, sess, err := s.svc.Accounts.LoginOAuth(r.Context(), service.OAuthProfile{Provider: p.ID, ID: pr.ID, Email: pr.Email, Name: pr.Name, Avatar: pr.Avatar, Lang: i18n.FromRequest(r)}, st.Plan)
 	if err != nil {
 		fail("login", err)
 		return

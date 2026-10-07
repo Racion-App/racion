@@ -1,14 +1,14 @@
 package service
 
 import (
-	"racion/internal/i18n"
-	"crypto/sha256"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/mail"
+	"racion/internal/i18n"
 	"slices"
 	"strings"
 	"time"
@@ -16,6 +16,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"racion/internal/domain"
+	letters "racion/internal/mail"
 	"racion/internal/planner"
 )
 
@@ -32,17 +33,20 @@ type Accounts struct {
 	dislikes  DislikeRepo
 	purchases PurchaseRepo
 	catalog   *planner.CatalogRef
-	mediaOwns func(url string) bool // ссылка ведёт в наше хранилище фото
+	mediaOwns func(url string) bool                                         // ссылка ведёт в наше хранилище фото
 	importPic func(ctx context.Context, userID, src string) (string, error) // аватар от внешнего сервиса → наше хранилище
 }
 
 // SetAvatarImporter — как забирать аватар у провайдера входа (CSP не пускает чужие картинки).
-func (a *Accounts) SetAvatarImporter(f func(ctx context.Context, userID, src string) (string, error)) { a.importPic = f }
+func (a *Accounts) SetAvatarImporter(f func(ctx context.Context, userID, src string) (string, error)) {
+	a.importPic = f
+}
 
 type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	Email    string    `json:"email"`
+	Password string    `json:"password"`
+	Name     string    `json:"name"`
+	Lang     i18n.Lang `json:"-"` // язык приветственного письма — язык страницы, с которой регистрируются
 }
 
 func (c *Credentials) clean() error {
@@ -86,12 +90,16 @@ func (a *Accounts) Register(ctx context.Context, c Credentials, claimPlan string
 		return domain.User{}, domain.Session{}, err
 	}
 	s, err := a.startSession(ctx, u.ID, claimPlan)
+	if err == nil {
+		a.welcome(ctx, u.Email, c.Lang, claimPlan)
+	}
 	return u, s, err
 }
 
 // OAuthProfile — что рассказал внешний сервис.
 type OAuthProfile struct {
 	Provider, ID, Email, Name, Avatar string
+	Lang                              i18n.Lang // язык приветственного письма новому пользователю
 }
 
 // LoginOAuth — вход через внешний сервис: знакомый аккаунт → сессия; незнакомый с известной почтой →
@@ -101,6 +109,7 @@ func (a *Accounts) LoginOAuth(ctx context.Context, pr OAuthProfile, claimPlan st
 	if pr.ID == "" {
 		return domain.User{}, domain.Session{}, domain.Invalid("auth.oauth.failed")
 	}
+	created := false
 	u, err := a.users.ByOAuth(ctx, pr.Provider, pr.ID)
 	if errors.Is(err, domain.ErrNotFound) {
 		email := strings.ToLower(strings.TrimSpace(pr.Email))
@@ -114,6 +123,7 @@ func (a *Accounts) LoginOAuth(ctx context.Context, pr OAuthProfile, claimPlan st
 				name = name[:80]
 			}
 			u, err = a.users.Create(ctx, email, "", name)
+			created = err == nil
 			if err == nil && pr.Avatar != "" && a.importPic != nil {
 				if url, perr := a.importPic(ctx, u.ID, pr.Avatar); perr == nil && url != "" {
 					_ = a.users.SetAvatar(ctx, u.ID, url)
@@ -131,7 +141,30 @@ func (a *Accounts) LoginOAuth(ctx context.Context, pr OAuthProfile, claimPlan st
 		return domain.User{}, domain.Session{}, err
 	}
 	s, err := a.startSession(ctx, u.ID, claimPlan)
+	if err == nil && created {
+		a.welcome(ctx, u.Email, pr.Lang, claimPlan)
+	}
 	return u, s, err
+}
+
+// welcome — приветственное письмо новому аккаунту: табло с числом блюд недели, с которой человек
+// пришёл, и кнопка к ней. Служебным адресам (вход без почты от провайдера) не пишем. Отправка в фоне:
+// письмо не задерживает вход, а сбой почты его не ломает (SendLetter сам пишет сбой в лог).
+func (a *Accounts) welcome(ctx context.Context, email string, lang i18n.Lang, planID string) {
+	if a.mailer == nil || strings.HasSuffix(email, "@login.racion.app") {
+		return
+	}
+	l := letters.Letter{Kind: "welcome", Lang: lang, BaseURL: a.baseURL, Link: a.baseURL + "/"}
+	if IsPlanID(planID) {
+		if rec, err := a.plans.Get(ctx, planID); err == nil {
+			l.Week, l.Link = true, a.baseURL+"/plan/"+planID
+			l.Board = letters.WelcomeBoard(lang, rec.Plan.DishCount())
+		}
+	}
+	if lang != "" && lang != "ru" {
+		l.Link += "?lang=" + string(lang)
+	}
+	go func() { _ = a.mailer.SendLetter(email, l) }()
 }
 
 // ExternalLogin — итог входа из мини-приложения мессенджера.
@@ -253,7 +286,8 @@ func (a *Accounts) Forgot(ctx context.Context, email string, lang i18n.Lang) err
 	if lang != "" && lang != "ru" {
 		link = a.baseURL + "/login?reset=" + token + "&lang=" + string(lang)
 	}
-	return a.mailer.Send(email, i18n.T(lang, "mail.reset.subject"), i18n.T(lang, "mail.reset.body", link))
+	minutes := int(ResetTTL.Minutes())
+	return a.mailer.SendLetter(email, letters.Letter{Kind: "reset", Lang: lang, BaseURL: a.baseURL, Link: link, Minutes: minutes, Board: letters.ResetBoard(lang, minutes)})
 }
 
 // Reset меняет пароль по одноразовой ссылке и сразу открывает сессию.
