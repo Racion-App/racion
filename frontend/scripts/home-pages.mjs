@@ -20,7 +20,10 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, 
 
 // ── Тексты первого шага ────────────────────────────────────────────────────
 
-const SHELL_KEYS = ["brand", "brand.home", "nav.recipes", "quiz.promise", "quiz.sample", "dishes.one", "dishes.many", "items.many", "quiz.trust", "quiz.q1", "quiz.q1.hint", "quiz.q1.hint.RU", "quiz.country"];
+const FEATURES = Array.from({ length: 13 }, (_, i) => i + 1); // строки страницы /features (features.N.t)
+const HOME_FEATURES = [2, 3, 4, 5, 7, 11]; // те же, что в HomeFeatures.tsx
+const SHELL_KEYS = ["brand", "brand.home", "nav.recipes", "quiz.promise", "quiz.sample", "dishes.one", "dishes.many", "items.many", "quiz.trust", "quiz.q1", "quiz.q1.hint", "quiz.q1.hint.RU", "quiz.country",
+  "features.title", "features.home", "features.all", ...FEATURES.map((n) => `features.${n}.t`)];
 const shellFile = path.resolve("home-shell.json");
 const localesDir = path.resolve("../backend/locales");
 
@@ -55,6 +58,27 @@ function shellTexts() {
 
 const texts = shellTexts();
 
+const CHEVRON = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>';
+// валюта страны языка по умолчанию: «0 ₽», «0,00 €» — как money() в приложении
+const CURRENCY = { RU: ["RUB", 0], KZ: ["KZT", 0], JP: ["JPY", 0], UA: ["UAH", 2], BY: ["BYN", 2], PL: ["PLN", 2], CZ: ["CZK", 2], TR: ["TRY", 2], CN: ["CNY", 2], US: ["USD", 2], GB: ["GBP", 2] };
+function zero(lang, country) {
+  const [cur, dec] = CURRENCY[country] ?? ["EUR", 2];
+  try {
+    return new Intl.NumberFormat(lang, { style: "currency", currency: cur, currencyDisplay: "narrowSymbol", minimumFractionDigits: dec, maximumFractionDigits: dec }).format(0);
+  } catch {
+    return "0";
+  }
+}
+
+// «Что умеет Рацион» под первым шагом: тот же короткий чек, что рисует HomeFeatures.tsx
+function features(lang) {
+  const t = texts[lang];
+  const p = lang === "ru" ? "" : `/${lang}`;
+  const z = esc(zero(lang, t.country));
+  const rows = HOME_FEATURES.map((n) => `<li class="feat__row"><div class="feat__item"><h3>${esc(t[`features.${n}.t`])}</h3></div><span class="feat__price num">${z}</span></li>`).join("");
+  return `<section class="feat feat--home" aria-labelledby="feat-home"><h2 class="feat__rtitle" id="feat-home">${esc(t["features.title"])}</h2><p class="feat__sub">${esc(t["features.home"])}</p><ol class="feat__rows">${rows}</ol><a class="feat__more" href="${p}/features">${esc(t["features.all"])} ${CHEVRON}</a></section>`;
+}
+
 const RECEIPT = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M14 8H8"></path><path d="M16 12H8"></path><path d="M13 16H8"></path></svg>';
 
 // первый шаг квиза теми же классами, что рисует Quiz.tsx; там, где нужен справочник, — те же заглушки
@@ -70,6 +94,7 @@ function shell(lang) {
   return `<div class="shell" id="homeshell">
         <header class="topbar"><a href="${p || "/"}" class="topbar__brand" aria-label="${esc(t["brand.home"])}">${RECEIPT}${esc(t.brand)}</a><div class="topbar__right pages-nav"><a href="${p}/recipes" class="pages-nav__link">${esc(t["nav.recipes"])}</a><span class="theme-btn"></span><span class="theme-btn"></span><span class="theme-btn"></span></div></header>
         <main class="quiz"><div class="quiz__progress">${progress}</div><section class="quiz__step"><div class="quiz__promise"><p class="quiz__lead">${esc(t["quiz.promise"])}</p>${sample}<p class="quiz__trust">${esc(t["quiz.trust"])}</p></div><h1 class="quiz__title">${esc(t["quiz.q1"])}</h1><p class="quiz__hint" elementtiming="homeshell">${esc(hint)}</p><div class="quiz__group quiz__group--tight"><span class="quiz__label">${esc(t["quiz.country"])}</span><div class="skeleton" style="min-height:44px"></div></div><div class="tiles">${tiles}</div></section></main>
+        ${features(lang)}
       </div>
       <script>${GUARD}</script>`;
 }
@@ -109,8 +134,15 @@ function render(lang, withShell) {
   html = html.replace(/<link rel="preload" href="\/api\/locales\/[a-z]{2}\?v="/, `<link rel="preload" href="/api/locales/${lang}?v="`);
   // текст для роботов без JS: заголовок, лид и ссылки на серверные страницы того же языка
   const list = links.map((l) => `          <li><a href="${l.href}">${esc(l.text)}</a></li>`).join("\n");
+  const t = texts[lang];
+  const p = lang === "ru" ? "" : `/${lang}`;
+  const feats = FEATURES.map((n) => `          <li>${esc(t[`features.${n}.t`])}</li>`).join("\n");
   html = html.replace(/<main class="prerender">[\s\S]*?<\/main>/,
-    `<main class="prerender">\n        <h1>${esc(title.split(" — ")[0])}</h1>\n        <p>${esc(description)}</p>\n        <ul>\n${list}\n        </ul>\n      </main>`);
+    `<main class="prerender">\n        <h1>${esc(title.split(" — ")[0])}</h1>\n        <p>${esc(description)}</p>\n        <ul>\n${list}\n        </ul>\n        <h2>${esc(t["features.title"])}</h2>\n        <ul>\n${feats}\n        </ul>\n        <p><a href="${p}/features">${esc(t["features.all"])}</a></p>\n      </main>`);
+  // возможности в разметке приложения — на языке страницы: по ним поисковые ответы описывают сервис
+  const n0 = html.length;
+  html = html.replace('"featureList":[]', `"featureList":${JSON.stringify(FEATURES.map((n) => t[`features.${n}.t`]))}`);
+  if (html.length === n0) throw new Error("home-pages: в index.html нет featureList");
   if (withShell) {
     const n = html.length;
     html = html.replace(/(<div id="root">\s*)/, `$1${shell(lang)}\n      `);

@@ -66,6 +66,7 @@ export function SiteFooter() {
           <a href={`${p}/terms`}>{t("legal.terms")}</a>
           <a href={`${p}/privacy`}>{t("legal.privacy")}</a>
           <a href={`${p}/status`}>{t("status.title")}</a>
+          <a href={`${p}/features`}>{t("features.title")}</a>
           <a href={`${p}/changelog`}>{t("foot.changelog")}</a>
           <LangButton footer />
         </div>

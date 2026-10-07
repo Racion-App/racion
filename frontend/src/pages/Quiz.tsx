@@ -29,6 +29,7 @@ import { MealSources } from "../components/MealSources";
 import { KidAllergens } from "../components/KidAllergens";
 import { KidSex } from "../components/KidSex";
 import { WeaningPicker } from "../components/Weaning";
+import { HomeFeatures } from "../components/HomeFeatures";
 
 const KEY = "racion.quiz.v4";
 const COUNTRY_KEY = "racion.country.chosen"; // страна выбрана вручную, по IP не переопределяем
@@ -994,6 +995,7 @@ export function Quiz() {
           </div>
         </section>
       )}
+      {step === 1 && !eventPreset && <HomeFeatures country={country} />}
       <SiteFooter />
     </div>
   );

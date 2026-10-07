@@ -97,6 +97,7 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		url("/recipe/"+rc.ID, "monthly", "0.5")
 	}
 	url("/developers", "monthly", "0.5")
+	url("/features", "monthly", "0.8")
 	url("/changelog", "weekly", "0.4")
 	url("/terms", "yearly", "0.3")
 	url("/privacy", "yearly", "0.3")

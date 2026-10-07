@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"math"
 	"net/http"
 	"net/url"
@@ -842,16 +843,33 @@ func (s *Server) openapiJSON(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(openapiSpec)
 }
 
+// llmsFeatures — возможности в llms.txt из тех же строк, что страница /features: по-английски и
+// по-русски (русские ответы нейросетей Яндекса и других берут текст на языке вопроса).
+func (s *Server) llmsFeatures(w io.Writer, base string) {
+	section := func(l i18n.Lang, head, page, stores string) {
+		fmt.Fprintf(w, "## %s\n\n%s\n\n", head, i18n.T(l, "features.lead"))
+		for i := 1; i <= featureCount; i++ {
+			n := strconv.Itoa(i)
+			fmt.Fprintf(w, "- **%s**: %s\n", i18n.T(l, "features."+n+".t"), i18n.T(l, "features."+n+".d", stores))
+		}
+		fmt.Fprintf(w, "- [%s](%s)\n\n", i18n.T(l, "features.all"), page)
+	}
+	section(i18n.EN, "Features", base+"/en/features", "Supermarket chains of 22 countries")
+	section(i18n.RU, "По-русски: что умеет Рацион", base+"/features", s.storeNames("RU"))
+}
+
 // llmsTxt — /llms.txt: краткое описание сайта для ассистентов и поисковых моделей (какие страницы читать, где API).
 func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
 	base := s.baseURL(r)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
-	fmt.Fprintf(w, `# Racion
+	fmt.Fprint(w, `# Racion
 
 > Free weekly meal planner: seven questions (country and store, who eats, allergies, kitchen equipment, meals, budget) give seven days of dishes with real store prices and one shopping list rounded to packs. 15 languages, 22 countries, holiday tables, family weeks. No subscription.
 
-## Recipes
+`)
+	s.llmsFeatures(w, base)
+	fmt.Fprintf(w, `## Recipes
 
 - [Recipe catalog](%[1]s/recipes): server-rendered HTML, filters by meal, time, calories, price and equipment; every recipe page carries schema.org Recipe JSON-LD with ingredients per portion, steps, nutrition and estimated cost.
 - [English catalog](%[1]s/en/recipes), [German](%[1]s/de/recipes), [Spanish](%[1]s/es/recipes), [French](%[1]s/fr/recipes) — other languages follow the same pattern: /<code>/recipes.

@@ -1,0 +1,25 @@
+{{template "head" .}}
+<article class="feat">
+  <nav class="crumbs" aria-label="{{t .L "crumbs"}}"><a href="{{if .P}}{{.P}}{{else}}/{{end}}">{{t .L "page.brand"}}</a><span aria-hidden="true">›</span><span>{{.Title}}</span></nav>
+  <h1 class="feat__title">{{.Title}}</h1>
+  <p class="feat__lead">{{.Lead}}</p>
+
+  <section class="feat__receipt" aria-labelledby="feat-r">
+    <h2 class="feat__rtitle" id="feat-r">{{t .L "features.receipt"}}</h2>
+    <ol class="feat__rows">
+      {{range .Rows}}<li class="feat__row">
+        <div class="feat__item"><h3>{{.Title}}</h3><p>{{.Text}}</p></div>
+        <span class="feat__price num">{{$.Zero}}</span>
+      </li>{{end}}
+    </ol>
+    <div class="tear tear--static" aria-hidden="true"><i></i></div>
+    <p class="feat__total"><span>{{t .L "features.total"}}</span><span class="num">{{.Zero}}</span></p>
+    <a class="btn btn-primary btn-lg feat__cta" href="{{if .P}}{{.P}}{{else}}/{{end}}">{{t .L "features.cta"}}</a>
+  </section>
+
+  <section class="feat__faq colfaq" aria-labelledby="feat-faq">
+    <h2 id="feat-faq">{{t .L "coll.faq"}}</h2>
+    {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+  </section>
+</article>
+{{template "foot" .}}

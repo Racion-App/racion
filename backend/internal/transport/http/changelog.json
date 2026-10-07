@@ -1,5 +1,21 @@
 [
  {
+  "version": "1.18",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Что умеет Рацион",
+   "en": "What Racion does"
+  },
+  "items": {
+   "ru": [
+    "Все возможности Рациона собраны на одной странице, строками чека: у каждой цена ноль. Короткий список стоит на главной под первым вопросом."
+   ],
+   "en": [
+    "All of Racion's features are on one page, as receipt lines that each cost nothing. A short list sits on the home page under the first question."
+   ]
+  }
+ },
+ {
   "version": "1.17",
   "date": "2026-10-07",
   "title": {
