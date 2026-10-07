@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"racion/internal/ai"
 	"racion/internal/domain"
@@ -190,6 +192,31 @@ func (s *Server) assistRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, out)
+}
+
+// importRecipe — рецепт по ссылке: {url} → черновик для формы. Скачать страницу и дважды спросить нейросеть
+// дольше общего срока ответа в 30 секунд, поэтому этой ручке срок продлевается; nginx ждёт /api/ минуту.
+func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
+	u := requireUser(w, r)
+	if u == nil {
+		return
+	}
+	var in struct {
+		URL string `json:"url"`
+	}
+	if !decode(w, r, 4<<10, &in) {
+		return
+	}
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(58 * time.Second))
+	ctx, cancel := context.WithTimeout(r.Context(), 55*time.Second)
+	defer cancel()
+	d, err := s.svc.Import.Import(ctx, u.ID, in.URL, i18n.FromRequest(r))
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	writeJSON(w, 200, d)
 }
 
 // ── Переводы своих рецептов ─────────────────────────────────────────────────

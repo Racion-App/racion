@@ -241,6 +241,7 @@ func main() {
 	}
 	if aiPool.Enabled() {
 		services.AI = service.NewAssistant(aiPool)
+		services.Import.SetAI(aiPool)
 		names := []string{}
 		for _, p := range aiPool.Status() {
 			names = append(names, p.Name+"/"+p.Model)

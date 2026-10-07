@@ -241,6 +241,7 @@ export type Recipe = {
   own?: boolean;
   public?: boolean;
   author?: string;
+  source?: string; // свой рецепт, взятый со страницы чужого сайта
   stats?: RecipeStats;
 };
 
@@ -267,6 +268,7 @@ export type OwnRecipe = {
   steps: string[];
   ingredients: OwnIngredient[];
   image?: string; // фото из нашего хранилища
+  source?: string; // адрес страницы, с которой рецепт взят по ссылке
   status?: "private" | "checking" | "review" | "improve" | "approved" | "rejected";
   note?: string; // причина от нейросети или модератора
   suggestion?: { title: string; description: string; steps: string[] }; // подробная версия от нейросети (status = improve)
@@ -274,6 +276,24 @@ export type OwnRecipe = {
   cost?: number;
 };
 export type OwnRecipeInput = Omit<OwnRecipe, "id" | "slotLabel" | "kcal" | "cost" | "public">;
+// Черновик рецепта со страницы чужого сайта: продукты уже из базы, количество на порцию; line — строка с сайта.
+export type ImportDraft = {
+  title: string;
+  description: string;
+  slot: string;
+  timeMin: number;
+  equipment: string[];
+  steps: string[];
+  ingredients: { ingredientId: string; amount: number; line: string }[];
+  unmatched: string[];
+  portions: number;
+  portionsGuessed?: boolean;
+  lang?: string;
+  source: string;
+  host: string;
+  found: "markup" | "ai";
+  matched: "ai" | "rules";
+};
 export type IngredientRef = { id: string; label: string; unit: string; pantry: boolean; category: string };
 export const OWN_TAGS = ["pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty"];
 

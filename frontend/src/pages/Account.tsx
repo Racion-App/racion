@@ -27,6 +27,15 @@ import { langCountry, useT } from "../i18n";
 
 type Tab = "plans" | "family" | "recipes" | "purchases";
 
+// firstLink — первый адрес http(s) из того, чем поделились; null — ссылки нет
+function firstLink(...parts: (string | null)[]): string | null {
+  for (const p of parts) {
+    const m = p?.match(/https?:\/\/[^\s<>"]+/);
+    if (m) return m[0];
+  }
+  return null;
+}
+
 export function Account() {
   const { user, admin, loading, setUser } = useAuth();
   const confirm = useConfirm();
@@ -41,6 +50,10 @@ export function Account() {
   const [dislikes, setDislikes] = useState<{ id: string; title: string; slot: string }[] | null>(null);
   const [own, setOwn] = useState<OwnRecipe[] | null>(null);
   const [editing, setEditing] = useState<OwnRecipe | "new" | null>(null);
+  // рецепт по ссылке: ?import=<адрес> или страница, которой поделились из браузера (share_target в манифесте —
+  // Android кладёт адрес то в url, то в text вместе с заголовком)
+  const shared = sp.get("import") ?? firstLink(sp.get("share_url"), sp.get("share_text"), sp.get("share_title"));
+  const [importFrom, setImportFrom] = useState<string | undefined>(undefined);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [name, setName] = useState(user?.name ?? "");
   const [nick, setNick] = useState(user?.nick ?? "");
@@ -80,6 +93,13 @@ export function Account() {
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!user || shared === null) return;
+    setImportFrom(shared);
+    setEditing("new");
+    setSp({ tab: "recipes" }, { replace: true });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!toast) return;
     // длинные подсказки (итог проверки уведомлений) держим дольше: примерно 60 мс на символ
     const t = window.setTimeout(() => setToast(null), Math.max(2000, Math.min(12000, toast.length * 60)));
@@ -88,7 +108,7 @@ export function Account() {
 
 
   if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to={shared ? `/login?next=${encodeURIComponent(`/me?tab=recipes&import=${encodeURIComponent(shared)}`)}` : "/login"} replace />;
 
   const logout = async () => {
     await api.logout();
@@ -199,14 +219,19 @@ export function Account() {
                 equipment={meta?.equipment ?? []}
                 ai={meta?.ai}
                 photos={meta?.photos}
+                importFrom={editing === "new" ? importFrom : undefined}
                 country={country}
                 onSaved={(r) => {
                   setOwn(editing === "new" ? [r, ...(own ?? [])] : (own ?? []).map((x) => (x.id === r.id ? r : x)));
                   setEditing(null);
+                  setImportFrom(undefined);
                   setToast(t("account.recipe.saved"));
                   track(editing === "new" ? "own_recipe_create" : "own_recipe_update");
                 }}
-                onCancel={() => setEditing(null)}
+                onCancel={() => {
+                  setEditing(null);
+                  setImportFrom(undefined);
+                }}
               />
             ) : (
               <>
@@ -280,7 +305,7 @@ export function Account() {
                       )}
                     </button>
                     <span className="planrow__actions">
-                    {(!r.status || r.status === "private" || r.status === "rejected") && (
+                    {(!r.status || r.status === "private" || r.status === "rejected") && !r.source && (
                       <button type="button" className="btn btn-soft btn-sm planrow__publish" onClick={() => shareOwn(r)} title={t("own.publish.hint")}>
                         <Upload size={15} aria-hidden /> {t("own.publish")}
                       </button>
@@ -307,9 +332,21 @@ export function Account() {
                     <TranslationLine recipeId={r.id} summary={r.translations} onToast={setToast} />
                   </div>
                 ))}
-                <button type="button" className="btn btn-primary" onClick={() => setEditing("new")}>
-                  <Plus size={16} aria-hidden /> {t("account.recipes.add")}
-                </button>
+                <div className="account__actions">
+                  <button type="button" className="btn btn-primary" onClick={() => setEditing("new")}>
+                    <Plus size={16} aria-hidden /> {t("account.recipes.add")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-soft"
+                    onClick={() => {
+                      setImportFrom("");
+                      setEditing("new");
+                    }}
+                  >
+                    <Link2 size={16} aria-hidden /> {t("import.open")}
+                  </button>
+                </div>
             <CollectionsPanel onToast={setToast} />
             <h3 className="account__sub">{t("account.favs")}</h3>
             <p className="quiz__hint">{t("account.favs.hint")}</p>

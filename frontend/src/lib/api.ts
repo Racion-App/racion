@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, ImportDraft, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
 import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -168,6 +168,7 @@ export const api = {
   feedback: (id: string, liked: boolean) => request<{ ok: boolean }>(`/api/recipes/${encodeURIComponent(id)}/feedback`, { method: "POST", body: JSON.stringify({ liked }) }),
   deleteOwnRecipe: (id: string) => request<void>(`/api/me/recipes/${encodeURIComponent(id)}`, { method: "DELETE" }),
   // помощник: поправить текст (improve) или перевести (translate) — ничего не сохраняет
+  importRecipe: (url: string) => request<ImportDraft>("/api/me/recipes/import", { method: "POST", body: JSON.stringify({ url }) }),
   assistRecipe: (body: { action: "improve" | "translate"; lang: string; title: string; description: string; steps: string[] }) =>
     request<{ title: string; description: string; steps: string[] }>("/api/me/recipes/ai", { method: "POST", body: JSON.stringify(body) }),
   // лайки, избранное, комментарии

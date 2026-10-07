@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"net/url"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -71,6 +72,11 @@ func (s *Recipes) Find(ctx context.Context, id string) (planner.Recipe, error) {
 
 // SetPublic открывает свой рецепт для всех по ссылке (или закрывает).
 func (s *Recipes) SetPublic(ctx context.Context, userID, id string, public bool) error {
+	if public {
+		if rc, err := s.repo.Get(ctx, id); err == nil && rc.Source != "" {
+			return domain.Invalid("import.err.publish") // рецепт с чужого сайта открытым не делаем, как и в Moderation.Publish
+		}
+	}
 	return s.repo.SetPublic(ctx, userID, id, public)
 }
 
@@ -136,7 +142,7 @@ func (s *Recipes) DeleteOwn(ctx context.Context, userID, id string) error {
 
 func toRecipe(id string, in domain.OwnRecipeInput) planner.Recipe {
 	return planner.Recipe{ID: id, Title: in.Title, Description: in.Description, Slot: in.Slot, TimeMin: in.TimeMin,
-		Equipment: in.Equipment, Tags: in.Tags, Steps: in.Steps, Ingredients: in.Ingredients, Own: true, Image: in.Image, Lang: in.Lang}
+		Equipment: in.Equipment, Tags: in.Tags, Steps: in.Steps, Ingredients: in.Ingredients, Own: true, Image: in.Image, Lang: in.Lang, Source: in.Source}
 }
 
 // validate чистит поля и возвращает ошибку с ключом i18n.
@@ -144,6 +150,10 @@ func (s *Recipes) validate(in *domain.OwnRecipeInput) error {
 	in.Title = strings.TrimSpace(in.Title)
 	in.Description = strings.TrimSpace(in.Description)
 	in.Image = strings.TrimSpace(in.Image)
+	in.Source = strings.TrimSpace(in.Source)
+	if u, err := url.Parse(in.Source); in.Source != "" && (err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || len(in.Source) > 1000) {
+		in.Source = "" // источник — только ссылка на страницу; иначе просто не сохраняем
+	}
 	if in.Image != "" && (s.mediaOwns == nil || !s.mediaOwns(in.Image)) {
 		return domain.Invalid("photo.bad")
 	}

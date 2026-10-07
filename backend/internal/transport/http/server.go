@@ -233,6 +233,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("PUT /api/me/recipes/{id}", s.limited(s.lim.write, s.updateOwnRecipe))
 	mux.HandleFunc("DELETE /api/me/recipes/{id}", s.deleteOwnRecipe)
 	mux.HandleFunc("POST /api/me/recipes/ai", s.limited(s.lim.write, s.assistRecipe))
+	mux.HandleFunc("POST /api/me/recipes/import", s.limited(s.lim.write, s.importRecipe))
 	mux.HandleFunc("POST /api/uploads", s.limited(s.lim.write, s.upload))
 	// семья
 	mux.HandleFunc("GET /api/me/family", s.getFamily)
@@ -353,6 +354,9 @@ func (w *statusWriter) WriteHeader(code int) {
 	w.status = code
 	w.ResponseWriter.WriteHeader(code)
 }
+
+// Unwrap — чтобы http.ResponseController добрался до соединения (продлить срок ответа долгой ручке).
+func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
 // ── Ответы ─────────────────────────────────────────────────────────────────
 

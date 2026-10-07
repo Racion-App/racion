@@ -1,5 +1,23 @@
 [
  {
+  "version": "1.19",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "Рецепт по ссылке",
+   "en": "Recipes by link"
+  },
+  "items": {
+   "ru": [
+    "В «Моих рецептах» появилась кнопка «Взять с сайта». Вставьте ссылку на рецепт, и Рацион заполнит форму: название, шаги, время и продукты из базы с количеством на одну порцию. Строки, которых нет в базе, остаются списком, по нажатию на строку откроется поиск похожего продукта.",
+    "В приложении, установленном на телефон, можно поделиться страницей рецепта из браузера прямо в Рацион. На странице сохранённого рецепта стоит ссылка на сайт, откуда он взят."
+   ],
+   "en": [
+    "My recipes now has an Import from a site button. Paste a link to a recipe, and Racion fills in the form: title, steps, time, and products from our list with amounts for one serving. Lines that aren't in our list stay as a list, and tapping one opens a search for a similar product.",
+    "In the app installed on your phone, you can share a recipe page from the browser straight to Racion. A saved recipe's page links to the site it came from."
+   ]
+  }
+ },
+ {
   "version": "1.18",
   "date": "2026-10-07",
   "title": {

@@ -81,6 +81,13 @@ export function RecipeSheet({ recipeId, portions, country, onClose }: { recipeId
             </span>
           </div>
           {recipe.author && <p className="social__by">{t("recipe.by", { nick: recipe.author })}</p>}
+          {recipe.source && (
+            <p className="social__by">
+              <a className="social__src" href={recipe.source} target="_blank" rel="noopener noreferrer nofollow ugc">
+                {t("recipe.source", { host: recipe.source.replace(/^https?:\/\/(www\.)?/, "").split("/")[0] })}
+              </a>
+            </p>
+          )}
           {recipe.description && <p className="bsheet__lead">{recipe.description}</p>}
           <SocialBar recipeId={recipe.id} initial={recipe.stats} onToast={setToast} extra={<CollectionButton recipeId={recipe.id} onToast={setToast} />} />
           {recipe.steps.length > 0 && (

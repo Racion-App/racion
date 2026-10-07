@@ -135,6 +135,7 @@ type Recipe struct {
 	Own         bool                  `json:"own,omitempty"`    // рецепт пользователя, не из базы
 	Public      bool                  `json:"public,omitempty"` // свой рецепт открыт для всех по ссылке
 	OwnerID     string                `json:"-"`
+	Source      string                `json:"source,omitempty"` // свой рецепт со страницы чужого сайта: адрес страницы
 	Author      string                `json:"author,omitempty"` // ник автора своего рецепта
 	Status      string                `json:"status,omitempty"` // свой рецепт: private | checking | review | approved | rejected
 	Note        string                `json:"note,omitempty"`   // причина от нейросети или модератора

@@ -70,6 +70,9 @@ func (m *Moderation) Publish(ctx context.Context, userID, id string) (string, er
 	if rc.OwnerID != userID {
 		return "", domain.ErrForbidden
 	}
+	if rc.Source != "" { // взят с чужого сайта: в общую базу чужой текст не отправляем, в неделях человека он и так работает
+		return rc.Status, domain.Invalid("import.err.publish")
+	}
 	switch rc.Status {
 	case StatusApproved, StatusChecking, StatusReview, StatusImprove:
 		return rc.Status, nil

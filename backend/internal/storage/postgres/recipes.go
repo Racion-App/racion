@@ -16,13 +16,13 @@ import (
 
 type UserRecipes struct{ pool *pgxpool.Pool }
 
-const ownRecipeCols = `id, title, description, slot, time_min, equipment, tags, steps, ingredients, public, user_id, image, status, review_note, submitted_at, suggestion, views, lang, i18n`
+const ownRecipeCols = `id, title, description, slot, time_min, equipment, tags, steps, ingredients, public, user_id, image, status, review_note, submitted_at, suggestion, views, lang, i18n, source`
 
 func scanOwn(row pgx.Row) (planner.Recipe, error) {
 	var r planner.Recipe
 	var submitted *time.Time
 	var suggestion, i18nRaw []byte
-	err := row.Scan(&r.ID, &r.Title, &r.Description, &r.Slot, &r.TimeMin, &r.Equipment, &r.Tags, &r.Steps, &r.Ingredients, &r.Public, &r.OwnerID, &r.Image, &r.Status, &r.Note, &submitted, &suggestion, &r.Views, &r.Lang, &i18nRaw)
+	err := row.Scan(&r.ID, &r.Title, &r.Description, &r.Slot, &r.TimeMin, &r.Equipment, &r.Tags, &r.Steps, &r.Ingredients, &r.Public, &r.OwnerID, &r.Image, &r.Status, &r.Note, &submitted, &suggestion, &r.Views, &r.Lang, &i18nRaw, &r.Source)
 	if len(i18nRaw) > 2 {
 		_ = json.Unmarshal(i18nRaw, &r.I18n)
 	}
@@ -110,14 +110,14 @@ func (r *UserRecipes) Insert(ctx context.Context, userID string, rc planner.Reci
 	if rc.Lang == "" {
 		rc.Lang = "ru"
 	}
-	_, err := r.pool.Exec(ctx, `INSERT INTO user_recipes (id, user_id, title, description, slot, time_min, equipment, tags, steps, ingredients, image, lang) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-		rc.ID, userID, rc.Title, rc.Description, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Steps, rc.Ingredients, rc.Image, rc.Lang)
+	_, err := r.pool.Exec(ctx, `INSERT INTO user_recipes (id, user_id, title, description, slot, time_min, equipment, tags, steps, ingredients, image, lang, source) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+		rc.ID, userID, rc.Title, rc.Description, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Steps, rc.Ingredients, rc.Image, rc.Lang, rc.Source)
 	return wrap("user_recipes.insert", err)
 }
 
 func (r *UserRecipes) Update(ctx context.Context, userID string, rc planner.Recipe) error {
-	tag, err := r.pool.Exec(ctx, `UPDATE user_recipes SET title = $3, description = $4, slot = $5, time_min = $6, equipment = $7, tags = $8, steps = $9, ingredients = $10, image = $11, lang = COALESCE(NULLIF($12, ''), lang), updated_at = now() WHERE id = $1 AND user_id = $2`,
-		rc.ID, userID, rc.Title, rc.Description, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Steps, rc.Ingredients, rc.Image, rc.Lang)
+	tag, err := r.pool.Exec(ctx, `UPDATE user_recipes SET title = $3, description = $4, slot = $5, time_min = $6, equipment = $7, tags = $8, steps = $9, ingredients = $10, image = $11, lang = COALESCE(NULLIF($12, ''), lang), source = COALESCE(NULLIF($13, ''), source), updated_at = now() WHERE id = $1 AND user_id = $2`,
+		rc.ID, userID, rc.Title, rc.Description, rc.Slot, rc.TimeMin, rc.Equipment, rc.Tags, rc.Steps, rc.Ingredients, rc.Image, rc.Lang, rc.Source)
 	if err != nil {
 		return wrap("user_recipes.update", err)
 	}

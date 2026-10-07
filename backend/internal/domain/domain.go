@@ -117,8 +117,9 @@ type OwnRecipeInput struct {
 	Tags        []string                   `json:"tags"`
 	Steps       []string                   `json:"steps"`
 	Ingredients []planner.RecipeIngredient `json:"ingredients"`
-	Image       string                     `json:"image"` // ссылка на фото из нашего хранилища
-	Lang        string                     `json:"-"`     // язык текста: ставит транспорт по языку интерфейса
+	Image       string                     `json:"image"`  // ссылка на фото из нашего хранилища
+	Source      string                     `json:"source"` // адрес страницы, с которой рецепт взят импортом
+	Lang        string                     `json:"-"`      // язык текста: ставит транспорт по языку интерфейса
 }
 
 // ── Семья ──────────────────────────────────────────────────────────────────

@@ -60,7 +60,15 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 		}
 		return m
 	},
-	"minutes":  func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
+	"minutes": func(l i18n.Lang, m int) string { return i18n.Minutes(l, m) },
+	// host — имя сайта из ссылки на источник рецепта: «https://www.eda.ru/recepty/…» → «eda.ru»
+	"host": func(raw string) string {
+		u, err := url.Parse(raw)
+		if err != nil {
+			return ""
+		}
+		return strings.TrimPrefix(u.Hostname(), "www.")
+	},
 	"seq": func(n int) []int {
 		out := make([]int, n)
 		for i := range out {

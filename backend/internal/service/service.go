@@ -135,6 +135,7 @@ type Services struct {
 	Accounts     *Accounts
 	Plans        *Plans
 	Recipes      *Recipes
+	Import       *RecipeImport // рецепт по ссылке; нейросеть подключает main через SetAI
 	Catalog      *Catalog
 	Events       *Events
 	Notify       *Notifications
@@ -166,6 +167,7 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Accounts:    &Accounts{users: repos.Users, resets: repos.Resets, sessions: repos.Sessions, plans: repos.Plans, dislikes: repos.Dislikes, purchases: repos.Purchases, catalog: catalog, baseURL: strings.TrimRight(baseURL, "/")},
 		Plans:       &Plans{plans: repos.Plans, checks: repos.Checks, purchases: repos.Purchases, extras: repos.Extras, dislikes: repos.Dislikes, members: repos.PlanMembers, recipes: recipes, social: social, family: family, catalog: catalog, collections: NewCollections(repos.Collections, recipes)},
 		Recipes:     recipes,
+		Import:      NewRecipeImport(catalog, nil),
 		Catalog:     &Catalog{catalog: catalog},
 		Events:      &Events{repo: repos.Events},
 		Notify:      NewNotifications(repos.Push, repos.Settings, subscriber, baseURL),

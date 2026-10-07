@@ -27,7 +27,7 @@
   "features.9.t": "Детское меню по возрасту",
   "features.10.t": "Общая неделя для семьи",
   "features.11.t": "Список в Telegram и MAX",
-  "features.12.t": "Свои рецепты",
+  "features.12.t": "Свои рецепты и рецепты с сайтов",
   "features.13.t": "Больше 1600 рецептов",
   "country": "RU",
   "plural": "east-slavic"
@@ -60,7 +60,7 @@
   "features.9.t": "Kids' menus by age",
   "features.10.t": "One week for the whole family",
   "features.11.t": "Your list in Telegram and MAX",
-  "features.12.t": "Your own recipes",
+  "features.12.t": "Your recipes and recipes from other sites",
   "features.13.t": "Over 1,600 recipes",
   "country": "US",
   "plural": "one-other"
@@ -93,7 +93,7 @@
   "features.9.t": "Kinder-Menüs nach Alter",
   "features.10.t": "Eine Woche für die ganze Familie",
   "features.11.t": "Ihre Liste in Telegram und MAX",
-  "features.12.t": "Ihre eigenen Rezepte",
+  "features.12.t": "Ihre Rezepte und Rezepte von anderen Websites",
   "features.13.t": "Über 1.600 Rezepte",
   "country": "DE",
   "plural": "one-other"
@@ -126,7 +126,7 @@
   "features.9.t": "Menus enfants par âge",
   "features.10.t": "Une semaine pour toute la famille",
   "features.11.t": "Votre liste dans Telegram et MAX",
-  "features.12.t": "Vos propres recettes",
+  "features.12.t": "Vos recettes et recettes d'autres sites",
   "features.13.t": "Plus de 1 600 recettes",
   "country": "FR",
   "plural": "one-other"
@@ -159,7 +159,7 @@
   "features.9.t": "Menús infantiles por edad",
   "features.10.t": "Una semana para toda la familia",
   "features.11.t": "Tu lista en Telegram y MAX",
-  "features.12.t": "Tus propias recetas",
+  "features.12.t": "Tus recetas y recetas de otros sitios",
   "features.13.t": "Más de 1.600 recetas",
   "country": "ES",
   "plural": "one-other"
@@ -192,7 +192,7 @@
   "features.9.t": "Menù per bambini per età",
   "features.10.t": "Una settimana per tutta la famiglia",
   "features.11.t": "La tua lista su Telegram e MAX",
-  "features.12.t": "Le tue ricette",
+  "features.12.t": "Le tue ricette e ricette da altri siti",
   "features.13.t": "Più di 1.600 ricette",
   "country": "IT",
   "plural": "one-other"
@@ -225,7 +225,7 @@
   "features.9.t": "Cardápios infantis por faixa etária",
   "features.10.t": "Uma semana para a família toda",
   "features.11.t": "Sua lista no Telegram e no MAX",
-  "features.12.t": "Suas próprias receitas",
+  "features.12.t": "Suas receitas e receitas de outros sites",
   "features.13.t": "Mais de 1.600 receitas",
   "country": "BR",
   "plural": "one-other"
@@ -258,7 +258,7 @@
   "features.9.t": "Menu dla dzieci według wieku",
   "features.10.t": "Jeden tydzień dla całej rodziny",
   "features.11.t": "Twoja lista w Telegramie i MAX",
-  "features.12.t": "Twoje własne przepisy",
+  "features.12.t": "Twoje przepisy i przepisy z innych stron",
   "features.13.t": "Ponad 1600 przepisów",
   "country": "PL",
   "plural": "polish"
@@ -291,7 +291,7 @@
   "features.9.t": "Дитячі меню за віком",
   "features.10.t": "Спільний тиждень для сім’ї",
   "features.11.t": "Список у Telegram і MAX",
-  "features.12.t": "Ваші власні рецепти",
+  "features.12.t": "Ваші рецепти та рецепти з інших сайтів",
   "features.13.t": "Більше 1600 рецептів",
   "country": "UA",
   "plural": "east-slavic"
@@ -324,7 +324,7 @@
   "features.9.t": "Yaş grubu için çocuk menüleri",
   "features.10.t": "Aile için ortak haftalık plan",
   "features.11.t": "Telegram ve MAX'te listeniz",
-  "features.12.t": "Kendi tarifleriniz",
+  "features.12.t": "Kendi tarifleriniz ve diğer sitelerden tarifler",
   "features.13.t": "1.600'den fazla tarif",
   "country": "TR",
   "plural": "none"
@@ -357,7 +357,7 @@
   "features.9.t": "Kindermaaltijden per leeftijd",
   "features.10.t": "Één week voor het hele gezin",
   "features.11.t": "Je lijst in Telegram en MAX",
-  "features.12.t": "Je eigen recepten",
+  "features.12.t": "Jouw recepten en recepten van andere websites",
   "features.13.t": "Meer dan 1.600 recepten",
   "country": "NL",
   "plural": "one-other"
@@ -390,7 +390,7 @@
   "features.9.t": "Dětská jídla podle věku",
   "features.10.t": "Týden pro celou rodinu",
   "features.11.t": "Váš seznam v Telegramu a MAX",
-  "features.12.t": "Vaše vlastní recepty",
+  "features.12.t": "Vaše recepty a recepty z jiných webů",
   "features.13.t": "Více než 1 600 receptů",
   "country": "CZ",
   "plural": "czech"
@@ -423,7 +423,7 @@
   "features.9.t": "Балаларға жасына қарай мәзір",
   "features.10.t": "Отбасыға ортақ апта",
   "features.11.t": "Тізім Telegram мен MAX-та",
-  "features.12.t": "Сіздің рецепттеріңіз",
+  "features.12.t": "Сіздің рецепттеріңіз және басқа сайттардың рецепттері",
   "features.13.t": "1600-ден астам рецепт",
   "country": "KZ",
   "plural": "none"
@@ -456,7 +456,7 @@
   "features.9.t": "按年龄分类的儿童菜单",
   "features.10.t": "全家共享一周计划",
   "features.11.t": "Telegram 和 MAX 中的购物清单",
-  "features.12.t": "自创食谱",
+  "features.12.t": "您的食谱和其他网站的食谱",
   "features.13.t": "1,600 余款食谱",
   "country": "CN",
   "plural": "none"
@@ -489,7 +489,7 @@
   "features.9.t": "年齢別の子どもメニュー",
   "features.10.t": "家族全員のための1週間",
   "features.11.t": "TelegramとMAXでリスト",
-  "features.12.t": "自分のレシピ",
+  "features.12.t": "あなたのレシピと他のサイトからのレシピ",
   "features.13.t": "1,600以上のレシピ",
   "country": "JP",
   "plural": "none"
