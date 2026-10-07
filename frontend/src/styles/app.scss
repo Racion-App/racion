@@ -1924,9 +1924,11 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   @media (min-width: 860px) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; padding: 28px 32px; }
   h2 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.015em; }
   &__col { display: grid; gap: 10px; align-content: start; font-size: 15.5px; line-height: 1.55; p { margin: 0; } .btn { justify-self: start; margin-top: 6px; } } }
-.faq { border-top: 1px solid var(--ds-separator); padding: 10px 0;
+// Вопросы и ответы. Отступы — у вопроса и ответа, а не у <details>: над и под вопросом поровну, нажимается
+// вся строка высотой не меньше 48 px, ответ отступает снизу сам.
+.faq { border-top: 1px solid var(--ds-separator);
   &:last-child { border-bottom: 1px solid var(--ds-separator); }
-  summary { cursor: pointer; font-weight: 600; font-size: 15.5px; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center;
+  summary { cursor: pointer; min-height: 48px; padding: 12px 0; font-weight: 600; font-size: 15.5px; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center;
     &::-webkit-details-marker { display: none; }
     &::after { content: ""; flex: 0 0 auto; width: 18px; height: 18px; background: var(--ds-label-secondary); transition: transform var(--ds-dur-base) var(--ds-ease-spring);
       -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -1934,7 +1936,11 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   // плюс поворачивается в крестик; .is-closing — ответ ещё сворачивается (ssr.js), а крестик уже возвращается
   &[open]:not(.is-closing) summary::after { transform: rotate(45deg); }
   // отступ внутри ответа, а не снаружи: ssr.js анимирует высоту ответа, и внешний отступ дёргался бы
-  p { margin: 0; padding-top: 8px; color: var(--ds-label-secondary); } }
+  p { margin: 0; padding: 0 0 14px; color: var(--ds-label-secondary); } }
+// вопросы идут сплошным списком, их делит только линия: зазор сетки колонки лёг бы под каждым вопросом,
+// кроме последнего, и строки вышли бы разной высоты
+.colhow__col:has(> .faq), .agesec:has(> .faq) { gap: 0; }
+.agesec:has(> .faq) > h2 { margin-bottom: 12px; }
 // Готовые меню на странице подборки: карточка с названием, списком блюд и итогами на человека
 .menus { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 .menu { display: grid; gap: 10px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); box-shadow: var(--ds-shadow-xs);
