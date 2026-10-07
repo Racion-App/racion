@@ -505,6 +505,9 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 		titleParts = append(titleParts, strings.ToLower(name))
 	}
 	for _, g := range service.CatalogFilters {
+		if g.Param == "pmin" {
+			continue // нижняя граница цены — часть ползунка «price», своей группы на странице у неё нет
+		}
 		fv := filterView{Param: g.Param, Label: i18n.T(pl.L, "filter."+g.Param)}
 		if g.Param == "price" {
 			lv := pl.Country.PriceLevels
