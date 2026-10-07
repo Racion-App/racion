@@ -1,5 +1,25 @@
 [
  {
+  "version": "1.15",
+  "date": "2026-10-07",
+  "title": {
+   "ru": "ПП-салаты: 30 новых рецептов и подборка",
+   "en": "Healthy salads: 30 new recipes and a collection"
+  },
+  "items": {
+   "ru": [
+    "Новая подборка «ПП-салаты на ужин и обед с собой»: 45 салатов с калориями, белками и ценой порции и семь готовых наборов по пять салатов: тёплые на ужин, осенний рынок, с запечёнными овощами, боулы с крупой и лапшой, на обед с собой, из ленты, белковые.",
+    "30 новых салатов с фото: курица с жареной грушей, хурма с копчёной курицей, плотный фасолевый, салат в банке с кускусом, огуречный с тунцом, тайский со свиной вырезкой. Без майонеза, от 393 до 484 ккал на порцию.",
+    "Рецепты переведены на 14 языков, к ним добавлены советы: как не пересушить, чем заменить, сколько хранить."
+   ],
+   "en": [
+    "A new collection, \"Healthy salads for dinner and packed lunch\": 45 salads with calories, protein and a price per serving, and seven ready sets of five salads: warm dinners, autumn market, roasted vegetables, bowls with grains and noodles, packed lunch, viral and high protein.",
+    "30 new salads with photos: chicken with seared pear, persimmon with smoked chicken, dense bean salad, a jar salad with couscous, cucumber with tuna, Thai with pork tenderloin. No mayonnaise, from 393 to 484 kcal per serving.",
+    "The recipes are translated into 14 languages and come with tips: how not to dry a dish out, what to swap, how long it keeps."
+   ]
+  }
+ },
+ {
   "version": "1.14",
   "date": "2026-10-07",
   "title": {
