@@ -30,7 +30,8 @@ export function Occasion() {
   const [draft, setDraft] = useState<Partial<Params>>(() => readDraft());
   const [country, setCountry] = useState(draft.country || langCountry(lang));
   const [store, setStore] = useState(draft.store || "");
-  const [guests, setGuests] = useState(0);
+  // ?guests=6 — со страницы «Новогодний стол»: стол открывается на то же число гостей, что и вкладка
+  const [guests, setGuests] = useState(() => Math.min(40, Math.max(0, Number(new URLSearchParams(location.search).get("guests")) || 0)));
   const [meta, setMeta] = useState<Meta | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

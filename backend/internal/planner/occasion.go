@@ -190,6 +190,16 @@ func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) 
 		}
 		byPhoto(primary)
 		byPhoto(backup)
+		// недорогой стол: в каждом курсе сначала то, что дешевле на порцию; фото уже не главное
+		if p.Thrifty {
+			cheap := func(list []Recipe) {
+				slices.SortStableFunc(list, func(a, b Recipe) int {
+					return int(math.Round(c.costPerPortion(a, pr) - c.costPerPortion(b, pr)))
+				})
+			}
+			cheap(primary)
+			cheap(backup)
+		}
 		// обязательные — вперёд в заданном порядке
 		slices.SortStableFunc(primary, func(a, b Recipe) int {
 			ia, ib := slices.Index(course.Must, a.ID), slices.Index(course.Must, b.ID)
@@ -216,7 +226,7 @@ func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) 
 			}
 			// дорогих блюд (буррата, икра, спаржа) — не больше одного на курс, иначе стол на 8 гостей уходит за 30 тысяч
 			if slices.Contains(r.Tags, "premium") && !must {
-				if premium >= 1 {
+				if premium >= 1 || p.Thrifty {
 					continue
 				}
 				premium++

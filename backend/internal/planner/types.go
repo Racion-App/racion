@@ -282,6 +282,9 @@ type Params struct {
 	Compact bool `json:"compact,omitempty"`
 	// ExcludeRecipes — нелюбимые рецепты из личного кабинета; сервер подставляет сам, из квиза не приходит.
 	ExcludeRecipes []string `json:"excludeRecipes,omitempty"`
+	// Thrifty — праздничный стол подешевле: без дорогих блюд и с самыми недорогими в каждом курсе.
+	// Ставит сервер (страница «Новогодний стол», вариант «недорогой»), из квиза не приходит.
+	Thrifty bool `json:"-"`
 	// Favorites — избранные рецепты из кабинета; тоже подставляет сервер. Получают бонус в подборе.
 	Favorites []string `json:"favorites,omitempty"`
 	// Collection — id коллекции из кабинета: неделю собираем из неё; CollectionIDs подставляет сервер.

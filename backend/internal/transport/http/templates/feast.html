@@ -1,0 +1,57 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{if .P}}{{.P}}{{else}}/{{end}}">{{t .L "page.brand"}}</a><span>›</span><a href="{{.P}}/collection/new-year-table">{{t .L "feast.crumb"}}</a><span>›</span><span>{{.H1}}</span></nav>
+
+<header class="agehead feasthead">
+  <h1 class="agehead__title">{{.H1}}</h1>
+  <p class="agesec__lead">{{.Lead}}</p>
+</header>
+
+<section class="feast" aria-label="{{t .L "feast.tabs"}}">
+  {{range .Views}}<input class="feast__radio" type="radio" name="feast-v" id="fv-{{.Key}}" aria-label="{{.Title}}"{{if .Checked}} checked{{end}}>{{end}}
+  <div class="feast__tabs agescale" aria-hidden="true">{{range .Views}}<label for="fv-{{.Key}}" data-v="{{.Key}}">{{.Tab}}</label>{{end}}</div>
+  {{range .Views}}<div class="feast__pane" data-v="{{.Key}}">
+    <div class="agetop">
+      <div class="feast__table">
+        <h2 class="season__title">{{.Title}}</h2>
+        {{range .Courses}}<section class="feast__course">
+          <h3>{{.Title}}</h3>
+          <ul class="feast__dishes">{{range .Dishes}}<li><a class="feast__dish" href="{{.Href}}">
+            <span class="feast__img">{{if .Image}}<img src="{{.Image}}" alt="" width="56" height="56" loading="lazy" decoding="async">{{end}}</span>
+            <span class="feast__name">{{.Title}}</span>
+            <span class="feast__money num is-rub">≈ {{.Money}}<small>{{t $.L "feast.portion"}}</small></span>
+          </a></li>{{end}}</ul>
+        </section>{{end}}
+      </div>
+      <div class="agetop__side">
+        <ul class="norms">
+          <li><b><span class="num is-rub">≈ {{.Total}}</span></b><span>{{t $.L "feast.norm.total"}}</span></li>
+          <li><b><span class="num is-rub">≈ {{.PerGuest}}</span></b><span>{{t $.L "feast.norm.guest"}}</span></li>
+          <li><b><span class="num">{{.Dishes}}</span></b><span>{{t $.L "feast.norm.dishes" .DishesWord}}</span></li>
+        </ul>
+        <div class="ctapanel">
+          <p>{{t $.L "feast.cta"}}</p>
+          <a class="btn btn-primary" href="{{.Href}}">{{t $.L "feast.cta.btn"}}</a>
+        </div>
+        <section class="feast__list" aria-label="{{t $.L "feast.list"}}">
+          <h3>{{t $.L "feast.list"}} <span class="catsection__n num">{{.Items}}</span></h3>
+          {{range .Groups}}<div class="feast__group">
+            <div class="feast__ghead"><b>{{.Label}}</b><span class="num">≈ {{.Money}}</span></div>
+            <ul>{{range .Items}}<li><span>{{.Name}}</span><span class="num">{{.Qty}}</span></li>{{end}}</ul>
+          </div>{{end}}
+          <p class="rpage__note">{{t $.L "feast.list.note"}}</p>
+        </section>
+      </div>
+    </div>
+  </div>{{end}}
+</section>
+
+<section class="agesec colfaq" aria-labelledby="f-faq">
+  <h2 id="f-faq">{{t .L "coll.faq"}}</h2>
+  {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+</section>
+
+<section class="agesec" aria-labelledby="f-more">
+  <h2 id="f-more">{{t .L "feast.more"}}</h2>
+  <div class="rpage__tags">{{range .Others}}<a class="chip" href="{{.Href}}">{{.Name}}</a>{{end}}</div>
+</section>
+{{template "foot" .}}

@@ -412,8 +412,18 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	kidAges, kidExamples := kidAgeLinks(col.Slug, col.ID, pl)
+	// у подборок к посту и Новому году есть готовая страница с ценой и списком покупок (ru, en, de)
+	var menuLink *struct{ Name, Href string }
+	if topicLang(pl.L) {
+		switch col.Slug {
+		case "lent-menu":
+			menuLink = &struct{ Name, Href string }{i18n.T(pl.L, "menu.post.h1"), pl.P + "/menu/post"}
+		case "new-year-table":
+			menuLink = &struct{ Name, Href string }{i18n.T(pl.L, "feast.h1short"), pl.P + "/menu/new-year"}
+		}
+	}
 	data := map[string]any{
-		"KidAges": kidAges, "KidExamples": kidExamples,
+		"KidAges": kidAges, "KidExamples": kidExamples, "MenuLink": menuLink,
 		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitle(text.Title, col.Name) + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
