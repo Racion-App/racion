@@ -470,7 +470,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"InCollections": inCols, "Topics": s.topicsFor(rc, l, pl.P),
 		"Viewer": viewer, "Stats": stats, "StarsOn": starsOn(stats), "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
 		"Base": pageBase{User: currentUser(r) != nil, Title: tx.Title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
-			Alternates: s.alternates(r, "/recipe/"+rc.ID), NoIndex: rc.Own},
+			Alternates: s.recipeAlternates(r, rc), NoIndex: rc.Own || !hasLang(rc, l)},
 		"L": l, "P": pl.P, "Country": pl.Country,
 		"NavRecipes": true,
 		"R":          rc, "Title": tx.Title, "Description": tx.Description, "Kcal": kcal, "Protein": prot, "Fat": fat, "Carb": carb,

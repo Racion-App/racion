@@ -300,6 +300,27 @@ func (s *Server) alternates(r *http.Request, path string) []altLink {
 	return out
 }
 
+// hasLang — есть ли у рецепта текст на языке: русский — основные поля, остальные — перевод. Без перевода
+// страница показывает английский или русский текст, поэтому в индекс и в hreflang она не идёт.
+func hasLang(rc planner.Recipe, l i18n.Lang) bool {
+	if l == i18n.RU {
+		return true
+	}
+	t, ok := rc.I18n[string(l)]
+	return ok && t.Title != ""
+}
+
+// recipeAlternates — версии рецепта только на тех языках, где у него есть текст.
+func (s *Server) recipeAlternates(r *http.Request, rc planner.Recipe) []altLink {
+	var out []altLink
+	for _, al := range s.alternates(r, "/recipe/"+rc.ID) {
+		if hasLang(rc, i18n.Lang(al.Lang)) {
+			out = append(out, al)
+		}
+	}
+	return out
+}
+
 const perPage = 36
 
 type filterView struct {

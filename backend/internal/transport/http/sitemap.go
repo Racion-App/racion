@@ -91,10 +91,18 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	for _, rc := range s.catalog.Recipes {
-		if rc.Hidden {
+		if rc.Hidden || !hasLang(rc, l) {
 			continue
 		}
-		url("/recipe/"+rc.ID, "monthly", "0.7")
+		// hreflang — только языки, на которых у рецепта есть текст
+		fmt.Fprintf(&b, "<url><loc>%s%s/recipe/%s</loc>", base, p, rc.ID)
+		for _, al := range i18n.Langs {
+			if hasLang(rc, al) {
+				fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="%s" href="%s%s/recipe/%s"/>`, al, base, prefix(al), rc.ID)
+			}
+		}
+		fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s/recipe/%s"/>`, base, rc.ID)
+		b.WriteString("<changefreq>monthly</changefreq><priority>0.7</priority></url>\n")
 	}
 	for _, rc := range community {
 		url("/recipe/"+rc.ID, "monthly", "0.5")
