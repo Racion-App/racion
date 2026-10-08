@@ -124,11 +124,30 @@ export function Quiz() {
     return init;
   });
   const limitsCount = p.allergens.length + p.excludeTags.length + p.exclude.length;
+  // Пришли с выбранным возрастом (?kid= со страницы «Меню ребёнка в N лет» или из детской подборки): на шаге
+  // «Кто ест?» ребёнок стоит под взрослыми, за краем экрана. Прокручиваем к нему и подсвечиваем карточку,
+  // иначе кажется, что нажатие на возраст ничего не сделало.
+  const kidParam = sp.has("kid") ? Number(sp.get("kid")) : null;
+  const [focusKid, setFocusKid] = useState<number | null>(null);
+  const kidShown = useRef(false);
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [regionQuery, setRegionQuery] = useState("");
   const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (kidShown.current || kidParam === null || step !== 2) return;
+    const i = p.kids.findIndex((k) => k.ageMonths === kidParam);
+    const el = i >= 0 ? document.querySelectorAll<HTMLElement>(".kid")[i] : undefined;
+    if (!el) return; // шаг ещё не отрисован — дождёмся справочников
+    kidShown.current = true;
+    setFocusKid(i);
+    // после эффекта смены шага: тот поднимает страницу наверх и отменил бы прокрутку к ребёнку
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // карточку ищем заново: за это время шаг мог перерисоваться, и старый узел уже не на странице
+    window.setTimeout(() => document.querySelector(".kid--focus")?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" }), 300);
+  }, [step, p.kids, meta]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Справочники зависят от языка и страны (пресеты бюджета в валюте).
   useEffect(() => {
@@ -576,7 +595,7 @@ export function Quiz() {
                 </button>
               )}
               {p.kids.map((k, i) => (
-                <div className="kid" key={i}>
+                <div className={"kid" + (i === focusKid ? " kid--focus" : "")} key={i}>
                   <div className="kid__head">
                     <span className="kid__title">
                       <Baby size={18} aria-hidden /> {t("quiz.child")} {p.kids.length > 1 ? i + 1 : ""}

@@ -556,6 +556,10 @@ a { text-underline-offset: 3px; }
 }
 
 // ── Дети ────────────────────────────────────────────────────────────────────
+// ребёнок, пришедший по ссылке с возрастом: карточка коротко загорается синим, когда до неё докрутили
+.kid--focus { animation: kid-focus 1.8s var(--ds-ease-emphasis) both; }
+@keyframes kid-focus { 0%, 45% { border-color: var(--ds-blue); box-shadow: 0 0 0 3px var(--ds-blue-tint); } 100% { border-color: var(--ds-separator); box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .kid.kid--focus { animation: none; border-color: var(--ds-blue); } }
 .kid {
   display: grid; gap: 10px;
   padding: 14px 16px;
@@ -880,7 +884,8 @@ body.catside-open { overflow: hidden; .consent { display: none; } } // банн�
   }
 }
 .colhead { display: grid; gap: 16px; margin: 8px 0 20px; @media (min-width: 720px) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; }
-  &__img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--ds-radius-xl); }
+  // height: auto — иначе высоту задаёт атрибут height у <img>, и aspect-ratio не действует
+  &__img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--ds-radius-xl); }
   &__body { display: grid; gap: 8px; justify-items: start; }
   &__title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
   &__lead { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ds-label-secondary); }
@@ -1928,9 +1933,24 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 // Страница подборки: шапка с фактами и двумя кнопками, вступление колонкой текста, группы рецептов,
 // «Как пользоваться» и вопросы двумя колонками, другие подборки внизу
 .colhead--rich { align-items: start; margin-bottom: 8px;
-  .colhead__img { aspect-ratio: 4 / 3; }
+  // на телефоне фото — полоса, а не весь первый экран: заголовок и главное действие должны быть видны сразу
+  .colhead__img { aspect-ratio: 4 / 3; @media (max-width: 719px) { aspect-ratio: 2 / 1; } }
   .colhead__body { gap: 10px; padding-top: 4px; }
-  .colhead__title { font-size: 32px; @media (min-width: 720px) { font-size: 38px; } } }
+  .colhead__title { font-size: 28px; @media (min-width: 720px) { font-size: 38px; } } }
+// Детская подборка: «Сколько лет ребёнку?» — возрасты крупными кнопками, каждая открывает анкету с ребёнком
+// этого возраста. Голубой тинт — как у панели призыва на страницах «Меню ребёнка в N лет».
+.kidpick { justify-self: stretch; display: grid; gap: 10px; margin: 4px 0 2px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-blue-tint);
+  &__q { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--ds-label-primary); }
+  &__ages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+    @media (min-width: 560px) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  &__age { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 8px 10px; border-radius: var(--ds-radius-md);
+    background: var(--ds-bg-elevated); box-shadow: 0 0 0 1px var(--ds-separator) inset; color: var(--ds-blue);
+    font-size: 16px; font-weight: 600; text-align: center; text-decoration: none; transition: background-color var(--ds-dur-fast), color var(--ds-dur-fast);
+    &:hover { background: var(--ds-blue); color: #fff; box-shadow: none; }
+    &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
+  &__hint { margin: 0; font-size: 13.5px; line-height: 1.4; color: var(--ds-label-secondary); }
+  &__more { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ds-label-secondary);
+    a { color: var(--ds-blue); font-weight: 500; text-decoration: none; &:hover { text-decoration: underline; text-underline-offset: 3px; } } } }
 .colhead__eyebrow { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ds-label-tertiary); }
 .colhead__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; .btn { display: inline-flex; align-items: center; gap: 8px; }
   .is-done { color: var(--ds-green); } }

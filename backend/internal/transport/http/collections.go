@@ -23,6 +23,34 @@ var mergedCollections = map[string]string{
 	"picnic-shashlik": "dacha-grill",
 }
 
+// Детские подборки: в шапке вместо общей кнопки вопрос «Сколько лет ребёнку?». Из поиска сюда приходят
+// с запросами «меню на неделю ребёнку 2 года», и кнопка возраста сразу открывает анкету с ребёнком этого
+// возраста (возраст в месяцах, как ?kid= на страницах «Меню ребёнка в N лет»).
+var collectionKidAges = map[string][]int{
+	"kids-1-3":    {12, 18, 24, 36},
+	"kids-dinner": {24, 36, 60, 84},
+}
+
+type kidAgeLink struct{ Label, Href string }
+
+// kidAgeLinks — кнопки возраста для детской подборки и ссылки на готовые недели этих возрастов (если такие
+// страницы есть на языке страницы).
+func kidAgeLinks(slug, colID string, pl pageLocale) (ages, examples []kidAgeLink) {
+	for _, m := range collectionKidAges[slug] {
+		label := planner.Child{AgeMonths: m}.AgeLabel(pl.L)
+		ages = append(ages, kidAgeLink{label, pl.P + "/?s=2&kid=" + strconv.Itoa(m) + "&collection=" + colID})
+		if !topicLang(pl.L) {
+			continue
+		}
+		for _, km := range kidMenuPresets {
+			if km.Age == m {
+				examples = append(examples, kidAgeLink{label, pl.P + "/menu/" + km.Slug})
+			}
+		}
+	}
+	return ages, examples
+}
+
 // pageTitle — заголовок вкладки: редакционный, если задан, иначе имя подборки.
 func pageTitle(custom, name string) string {
 	if custom != "" {
@@ -383,7 +411,9 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		m := i18n.Meta(l)
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
+	kidAges, kidExamples := kidAgeLinks(col.Slug, col.ID, pl)
 	data := map[string]any{
+		"KidAges": kidAges, "KidExamples": kidExamples,
 		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitle(text.Title, col.Name) + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
