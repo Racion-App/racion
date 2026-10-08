@@ -412,9 +412,15 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		alts = append(alts, altLink{Lang: string(l), Href: base + prefix(l) + "/collection/" + col.Slug, Name: m.Name, English: m.English, Flag: m.Flag})
 	}
 	kidAges, kidExamples := kidAgeLinks(col.Slug, col.ID, pl)
+	// тексты подборок есть на русском и английском; на других языках заголовок — название подборки на этом
+	// языке, а не английский заголовок: иначе у испанской и португальской страниц он один и тот же
+	colTitle := text.Title
+	if !col.HasText(string(pl.L)) {
+		colTitle = ""
+	}
 	data := map[string]any{
 		"KidAges": kidAges, "KidExamples": kidExamples,
-		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitle(text.Title, col.Name) + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
+		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitle(colTitle, col.Name) + " — " + i18n.T(pl.L, "page.brand"), Description: col.Description, Canonical: base + pl.P + "/collection/" + col.Slug, OGImage: base + "/og/collection/" + col.Slug + ".jpg?l=" + string(pl.L), OGType: "article", OGWide: true, Alternates: alts, JSONLD: collectionLD(base, pl, col.Name, col.Description, col.Slug, cards, text.FAQ)},
 		"L":    pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}

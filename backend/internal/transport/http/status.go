@@ -113,7 +113,8 @@ func (s *Server) statusPage(w http.ResponseWriter, r *http.Request) {
 	}
 	base := s.baseURL(r)
 	title := i18n.T(pl.L, "status.title")
-	data["Base"] = pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "status.desc"), Canonical: base + pl.P + "/status", OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/status")}
+	data["Base"] = pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(pl.L, "page.brand"), Description: i18n.T(pl.L, "status.desc"), Canonical: base + pl.P + "/status", OGImage: brandOG(base, pl.L), OGWide: true, Alternates: s.alternates(r, "/status"),
+		NoIndex: true} // служебная страница: в поиске ей делать нечего, а на пятнадцати языках она давала одинаковые заголовки
 	data["L"], data["P"], data["Country"], data["Title"] = pl.L, pl.P, pl.Country, title
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache")

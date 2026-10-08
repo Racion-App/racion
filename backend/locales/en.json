@@ -2227,5 +2227,8 @@
   "lent.fish.lead.nativity": "During the Nativity Fast fish is eaten on Tuesdays, Thursdays and weekends until 19 December, then only at weekends until 1 January. These fish dishes have no meat, dairy or eggs.",
   "lent.fish.lead.great": "During Great Lent fish is eaten twice: on the Annunciation and on Palm Sunday. These fish dishes have no meat, dairy or eggs.",
   "lent.fish.lead.apostles": "During the Apostles' Fast fish is eaten on Tuesdays, Thursdays, Saturdays and Sundays. These fish dishes have no meat, dairy or eggs.",
-  "lent.fish.lead.dormition": "During the Dormition Fast fish is allowed only on the Transfiguration, 19 August. These fish dishes have no meat, dairy or eggs."
+  "lent.fish.lead.dormition": "During the Dormition Fast fish is allowed only on the Transfiguration, 19 August. These fish dishes have no meat, dairy or eggs.",
+  "recipe.title.kid": "{0} for kids",
+  "recipe.title.alt": "{0}: {1}, {2}",
+  "catalog.page.n": "page {0}"
 }

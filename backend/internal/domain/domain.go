@@ -371,6 +371,12 @@ type QA struct {
 }
 
 // TextFor — текст подборки на языке с запасом en → ru.
+// HasText — есть ли у подборки свои тексты на языке (а не запасные с английского или русского).
+func (c Collection) HasText(lang string) bool {
+	t, ok := c.SEO[lang]
+	return ok && (len(t.Intro) > 0 || len(t.FAQ) > 0 || len(t.Menus) > 0)
+}
+
 func (c Collection) TextFor(lang string) CollectionText {
 	for _, code := range []string{lang, "en", "ru"} {
 		if t, ok := c.SEO[code]; ok && (len(t.Intro) > 0 || len(t.FAQ) > 0 || len(t.Menus) > 0) {

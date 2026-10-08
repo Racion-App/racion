@@ -85,7 +85,7 @@ func main() {
 	backend := fs.String("backend", "local", "local (прокси подписки ChatGPT на 127.0.0.1:10531) | codex (Codex CLI) | openai (API-ключ) | mistral | gemini | groq | openrouter | custom (AI_BASE_URL, AI_API_KEY)")
 	model := fs.String("model", "", "codex: модель (пусто — из ~/.codex/config.toml)")
 	effort := fs.String("effort", "low", "codex: model_reasoning_effort: minimal | low | medium")
-	only := fs.String("only", "", "notes: только эти id через запятую")
+	only := fs.String("only", "", "notes, recipes: только эти id через запятую")
 	limit := fs.Int("limit", 0, "notes: не больше N рецептов за прогон (0 — все)")
 	_ = fs.Parse(os.Args[2:])
 	if *to == "" {
@@ -152,7 +152,7 @@ func main() {
 	case "locales":
 		err = genLocales(ctx, client, langs)
 	case "recipes":
-		err = genRecipes(ctx, client, langs, *workers, *force)
+		err = genRecipes(ctx, client, langs, *workers, *force, *only)
 	case "detail":
 		err = genDetail(ctx, client, *workers)
 	case "ingredients":
@@ -254,7 +254,7 @@ type recipeFile struct {
 
 // genRecipes переводит все рецепты базы (internal/seed/data/recipes*.json) на языки; результат —
 // recipes_i18n_<lang>.json в том же формате, что и ручные переводы en/de.
-func genRecipes(ctx context.Context, client *ai.Client, langs []string, workers int, force bool) error {
+func genRecipes(ctx context.Context, client *ai.Client, langs []string, workers int, force bool, only string) error {
 	dir := filepath.Join("internal", "seed", "data")
 	src := map[string]ai.RecipeText{}
 	entries, _ := os.ReadDir(dir)
@@ -293,9 +293,19 @@ func genRecipes(ctx context.Context, client *ai.Client, langs []string, workers 
 		}
 	}
 	en := readRecipeFile(filepath.Join(dir, "recipes_i18n_en.json"))
+	// -only: перевести заново только эти рецепты, не трогая остальные непереведённые (банки на двенадцати
+	// языках переводить целиком дорого — за ними идут отдельным решением)
+	pick := map[string]bool{}
+	for _, id := range strings.Split(only, ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			pick[id] = true
+		}
+	}
 	ids := make([]string, 0, len(src))
 	for id := range src {
-		ids = append(ids, id)
+		if len(pick) == 0 || pick[id] {
+			ids = append(ids, id)
+		}
 	}
 	sort.Strings(ids)
 	for _, l := range langs {

@@ -443,6 +443,11 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		ld["aggregateRating"] = map[string]any{"@type": "AggregateRating", "ratingValue": fmt.Sprintf("%.1f", stats.Rating), "ratingCount": stats.Ratings, "bestRating": 5, "worstRating": 1}
 	}
 	ldJSON, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{ld, crumbs}})
+	// заголовок для поиска без повторов на языке (см. titles.go); свои рецепты не в каталоге и не в индексе
+	pageTitleOf := tx.Title
+	if !rc.Own {
+		pageTitleOf = s.recipePageTitle(l, rc, tx.Title)
+	}
 	viewer := currentUser(r)
 	comments, _ := s.svc.Social.Comments(r.Context(), rc.ID, viewerID(r))
 	type commentView struct {
@@ -483,7 +488,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"InCollections": inCols, "Topics": s.topicsFor(rc, l, pl.P),
 		"Viewer": viewer, "Stats": stats, "StarsOn": starsOn(stats), "Comments": cviews, "Author": rc.Author, "Photos": s.svc.Media.Enabled(),
-		"Base": pageBase{User: currentUser(r) != nil, Title: tx.Title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
+		"Base": pageBase{User: currentUser(r) != nil, Title: pageTitleOf + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/recipe/" + rc.ID, OGImage: base + "/og/recipe/" + rc.ID + ".jpg?l=" + string(l) + "&c=" + pl.Country.Code, OGType: "article", OGWide: true, JSONLD: template.JS(ldJSON),
 			Alternates: s.recipeAlternates(r, rc), NoIndex: rc.Own || !hasLang(rc, l)},
 		"L": l, "P": pl.P, "Country": pl.Country,
 		"NavRecipes": true,

@@ -637,6 +637,13 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	if q != "" {
 		title = "«" + q + "» — " + i18n.T(pl.L, "catalog.search") + " · " + i18n.T(pl.L, "page.brand")
 	}
+	// вторая и дальше страницы каталога — с номером, иначе у всех один заголовок
+	metaDesc := i18n.T(pl.L, "catalog.meta", total, i18n.Plural(pl.L, total, "catalog.recipe"))
+	if page > 1 {
+		pn := i18n.T(pl.L, "catalog.page.n", page)
+		title = strings.TrimSuffix(title, " — "+i18n.T(pl.L, "page.brand")) + " — " + pn + " — " + i18n.T(pl.L, "page.brand")
+		metaDesc = pn + ". " + metaDesc
+	}
 	// canonical без цены и валюты: те же рецепты в другой валюте — не отдельная страница; поиск и ценовые
 	// срезы не индексируем, чтобы не плодить почти одинаковые страницы
 	canon := service.ActiveFilters{}
@@ -648,7 +655,7 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"Base": pageBase{
 			Title:       title,
-			Description: i18n.T(pl.L, "catalog.meta", total, i18n.Plural(pl.L, total, "catalog.recipe")),
+			Description: metaDesc,
 			Canonical:   base + link(canon, page),
 			NoIndex:     q != "" || len(active["price"]) > 0 || len(active["pmin"]) > 0 || len(have) > 0,
 			OGImage:     brandOG(base, pl.L),
