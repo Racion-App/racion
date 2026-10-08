@@ -16,21 +16,33 @@ import (
 // масла, среда и пятница — сухоядение; на странице оба вида — «без масла». 6 января — Сочельник.
 
 type fastDay struct {
-	Day   int
-	Mon   string // короткий месяц у первой клетки поста и у первого числа
-	Kind  string // fish | oil | lean | eve | out
-	Label string // что можно в этот день: подсказка и текст для экранных читалок
-	Today bool
+	Day      int
+	Mon      string // короткий месяц у первой клетки поста и у первого числа
+	Kind     string // fish | oil | lean | eve | out
+	Label    string // что можно в этот день: подсказка и текст для экранных читалок
+	Date     string // «1 декабря 2026» — заголовок панели, когда день выбран
+	Today    bool
+	Selected bool // день, открытый при загрузке: сегодня, если пост идёт, иначе первый день поста
+}
+
+// fastPane — что можно в день такого вида и блюда под него; панель показывается по нажатию на день.
+type fastPane struct {
+	Kind, Label, Text string
+	Cards             []recipeCard
 }
 
 type fastKind struct{ Kind, Label string }
 
 type fastCalendar struct {
 	Title, Lead, Note string
+	Status            string // «Идёт 12-й день поста из 40» или «До Рождественского поста 51 день»
 	Weekdays          []string
 	Weeks             [][]fastDay
 	Legend            []fastKind
 	FAQ               []domain.QA
+	Panes             []fastPane
+	SelectedDate      string
+	SelectedKind      string
 }
 
 // fastKindOf — что можно в день d поста, который идёт с start по end.
@@ -88,12 +100,25 @@ func newFastCalendar(l i18n.Lang, now time.Time) *fastCalendar {
 	for i := 0; i < 7; i++ {
 		fc.Weekdays = append(fc.Weekdays, planner.DayLabel(l, i))
 	}
+	// открытый день: сегодня, если пост идёт, иначе первый день поста
+	sel := start
+	if !today.Before(start) && !today.After(end) {
+		sel = today
+		n := int(today.Sub(start).Hours()/24) + 1
+		fc.Status = i18n.T(l, "fast.status.day", n, int(end.Sub(start).Hours()/24)+1)
+	} else if left := int(start.Sub(today).Hours() / 24); left > 0 && left <= 90 {
+		fc.Status = i18n.T(l, "fast.status.left", left, i18n.Plural(l, left, "fast.days"))
+	}
 	var week []fastDay
 	for d := first; !d.After(last); d = d.AddDate(0, 0, 1) {
 		k := fastKindOf(d, start, end)
-		fd := fastDay{Day: d.Day(), Kind: k, Today: d.Equal(today)}
+		fd := fastDay{Day: d.Day(), Kind: k, Today: d.Equal(today), Selected: d.Equal(sel)}
 		if k != "out" {
 			fd.Label = i18n.T(l, "fast.kind."+k)
+			fd.Date = i18n.DayMonthYear(l, d.Day(), int(d.Month()), d.Year())
+		}
+		if fd.Selected {
+			fc.SelectedDate, fc.SelectedKind = fd.Date, k
 		}
 		if d.Equal(start) || (d.Day() == 1 && k != "out") {
 			fd.Mon = shortMonth(l, int(d.Month()))

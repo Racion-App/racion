@@ -1994,7 +1994,9 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__title { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.012em; }
   &__note { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ds-label-secondary); }
   &__list { list-style: none; margin: 0; padding: 0; display: grid; }
-  &__item { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; color: var(--ds-label-primary); text-decoration: none; border-top: 1px solid var(--ds-separator);
+  // фото слева на две строки: название сверху, время и цена под ним — в узкой карточке название не сжимается
+  &__item { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "img name" "img meta"; gap: 1px 10px; align-items: center; padding: 6px 0; color: var(--ds-label-primary); text-decoration: none; border-top: 1px solid var(--ds-separator);
+    > .menu__img { grid-area: img; } > .menu__name { grid-area: name; align-self: end; } > .menu__meta { grid-area: meta; align-self: start; }
     &:hover { opacity: 1; .menu__name { color: var(--ds-blue); } } }
   &__list li:first-child .menu__item { border-top: 0; }
   &__img { width: 44px; height: 44px; border-radius: var(--ds-radius-sm); object-fit: cover; background: var(--ds-fill-3); &--empty { display: block; } }
@@ -2509,7 +2511,7 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
 .fastcal__grid { display: grid; gap: 4px; max-width: 560px; }
 .fastcal__row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .fastcal__wd { padding: 2px 0; font-size: 12px; font-weight: 600; text-align: center; color: var(--ds-label-secondary); }
-.fastcal__day { position: relative; display: grid; align-content: center; justify-items: center; gap: 1px; min-height: 48px; border-radius: var(--ds-radius-md); border: 1px solid transparent;
+.fastcal__day { position: relative; display: grid; align-content: center; justify-items: center; gap: 1px; min-height: 48px; border-radius: var(--ds-radius-md); border: 1px solid transparent; background: transparent;
   b { font-size: 14px; font-weight: 600; color: var(--ds-label-primary); }
   small { font-size: 10px; font-weight: 600; line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-label-secondary); }
   svg { width: 13px; height: 13px; color: var(--ds-label-secondary); }
@@ -2519,6 +2521,21 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
   &.is-lean { border-color: var(--ds-separator); }
   &.is-eve { background: var(--ds-fill-2); }
   &.is-today { box-shadow: inset 0 0 0 2px var(--ds-blue); b { color: var(--ds-blue); } } }
+button.fastcal__day { width: 100%; padding: 0; font: inherit; color: inherit; cursor: pointer;
+  transition: transform var(--ds-dur-fast) var(--ds-ease-spring);
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: scale(0.96); }
+  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); }
+  &[aria-pressed="true"] { background: var(--ds-blue); border-color: var(--ds-blue); b, small, svg { color: #fff; } } }
+.fastcal__pick { display: grid; gap: 8px; padding: 14px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4); }
+.fastcal__date { margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-label-secondary); }
+.fastcal__pane { display: grid; gap: 8px; &[hidden] { display: none; } }
+.fastcal__kind { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 17px; }
+.fastcal__text { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ds-label-secondary); }
+.fastcal__dishes { display: grid; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none;
+  a { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; align-items: center; color: var(--ds-label-primary); font-size: 14.5px; font-weight: 600; line-height: 1.3; text-decoration: none; &:hover { color: var(--ds-blue); } } }
+.fastcal__img { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-3);
+  img { display: block; width: 100%; height: 100%; object-fit: cover; } }
 .fastcal__legend { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.35; color: var(--ds-label-primary);
   li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: center; } }
 .fastcal__key { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--ds-radius-md); border: 1px solid transparent; color: var(--ds-label-secondary);
@@ -2528,41 +2545,45 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
   &.is-lean { border-color: var(--ds-separator); }
   &.is-eve { background: var(--ds-fill-2); } }
 
-// ── «Новогодний стол» (/menu/new-year): вкладки на 4, 6, 8 гостей и недорогой стол — радиокнопки, без JS ──
-.feasthead .agesec__lead { max-width: 70ch; }
-.feast { display: grid; gap: 14px; margin-top: 16px; }
+// ── Новогодний стол в подборке new-year-table: вкладки на 4, 6, 8 гостей и недорогой — радиокнопки, без JS.
+// Блюда — плитками с фото, как стол сверху; список покупок свёрнут под плитками.
+.feast { display: grid; gap: 14px; margin: 8px 0 22px; }
 .feast__radio { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 .feast__tabs { max-width: 560px;
   label { flex: 1 1 0; display: grid; place-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary); white-space: nowrap; cursor: pointer;
     transition: background var(--ds-dur-fast) var(--ds-ease-standard), color var(--ds-dur-fast) var(--ds-ease-standard);
     &:hover { color: var(--ds-label-primary); } } }
-.feast__pane { display: none; }
+.feast__pane { display: none; gap: 16px; padding: 18px 16px 16px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  @media (min-width: 560px) { padding: 20px 20px 18px; } }
 @each $v in 4, 6, 8, cheap {
-  #fv-#{$v}:checked ~ .feast__pane[data-v="#{$v}"] { display: block; }
+  #fv-#{$v}:checked ~ .feast__pane[data-v="#{$v}"] { display: grid; }
   #fv-#{$v}:checked ~ .feast__tabs [data-v="#{$v}"] { background: var(--ds-bg-elevated); color: var(--ds-blue); box-shadow: var(--ds-shadow-sm); }
   #fv-#{$v}:focus-visible ~ .feast__tabs [data-v="#{$v}"] { box-shadow: var(--ds-shadow-focus); }
 }
-.feast .agetop { margin-top: 0; }
-// список покупок длинный: правая колонка не липнет, иначе её низ не увидеть; на телефоне кнопка — до списка
-.feast .agetop__side { @media (min-width: 900px) { position: static; } }
-.feast__list { order: 2; } // кнопка — над списком покупок и на телефоне, и на компьютере
-@media (max-width: 899px) { .feast .ctapanel { order: 1; } }
-.feast__table { display: grid; gap: 6px; align-content: start; padding: 18px 16px 10px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
-  @media (min-width: 560px) { padding: 20px 20px 12px; } }
-.feast__course { display: grid;
-  h3 { margin: 10px 0 2px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ds-label-secondary); } }
-.feast__dishes { margin: 0; padding: 0; list-style: none; }
-.feast__dish { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--ds-fill-4); color: inherit; text-decoration: none;
-  li:first-child > & { border-top: 0; }
-  &:hover .feast__name { color: var(--ds-blue); }
-  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: var(--ds-radius-md); } }
-.feast__img { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-4);
+.feast__head { display: grid; gap: 6px;
+  h3 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.016em; }
+  .colfacts .is-rub { color: var(--ds-green); } }
+.feast__course { display: grid; gap: 8px;
+  h4 { margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ds-label-secondary); } }
+.feast__tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none;
+  @media (max-width: 559px) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+.feast__tile { display: grid; grid-template-rows: auto 1fr auto; height: 100%; border-radius: var(--ds-radius-lg); overflow: clip; background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator); color: inherit; text-decoration: none;
+  transition: box-shadow var(--ds-dur-base) var(--ds-ease-spring), transform var(--ds-dur-base) var(--ds-ease-spring);
+  &:hover { box-shadow: var(--ds-shadow-md); transform: translateY(-1px); .feast__name { color: var(--ds-blue); } }
+  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
+.feast__photo { display: block; aspect-ratio: 3 / 2; background: var(--ds-fill-4);
   img { display: block; width: 100%; height: 100%; object-fit: cover; } }
-.feast__name { font-size: 15.5px; font-weight: 600; line-height: 1.3; color: var(--ds-label-primary); transition: color var(--ds-dur-fast) var(--ds-ease-standard); }
-.feast__money { display: grid; justify-items: end; font-size: 14px; font-weight: 600; white-space: nowrap; color: var(--ds-green);
+.feast__name { padding: 10px 12px 2px; font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--ds-label-primary); transition: color var(--ds-dur-fast) var(--ds-ease-standard); }
+.feast__money { padding: 2px 12px 11px; font-size: 13px; font-weight: 600; color: var(--ds-green);
   small { font-family: var(--ds-font-sans); font-size: 12px; font-weight: 500; color: var(--ds-label-secondary); } }
-.feast__list { display: grid; gap: 4px; padding: 16px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
-  h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; } }
+.feast__list { border-top: 1px solid var(--ds-separator); padding-top: 12px;
+  summary { display: flex; align-items: baseline; gap: 8px; min-height: 32px; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; list-style: none;
+    &::-webkit-details-marker { display: none; }
+    &::after { content: ""; width: 8px; height: 8px; margin-left: 4px; border-right: 2px solid var(--ds-label-secondary); border-bottom: 2px solid var(--ds-label-secondary); transform: translateY(-3px) rotate(45deg); transition: transform var(--ds-dur-base) var(--ds-ease-spring); } }
+  &[open] summary::after { transform: translateY(1px) rotate(-135deg); } }
+.feast__groups { display: grid; gap: 4px 28px; margin-top: 8px;
+  @media (min-width: 720px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 1100px) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .feast__group { padding: 6px 0;
   ul { margin: 0; padding: 0; list-style: none; }
   li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-top: 1px solid var(--ds-fill-4); font-size: 14px; line-height: 1.35; }
@@ -2570,6 +2591,44 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
 .feast__ghead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 4px;
   b { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ds-label-secondary); }
   .num { font-size: 13px; font-weight: 600; color: var(--ds-green); } }
+.feast__own { justify-self: start; }
+
+// отсчёт до праздника или день поста — строкой над заголовком подборки
+.countdown { display: inline-flex; align-items: center; gap: 8px; justify-self: start; margin: 0; padding: 5px 12px 5px 10px; border-radius: var(--ds-radius-pill); background: var(--ds-fill-3); font-size: 14px; font-weight: 600; color: var(--ds-label-primary);
+  svg { color: var(--ds-label-secondary); } }
+
+// Где дешевле собрать стол: полоска длиной в цену, самая дешёвая сеть подписана
+.stores__list { display: grid; margin: 0; padding: 6px 16px; list-style: none; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  li { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 9px 0; border-top: 1px solid var(--ds-fill-4); &:first-child { border-top: 0; } }
+  @media (max-width: 559px) { li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; } .stores__bar { grid-column: 1 / -1; grid-row: 2; } } }
+.stores__name { font-size: 15px; font-weight: 600;
+  small { margin-left: 4px; font-size: 12px; font-weight: 600; color: var(--ds-green); } }
+.stores__bar { display: block; height: 8px; border-radius: 4px; background: var(--ds-fill-4);
+  i { display: block; height: 100%; border-radius: 4px; background: var(--ds-label-quaternary); }
+  .is-cheapest & i { background: var(--ds-green); } }
+.stores__money { font-size: 15px; font-weight: 600; color: var(--ds-green); white-space: nowrap; }
+
+// План последних дней перед праздником: отметки хранит браузер
+.prep__list { display: grid; margin: 0; padding: 4px 16px; list-style: none; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  li { border-top: 1px solid var(--ds-fill-4); &:first-child { border-top: 0; } } }
+.prep__item { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-areas: "box when" "box text"; gap: 2px 12px; padding: 12px 0; cursor: pointer;
+  input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  @media (min-width: 720px) { grid-template-columns: 26px 190px minmax(0, 1fr); grid-template-areas: "box when text"; align-items: start; } }
+.prep__box { grid-area: box; display: grid; place-items: center; width: 24px; height: 24px; margin-top: 1px; border-radius: 50%; border: 1.5px solid var(--ds-separator-opaque); color: transparent;
+  transition: background var(--ds-dur-fast) var(--ds-ease-standard), border-color var(--ds-dur-fast) var(--ds-ease-standard); }
+.prep__when { grid-area: when; font-size: 14px; font-weight: 700; }
+.prep__text { grid-area: text; font-size: 15px; line-height: 1.45; color: var(--ds-label-primary); }
+.prep__item input:checked ~ .prep__box { background: var(--ds-green); border-color: var(--ds-green); color: #fff; }
+.prep__item input:checked ~ .prep__text { color: var(--ds-label-tertiary); text-decoration: line-through; }
+.prep__item input:focus-visible ~ .prep__box { box-shadow: var(--ds-shadow-focus); }
+
+// Ещё постные блюда каталога: подразделы с чипами-якорями
+.lentmore__group { display: grid; gap: 10px; margin-top: 14px;
+  h3 { margin: 0; font-size: 17px; font-weight: 700; } }
+// остаток группы свёрнут: на телефоне двести карточек подряд — это десятки экранов; в HTML они все
+.lentmore__rest { summary { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-size: 15px; font-weight: 600; color: var(--ds-blue); cursor: pointer; list-style: none;
+    &::-webkit-details-marker { display: none; } }
+  &[open] summary { margin-bottom: 10px; } }
 
 // Дневник прикорма в карточке ребёнка (кабинет → Семья)
 .kiddiary { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);

@@ -274,6 +274,26 @@ func (p pricer) unitPrice(ing Ingredient) float64 {
 	return pp / ing.Pack
 }
 
+// ListCost — тот же список покупок по ценам другой сети: количества и упаковки те же, меняются только цены
+// (индекс сети и её собственный каталог, если он есть). Для сравнения «где дешевле собрать стол».
+func (c *Catalog) ListCost(items []ShopItem, country, store string) float64 {
+	pr := c.pricerFor(Params{Country: country, Store: store})
+	var sum float64
+	for _, it := range items {
+		ing, ok := c.Ingredients[it.IngredientID]
+		if !ok || it.Pantry || it.AtHome || ing.Pack <= 0 {
+			continue
+		}
+		pp, _ := pr.packPrice(ing)
+		if ing.Loose {
+			sum += it.Buy * pp / ing.Pack
+		} else {
+			sum += float64(max(it.Packs, 1)) * pp
+		}
+	}
+	return pr.round(sum)
+}
+
 // referencePricer — цены страны без индекса сети: Росстат по РФ или источник страны (для страниц рецептов).
 func (c *Catalog) referencePricer(country string, l i18n.Lang) pricer {
 	return pricer{pb: c.PriceBook(), local: c.LocalPrices(country), region: "643", idx: 1, country: CountryOf(country), lang: l}

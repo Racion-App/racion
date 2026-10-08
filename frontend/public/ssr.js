@@ -277,3 +277,30 @@
     anim.onfinish=function(){a.style.overflow="";if(!open){d.open=false;d.classList.remove("is-closing")}delete d.dataset.anim};
   });
 })();
+
+// Календарь поста в подборке «Что приготовить в пост»: нажатие на день показывает, что в этот день можно,
+// и блюда под него. Панели всех видов дня уже в HTML, скрипт только переключает видимую.
+(function(){
+  document.querySelectorAll("[data-fastcal]").forEach(function(cal){
+    var date=cal.querySelector("[data-fast-date]"),panes=cal.querySelectorAll("[data-fast-pane]");
+    cal.addEventListener("click",function(e){
+      var b=e.target.closest("button.fastcal__day");if(!b)return;
+      cal.querySelectorAll('.fastcal__day[aria-pressed="true"]').forEach(function(x){x.setAttribute("aria-pressed","false")});
+      b.setAttribute("aria-pressed","true");
+      if(date)date.textContent=b.dataset.date;
+      panes.forEach(function(p){p.hidden=p.dataset.fastPane!==b.dataset.kind});
+    });
+  });
+})();
+
+// Чек-лист подготовки к празднику: отметки живут в этом браузере (localStorage), на сервер не уходят.
+(function(){
+  document.querySelectorAll("[data-checklist]").forEach(function(list){
+    var key="racion.check."+list.dataset.checklist,done={};
+    try{done=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(e){done={}}
+    list.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+      cb.checked=!!done[cb.value];
+      cb.addEventListener("change",function(){done[cb.value]=cb.checked;try{localStorage.setItem(key,JSON.stringify(done))}catch(e){}});
+    });
+  });
+})();

@@ -40,15 +40,10 @@ var menuPresets = []menuPreset{
 	{"budget", func(cy planner.Country) planner.Params {
 		return planner.Params{Adults: 2, Goal: "none", BudgetMode: "perPersonDay", BudgetValue: math.Round(cy.Default * 0.7)}
 	}},
-	// постная неделя: те же ограничения, что у события «Постная неделя» в квизе (occasions.json, id lent)
-	{"post", func(cy planner.Country) planner.Params {
-		p := planner.Params{Adults: 2, Goal: "healthy", ExcludeTags: []string{"meat", "poultry", "fish", "seafood", "offal"}, Allergens: []string{"dairy", "eggs"}}
-		if o, ok := planner.OccasionByID("lent"); ok && o.Preset != nil {
-			p.ExcludeTags, p.Allergens = o.Preset.ExcludeTags, o.Preset.Allergens
-		}
-		return p
-	}},
 }
+
+// menuMoved — страницы, которые слились с подборками своих тем: один адрес на тему, без дублей в поиске.
+var menuMoved = map[string]string{"new-year": "new-year-table", "post": "lent-menu"}
 
 func menuBySlug(slug string) (menuPreset, bool) {
 	for _, m := range menuPresets {
@@ -94,8 +89,8 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		s.kidMenuPage(w, r, km, pl) // «Меню ребёнка в N лет» — своя страница с детской неделей
 		return
 	}
-	if r.PathValue("slug") == "new-year" {
-		s.feastPage(w, r, pl) // «Новогодний стол»: не неделя, а стол на гостей
+	if to, ok := menuMoved[r.PathValue("slug")]; ok {
+		http.Redirect(w, r, pl.P+"/collection/"+to, http.StatusMovedPermanently)
 		return
 	}
 	m, ok := menuBySlug(r.PathValue("slug"))
@@ -158,21 +153,12 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		i18n.T(l, "menu."+m.Slug+".intro"),
 		i18n.T(l, "menu.intro2", formatMoney(pl.Country, plan.Totals.Cost), people, formatMoney(pl.Country, perPersonDay), int(math.Round(plan.Totals.KcalPerDay)), plan.Totals.Items, i18n.T(l, "country."+pl.Country.Code)),
 	}
-	var faq []domain.QA
-	planHref := "/?s=1"
-	var fast *fastCalendar
-	if m.Slug == "post" {
-		// постная неделя: календарь Рождественского поста, свои вопросы первыми и квиз сразу с событием «Пост»
-		planHref = "/?s=1&event=lent"
-		fast = newFastCalendar(l, time.Now().In(moscow))
-		faq = append(faq, fast.FAQ...)
-	}
-	faq = append(faq, []domain.QA{
+	faq := []domain.QA{
 		{Q: i18n.T(l, "menu.faq.cost.q", people), A: i18n.T(l, "menu.faq.cost.a", formatMoney(pl.Country, plan.Totals.Cost), people, formatMoney(pl.Country, perPersonDay), i18n.T(l, "country."+pl.Country.Code))},
 		{Q: i18n.T(l, "menu.faq.change.q"), A: i18n.T(l, "menu.faq.change.a")},
 		{Q: i18n.T(l, "menu.faq.list.q"), A: i18n.T(l, "menu.faq.list.a", plan.Totals.Items, len(groups))},
 		{Q: i18n.T(l, "menu.faq.fresh.q"), A: i18n.T(l, "menu.faq.fresh.a")},
-	}...)
+	}
 	type link struct{ Name, Href string }
 	var others []link
 	for _, o := range menuPresets {
@@ -180,10 +166,7 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 			others = append(others, link{i18n.T(l, "menu."+o.Slug+".h1"), pl.P + "/menu/" + o.Slug})
 		}
 	}
-	others = append(others, link{i18n.T(l, "feast.h1short"), pl.P + "/menu/new-year"})
-	if m.Slug == "post" {
-		others = append([]link{{i18n.T(l, "menu.post.coll"), pl.P + "/collection/lent-menu"}}, others...)
-	}
+	others = append(others, link{i18n.T(l, "feast.link.newyear"), pl.P + "/collection/new-year-table"}, link{i18n.T(l, "feast.link.lent"), pl.P + "/collection/lent-menu"})
 	for _, o := range kidMenuPresets {
 		others = append(others, link{i18n.T(l, "kidpage."+o.Key+".h1"), pl.P + "/menu/" + o.Slug})
 	}
@@ -198,7 +181,7 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
 		"H1": h1, "Intro": intro, "Days": days, "Groups": groups, "FAQ": faq, "Others": others,
 		"Week": formatMoney(pl.Country, plan.Totals.Cost), "PerDay": formatMoney(pl.Country, perPersonDay), "KcalDay": int(math.Round(plan.Totals.KcalPerDay)), "Items": plan.Totals.Items, "People": people, "Dishes": dishes,
-		"StartDate": start, "PlanHref": planHref, "Fast": fast,
+		"StartDate": start, "PlanHref": "/?s=1",
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "menu.html", data); err != nil {

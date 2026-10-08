@@ -3,23 +3,25 @@
   "version": "1.22",
   "date": "2026-10-08",
   "title": {
-   "ru": "Постное меню и новогодний стол",
-   "en": "Lenten menu and New Year's Eve dinner"
+   "ru": "Пост и Новый год",
+   "en": "The fast and New Year"
   },
   "items": {
    "ru": [
-    "Страница «Постное меню на неделю»: семь дней без мяса, рыбы, молока и яиц с рецептами, ценой и списком покупок. Над меню календарь Рождественского поста по дням: когда можно рыбу, когда растительное масло и когда день строже.",
-    "Событие «Постная неделя» в анкете теперь видно и в Рождественский пост, с ноября по январь, а не только весной.",
-    "Страница «Новогодний стол»: готовое меню на 4, 6 и 8 человек и недорогой стол на шестерых. У каждого варианта салаты, закуски, горячее и десерт с фото, цена стола и на гостя, полный список покупок по отделам.",
-    "Кнопка «Собрать свой стол» открывает праздничный стол сразу на столько гостей, сколько выбрано на странице.",
-    "В меню на неделю название блюда теперь занимает всю ширину карточки: на широком экране оно больше не сжимается до слова в строке."
+    "Подборка «Что приготовить в пост» стала главной страницей поста. Наверху календарь Рождественского поста по дням: нажмите на день, и рядом появится, что в него можно и какие блюда подойдут.",
+    "Там же раздел для рыбных дней и ещё постные блюда из каталога: горячее, супы, завтраки, салаты и выпечка.",
+    "Событие «Постная неделя» в анкете теперь видно и в Рождественский пост, с ноября по январь.",
+    "В подборке «Новогодний стол» готовый стол на 4, 6 и 8 человек и недорогой: блюда с фото, цена стола и на гостя, список покупок. Ниже цена того же стола в разных сетях и план подготовки на последние дни с отметками.",
+    "Кнопка «Собрать стол под себя» открывает праздничный стол сразу на выбранное число гостей.",
+    "В меню на неделю название блюда занимает всю ширину карточки и больше не сжимается до слова в строке."
    ],
    "en": [
-    "New page \"Lenten meal plan for a week\": seven days without meat, fish, dairy or eggs, with recipes, prices and a shopping list. Above the menu is the Nativity Fast calendar by day: which days allow fish, which allow oil and which are stricter.",
-    "The \"Lenten week\" event in the questionnaire now also shows during the Nativity Fast, from November to January, not only in spring.",
-    "New page \"New Year's Eve dinner\": a ready menu for 4, 6 and 8 people and a budget table for six. Each version has salads, starters, a main and dessert with photos, the price of the table and per guest, and a full shopping list by aisle.",
-    "\"Build my table\" opens the holiday table for as many guests as you picked on the page.",
-    "In the weekly menu a dish name now spans the whole card: on wide screens it no longer shrinks to one word per line."
+    "The \"What to cook during Lent\" collection is now the main page for the fast. At the top is the Nativity Fast calendar by day: tap a day to see what is allowed and which dishes fit.",
+    "The same page has a fish-day section and more lenten dishes from the catalog: mains, soups, breakfasts, salads and baking.",
+    "The \"Lenten week\" event in the questionnaire now also shows during the Nativity Fast, from November to January.",
+    "The \"New Year table\" collection has a ready table for 4, 6 and 8 people and a budget one: dishes with photos, the price of the table and per guest, a shopping list. Below are the same table's prices at different chains and a plan for the last few days with checkboxes.",
+    "\"Build my own table\" opens the holiday table for as many guests as you picked.",
+    "In the weekly menu a dish name spans the whole card and no longer shrinks to one word per line."
    ]
   }
  },

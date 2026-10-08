@@ -5,6 +5,7 @@
   {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512" fetchpriority="high">{{end}}
   <div class="colhead__body">
     <p class="colhead__eyebrow">{{t .L "coll.public.one"}}{{if and .Col.Author (not .Col.Curated)}} · @{{.Col.Author}}{{end}}</p>
+    {{with .Countdown}}<p class="countdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>{{.}}</p>{{end}}
     <h1 class="colhead__title">{{.Col.Name}}</h1>
     {{if .KidAges}}
     <div class="kidpick">
@@ -17,13 +18,80 @@
     {{if .Col.Description}}<p class="colhead__lead">{{.Col.Description}}</p>{{end}}
     {{if .Facts}}<ul class="colfacts">{{range .Facts}}<li><b class="num">{{.Value}}</b><span>{{.Label}}</span></li>{{end}}</ul>{{end}}
     <div class="colhead__actions">
-      {{if not .KidAges}}<a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{t .L "coll.week"}}</a>{{end}}
-      {{with .MenuLink}}<a class="btn btn-soft btn-lg" href="{{.Href}}">{{.Name}}</a>{{end}}
+      {{if not .KidAges}}<a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{if .PlanLabel}}{{.PlanLabel}}{{else}}{{t .L "coll.week"}}{{end}}</a>{{end}}
       <button type="button" class="btn btn-soft btn-lg" data-share-page aria-label="{{t .L "social.share"}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg> {{t .L "social.share"}}</button>
     </div>
     {{if .Text.Intro}}<div class="coltext">{{range .Text.Intro}}<p>{{.}}</p>{{end}}</div>{{end}}
   </div>
 </header>
+
+{{with .Fast}}{{$sel := .SelectedKind}}
+<section class="fastcal" aria-labelledby="fast-h" data-fastcal>
+  <h2 class="season__title" id="fast-h">{{.Title}}</h2>
+  <p class="fastcal__lead">{{.Lead}}</p>
+  <div class="fastcal__grid" role="grid" aria-label="{{.Title}}">
+    <div class="fastcal__row" role="row">{{range .Weekdays}}<span class="fastcal__wd" role="columnheader">{{.}}</span>{{end}}</div>
+    {{range .Weeks}}<div class="fastcal__row" role="row">{{range .}}{{if eq .Kind "out"}}<span class="fastcal__day is-out" role="gridcell"><b class="num">{{.Day}}</b></span>{{else}}<button type="button" class="fastcal__day is-{{.Kind}}{{if .Today}} is-today{{end}}" role="gridcell" data-kind="{{.Kind}}" data-date="{{.Date}}" aria-pressed="{{if .Selected}}true{{else}}false{{end}}" title="{{.Label}}">{{if .Mon}}<small>{{.Mon}}</small>{{end}}<b class="num">{{.Day}}</b>{{template "fasticon" .Kind}}<span class="visually-hidden">{{.Date}}: {{.Label}}</span></button>{{end}}{{end}}</div>{{end}}
+  </div>
+  <div class="fastcal__side">
+    <div class="fastcal__pick" aria-live="polite">
+      <p class="fastcal__date" data-fast-date>{{.SelectedDate}}</p>
+      {{range .Panes}}<div class="fastcal__pane" data-fast-pane="{{.Kind}}"{{if ne .Kind $sel}} hidden{{end}}>
+        <p class="fastcal__kind"><span class="fastcal__key is-{{.Kind}}" aria-hidden="true">{{template "fasticon" .Kind}}</span><b>{{.Label}}</b></p>
+        <p class="fastcal__text">{{.Text}}</p>
+        {{if .Cards}}<ul class="fastcal__dishes">{{range .Cards}}<li><a href="{{.Href}}"><span class="fastcal__img">{{if .Image}}<img src="{{.Image}}" alt="" width="48" height="48" loading="lazy" decoding="async">{{end}}</span><span>{{.Title}}</span></a></li>{{end}}</ul>{{end}}
+      </div>{{end}}
+    </div>
+    <ul class="fastcal__legend">{{range .Legend}}<li><span class="fastcal__key is-{{.Kind}}" aria-hidden="true">{{template "fasticon" .Kind}}</span>{{.Label}}</li>{{end}}</ul>
+    <p class="rpage__note">{{.Note}}</p>
+  </div>
+</section>
+{{end}}
+
+{{with .Feast}}
+<section class="feast" aria-labelledby="feast-h">
+  <h2 class="season__title" id="feast-h">{{t $.L "feast.h2"}}</h2>
+  {{range .}}<input class="feast__radio" type="radio" name="feast-v" id="fv-{{.Key}}" aria-label="{{.Title}}"{{if .Checked}} checked{{end}}>{{end}}
+  <div class="feast__tabs agescale" aria-hidden="true">{{range .}}<label for="fv-{{.Key}}" data-v="{{.Key}}">{{.Tab}}</label>{{end}}</div>
+  {{range .}}<div class="feast__pane" data-v="{{.Key}}">
+    <div class="feast__head">
+      <h3>{{.Title}}</h3>
+      <ul class="colfacts">
+        <li><b class="num is-rub">≈ {{.Total}}</b><span>{{t $.L "feast.norm.total"}}</span></li>
+        <li><b class="num is-rub">≈ {{.PerGuest}}</b><span>{{t $.L "feast.norm.guest"}}</span></li>
+        <li><b class="num">{{.Dishes}}</b><span>{{t $.L "feast.norm.dishes" .DishesWord}}</span></li>
+        <li><b class="num">{{.Items}}</b><span>{{t $.L "feast.norm.items"}}</span></li>
+      </ul>
+    </div>
+    {{range .Courses}}<div class="feast__course">
+      <h4>{{.Title}}</h4>
+      <ul class="feast__tiles">{{range .Dishes}}<li><a class="feast__tile" href="{{.Href}}">
+        <span class="feast__photo">{{if .Image}}<img src="{{.Image}}" alt="" width="384" height="256" loading="lazy" decoding="async">{{end}}</span>
+        <span class="feast__name">{{.Title}}</span>
+        <span class="feast__money num is-rub">≈ {{.Money}} <small>{{t $.L "feast.portion"}}</small></span>
+      </a></li>{{end}}</ul>
+    </div>{{end}}
+    <details class="feast__list">
+      <summary>{{t $.L "feast.list"}} <span class="catsection__n num">{{.Items}}</span></summary>
+      <div class="feast__groups">{{range .Groups}}<div class="feast__group">
+        <div class="feast__ghead"><b>{{.Label}}</b><span class="num">≈ {{.Money}}</span></div>
+        <ul>{{range .Items}}<li><span>{{.Name}}</span><span class="num">{{.Qty}}</span></li>{{end}}</ul>
+      </div>{{end}}</div>
+      <p class="rpage__note">{{t $.L "feast.list.note"}}</p>
+    </details>
+    <a class="btn btn-soft feast__own" href="{{.Href}}">{{t $.L "feast.cta.btn"}}</a>
+  </div>{{end}}
+</section>
+{{end}}
+
+{{with .Stores}}
+<section class="agesec stores" aria-labelledby="stores-h">
+  <h2 id="stores-h">{{t $.L "feast.stores.h"}}</h2>
+  <p class="agesec__lead">{{t $.L "feast.stores.lead"}}</p>
+  <ul class="stores__list">{{range .}}<li{{if .Cheapest}} class="is-cheapest"{{end}}><span class="stores__name">{{.Name}}{{if .Cheapest}} <small>{{t $.L "feast.stores.min"}}</small>{{end}}</span><span class="stores__bar" aria-hidden="true"><i style="width: {{.Pct}}%"></i></span><span class="stores__money num is-rub">≈ {{.Money}}</span></li>{{end}}</ul>
+  <p class="rpage__note">{{t $.L "feast.stores.note"}}</p>
+</section>
+{{end}}
 
 {{if .Menus}}
 <section class="rpage__section" aria-labelledby="menus">
@@ -64,6 +132,35 @@
 <div class="state"><div class="state__box"><h2>{{t .L "coll.items.empty.public"}}</h2></div></div>
 {{end}}
 
+{{with .FishCards}}
+<section class="rpage__section colgroup" aria-labelledby="g-fish">
+  <div class="rpage__section-head"><h2 id="g-fish">{{t $.L "lent.fish.h"}} <span class="catsection__n num">{{len .}}</span></h2></div>
+  <p class="agesec__lead">{{t $.L "lent.fish.lead"}}</p>
+  <div class="rgrid">{{range .}}{{template "card" .}}{{end}}</div>
+</section>
+{{end}}
+
+{{with .MoreGroups}}
+<section class="rpage__section colgroup lentmore" aria-labelledby="g-more">
+  <div class="rpage__section-head"><h2 id="g-more">{{t $.L "lent.more.h"}} <span class="catsection__n num">{{$.MoreTotal}}</span></h2></div>
+  <p class="agesec__lead">{{t $.L "lent.more.lead"}}</p>
+  <nav class="jarnav" aria-label="{{t $.L "lent.more.h"}}">{{range .}}<a class="chip chip--sm" href="#more-{{.Key}}">{{.Title}} <span class="num">{{len .Cards}}</span></a>{{end}}</nav>
+  {{range .}}<div class="lentmore__group jarsec" id="more-{{.Key}}">
+    <h3>{{.Title}} <span class="catsection__n num">{{len .Cards}}</span></h3>
+    <div class="rgrid">{{range $i, $c := .Cards}}{{if lt $i 8}}{{template "card" $c}}{{end}}{{end}}</div>
+    {{if gt (len .Cards) 8}}<details class="lentmore__rest"><summary>{{t $.L "lent.more.rest" (sub (len .Cards) 8)}}</summary><div class="rgrid">{{range $i, $c := .Cards}}{{if ge $i 8}}{{template "card" $c}}{{end}}{{end}}</div></details>{{end}}
+  </div>{{end}}
+</section>
+{{end}}
+
+{{with .Prep}}
+<section class="agesec prep" aria-labelledby="prep-h" data-checklist="newyear">
+  <h2 id="prep-h">{{t $.L "feast.prep.h"}}</h2>
+  <p class="agesec__lead">{{t $.L "feast.prep.lead"}}</p>
+  <ol class="prep__list">{{range .}}<li><label class="prep__item"><input type="checkbox" value="{{.Key}}"><span class="prep__box" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="prep__when">{{.When}}</span><span class="prep__text">{{.Text}}</span></label></li>{{end}}</ol>
+</section>
+{{end}}
+
 {{if or .Text.How .Text.FAQ}}
 <section class="colhow" aria-labelledby="how">
   {{if .Text.How}}
@@ -76,6 +173,7 @@
   {{if .Text.FAQ}}
   <div class="colhow__col">
     <h2>{{t .L "coll.faq"}}</h2>
+    {{range .ExtraFAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
     {{range .Text.FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
   </div>
   {{end}}
@@ -97,3 +195,4 @@
 </section>
 {{end}}
 {{template "foot" .}}
+{{define "fasticon"}}{{if eq . "fish"}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 16s9-15 20-4C11 23 2 8 2 8"/></svg>{{else if eq . "oil"}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>{{else if eq . "eve"}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>{{end}}{{end}}
