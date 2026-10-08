@@ -1,0 +1,288 @@
+{
+ "preserves": [
+  {
+   "id": "cucumbers",
+   "recipes": [
+    "zk_cucumbers_crispy",
+    "zk_cucumbers_salted_cold",
+    "zk_gherkins_marinated",
+    "zk_cucumbers_mustard",
+    "zk_cucumbers_tomato_fill",
+    "zk_cucumbers_citric",
+    "zk_cucumbers_sweet_carrot",
+    "zk_cucumbers_nezhinsky",
+    "zk_cucumbers_chili_ketchup",
+    "zk_cucumbers_overgrown",
+    "zk_cucumbers_apple",
+    "zk_cucumbers_slices_garlic",
+    "zk_cucumbers_korean_winter"
+   ]
+  },
+  {
+   "id": "tomatoes",
+   "recipes": [
+    "zk_tomatoes_sweet",
+    "zk_tomatoes_own_juice",
+    "zk_tomatoes_cherry",
+    "zk_tomatoes_green_stuffed",
+    "zk_tomatoes_green_korean",
+    "zk_tomatoes_jelly",
+    "zk_tomatoes_halves_onion",
+    "zk_tomatoes_snow",
+    "zk_tomatoes_plum_basil",
+    "zk_tomatoes_honey",
+    "zk_tomato_juice"
+   ]
+  },
+  {
+   "id": "ferment",
+   "recipes": [
+    "zk_tomatoes_barrel",
+    "zk_tomatoes_mustard_cold",
+    "zk_sauerkraut_classic",
+    "zk_sauerkraut_cranberry",
+    "zk_sauerkraut_apple",
+    "zk_cabbage_pelyustka",
+    "zk_cabbage_provansal",
+    "zk_cabbage_gurian",
+    "zk_apples_soaked",
+    "zk_cucumbers_barrel",
+    "zk_lingonberry_soaked",
+    "zk_watermelon_salted"
+   ]
+  },
+  {
+   "id": "salads",
+   "recipes": [
+    "zk_lecho",
+    "zk_salad_danube",
+    "zk_salad_kuban",
+    "zk_salad_hunter",
+    "zk_zucchini_korean_winter",
+    "zk_tesha_tongue_zucchini",
+    "zk_tesha_tongue_eggplant",
+    "zk_ikra_zucchini",
+    "zk_ikra_eggplant",
+    "zk_ikra_beet",
+    "zk_borscht_dressing",
+    "zk_salad_cabbage_pepper",
+    "zk_vegetable_assorti",
+    "zk_eggplant_ogonyok",
+    "zk_eggplant_desyatochka",
+    "zk_beans_vegetables",
+    "zk_tourist_breakfast",
+    "zk_lecho_zucchini",
+    "zk_carrot_korean_winter",
+    "zk_pepper_baked_oil",
+    "zk_ajapsandali_winter",
+    "zk_salad_autumn"
+   ]
+  },
+  {
+   "id": "vegetables",
+   "recipes": [
+    "zk_pepper_honey",
+    "zk_pepper_stuffed_cabbage",
+    "zk_zucchini_like_gruzdi",
+    "zk_zucchini_rings",
+    "zk_eggplant_like_mushrooms",
+    "zk_patisson_marinated",
+    "zk_beet_marinated",
+    "zk_cauliflower_marinated",
+    "zk_garlic_heads_marinated",
+    "zk_onion_small_marinated",
+    "zk_carrot_sticks_marinated",
+    "zk_green_beans_marinated",
+    "zk_chili_whole_marinated",
+    "zk_mixed_pickles_winter",
+    "zk_pumpkin_marinated"
+   ]
+  },
+  {
+   "id": "sauces",
+   "recipes": [
+    "zk_adjika_cooked",
+    "zk_adjika_zucchini",
+    "zk_adjika_apple",
+    "zk_adjika_abkhaz",
+    "zk_khrenovina",
+    "zk_ketchup_home",
+    "zk_ketchup_plum",
+    "zk_satsebeli",
+    "zk_lingonberry_sauce",
+    "zk_cranberry_sauce",
+    "zk_bbq_sauce",
+    "zk_chili_sauce",
+    "zk_tomato_paste_home",
+    "zk_mustard_home",
+    "zk_chutney_apple",
+    "zk_garlic_greens_paste"
+   ]
+  },
+  {
+   "id": "jam",
+   "recipes": [
+    "zk_jam_strawberry",
+    "zk_jam_strawberry_5min",
+    "zk_jam_raspberry",
+    "zk_jam_cherry",
+    "zk_jam_apricot",
+    "zk_jam_currant_5min",
+    "zk_currant_raw_sugar",
+    "zk_jam_gooseberry_royal",
+    "zk_jam_apple_amber",
+    "zk_jam_pear_lemon",
+    "zk_jam_plum",
+    "zk_jam_quince",
+    "zk_jam_pumpkin_orange",
+    "zk_jam_sweet_cherry",
+    "zk_sea_buckthorn_sugar",
+    "zk_jam_chokeberry_apple",
+    "zk_jam_lingonberry_pear",
+    "zk_jam_zucchini_lemon",
+    "zk_jam_strawberry_banana",
+    "zk_jam_mixed_berry",
+    "zk_jam_cherry_cocoa",
+    "zk_jam_apple_cinnamon"
+   ]
+  },
+  {
+   "id": "confiture",
+   "recipes": [
+    "zk_confiture_strawberry",
+    "zk_jam_apricot_smooth",
+    "zk_povidlo_apple",
+    "zk_povidlo_plum",
+    "zk_jelly_redcurrant",
+    "zk_jelly_apple",
+    "zk_confiture_cherry",
+    "zk_orange_marmalade",
+    "zk_jam_pear_vanilla",
+    "zk_jam_lingonberry_apple",
+    "zk_jam_raspberry_seedless",
+    "zk_quince_marmalade"
+   ]
+  },
+  {
+   "id": "compote",
+   "recipes": [
+    "zk_compote_cherry",
+    "zk_compote_apple",
+    "zk_compote_assorted",
+    "zk_compote_apricot",
+    "zk_compote_plum",
+    "zk_compote_fanta",
+    "zk_compote_chokeberry_apple",
+    "zk_compote_strawberry",
+    "zk_compote_grape",
+    "zk_compote_currant"
+   ]
+  },
+  {
+   "id": "mushrooms",
+   "recipes": [
+    "zk_champignons_marinated",
+    "zk_oyster_marinated",
+    "zk_forest_mushrooms_marinated",
+    "zk_mushroom_caviar",
+    "zk_champignons_korean",
+    "zk_solyanka_mushroom_winter"
+   ]
+  },
+  {
+   "id": "other",
+   "recipes": [
+    "zk_greens_salted",
+    "zk_garlic_cloves_marinated",
+    "zk_beans_tomato",
+    "zk_apple_puree_kids",
+    "zk_pumpkin_puree",
+    "zk_pears_marinated",
+    "zk_plums_marinated"
+   ]
+  }
+ ],
+ "quick": [
+  {
+   "id": "quickveg",
+   "recipes": [
+    "qp_cucumbers_bag",
+    "qp_cucumbers_overnight",
+    "qp_cherry_lightly_salted",
+    "qp_radish_pickled",
+    "qp_beet_ginger",
+    "qp_carrot_dill",
+    "qp_cauliflower_turmeric",
+    "qp_zucchini_ribbons",
+    "qp_bread_butter_pickles",
+    "qp_shallot_pickled",
+    "qp_red_cabbage_pickled",
+    "qp_jalapeno_home",
+    "qp_cucumber_korean_oi",
+    "qp_daikon_cubes",
+    "qp_champignons_quick",
+    "qp_giardiniera"
+   ]
+  },
+  {
+   "id": "quickfruit",
+   "recipes": [
+    "qp_grapes_rosemary",
+    "qp_watermelon_rind",
+    "qp_strawberry_pepper",
+    "qp_pears_spiced",
+    "qp_lemons_preserved",
+    "qp_ginger_gari",
+    "qp_mango_chutney",
+    "qp_cherry_tomatoes_honey"
+   ]
+  },
+  {
+   "id": "eggs",
+   "recipes": [
+    "qp_eggs_mayak",
+    "qp_eggs_beet_pink",
+    "qp_eggs_quail_pickled",
+    "qp_eggs_spicy"
+   ]
+  },
+  {
+   "id": "ferments",
+   "recipes": [
+    "qp_kimchi_quick",
+    "qp_kimchi_cucumber",
+    "qp_sauerkraut_day",
+    "qp_lacto_cucumbers",
+    "qp_lacto_carrot",
+    "qp_lacto_hot_sauce",
+    "qp_sauerkraut_red_apple",
+    "qp_lacto_cauliflower"
+   ]
+  },
+  {
+   "id": "condiments",
+   "recipes": [
+    "qp_chili_crisp",
+    "qp_hot_honey",
+    "qp_onion_jalapeno_taco",
+    "qp_zhug",
+    "qp_garlic_confit",
+    "qp_tomatoes_confit",
+    "qp_mustard_honey",
+    "qp_harissa"
+   ]
+  },
+  {
+   "id": "sweet",
+   "recipes": [
+    "qp_chia_jam_strawberry",
+    "qp_chia_jam_raspberry",
+    "qp_jam_microwave",
+    "qp_lemon_ginger_honey",
+    "qp_apple_cinnamon_quick",
+    "qp_orange_jam_quick",
+    "qp_berry_sauce"
+   ]
+  }
+ ]
+}

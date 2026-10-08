@@ -125,6 +125,8 @@ type Recipe struct {
 	Batch       bool                  `json:"batch"`
 	KeepDays    *int                  `json:"keep,omitempty"`   // сколько дней стоит в холодильнике готовым; nil — по правилам prep.go, 0 — есть свежим
 	Freeze      bool                  `json:"freeze,omitempty"` // можно заморозить готовым
+	Jar         float64               `json:"jar,omitempty"`    // заготовка: порция — одна банка стольких литров (0 — обычное блюдо)
+	Shelf       int                   `json:"shelf,omitempty"`  // заготовка: месяцев хранения закрытой банки в прохладном месте (0 — только холодильник)
 	Steps       []string              `json:"steps"`
 	Ingredients []RecipeIngredient    `json:"ingredients"`
 	Image       string                `json:"image"`            // URL картинки, пусто — нет фото
@@ -144,6 +146,9 @@ type Recipe struct {
 	Views       int                   `json:"views,omitempty"`      // просмотры страницы своего рецепта
 	Lang        string                `json:"lang,omitempty"`       // язык оригинала своего рецепта (ru по умолчанию)
 }
+
+// IsJar — заготовка (закрутка на зиму или быстрый маринад): не блюдо на день, в неделю и общий каталог не попадает.
+func (r Recipe) IsJar() bool { return r.Jar > 0 }
 
 // Text — название, подводка и шаги на языке (ru — из основных полей).
 func (r Recipe) Text(l i18n.Lang) RecipeText {

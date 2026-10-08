@@ -1202,6 +1202,8 @@ body:has(.tablebar:not([hidden])) .sitefoot {
     @media (min-width: 560px) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
   &__tags { display: flex; flex-wrap: wrap; gap: 6px; .chip { text-decoration: none; &:hover { opacity: 1; border-color: var(--ds-blue); color: var(--ds-blue); } } }
+  // банка: где и сколько хранить — одной строкой под фактами, тем же текстом, что в последнем шаге
+  &__store { margin: 0; max-width: 62ch; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); }
   &__cols { display: grid; }
   &__main { padding: 8px 20px 24px; display: grid; gap: 22px; }
   &__aside { padding: 0 20px 24px; display: grid; gap: 12px; align-content: start; }
@@ -1223,7 +1225,8 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   }
 }
 .chip--sm { min-height: 34px; padding: 0 12px; font-size: 13px; }
-.portions { display: inline-flex; align-items: center; gap: 6px; output { min-width: 28px; text-align: center; font-weight: 600; font-size: 16px; } .counter__btn { width: 36px; height: 36px; } }
+.portions { display: inline-flex; align-items: center; gap: 6px; output { min-width: 28px; text-align: center; font-weight: 600; font-size: 16px; } .counter__btn { width: 36px; height: 36px; }
+  &__label { margin-right: 4px; font-size: 13px; font-weight: 600; color: var(--ds-label-secondary); } }
 .ings {
   list-style: none; margin: 0; padding: 0;
   &__row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; padding: 9px 0; border-top: 1px solid var(--ds-fill-4); font-size: 16px; &:first-child { border-top: 0; } }
@@ -2418,6 +2421,75 @@ a.plate__link:hover .plate__name { color: var(--ds-blue); }
   &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); } }
 .wfood__img { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-3);
   img { display: block; width: 100%; height: 100%; object-fit: cover; } }
+
+// ── Банки: /preserves (закрутки на зиму) и /quick-pickles (быстрые маринады) ─────────────────────────
+// Тот же мир, что у страниц возраста: шкала сверху ведёт между двумя страницами, белые плоские блоки на грунте.
+// Первый экран слева — календарь сезона (закрутки) или маринад с рассолом строками чека (быстрые).
+.season, .formula { display: grid; gap: 12px; align-content: start; padding: 18px 16px 12px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  @media (min-width: 560px) { padding: 20px 20px 14px; } }
+.season__head { display: grid; gap: 4px;
+  p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); } }
+.season__title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.016em; }
+// Календарь: продукт слева, июнь–ноябрь столбцами. Сезон — сплошная полоса через месяцы, текущий месяц —
+// синяя полоса-столбец, и в нём полосы синие: «это закрывают сейчас».
+.season__table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed;
+  th, td { padding: 0; }
+  thead th { padding: 6px 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; text-align: center; color: var(--ds-label-secondary);
+    &:first-child { width: 46%; text-align: left; }
+    &.is-now { color: var(--ds-blue); font-weight: 700; border-radius: 10px 10px 0 0; } }
+  tbody th { text-align: left; font-weight: 500; border-top: 1px solid var(--ds-fill-4); }
+  td { position: relative; height: 42px; border-top: 1px solid var(--ds-fill-4); }
+  // подсвечен только столбец месяца; строку «сейчас» выделяет жирное название, не заливка
+  td.is-now, thead th.is-now { background: var(--ds-blue-tint); }
+  tbody tr:last-child td.is-now { border-radius: 0 0 10px 10px; }
+  @media (min-width: 560px) { thead th:first-child { width: 40%; } } }
+.season__what { display: flex; align-items: center; gap: 8px; min-height: 42px; padding-right: 8px; font-size: 14px; line-height: 1.25; color: var(--ds-label-secondary); text-decoration: none;
+  tr.is-now & { color: var(--ds-label-primary); font-weight: 600; }
+  &:hover { color: var(--ds-blue); }
+  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: 8px; } }
+.season__img { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--ds-fill-3);
+  img { display: block; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; } }
+.season__bar { position: absolute; left: 0; right: 0; top: 50%; height: 12px; transform: translateY(-50%); background: var(--ds-label-quaternary);
+  .is-start > & { left: 5px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+  .is-end > & { right: 5px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+  .is-now > & { background: var(--ds-blue); } }
+// телефон: шесть месяцев по 32 px, иначе «ИЮН» и «ИЮЛ» сливаются в одно слово
+@media (max-width: 420px) {
+  .season__table thead th { font-size: 11px; letter-spacing: 0; &:first-child { width: 40%; } }
+  .season__what { gap: 6px; font-size: 13px; }
+  .season__img { width: 24px; height: 24px; } }
+
+// Маринад и рассол: строки как в чеке — название слева, количество моноширинным справа
+.formula__cards { display: grid; gap: 10px;
+  @media (min-width: 560px) { grid-template-columns: 1fr 1fr; } }
+.formula__card { display: grid; gap: 10px; align-content: start; padding: 14px; border-radius: var(--ds-radius-lg); background: var(--ds-fill-4);
+  h3 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.005em; }
+  p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ds-label-secondary); } }
+.formula__rows { display: grid; margin: 0;
+  > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid var(--ds-fill-3);
+    &:first-child { border-top: 0; padding-top: 0; } }
+  dt { font-size: 15px; font-weight: 400; color: var(--ds-label-primary); }
+  dd { margin: 0; font-size: 15px; font-weight: 600; white-space: nowrap; } }
+.formula__fits b { font-weight: 600; color: var(--ds-label-primary); }
+
+.norms .is-rub { color: var(--ds-green); }
+
+// разделы банок: чипы-якоря над разделами, раздел не уходит под край окна при переходе
+.jarnav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px;
+  .chip { text-decoration: none; color: var(--ds-label-primary); }
+  .num { color: var(--ds-label-secondary); } }
+.jarsec { scroll-margin-top: 16px; }
+// таблица из двух-трёх узких столбцов: на широком экране числа не разъезжаются по краям
+.agesec .wtable-wrap:has(.jtable) { max-width: 760px; }
+.jtable { min-width: 0;
+  th:first-child { min-width: 0; }
+  tbody th a { color: var(--ds-label-primary); text-decoration: none; &:hover { color: var(--ds-blue); } } }
+.jarx { display: grid; gap: 10px; margin-top: 18px; padding: 16px 18px; border-radius: var(--ds-radius-lg); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
+  @media (min-width: 720px) { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; }
+  p { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.45; } }
+.jarx__link { display: inline-flex; align-items: center; gap: 6px; justify-self: start; font-size: 15px; font-weight: 600; color: var(--ds-blue); text-decoration: none; white-space: nowrap;
+  &:hover { text-decoration: underline; text-underline-offset: 3px; }
+  &:focus-visible { outline: none; box-shadow: var(--ds-shadow-focus); border-radius: 6px; } }
 
 // Дневник прикорма в карточке ребёнка (кабинет → Семья)
 .kiddiary { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--ds-radius-md); background: var(--ds-fill-4);

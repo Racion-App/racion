@@ -78,6 +78,9 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 		}
 		urlTopics("/recipes/from")
 		urlTopics("/weaning")
+		for _, h := range jarHubs {
+			urlTopics(h.Path)
+		}
 		for _, m := range kidMenuPresets {
 			urlTopics("/menu/" + m.Slug)
 		}

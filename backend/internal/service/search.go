@@ -34,6 +34,12 @@ var synonyms = map[string][]string{
 	"десерт":   {"sweet"},
 	"сладкое":  {"sweet"},
 	"острое":   {"spicy"},
+	"закрутк":  {"preserve"},
+	"заготовк": {"preserve"},
+	"консерв":  {"preserve"},
+	"зиму":     {"preserve"},
+	"пикул":    {"quickpickle"},
+	"маринад":  {"quickpickle", "preserve"},
 	"детское":  {"kidmenu"},
 	"ребёнок":  {"kidmenu"},
 	"ребенок":  {"kidmenu"},
@@ -48,14 +54,14 @@ var synonyms = map[string][]string{
 	"quick": {"quick"}, "fast": {"quick"}, "soup": {"soup"}, "salad": {"salad"}, "porridge": {"oat", "buckwheat", "millet", "semolina", "rice"},
 	"breakfast": {"breakfast"}, "lunch": {"lunch"}, "dinner": {"dinner"}, "snack": {"snack"}, "dessert": {"sweet"}, "sweet": {"sweet"}, "spicy": {"spicy"},
 	"kids": {"kidmenu"}, "baby": {"kidmenu"}, "child": {"kidmenu"}, "vegetarian": {"vegetarian"}, "veggie": {"vegetarian"}, "cottage": {"cottage", "syrniki"},
-	"pasta": {"pasta", "noodle", "spaghetti"},
+	"pasta": {"pasta", "noodle", "spaghetti"}, "preserves": {"preserve"}, "canning": {"preserve"}, "pickle": {"quickpickle", "preserve"}, "pickled": {"quickpickle", "preserve"},
 	// deutsch
 	"hähnchen": {"hähnchen", "huhn", "brust", "schenkel", "keule", "flügel"}, "huhn": {"hähnchen", "huhn"}, "fleisch": {"rind", "schwein", "lamm", "hack", "pute"},
 	"fisch": {"fisch", "kabeljau", "seelachs", "seehecht", "lachs", "makrele", "thunfisch", "hering"}, "gesund": {"pp"}, "leicht": {"pp"}, "diät": {"pp"},
 	"schnell": {"quick"}, "suppe": {"soup"}, "salat": {"salad"}, "brei": {"hafer", "buchweizen", "hirse", "grieß", "reis"},
 	"frühstück": {"breakfast"}, "mittag": {"lunch"}, "abend": {"dinner"}, "süß": {"sweet"}, "scharf": {"spicy"},
 	"kinder": {"kidmenu"}, "kind": {"kidmenu"}, "vegetarisch": {"vegetarian"}, "quark": {"quark", "syrniki"},
-	"nudeln": {"nudel", "pasta", "spaghetti"},
+	"nudeln": {"nudel", "pasta", "spaghetti"}, "eingemacht": {"preserve"}, "einmachen": {"preserve"}, "eingelegt": {"quickpickle", "preserve"},
 }
 
 // Norm — нижний регистр без «ё», как в поиске.
@@ -241,7 +247,7 @@ type FilterGroup struct {
 // CatalogFilters — группы фильтров каталога в порядке показа.
 var CatalogFilters = []FilterGroup{
 	{"slot", []string{"breakfast", "lunch", "dinner", "snack"}, false},
-	{"tag", []string{"pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty", "batch", "premium", "kidmenu"}, true},
+	{"tag", []string{"pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty", "batch", "premium", "kidmenu", "preserve", "quickpickle"}, true},
 	{"main", []string{"poultry", "meat", "fish", "veg", "dairy"}, false},
 	{"time", []string{"20", "40", "60"}, false},
 	{"kcal", []string{"300", "500", "501"}, false},
@@ -293,6 +299,10 @@ func (c *Catalog) Matches(r planner.Recipe, f ActiveFilters, country planner.Cou
 		}
 	}
 	if !f.Has("tag", "kidmenu") && HasTag(r, "kidmenu") {
+		return false
+	}
+	// банки — свой раздел: в общем каталоге только по фильтру «Закрутки» / «Быстрые маринады» или по запросу (jar=1)
+	if r.IsJar() && !f.Has("tag", "preserve") && !f.Has("tag", "quickpickle") && !f.Has("jar", "1") {
 		return false
 	}
 	if v := f["have"]; len(v) > 0 {

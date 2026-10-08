@@ -50,6 +50,8 @@ type recipe struct {
 	Batch       bool                `json:"batch"`
 	Keep        *int                `json:"keep"`
 	Freeze      bool                `json:"freeze"`
+	Jar         float64             `json:"jar"`   // заготовка: литров в банке (порция — банка)
+	Shelf       int                 `json:"shelf"` // заготовка: месяцев хранения закрытой банки
 	Ingredients [][]json.RawMessage `json:"ingredients"`
 	Steps       []string            `json:"steps"`
 	Image       string              `json:"image"`
@@ -305,11 +307,11 @@ func Run(ctx context.Context, pool *pgxpool.Pool) error {
 				r.Description = d.Description
 			}
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, keep_days, can_freeze) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		if _, err := tx.Exec(ctx, `INSERT INTO recipes (id, title, slot, time_min, equipment, tags, batch, steps, image, description, i18n, keep_days, can_freeze, jar_l, shelf_months) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 			ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, slot=EXCLUDED.slot, time_min=EXCLUDED.time_min, equipment=EXCLUDED.equipment,
-			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n, keep_days=EXCLUDED.keep_days, can_freeze=EXCLUDED.can_freeze
+			tags=EXCLUDED.tags, batch=EXCLUDED.batch, steps=EXCLUDED.steps, image=EXCLUDED.image, description=EXCLUDED.description, i18n=recipes.i18n || EXCLUDED.i18n, keep_days=EXCLUDED.keep_days, can_freeze=EXCLUDED.can_freeze, jar_l=EXCLUDED.jar_l, shelf_months=EXCLUDED.shelf_months
 			WHERE recipes.edited_at IS NULL`,
-			r.ID, r.Title, r.Slot, r.Time, r.Equipment, r.Tags, r.Batch, r.Steps, r.Image, r.Description, tr, r.Keep, r.Freeze); err != nil {
+			r.ID, r.Title, r.Slot, r.Time, r.Equipment, r.Tags, r.Batch, r.Steps, r.Image, r.Description, tr, r.Keep, r.Freeze, r.Jar, r.Shelf); err != nil {
 			return fmt.Errorf("recipe %s: %w", r.ID, err)
 		}
 		// продукты рецепта, правленного из админки, тоже его

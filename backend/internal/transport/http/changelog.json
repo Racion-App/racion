@@ -1,5 +1,29 @@
 [
  {
+  "version": "1.21",
+  "date": "2026-10-08",
+  "title": {
+   "ru": "Закрутки на зиму и быстрые маринады",
+   "en": "Winter preserves and quick pickles"
+  },
+  "items": {
+   "ru": [
+    "Новая страница «Закрутки на зиму»: 146 рецептов огурцов, помидоров, лечо, аджики, варенья и компотов. Каждый рецепт рассчитан на одну банку, в нём есть время стерилизации, цена банки и срок хранения.",
+    "Сверху на странице календарь заготовок с июня по ноябрь. Текущий месяц выделен, а строка с продуктом ведёт к рецептам из него.",
+    "Вторая страница, «Быстрые маринады»: 51 банка без стерилизации, от малосольных огурцов за ночь до кимчи, масла чили и джема без варки.",
+    "В рецепте банки вместо калорий на порцию показаны объём банки и срок хранения, а счётчик «Банки» пересчитывает граммы на нужное число банок.",
+    "Банки не попадают в меню недели и в общий список рецептов. Их можно найти фильтрами «Закрутки» и «Быстрые маринады» или поиском, например «огурцы на зиму»."
+   ],
+   "en": [
+    "New page \"Winter preserves\": 146 recipes for cucumbers, tomatoes, lecso, adjika, jams and compotes. Every recipe is for one jar and gives the sterilizing time, jar price and shelf life.",
+    "The page opens with a preserving calendar from June to November. The current month is highlighted, and each produce row leads to its recipes.",
+    "A second page, \"Quick pickles\": 51 jars with no sterilizing, from overnight cucumbers to kimchi, chili crisp and no-cook jam.",
+    "A jar recipe shows the jar size and shelf life instead of calories per serving, and the \"Jars\" counter scales the grams to the number of jars you need.",
+    "Jars stay out of the weekly menu and the main recipe list. Find them with the \"Preserves\" and \"Quick pickles\" filters or by search, such as \"pickled cucumbers\"."
+   ]
+  }
+ },
+ {
   "version": "1.20",
   "date": "2026-10-08",
   "title": {

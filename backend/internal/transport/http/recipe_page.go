@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -177,9 +178,10 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	var dearest ingredientLine
 	for i, ri := range rc.Ingredients {
 		ing := s.catalog.Ingredients[ri.IngredientID]
-		line := ingredientLine{N: i + 1, ID: ing.ID, Name: ing.LocalName(l), Amount: ri.Amount, Unit: ing.Unit, Pantry: ing.Pantry, Image: ing.Image}
+		pantry := ing.Pantry && !planner.JarBulk(rc, ri)
+		line := ingredientLine{N: i + 1, ID: ing.ID, Name: ing.LocalName(l), Amount: ri.Amount, Unit: ing.Unit, Pantry: pantry, Image: ing.Image}
 		line.ToTaste = ing.Pantry && ri.Amount < 1
-		if priced && !ing.Pantry {
+		if priced && !pantry {
 			pack, official := s.catalog.IngredientPrice(ing, pl.Country.Code)
 			line.Cost = ri.Amount * pack / ing.Pack
 			// подпись цены показываем для официальных источников и для ручных ориентиров других стран
@@ -217,8 +219,18 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var tags []tagLink
+	// заготовка ведёт на свою страницу-подборку (она есть на ru, en, de), на других языках — в каталог с фильтром
+	for _, t := range [][2]string{{"preserve", "/preserves"}, {"quickpickle", "/quick-pickles"}} {
+		if hasTag(rc, t[0]) {
+			href := "/recipes?tag=" + t[0]
+			if topicLang(l) {
+				href = t[1]
+			}
+			tags = append(tags, tagLink{i18n.T(l, "filter.tag."+t[0]), pl.P + href})
+		}
+	}
 	for _, t := range tagLabels {
-		if hasTag(rc, t.Tag) || (t.Tag == "quick" && rc.TimeMin <= 20 && !hasTag(rc, "kidmenu")) {
+		if hasTag(rc, t.Tag) || (t.Tag == "quick" && rc.TimeMin <= 20 && !hasTag(rc, "kidmenu") && rc.Jar == 0) {
 			tags = append(tags, tagLink{i18n.T(l, "tag."+t.Tag), pl.P + t.Href})
 		}
 	}
@@ -232,7 +244,9 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	seen := map[string]bool{rc.ID: true}
 	for pass := 0; pass < 2 && len(related) < 4; pass++ {
 		for _, x := range s.catalog.Recipes {
-			if len(related) >= 4 || seen[x.ID] || x.Hidden || x.Slot != rc.Slot || hasTag(x, "kidmenu") != kid {
+			// к банке — другие банки того же рода, к блюду — блюда
+			if len(related) >= 4 || seen[x.ID] || x.Hidden || x.Slot != rc.Slot || hasTag(x, "kidmenu") != kid ||
+				hasTag(x, "preserve") != hasTag(rc, "preserve") || hasTag(x, "quickpickle") != hasTag(rc, "quickpickle") {
 				continue
 			}
 			sameMain := len(x.Ingredients) > 0 && x.Ingredients[0].IngredientID == main
@@ -319,6 +333,29 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		costNote += i18n.T(l, "recipe.cost.dearest", strings.ToLower(dearest.Name))
 	}
 
+	// заготовка: порция — одна банка; вместо «Порция … ккал» и белка — объём банки и срок хранения
+	jarLabel, shelfLabel, storeNote, yield := "", "", "", i18n.T(l, "recipe.yield")
+	if rc.Jar > 0 {
+		jarLabel = i18n.T(l, "recipe.jar.size", litres(l, rc.Jar))
+		yield = i18n.T(l, "recipe.yield.jar", jarLabel)
+		keep := 0
+		if rc.KeepDays != nil {
+			keep = *rc.KeepDays
+		}
+		shelfLabel = jarShelf(l, rc)
+		switch {
+		case rc.Shelf > 0 && hasTag(rc, "cellar"):
+			// квашеное и мочёное без закатки: срок тот же, но только в холоде
+			storeNote = i18n.T(l, "recipe.store.cold", rc.Shelf, keep)
+		case rc.Shelf > 0:
+			storeNote = i18n.T(l, "recipe.store.shelf", rc.Shelf, keep)
+		case rc.Freeze:
+			storeNote = i18n.T(l, "recipe.store.freezer", keep)
+		default:
+			storeNote = i18n.T(l, "recipe.store.fridge", keep)
+		}
+	}
+
 	base := s.baseURL(r)
 	desc := tx.Description
 	if desc == "" {
@@ -331,14 +368,14 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	pageURL := base + pl.P + "/recipe/" + rc.ID
 	ld := map[string]any{
 		"@type": "Recipe", "@id": pageURL + "#recipe", "url": pageURL, "mainEntityOfPage": pageURL,
-		"name": tx.Title, "description": desc, "recipeYield": i18n.T(l, "recipe.yield"),
+		"name": tx.Title, "description": desc, "recipeYield": yield,
 		"inLanguage":         string(l),
 		"totalTime":          fmt.Sprintf("PT%dM", rc.TimeMin),
 		"recipeCategory":     planner.SlotLabel(l, rc.Slot),
 		"recipeCuisine":      i18n.T(l, "recipe.cuisine"),
 		"recipeIngredient":   ingNames,
 		"recipeInstructions": ldSteps,
-		"nutrition": map[string]any{"@type": "NutritionInformation", "calories": fmt.Sprintf("%d kcal", int(math.Round(kcal))), "servingSize": i18n.T(l, "recipe.yield"),
+		"nutrition": map[string]any{"@type": "NutritionInformation", "calories": fmt.Sprintf("%d kcal", int(math.Round(kcal))), "servingSize": yield,
 			"proteinContent": fmt.Sprintf("%d g", int(math.Round(prot))), "fatContent": fmt.Sprintf("%d g", int(math.Round(fat))), "carbohydrateContent": fmt.Sprintf("%d g", int(math.Round(carb)))},
 		"keywords":  strings.Join(tagWords(l, rc.Tags), ", "),
 		"author":    map[string]any{"@type": "Organization", "name": i18n.T(l, "page.brand"), "url": base + "/"},
@@ -364,12 +401,6 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	if len(diets) > 0 {
 		ld["suitableForDiet"] = diets
 	}
-	crumbs := breadcrumbLD([][2]string{{i18n.T(l, "page.brand"), base + "/"}, {i18n.T(l, "catalog.title"), base + pl.P + "/recipes"}, {planner.SlotLabel(l, rc.Slot), base + pl.P + "/recipes?slot=" + rc.Slot}, {tx.Title, ""}})
-	stats := s.svc.Social.Stats(r.Context(), rc.ID, viewerOrVoter(r))
-	if stats.Ratings >= 3 { // рейтинг в сниппет только когда за ним стоят реальные голоса
-		ld["aggregateRating"] = map[string]any{"@type": "AggregateRating", "ratingValue": fmt.Sprintf("%.1f", stats.Rating), "ratingCount": stats.Ratings, "bestRating": 5, "worstRating": 1}
-	}
-	ldJSON, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{ld, crumbs}})
 	slotHref := pl.P + "/recipes?slot=" + rc.Slot
 	slotCrumb := planner.SlotLabel(l, rc.Slot)
 	allLabel := i18n.T(l, "recipe.all", i18n.T(l, "slots."+rc.Slot))
@@ -378,6 +409,26 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		slotCrumb = i18n.T(l, "recipe.crumb.kids")
 		allLabel = i18n.T(l, "recipe.all.kids")
 	}
+	// банка живёт на своей странице: крошка и «все» ведут туда (на других языках — в каталог с фильтром)
+	if rc.IsJar() {
+		h := hubQuick
+		if hasTag(rc, "preserve") {
+			h = hubPreserves
+		}
+		slotCrumb = i18n.T(l, "jars."+h.Key+".tab")
+		allLabel = slotCrumb
+		slotHref = pl.P + "/recipes?tag=" + h.Tag
+		if topicLang(l) {
+			slotHref = pl.P + h.Path
+		}
+		ld["recipeCategory"] = slotCrumb
+	}
+	crumbs := breadcrumbLD([][2]string{{i18n.T(l, "page.brand"), base + "/"}, {i18n.T(l, "catalog.title"), base + pl.P + "/recipes"}, {slotCrumb, base + slotHref}, {tx.Title, ""}})
+	stats := s.svc.Social.Stats(r.Context(), rc.ID, viewerOrVoter(r))
+	if stats.Ratings >= 3 { // рейтинг в сниппет только когда за ним стоят реальные голоса
+		ld["aggregateRating"] = map[string]any{"@type": "AggregateRating", "ratingValue": fmt.Sprintf("%.1f", stats.Rating), "ratingCount": stats.Ratings, "bestRating": 5, "worstRating": 1}
+	}
+	ldJSON, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{ld, crumbs}})
 	viewer := currentUser(r)
 	comments, _ := s.svc.Social.Comments(r.Context(), rc.ID, viewerID(r))
 	type commentView struct {
@@ -426,6 +477,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Pct":    map[string]int{"Kcal": int(math.Round(kcal / 20)), "Protein": int(math.Round(prot / 0.75)), "Fat": int(math.Round(fat / 0.7)), "Carb": int(math.Round(carb / 2.6))},
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
+		"JarLabel": jarLabel, "ShelfLabel": shelfLabel, "StoreNote": storeNote,
 		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor, "Notes": notesPtr(rc.NotesFor(l)),
 		"Equipment": eq, "Buy": buy, "Offer": offer, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
@@ -480,4 +532,13 @@ func notesPtr(n planner.Notes) *planner.Notes {
 		return nil
 	}
 	return &n
+}
+
+// litres — объём банки с разделителем языка: 0,5 по-русски, 0.5 по-английски, по-китайски и по-японски.
+func litres(l i18n.Lang, v float64) string {
+	out := strconv.FormatFloat(v, 'f', -1, 64)
+	if l != "en" && l != "zh" && l != "ja" {
+		out = strings.Replace(out, ".", ",", 1)
+	}
+	return out
 }

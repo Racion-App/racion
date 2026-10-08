@@ -337,13 +337,17 @@ func (c *Catalog) costPerPortion(r Recipe, pr pricer) float64 {
 	var sum float64
 	for _, ri := range r.Ingredients {
 		ing := c.Ingredients[ri.IngredientID]
-		if ing.Pantry {
+		if ing.Pantry && !JarBulk(r, ri) {
 			continue
 		}
 		sum += ri.Amount * pr.unitPrice(ing)
 	}
 	return sum
 }
+
+// JarBulk — кладовой продукт, который уходит в банку заметной долей упаковки: сахар в варенье, уксус и масло
+// в салатах. Его специально покупают под заготовки, поэтому в цену банки он входит; соль и специи — нет.
+func JarBulk(r Recipe, ri RecipeIngredient) bool { return r.IsJar() && ri.Amount >= 30 }
 
 func mainIngredient(r Recipe) string {
 	if len(r.Ingredients) == 0 {
@@ -440,6 +444,10 @@ func (c *Catalog) pick(pool []Recipe, day int, slot string, portions float64, pr
 			} else {
 				s.score += 0.4
 			}
+		}
+		// заготовки (банки на зиму и быстрые маринады) — не блюдо на ужин: в неделю их не ставим никогда
+		if r.IsJar() {
+			continue
 		}
 		// праздничное (торт, кулич, начинки к блинам) и гарниры (запечённая картошка, пюре, соусы): сами по себе
 		// это не приём пищи — в обычную неделю не берём, только события, коллекции и «хочется»

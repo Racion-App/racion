@@ -1,0 +1,118 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="breadcrumbs"><a href="{{if .P}}{{.P}}{{else}}/{{end}}">{{t .L "page.brand"}}</a><span>›</span><a href="{{.P}}/recipes">{{t .L "page.recipes"}}</a><span>›</span><span>{{.H1}}</span></nav>
+
+<header class="agehead">
+  <h1 class="agehead__title">{{.H1}}</h1>
+  <nav class="agescale" aria-label="{{t .L "jars.switch"}}">{{range .Switch}}<a href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a>{{end}}</nav>
+</header>
+
+<div class="agetop">
+  {{if .Season}}
+  <section class="season" aria-labelledby="season-h">
+    <div class="season__head">
+      <h2 class="season__title" id="season-h">{{t .L "jars.season.h"}}</h2>
+      <p>{{t .L "jars.season.lead"}}</p>
+    </div>
+    <table class="season__table">
+      <thead><tr><th scope="col"><span class="visually-hidden">{{t .L "jars.season.what"}}</span></th>{{range .Months}}<th scope="col"{{if .Now}} class="is-now" aria-current="date"{{end}}>{{.Label}}</th>{{end}}</tr></thead>
+      <tbody>{{range .Season}}<tr{{if .Now}} class="is-now"{{end}}>
+        <th scope="row"><a class="season__what" href="{{.Href}}"><span class="season__img">{{if .Image}}<img src="{{.Image}}" alt="" width="28" height="28" loading="lazy" decoding="async">{{end}}</span><span>{{.Label}}</span></a></th>
+        {{range .Cells}}<td class="{{if .On}}is-on{{if .Start}} is-start{{end}}{{if .End}} is-end{{end}}{{end}}{{if .Now}} is-now{{end}}">{{if .On}}<span class="season__bar"><span class="visually-hidden">{{t $.L "jars.season.on"}}</span></span>{{end}}</td>{{end}}
+      </tr>{{end}}</tbody>
+    </table>
+  </section>
+  {{else}}
+  <section class="formula" aria-labelledby="formula-h">
+    <h2 class="season__title" id="formula-h">{{t .L "jars.f.h"}}</h2>
+    <div class="formula__cards">
+      <div class="formula__card">
+        <h3>{{t .L "jars.f.marinade"}}</h3>
+        <dl class="formula__rows">{{range .Marinade}}<div><dt>{{.Name}}</dt><dd class="num">{{.Qty}}</dd></div>{{end}}</dl>
+        <p>{{t .L "jars.f.marinade.how"}}</p>
+        <p class="formula__fits"><b>{{t .L "jars.f.fits"}}</b> {{t .L "jars.f.marinade.fits"}}</p>
+      </div>
+      <div class="formula__card">
+        <h3>{{t .L "jars.f.brine"}}</h3>
+        <dl class="formula__rows">{{range .Brine}}<div><dt>{{.Name}}</dt><dd class="num">{{.Qty}}</dd></div>{{end}}</dl>
+        <p>{{t .L "jars.f.brine.how"}}</p>
+        <p class="formula__fits"><b>{{t .L "jars.f.fits"}}</b> {{t .L "jars.f.brine.fits"}}</p>
+      </div>
+    </div>
+  </section>
+  {{end}}
+  <div class="agetop__side">
+    <ul class="norms">{{range .Norms}}<li><b><span class="num{{if .Rub}} is-rub{{end}}">{{.Value}}</span>{{if .Unit}} <small>{{.Unit}}</small>{{end}}</b><span>{{.Label}}</span></li>{{end}}</ul>
+    <div class="ctapanel">
+      <p>{{t .L "jars.cta"}}</p>
+      <a class="btn btn-primary" href="{{.P}}/">{{t .L "jars.cta.btn"}}</a>
+    </div>
+    <div class="agetop__lead">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+  </div>
+</div>
+
+{{if .Now}}
+<section class="agesec colgroup" aria-labelledby="j-now">
+  <h2 id="j-now">{{.NowTitle}}</h2>
+  <div class="rgrid">{{range .Now}}{{template "card" .}}{{end}}</div>
+</section>
+{{end}}
+
+<nav class="jarnav" aria-label="{{t .L "jars.nav"}}">{{range .Sections}}<a class="chip chip--sm" href="#{{.ID}}">{{.Title}} <span class="num">{{len .Cards}}</span></a>{{end}}</nav>
+
+{{range .Sections}}
+<section class="agesec colgroup jarsec" id="{{.ID}}" aria-labelledby="h-{{.ID}}">
+  <h2 id="h-{{.ID}}">{{.Title}} <span class="catsection__n num">{{len .Cards}}</span></h2>
+  {{if .Lead}}<p class="agesec__lead">{{.Lead}}</p>{{end}}
+  <div class="rgrid">{{range .Cards}}{{template "card" .}}{{end}}</div>
+</section>
+{{end}}
+
+{{if .Steril}}
+<section class="agesec" aria-labelledby="j-steril">
+  <h2 id="j-steril">{{t .L "jars.steril.h"}}</h2>
+  <div class="wtable-wrap">
+    <table class="wtable jtable">
+      <thead><tr><th scope="col">{{t .L "jars.steril.jar"}}</th><th scope="col">{{t .L "jars.steril.steam"}}</th><th scope="col">{{t .L "jars.steril.full"}}</th></tr></thead>
+      <tbody>{{range .Steril}}<tr><th scope="row" class="num">{{index . 0}}</th><td class="num">{{index . 1}} {{t $.L "jars.unit.min"}}</td><td class="num">{{index . 2}} {{t $.L "jars.unit.min"}}</td></tr>{{end}}</tbody>
+    </table>
+  </div>
+  <p class="rpage__note">{{t .L "jars.steril.note"}}</p>
+</section>
+{{end}}
+
+{{if .Keep}}
+<section class="agesec" aria-labelledby="j-keep">
+  <h2 id="j-keep">{{t .L "jars.keep.h"}}</h2>
+  <div class="wtable-wrap">
+    <table class="wtable jtable">
+      <thead><tr><th scope="col">{{t .L "jars.keep.what"}}</th><th scope="col">{{t .L "jars.keep.fridge"}}</th></tr></thead>
+      <tbody>{{range .Keep}}<tr><th scope="row"><a href="{{.Href}}">{{.Label}}</a></th><td class="num">{{.Range}}</td></tr>{{end}}</tbody>
+    </table>
+  </div>
+  <p class="rpage__note">{{t .L "jars.keep.note"}}</p>
+</section>
+{{end}}
+
+<section class="agesec" aria-labelledby="j-rules">
+  <h2 id="j-rules">{{t .L (printf "jars.%s.rule.h" .Key)}}</h2>
+  <ul class="checks">{{range .Rules}}<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>{{.}}</span></li>{{end}}</ul>
+</section>
+
+<section class="agesec" aria-labelledby="j-bad">
+  <h2 id="j-bad">{{t .L (printf "jars.%s.bad.h" .Key)}}</h2>
+  <p class="agesec__lead">{{t .L (printf "jars.%s.bad.lead" .Key)}}</p>
+  <ul class="checks checks--bad">{{range .Safety}}<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>{{.}}</span></li>{{end}}</ul>
+</section>
+
+<aside class="jarx">
+  <p>{{t .L (printf "jars.%s.cross" .Key)}}</p>
+  {{range .Switch}}{{if not .Current}}<a class="jarx__link" href="{{.Href}}">{{.Label}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>{{end}}{{end}}
+</aside>
+
+{{if .FAQ}}
+<section class="agesec colfaq" aria-labelledby="j-faq">
+  <h2 id="j-faq">{{t .L "coll.faq"}}</h2>
+  {{range .FAQ}}<details class="faq"><summary>{{.Q}}</summary><p>{{.A}}</p></details>{{end}}
+</section>
+{{end}}
+{{template "foot" .}}

@@ -93,7 +93,9 @@
       <a href="{{.P}}/recipes?slot=dinner">{{t .L "slot.dinner"}}</a>
       <a href="{{.P}}/recipes?tag=kidmenu">{{t .L "foot.kids"}}</a>
       {{if topicLang .L}}<a href="{{.P}}/weaning">{{t .L "weaning.page.h1"}}</a>
-      <a href="{{.P}}/menu/child-1">{{t .L "kidpage.foot"}}</a>{{end}}
+      <a href="{{.P}}/menu/child-1">{{t .L "kidpage.foot"}}</a>
+      <a href="{{.P}}/preserves">{{t .L "jars.preserves.tab"}}</a>
+      <a href="{{.P}}/quick-pickles">{{t .L "jars.quick.tab"}}</a>{{end}}
     </div>
     {{with featured .L .P}}<div class="sitefoot__col">
       <h3>{{t $.L "foot.cook"}}</h3>
@@ -175,10 +177,10 @@
     {{if .Have}}<span class="rcard__have">{{.Have}}</span>{{end}}
   </span>
 </a>
-<button type="button" class="rcard__add" data-table-add="{{.ID}}" data-l-add="{{.AddLabel}}" data-l-added="{{.AddedLabel}}" aria-pressed="false">
+{{if not .Jar}}<button type="button" class="rcard__add" data-table-add="{{.ID}}" data-l-add="{{.AddLabel}}" data-l-added="{{.AddedLabel}}" aria-pressed="false">
   <svg class="rcard__add-i i-plus" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
   <svg class="rcard__add-i i-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
   <span data-table-label>{{.AddLabel}}</span>
-</button>
+</button>{{end}}
 </div>
 {{end}}

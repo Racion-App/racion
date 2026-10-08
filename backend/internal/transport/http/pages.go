@@ -214,6 +214,7 @@ type recipeCard struct {
 	AddLabel   string // «Добавить в стол» на языке страницы: внутри шаблона карточки язык недоступен
 	AddedLabel string
 	Have       string // «есть 3 из 5 · докупить: лук, сметана» — при фильтре «есть дома»
+	Jar        bool   // банка: вместо приёма пищи объём, вместо ккал срок, без кнопки «В стол»
 }
 
 func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
@@ -232,7 +233,24 @@ func (s *Server) card(r planner.Recipe, pl pageLocale) recipeCard {
 	if priced && cost > 0 {
 		c.Money = formatMoney(pl.Country, cost)
 	}
+	if r.IsJar() {
+		c.Jar = true
+		c.Slot_ = i18n.T(pl.L, "recipe.jar.size", litres(pl.L, r.Jar))
+		c.KcalLabel = jarShelf(pl.L, r)
+	}
 	return c
+}
+
+// jarShelf — срок хранения банки одной подписью: «до 12 мес.», «в холодильнике», «в морозилке».
+func jarShelf(l i18n.Lang, r planner.Recipe) string {
+	switch {
+	case r.Shelf > 0:
+		return i18n.T(l, "recipe.shelf.months", r.Shelf)
+	case r.Freeze:
+		return i18n.T(l, "recipe.shelf.freezer")
+	default:
+		return i18n.T(l, "recipe.shelf.fridge")
+	}
 }
 
 type pageBase struct {
@@ -365,9 +383,17 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
+	// по запросу находим и банки: «огурцы на зиму» не должны вести в пустой список
+	match := active
+	if q != "" {
+		match = service.ActiveFilters{"jar": {"1"}}
+		for k, v := range active {
+			match[k] = v
+		}
+	}
 	var pool []planner.Recipe
 	for _, rc := range s.catalog.Recipes {
-		if s.svc.Catalog.Matches(rc, active, pl.Country) {
+		if s.svc.Catalog.Matches(rc, match, pl.Country) {
 			pool = append(pool, rc)
 		}
 	}
@@ -670,6 +696,14 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			Count                                int
 		}
 		var cols []colCard
+		// банки первыми: свои страницы у них есть на ru, en, de
+		if topicLang(pl.L) {
+			for _, h := range jarHubs {
+				if n, cover := s.jarHubStat(h); n > 0 {
+					cols = append(cols, colCard{Name: i18n.T(pl.L, "jars."+h.Key+".tab"), Cover: cover, Href: pl.P + h.Path, Count: n})
+				}
+			}
+		}
 		all := s.svc.Collections.Curated(r.Context())
 		data["CollectionsTotal"] = len(all)
 		if len(all) > 8 {
@@ -885,6 +919,7 @@ func (s *Server) llmsTxt(w http.ResponseWriter, r *http.Request) {
 - [Recipe catalog](%[1]s/recipes): server-rendered HTML, filters by meal, time, calories, price and equipment; every recipe page carries schema.org Recipe JSON-LD with ingredients per portion, steps, nutrition and estimated cost.
 - [English catalog](%[1]s/en/recipes), [German](%[1]s/de/recipes), [Spanish](%[1]s/es/recipes), [French](%[1]s/fr/recipes) — other languages follow the same pattern: /<code>/recipes.
 - [Collections](%[1]s/collections): curated sets (holiday tables, quick dinners, dacha and grill) as schema.org ItemList.
+- [Winter preserves](%[1]s/en/preserves) and [quick pickles](%[1]s/en/quick-pickles): canning and fridge pickles where every recipe is one jar (0.25–3 l) with sterilizing time, jar price and shelf life; Russian at /preserves and /quick-pickles, German at /de/…. These jars never enter the weekly plan.
 - [Sitemap](%[1]s/sitemap.xml): all recipe and collection pages in every language.
 
 ## API
