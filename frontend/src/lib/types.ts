@@ -313,6 +313,15 @@ export type AdminOverview = {
   events: { name: string; count: number; sessions: number }[];
   top: { stores: { key: string; count: number }[] | null; recipes: { key: string; count: number }[] | null };
 };
+// Сводка дня из Яндекс Метрики (backend/internal/metrika): без токена на сервере enabled = false.
+export type MetrikaTotals = { visits: number; users: number; newUsers: number; pageviews: number; bounce: number; depth: number; duration: number };
+export type MetrikaRow = { key?: string; name: string; visits: number };
+export type MetrikaDay = {
+  date: string; prev: string; totals: MetrikaTotals; prevTotals: MetrikaTotals; counter: string;
+  sources: MetrikaRow[]; engines: MetrikaRow[]; sites: MetrikaRow[]; devices: MetrikaRow[]; pages: MetrikaRow[]; phrases: MetrikaRow[]; cities: MetrikaRow[];
+  goals: { key: string; name: string; visits: number; reaches: number }[];
+};
+export type AdminMetrika = { enabled: boolean; today?: string; day?: MetrikaDay };
 export type AdminUser = { id: string; email: string; name: string; createdAt: string; plans: number; lastSeen?: string; role: string };
 export type AdminRecipe = { id: string; title: string; description: string; slot: string; timeMin: number; batch: boolean; equipment: string[]; tags: string[]; steps: string[]; ingredients: OwnIngredient[]; image: string; hidden?: boolean };
 export type CatalogRecipeInput = Omit<AdminRecipe, "id"> & { id: string };

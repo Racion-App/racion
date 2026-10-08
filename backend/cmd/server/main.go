@@ -27,6 +27,7 @@ import (
 	"racion/internal/logger"
 	"racion/internal/media"
 	"racion/internal/messenger"
+	"racion/internal/metrika"
 	"racion/internal/planner"
 	"racion/internal/rosstat"
 	"racion/internal/seed"
@@ -299,7 +300,7 @@ func main() {
 			OAuth:   oauthReg,
 			BaseURL: cfg.BaseURL,
 			Metrika: cfg.MetrikaID, Contact: cfg.LegalEmail, Images: cfg.ImagesDir,
-			Logs: ring, Quota: store.APIUsage,
+			Logs: ring, Quota: store.APIUsage, Stats: metrika.New(cfg.MetrikaID, cfg.MetrikaToken),
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,

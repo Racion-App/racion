@@ -25,6 +25,7 @@ services:
       LOG_FORMAT: ${LOG_FORMAT:-json}
       BASE_URL: ${BASE_URL:-}
       METRIKA_ID: ${VITE_METRIKA_ID:-}
+      METRIKA_TOKEN: ${METRIKA_TOKEN:-}
       LEGAL_EMAIL: ${LEGAL_EMAIL:-}
       IMAGES_DIR: /images
       GEO_DIR: /geo

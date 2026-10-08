@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Activity, AlertTriangle, BookOpen, FolderOpen, KeyRound, ScrollText, ShieldCheck, Store, Users } from "lucide-react";
+import { Activity, AlertTriangle, BookOpen, ChartLine, FolderOpen, KeyRound, ScrollText, ShieldCheck, Store, Users } from "lucide-react";
 import { AdminRecipes } from "../components/AdminRecipes";
 import { AdminModeration } from "../components/AdminModeration";
 import { AdminCollections } from "../components/AdminCollections";
 import { AdminAds } from "../components/AdminAds";
 import { AdminApi } from "../components/AdminApi";
+import { AdminMetrika } from "../components/AdminMetrika";
 import { EmptyState } from "../components/EmptyState";
 import { ABar, AList, ARow, Monogram } from "../components/AdminList";
 import { TopBar } from "../components/TopBar";
@@ -20,7 +21,7 @@ import { useT } from "../i18n";
 // Панель администратора: числа, динамика по дням, события аналитики, аккаунты, ошибки браузера и лог сервера.
 // Открыта только почтам из ADMIN_EMAILS; остальным сервер отвечает 404, страница уводит на главную.
 
-type Tab = "overview" | "recipes" | "collections" | "moderation" | "users" | "errors" | "logs" | "partners" | "api";
+type Tab = "overview" | "metrika" | "recipes" | "collections" | "moderation" | "users" | "errors" | "logs" | "partners" | "api";
 
 export function Admin() {
   const { t, lang } = useT();
@@ -29,7 +30,7 @@ export function Admin() {
   // вкладка и открытый рецепт живут в адресе: /admin/users, /admin/recipes/olivier — работают «назад» и обновление
   const nav = useNavigate();
   const params = useParams<{ tab?: string; id?: string }>();
-  const TABS: Tab[] = ["overview", "recipes", "collections", "moderation", "users", "errors", "logs", "partners", "api"];
+  const TABS: Tab[] = ["overview", "metrika", "recipes", "collections", "moderation", "users", "errors", "logs", "partners", "api"];
   const tab: Tab = params.id ? "recipes" : TABS.includes(params.tab as Tab) ? (params.tab as Tab) : "overview";
   const setTab = (next: Tab) => nav(next === "overview" ? "/admin" : `/admin/${next}`);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -98,6 +99,11 @@ export function Admin() {
               <Activity size={15} aria-hidden /> {t("admin.tab.overview")}
             </button>
           )}
+          {can("stats") && (
+            <button type="button" role="tab" className="chip" aria-pressed={tab === "metrika"} aria-selected={tab === "metrika"} onClick={() => setTab("metrika")}>
+              <ChartLine size={15} aria-hidden /> {t("admin.tab.metrika")}
+            </button>
+          )}
           {can("recipes") && (
             <button type="button" role="tab" className="chip" aria-pressed={tab === "recipes"} aria-selected={tab === "recipes"} onClick={() => setTab("recipes")}>
               <BookOpen size={15} aria-hidden /> {t("admin.tab.recipes")}
@@ -145,6 +151,7 @@ export function Admin() {
           </div>
         )}
         {tab === "recipes" && can("recipes") && <AdminRecipes equipment={meta?.equipment ?? []} photos={!!meta?.photos} ai={!!meta?.ai} onToast={setToast} editId={params.id} onOpen={(id) => nav(`/admin/recipes/${encodeURIComponent(id)}`)} onClose={() => nav("/admin/recipes")} />}
+        {tab === "metrika" && can("stats") && <AdminMetrika />}
         {tab === "moderation" && can("moderation") && <AdminModeration onToast={setToast} />}
         {tab === "collections" && can("recipes") && <AdminCollections photos={!!meta?.photos} onToast={setToast} />}
         {tab === "partners" && can("partners") && <AdminAds onToast={setToast} />}

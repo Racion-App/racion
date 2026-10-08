@@ -1612,6 +1612,13 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &__bar--visitors { fill: var(--ds-fill-2); } &__bar--plans { fill: var(--ds-blue); } &__bar--users { fill: var(--ds-green); }
   &__label { font-size: 10px; fill: var(--ds-label-tertiary); font-family: inherit; }
   &__row > .admin__h2 { white-space: nowrap; }
+  // сводка дня из Метрики: день со стрелками, ссылка в Метрику, рост и падение к прошлому дню
+  &__day { flex-wrap: wrap; }
+  &__daynav { display: flex; align-items: center; gap: 8px; min-width: 0; .admin__h2 { margin: 0; white-space: normal; &::first-letter { text-transform: uppercase; } } }
+  &__navbtn { display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; border: 0; border-radius: 50%; background: var(--ds-fill-4); color: var(--ds-label-primary); cursor: pointer;
+    &:hover:not(:disabled) { background: var(--ds-fill-3); } &:disabled { opacity: 0.35; cursor: default; } }
+  &__ext { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: var(--ds-blue); text-decoration: none; &:hover { text-decoration: underline; } }
+  &__delta { font-weight: 600; color: var(--ds-label-secondary); &.is-good { color: var(--ds-green); } &.is-bad { color: var(--ds-red); } }
   &__legend { margin: -6px 0 0; font-size: 12.5px; color: var(--ds-label-tertiary); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; i + i { margin-left: 8px; } }
   &__dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; &--visitors { background: var(--ds-fill-2); } &--plans { background: var(--ds-blue); } &--users { background: var(--ds-green); } }
   &__grid { display: grid; gap: 20px; @media (min-width: 800px) { grid-template-columns: 1fr 1fr; } }

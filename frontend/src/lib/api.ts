@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, ImportDraft, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
+import type { AdminError, AdminLog, AdminMetrika, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, ImportDraft, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
 import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -81,6 +81,7 @@ export const api = {
   publishOwn: (id: string) => request<{ status: string }>(`/api/me/recipes/${encodeURIComponent(id)}/publish`, { method: "POST" }),
   adminAI: () => request<{ providers: { name: string; model: string; today: number; perDay: number; ok: number; failed: number; resting: boolean; restUntil?: string; lastError?: string }[] }>("/api/admin/ai"),
   adminOverview: (days: number) => request<AdminOverview>(`/api/admin/overview?days=${days}`),
+  adminMetrika: (date?: string) => request<AdminMetrika>(`/api/admin/metrika${date ? `?date=${date}` : ""}`),
   adminUsers: () => request<AdminUser[]>("/api/admin/users"),
   adminErrors: () => request<AdminError[]>("/api/admin/errors"),
   adminLogs: (level: string) => request<AdminLog[]>(`/api/admin/logs?level=${level}&n=300`),

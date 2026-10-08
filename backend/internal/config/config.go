@@ -13,6 +13,7 @@ type Config struct {
 	LogFormat       string // json | console
 	BaseURL         string // публичный адрес сайта для canonical и sitemap; пусто — из заголовков запроса
 	MetrikaID       string // счётчик Яндекс Метрики на SSR-страницах; пусто — не подключать
+	MetrikaToken    string // OAuth-токен с правом metrika:read для сводки дня в админке; пусто — сводки нет
 	LegalEmail      string // почта для жалоб и вопросов о данных
 	ImagesDir       string // фото блюд для карточек превью ссылок (IMAGES_DIR; в докере — том фронтенда)
 	GeoDir          string // папка файла базы городов DB-IP (пусто — только страна)
@@ -77,6 +78,7 @@ func Load() Config {
 		LogFormat:     env("LOG_FORMAT", "json"),
 		BaseURL:       env("BASE_URL", ""),
 		MetrikaID:     env("METRIKA_ID", ""),
+		MetrikaToken:  env("METRIKA_TOKEN", ""),
 		LegalEmail:    env("LEGAL_EMAIL", "info@racion.app"),
 		VkusvillMCP:   env("VKUSVILL_MCP", ""),
 		ImagesDir:     env("IMAGES_DIR", "../frontend/public/images"),

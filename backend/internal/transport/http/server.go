@@ -17,6 +17,7 @@ import (
 	"racion/internal/geo"
 	"racion/internal/i18n"
 	"racion/internal/logger"
+	"racion/internal/metrika"
 	"racion/internal/oauth"
 	"racion/internal/planner"
 	"racion/internal/service"
@@ -36,6 +37,7 @@ type Server struct {
 	publicURL string     // публичный адрес для canonical и sitemap; пусто — по заголовкам запроса
 	pages     *pageCache // микрокэш готовых страниц каталога
 	quota     APIQuota   // квота стороннего API (quota.go)
+	stats     *metrika.Client
 }
 
 // Deps — всё, что нужно транспорту от приложения.
@@ -51,7 +53,8 @@ type Deps struct {
 	Images   string          // каталог с фото блюд (том фронтенда) для карточек превью
 	Logs     *logger.Ring    // последние записи лога для админки
 	OAuth    *oauth.Registry
-	Quota    APIQuota // квота стороннего API; nil — без квоты (тесты)
+	Quota    APIQuota        // квота стороннего API; nil — без квоты (тесты)
+	Stats    *metrika.Client // сводка дня из Метрики для админки; nil или без токена — выключена
 }
 
 func New(d Deps) http.Handler {
@@ -74,7 +77,7 @@ func New(d Deps) http.Handler {
 		}
 		return out
 	}
-	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache(), quota: d.Quota}
+	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache(), quota: d.Quota, stats: d.Stats}
 	go s.pagesLoop()
 	mux := http.NewServeMux()
 	// Публичные методы, описанные в openapi.json, вызываются в том числе из браузера: без CORS
@@ -209,6 +212,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/me/purchases", s.myPurchases)
 	mux.HandleFunc("GET /api/me/budget", s.myBudget)
 	mux.HandleFunc("GET /api/admin/overview", s.adminOverview)
+	mux.HandleFunc("GET /api/admin/metrika", s.adminMetrika)
 	mux.HandleFunc("GET /api/admin/errors", s.adminErrors)
 	mux.HandleFunc("GET /api/admin/users", s.adminUsers)
 	mux.HandleFunc("GET /api/admin/logs", s.adminLogs)
