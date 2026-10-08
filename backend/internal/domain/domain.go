@@ -359,6 +359,12 @@ type CollectionMenu struct {
 	Recipes []string `json:"recipes"`
 }
 
+// PageVersion — хеш содержимого страницы и когда он сменился в последний раз (lastmod, dateModified).
+type PageVersion struct {
+	Hash    string
+	Changed time.Time
+}
+
 type QA struct {
 	Q string `json:"q"`
 	A string `json:"a"`

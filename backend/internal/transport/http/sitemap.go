@@ -36,7 +36,13 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	community, _ := s.svc.Moderation.Approved(r.Context(), 500)
 	curated := s.svc.Collections.Curated(r.Context())
 	var b strings.Builder
-	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">` + "\n")
+	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">` + "\n")
+	// lastmod — только там, где дата настоящая (service.PageVersions); Google верит lastmod, пока он не врёт
+	lastmod := func(path string) {
+		if t := s.svc.Pages.Changed(path); !t.IsZero() {
+			fmt.Fprintf(&b, "<lastmod>%s</lastmod>", t.Format("2006-01-02"))
+		}
+	}
 	// url пишет страницу с версиями на всех языках; path — без языкового префикса
 	url := func(path, freq, prio string) {
 		fmt.Fprintf(&b, "<url><loc>%s%s%s</loc>", base, p, path)
@@ -71,6 +77,7 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="%s" href="%s%s%s"/>`, al, base, prefix(al), path)
 			}
 			fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s%s"/>`, base, path)
+			lastmod(path)
 			b.WriteString("<changefreq>weekly</changefreq><priority>0.7</priority></url>\n")
 		}
 		for _, m := range menuPresets {
@@ -102,6 +109,11 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s/recipe/%s"/>`, base, rc.ID)
+		lastmod("/recipe/" + rc.ID)
+		// фото блюда — в поиск по картинкам: тот же JPEG, что в разметке рецепта
+		if img := ogImage(base, rc.Image); img != "" {
+			fmt.Fprintf(&b, "<image:image><image:loc>%s</image:loc></image:image>", img)
+		}
 		b.WriteString("<changefreq>monthly</changefreq><priority>0.7</priority></url>\n")
 	}
 	for _, rc := range community {
@@ -141,7 +153,29 @@ func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
 		"Disallow: /api/\nDisallow: /plan/\nDisallow: /event/\nDisallow: /cook/\nDisallow: /table\nDisallow: /me\nDisallow: /login\nDisallow: /admin\nDisallow: /og/\nDisallow: /*?*q=\nDisallow: /*?*country=\nDisallow: /*recipes?*&\n"
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
-	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%sClean-param: country&pmin&price /recipes\n\nSitemap: %s/sitemap.xml\n", closed, closed, base)
+	fmt.Fprintf(w, "User-agent: *\nAllow: /\n%s\nUser-agent: Yandex\nAllow: /\n%s%sClean-param: country&pmin&price /recipes\n%s\nSitemap: %s/sitemap.xml\n", closed, closed, yandexClosedLangs(), yandexCleanParams, base)
+}
+
+// Параметры, которые не меняют страницу: шаг квиза и возраст ребёнка из ссылок детских подборок (/?s=2&kid=12…),
+// метка установленного приложения и метки кампаний. Яндекс заводил такие ссылки в поиск отдельными копиями главной.
+const yandexCleanParams = "Clean-param: s&kid&collection&source&utm_source&utm_medium&utm_campaign&utm_content&utm_term\n"
+
+// yandexOpenLangs — языки, которые Яндекс видит. Остальные переводы он массово выкидывает из поиска как
+// «некачественные» (в октябре 2026 — 63 из 67 исключений, чешские страницы) и тратит на них обход, а людей
+// из его поиска на них нет. Google эти страницы читает и приводит на них людей — его правила не трогаем.
+var yandexOpenLangs = map[i18n.Lang]bool{i18n.RU: true, "uk": true, "kk": true, "tr": true}
+
+// yandexClosedLangs — /cs/ и сама /cs для каждого закрытого языка. Префикс без слеша закрыл бы и чужие
+// адреса («/de» — это и /developers), поэтому главная языка закрыта точным адресом через «$».
+func yandexClosedLangs() string {
+	var b strings.Builder
+	for _, l := range i18n.Langs {
+		if yandexOpenLangs[l] {
+			continue
+		}
+		fmt.Fprintf(&b, "Disallow: /%s/\nDisallow: /%s$\n", l, l)
+	}
+	return b.String()
 }
 
 // notifySearch — сообщить поисковикам об изменившихся страницах на всех языках (IndexNow).

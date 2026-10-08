@@ -128,6 +128,7 @@ type Repos struct {
 	Partners    PartnerRepo
 	Offers      OfferRepo
 	APIKeys     APIKeyRepo
+	Pages       PageVersionRepo
 }
 
 // Services — набор сценариев; транспорт получает его целиком.
@@ -154,6 +155,7 @@ type Services struct {
 	Offers       *Offers
 	Ads          *Ads
 	IndexNow     *IndexNow
+	Pages        *PageVersions // nil-безопасен: без хранилища дат нет, IndexNow после деплоя молчит
 	APIKeys      *APIKeys
 	Bots         *Bots // nil-безопасен: без токенов ботов кнопок «список в мессенджере» нет
 }
@@ -161,6 +163,7 @@ type Services struct {
 // New собирает сервисы; subscriber и baseURL нужны push-уведомлениям (VAPID и ссылки в них).
 func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *Services {
 	recipes := &Recipes{repo: repos.UserRecipes, users: repos.Users, catalog: catalog}
+	index := NewIndexNow(repos.Settings, baseURL, zap.L().Named("indexnow"))
 	social := &Social{repo: repos.Social, recipes: recipes}
 	family := &Family{repo: repos.Households}
 	return &Services{
@@ -177,7 +180,8 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		Partners:    NewPartners(repos.Partners),
 		Offers:      NewOffers(repos.Offers),
 		Ads:         NewAds(repos.Settings),
-		IndexNow:    NewIndexNow(repos.Settings, baseURL, zap.L().Named("indexnow")),
+		IndexNow:    index,
+		Pages:       NewPageVersions(repos.Pages, index, zap.L().Named("pages")),
 		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
 	}

@@ -4,6 +4,7 @@ package planner
 import (
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"racion/internal/i18n"
 )
@@ -145,6 +146,7 @@ type Recipe struct {
 	Suggestion  *RecipeText           `json:"suggestion,omitempty"` // подробная версия от нейросети (status = improve)
 	Views       int                   `json:"views,omitempty"`      // просмотры страницы своего рецепта
 	Lang        string                `json:"lang,omitempty"`       // язык оригинала своего рецепта (ru по умолчанию)
+	Created     time.Time             `json:"-"`                    // когда рецепт появился в базе: datePublished в разметке
 }
 
 // IsJar — заготовка (закрутка на зиму или быстрый маринад): не блюдо на день, в неделю и общий каталог не попадает.

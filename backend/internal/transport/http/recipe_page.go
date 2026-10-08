@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"math"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -383,7 +385,19 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 	}
 	if rc.Image != "" {
 		// JPEG-копия первой: не все читалки разметки понимают WebP
-		ld["image"] = []string{ogImage(base, rc.Image), base + rc.Image}
+		ld["image"] = []string{ogImage(base, rc.Image)}
+		if webp := base + rc.Image; webp != ld["image"].([]string)[0] {
+			ld["image"] = append(ld["image"].([]string), webp)
+		}
+	}
+	// даты: появление рецепта в базе и последняя настоящая правка (service.PageVersions)
+	if !rc.Created.IsZero() {
+		ld["datePublished"] = rc.Created.Format("2006-01-02")
+		mod := s.svc.Pages.Changed("/recipe/" + rc.ID)
+		if mod.Before(rc.Created) {
+			mod = rc.Created
+		}
+		ld["dateModified"] = mod.Format("2006-01-02")
 	}
 	if priced {
 		ld["estimatedCost"] = map[string]any{"@type": "MonetaryAmount", "currency": pl.Country.Currency, "value": fmt.Sprintf("%.2f", cost)}
@@ -497,8 +511,13 @@ func ogImage(base, img string) string {
 	if img == "" {
 		return ""
 	}
-	if strings.HasSuffix(img, ".webp") {
-		img = strings.TrimSuffix(img, ".webp") + ".jpg"
+	// JPEG-копия есть не у всех фото (в октябре 2026 — у 458 из 1629): без файла ссылка вела на страницу
+	// «не найдено», и в разметке рецепта стояла битая картинка. Нет копии — отдаём сам WebP, его читают и
+	// Google, и Яндекс.
+	if jpg := strings.TrimSuffix(img, ".webp") + ".jpg"; strings.HasSuffix(img, ".webp") && imagesDir != "" {
+		if _, err := os.Stat(filepath.Join(imagesDir, strings.TrimPrefix(jpg, "/images/"))); err == nil {
+			return base + jpg
+		}
 	}
 	return base + img
 }

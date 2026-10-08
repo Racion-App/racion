@@ -75,6 +75,7 @@ func New(d Deps) http.Handler {
 		return out
 	}
 	s := &Server{svc: d.Services, catalog: d.Services.Catalog.Base(), log: d.Log, geo: d.Geo, health: d.Health, monitor: d.Monitor, lim: newLimits(), publicURL: strings.TrimRight(d.BaseURL, "/"), logs: d.Logs, oauth: d.OAuth, pages: newPageCache(), quota: d.Quota}
+	go s.pagesLoop()
 	mux := http.NewServeMux()
 	// Публичные методы, описанные в openapi.json, вызываются в том числе из браузера: без CORS
 	// стороннее приложение до них не достучится. Куки при этом не передаются — доступ анонимный.
