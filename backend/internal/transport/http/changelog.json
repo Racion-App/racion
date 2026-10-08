@@ -9,11 +9,13 @@
   "items": {
    "ru": [
     "В подборках «Что приготовить ребёнку в 1, 2 и 3 года» и «Что приготовить ребёнку на ужин» первым стоит вопрос «Сколько лет ребёнку?». Нажмите на возраст, и откроется анкета, где ребёнок уже добавлен: страница сама прокрутит к его карточке.",
-    "На телефоне фото в шапке подборки стало ниже, поэтому заголовок видно сразу."
+    "На телефоне фото в шапке подборки стало ниже, поэтому заголовок видно сразу.",
+    "На большом экране страницы стали шире: до 1440 пикселей вместо 1100, а список покупок рядом с неделей растёт вместе с ними."
    ],
    "en": [
     "The collections \"What to cook for a child aged 1 to 3\" and \"What to cook for a child's dinner\" now open with \"How old is your child?\". Tap an age and the questionnaire opens with your child already added, scrolled to their card.",
-    "On phones the photo at the top of a collection is shorter, so you see the title right away."
+    "On phones the photo at the top of a collection is shorter, so you see the title right away.",
+    "On large screens pages are wider: up to 1440 pixels instead of 1100, and the shopping list next to the week grows with them."
    ]
   }
  },
