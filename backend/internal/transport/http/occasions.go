@@ -26,18 +26,13 @@ type occasionView struct {
 func (s *Server) occasions(w http.ResponseWriter, r *http.Request) {
 	l := i18n.FromRequest(r)
 	now := time.Now()
-	m := int(now.Month())
 	out := []occasionView{}
 	for _, o := range planner.Occasions(now) {
 		v := occasionView{ID: o.ID, Icon: o.Icon, Title: i18n.T(l, "occasion."+o.ID+".title"), Lead: i18n.T(l, "occasion."+o.ID+".lead"), Guests: o.Guests, Kind: o.Kind, Preset: o.Preset, Countries: o.Countries}
 		if v.Kind == "" {
 			v.Kind = "menu"
 		}
-		for _, om := range o.Months {
-			if om == m {
-				v.Season = true
-			}
-		}
+		v.Season = o.InSeason(now)
 		for _, c := range o.Courses {
 			v.Courses = append(v.Courses, i18n.T(l, "course."+c.Key))
 		}

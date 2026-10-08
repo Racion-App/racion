@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"racion/internal/fasts"
 	"racion/internal/i18n"
 )
 
@@ -58,10 +59,25 @@ var occasions []Occasion
 
 func SetOccasions(list []Occasion) { occasions = list }
 
+// InSeason — событие актуально сейчас. «Постная неделя» — когда пост идёт или начнётся в ближайшие три
+// недели (даты постов считает пакет fasts, Великий и Петров — от Пасхи); остальные — по месяцам.
+func (o Occasion) InSeason(now time.Time) bool {
+	if o.ID == "lent" {
+		return fasts.Soon(now, 21)
+	}
+	return slices.Contains(o.Months, int(now.Month()))
+}
+
 // Occasions — события в порядке актуальности: сначала те, чей сезон сейчас или в ближайшие два месяца.
 func Occasions(now time.Time) []Occasion {
 	m := int(now.Month())
 	score := func(o Occasion) int {
+		if o.ID == "lent" {
+			if o.InSeason(now) {
+				return 0
+			}
+			return 2
+		}
 		if len(o.Months) == 0 {
 			return 1
 		}

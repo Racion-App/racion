@@ -84,8 +84,9 @@ func (s *Server) collectionExtras(slug string, pl pageLocale, recipes []planner.
 		fish := s.fishDayCards(pl)
 		more, total, extra := s.moreLenten(pl, mine)
 		// панели дней берут блюда из подборки и из остального постного каталога: без масла в подборке почти ничего
-		fc.Panes = s.fastPanes(pl, append(slices.Clone(recipes), extra...), fish)
+		fc.Panes = s.fastPanes(pl, fc, append(slices.Clone(recipes), extra...), fish)
 		data["Countdown"] = fc.Status
+		data["FastID"] = fc.ID
 		data["Fast"] = fc
 		data["FishCards"] = fish
 		data["MoreGroups"], data["MoreTotal"] = more, total
@@ -153,7 +154,7 @@ func hasOil(rc planner.Recipe) bool {
 }
 
 // fastPanes — по нажатию на день календаря: что можно и четыре блюда под такой день.
-func (s *Server) fastPanes(pl pageLocale, lent []planner.Recipe, fish []recipeCard) []fastPane {
+func (s *Server) fastPanes(pl pageLocale, fc *fastCalendar, lent []planner.Recipe, fish []recipeCard) []fastPane {
 	l := pl.L
 	pick := func(match func(planner.Recipe) bool) []recipeCard {
 		var list []planner.Recipe
@@ -184,13 +185,19 @@ func (s *Server) fastPanes(pl pageLocale, lent []planner.Recipe, fish []recipeCa
 		{Kind: "lean", Cards: pick(func(rc planner.Recipe) bool {
 			return !hasOil(rc) && rc.Slot != "snack" && !hasTag(rc, "sweet") && !hasTag(rc, "drink") && !hasTag(rc, "sauce")
 		})},
+		{Kind: "none"},
 		{Kind: "eve", Cards: eve},
 	}
-	for i := range panes {
-		panes[i].Label = i18n.T(l, "fast.kind."+panes[i].Kind)
-		panes[i].Text = i18n.T(l, "fast.pane."+panes[i].Kind)
+	// только виды дней, которые есть в этом посту: в Петров пост нет ни Сочельника, ни дней без еды
+	out := panes[:0]
+	for _, p := range panes {
+		if fc.Kinds[p.Kind] {
+			p.Label = i18n.T(l, "fast.kind."+p.Kind)
+			p.Text = i18n.T(l, "fast.pane."+p.Kind)
+			out = append(out, p)
+		}
 	}
-	return panes
+	return out
 }
 
 // moreLenten — постные блюда каталога, которых нет в подборке: по видам блюд, с фото вперёд.
