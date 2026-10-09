@@ -649,6 +649,8 @@ a { text-underline-offset: 3px; }
 .store-logo--drawn { display: inline-flex; align-items: center; gap: 6px; svg { flex: none; } } // знак не сжимается, длинное название переносится
 .store-logo__text { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; color: var(--ds-label-primary); }
 // Монограмма сети без свободного логотипа: квадрат в фирменном цвете, две буквы белым
+.store-logo--inline { display: flex; align-items: center; color: var(--ds-label-primary); svg { display: block; max-width: 100%; height: auto; } } // встроенный логотип: буквы цветом темы
+.store-logo__icon { width: 26px; height: 26px; border-radius: 7px; flex: none; }
 .store-logo__mono { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.02em; flex: 0 0 auto; }
 .tile.is-on .store-logo { transform: scale(1.04); }
 .tile .tile__sub { margin-top: 0; }
