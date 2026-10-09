@@ -646,7 +646,7 @@ a { text-underline-offset: 3px; }
 // В тёмной теме логотипы идут как есть, без подложек.
 // фиксированный бокс 96×24: плитка не прыгает, пока логотип грузится (CLS)
 .store-logo { display: block; height: 24px; width: 96px; max-width: 100%; object-fit: contain; object-position: left center; transition: transform var(--ds-dur-base) var(--ds-ease-spring); }
-.store-logo--drawn { display: inline-flex; align-items: center; gap: 6px; }
+.store-logo--drawn { display: inline-flex; align-items: center; gap: 6px; svg { flex: none; } } // знак не сжимается, длинное название переносится
 .store-logo__text { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; color: var(--ds-label-primary); }
 // Монограмма сети без свободного логотипа: квадрат в фирменном цвете, две буквы белым
 .store-logo__mono { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.02em; flex: 0 0 auto; }

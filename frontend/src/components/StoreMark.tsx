@@ -27,7 +27,7 @@ const ALIAS: Record<string, string> = {
 
 // Фирменный цвет для монограммы там, где свободного SVG нет (белорусские и казахстанские сети, Carrefour, Biedronka…).
 const BRAND: Record<string, string> = {
-  azbukavkusa: "#1E3B2F", svetofor: "#2B2B2B", evroopt: "#E2001A", gippo: "#F39200", green: "#3AAA35", korona: "#D71920", santa: "#0066B3", dobronom: "#E30613", vitalur: "#00843D",
+  azbukavkusa: "#1E3B2F", svetofor: "#2B2B2B", samokat: "#FF335F", evroopt: "#E2001A", gippo: "#F39200", green: "#3AAA35", korona: "#D71920", santa: "#0066B3", dobronom: "#E30613", vitalur: "#00843D",
   small: "#E4002B", galmart: "#7B2D8E", anvar: "#E31E24", arzan: "#F7A600", metro_kz: "#003D7C",
   carrefour: "#004E9F", conad: "#F7A600", alcampo: "#E30613", interspar: "#EE1C25", dirk: "#E30613", rimi_lt: "#E2001A",
   top: "#D40000", selver: "#E4002B", biedronka: "#D6001C", dino: "#E30613", albert: "#E2001A", kiwi: "#008A3F", meny: "#E4002B",
@@ -53,6 +53,19 @@ export function StoreMark({ code, name }: { code: string; name: string }) {
           <circle cx="8" cy="6.5" r="3" fill="#F03A2F" />
           <circle cx="8" cy="13" r="3" fill="#F5C518" />
           <circle cx="8" cy="19.5" r="3" fill="#3BB54A" />
+        </svg>
+        <span className="store-logo__text">{name}</span>
+      </span>
+    );
+  }
+  // Яндекс Лавка: свободен только растровый логотип (Commons, «Yandex lavka new logo.jpg»), а чёрный текст
+  // пропал бы на тёмной плитке — рисуем её знак, голубой круг с сердцем, и пишем название цветом темы.
+  if (code === "lavka") {
+    return (
+      <span className="store-logo store-logo--drawn" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" role="img" focusable="false">
+          <circle cx="12" cy="12" r="12" fill="#00AEFF" />
+          <path d="M12 18.2c-4.3-3.4-5.4-6-4.2-8 1.1-1.8 3.3-1.6 4.2.1.9-1.7 3.1-1.9 4.2-.1 1.2 2 .1 4.6-4.2 8z" fill="#fff" />
         </svg>
         <span className="store-logo__text">{name}</span>
       </span>

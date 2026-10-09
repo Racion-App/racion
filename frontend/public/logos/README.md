@@ -68,3 +68,8 @@
 | waitrose | File:Waitrose & Partners logo.svg | Public domain |
 | willys | File:Willys logo.svg | Public domain |
 | zabka | File:Zabka logo 2020.svg | Public domain |
+
+## Экспресс-доставка (октябрь 2026)
+
+- Самокат: векторного логотипа на Commons и в Википедии нет — монограмма в фирменном розовом (BRAND в StoreMark.tsx).
+- Яндекс Лавка: на Commons есть старый SVG 2022 года («Logo of «Yandex.Lavka».svg») и актуальный логотип только растром («Yandex lavka new logo.jpg», Public domain). Чёрный текст логотипа пропадал бы на тёмной плитке, поэтому рисуем её знак (голубой круг #00AEFF с белым сердцем, цвет снят с этого файла) и пишем название цветом темы.

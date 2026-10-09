@@ -34,15 +34,16 @@ type Ingredient struct {
 	Tier          string             `json:"tier,omitempty"`   // где продаётся: "" везде, super — супермаркеты и крупнее, premium — гипермаркеты, оптовики, премиум-сети
 }
 
-// StoreLevel — размер ассортимента по виду магазина: у дома и дискаунтеры (0–1), супермаркет (2), гипермаркет,
-// оптовик и премиум-сеть (3). Продукт с Tier доступен, если TierLevel ≤ StoreLevel.
+// StoreLevel — размер ассортимента по виду магазина: у дома и дискаунтеры (0–1), супермаркет и экспресс-доставка
+// (Самокат, Лавка: даркстор на несколько тысяч позиций) (2), гипермаркет, оптовик и премиум-сеть (3).
+// Продукт с Tier доступен, если TierLevel ≤ StoreLevel.
 func StoreLevel(kind string) int {
 	switch kind {
 	case "discounter":
 		return 0
 	case "convenience":
 		return 1
-	case "supermarket":
+	case "supermarket", "delivery":
 		return 2
 	default:
 		return 3
@@ -176,7 +177,7 @@ type Store struct {
 	Code       string  `json:"code"`
 	Country    string  `json:"country"`
 	Name       string  `json:"name"`
-	Kind       string  `json:"kind"` // convenience | supermarket | hypermarket | discounter | wholesale | premium
+	Kind       string  `json:"kind"` // convenience | supermarket | hypermarket | discounter | wholesale | premium | delivery
 	PriceIndex float64 `json:"priceIndex"`
 	Note       string  `json:"note"` // подпись на языке плана
 	Sort       int     `json:"sort"`
