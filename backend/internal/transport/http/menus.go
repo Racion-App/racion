@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -54,6 +55,9 @@ func menuBySlug(slug string) (menuPreset, bool) {
 	return menuPreset{}, false
 }
 
+// menuSlots — три приёма пищи готовых недель: колонки таблицы недели на странице.
+var menuSlots = []string{"breakfast", "lunch", "dinner"}
+
 // кэш недель: slug+lang+country → план на час (сборка недели дорогая для страницы под поисковик)
 var menuCache sync.Map
 
@@ -73,7 +77,7 @@ func (s *Server) menuPlan(m menuPreset, pl pageLocale) planner.Plan {
 	p.Lang = string(pl.L)
 	p.Country = pl.Country.Code
 	p.Equipment = []string{"stove", "oven", "microwave"}
-	p.Slots = []string{"breakfast", "lunch", "dinner"}
+	p.Slots = menuSlots
 	plan := s.catalog.Build(p)
 	menuCache.Store(key, menuCached{plan, time.Now()})
 	return plan
@@ -116,35 +120,91 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		start = i18n.DayMonthYear(l, t.Day(), int(t.Month()), t.Year())
 	}
 
+	// Неделя таблицей: строка — день, колонка — приём пищи; у блюда фото из каталога, если оно есть.
 	type dishView struct {
-		Slot, Title, Href, Money, KcalLabel, Time string
-		Leftover, Batch                           bool
+		Slot, Title, Href, Image, Money, Time string
+		Leftover, Batch                       bool
+	}
+	type cellView struct {
+		Key    string
+		Dishes []dishView
 	}
 	type dayView struct {
-		Label, Money, Kcal, Cook string
-		Dishes                   []dishView
+		Label, Date, Money, Kcal, Cook string
+		Cells                          []cellView
 	}
+	type slotHead struct{ Key, Label string }
+	var heads []slotHead
+	for _, k := range menuSlots {
+		heads = append(heads, slotHead{k, planner.SlotLabel(l, k)})
+	}
+	cat := s.svc.Catalog.Base()
 	var days []dayView
 	dishes := 0
 	for _, d := range plan.Days {
-		dv := dayView{Label: d.Label, Money: formatMoney(pl.Country, d.Cost), Kcal: strconv.Itoa(int(math.Round(d.Kcal))), Cook: i18n.Minutes(l, d.CookMin)}
+		dv := dayView{Label: d.Label, Date: d.Date, Money: formatMoney(pl.Country, d.Cost), Kcal: strconv.Itoa(int(math.Round(d.Kcal))), Cook: i18n.Minutes(l, d.CookMin)}
+		if t, err := time.Parse("2006-01-02", d.Date); err == nil {
+			dv.Date = dayMonth(l, t)
+		}
+		for _, k := range menuSlots {
+			dv.Cells = append(dv.Cells, cellView{Key: k})
+		}
 		for _, x := range d.Dishes {
 			dishes++
-			dv.Dishes = append(dv.Dishes, dishView{Slot: planner.SlotLabel(l, x.Slot), Title: x.Title, Href: pl.P + "/recipe/" + x.RecipeID,
-				Money: formatMoney(pl.Country, x.Cost), KcalLabel: i18n.T(l, "recipe.kcal", strconv.Itoa(int(math.Round(x.Kcal)))), Time: i18n.Minutes(l, x.TimeMin), Leftover: x.Leftover, Batch: x.Batch})
+			img := ""
+			if rc, ok := cat.RecipeByID[x.RecipeID]; ok {
+				img = rc.Image
+			}
+			v := dishView{Slot: planner.SlotLabel(l, x.Slot), Title: x.Title, Href: pl.P + "/recipe/" + x.RecipeID, Image: img,
+				Money: formatMoney(pl.Country, x.Cost), Time: i18n.Minutes(l, x.TimeMin), Leftover: x.Leftover, Batch: x.Batch}
+			i := len(dv.Cells) - 1 // приём вне трёх колонок — к ужину, чтобы блюдо не потерялось
+			for j, c := range dv.Cells {
+				if c.Key == x.Slot {
+					i = j
+				}
+			}
+			dv.Cells[i].Dishes = append(dv.Cells[i].Dishes, v)
 		}
 		days = append(days, dv)
 	}
-	type groupView struct {
+
+	// Чек недели: отделы магазина от дорогих к дешёвым; то, что обычно есть дома (соль, масло, специи),
+	// в сумму не входит — в чеке у такого отдела вместо цены «дома».
+	type checkLine struct {
 		Label, Money string
 		Items        int
+		cost         float64
 	}
-	var groups []groupView
+	var lines []checkLine
+	var groups []feastGroup
 	for _, g := range plan.Shopping {
 		if len(g.Items) == 0 {
 			continue
 		}
-		groups = append(groups, groupView{g.Label, formatMoney(pl.Country, g.Cost), len(g.Items)})
+		cl := checkLine{Label: g.Label, Items: len(g.Items), cost: g.Cost}
+		if g.Cost >= 0.5 {
+			cl.Money = formatMoney(pl.Country, g.Cost)
+		}
+		lines = append(lines, cl)
+		fg := feastGroup{Label: g.Label, Money: cl.Money}
+		for _, it := range g.Items {
+			fg.Items = append(fg.Items, feastItem{Name: it.Name, Qty: formatQty(l, it.Buy, it.Unit)})
+		}
+		groups = append(groups, fg)
+	}
+	sort.SliceStable(lines, func(i, j int) bool { return lines[i].cost > lines[j].cost })
+
+	// Экономное меню рядом с обычной неделей на тех же двоих: разница — главный факт страницы.
+	type saving struct{ Regular, Week, Month, Href, Label string }
+	var save *saving
+	if m.Slug == "budget" {
+		if reg, ok := menuBySlug("family-2"); ok {
+			rp := s.menuPlan(reg, pl)
+			if d := rp.Totals.Cost - plan.Totals.Cost; d > 0 && len(rp.Days) == 7 {
+				save = &saving{Regular: formatMoney(pl.Country, rp.Totals.Cost), Week: formatMoney(pl.Country, d),
+					Month: formatMoney(pl.Country, math.Round(d*30/7/100)*100), Href: pl.P + "/menu/family-2", Label: i18n.T(l, "menu.family-2.h1")}
+			}
+		}
 	}
 	h1 := i18n.T(l, "menu."+m.Slug+".h1")
 	title := i18n.T(l, "menu."+m.Slug+".title", formatMoney(pl.Country, plan.Totals.Cost))
@@ -179,7 +239,8 @@ func (s *Server) menuPage(w http.ResponseWriter, r *http.Request) {
 		"Base": pageBase{User: currentUser(r) != nil, Title: title + " — " + i18n.T(l, "page.brand"), Description: desc, Canonical: base + pl.P + "/menu/" + m.Slug,
 			OGImage: brandOG(base, l), OGWide: true, OGType: "article", Alternates: alts, JSONLD: menuLD(base, pl, h1, desc, m.Slug, faq)},
 		"L": l, "P": pl.P, "Country": pl.Country, "NavRecipes": true,
-		"H1": h1, "Intro": intro, "Days": days, "Groups": groups, "FAQ": faq, "Others": others,
+		"H1": h1, "Intro": intro, "Days": days, "Heads": heads, "Lines": lines, "Groups": groups, "Save": save, "FAQ": faq, "Others": others,
+		"Stores": s.feastStores(plan, pl), "CountryName": i18n.T(l, "country."+pl.Country.Code),
 		"Week": formatMoney(pl.Country, plan.Totals.Cost), "PerDay": formatMoney(pl.Country, perPersonDay), "KcalDay": int(math.Round(plan.Totals.KcalPerDay)), "Items": plan.Totals.Items, "People": people, "Dishes": dishes,
 		"StartDate": start, "PlanHref": "/?s=1",
 	}

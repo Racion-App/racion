@@ -1,5 +1,27 @@
 [
  {
+  "version": "1.23",
+  "date": "2026-10-09",
+  "title": {
+   "ru": "Готовые меню на неделю",
+   "en": "Ready-made weekly menus"
+  },
+  "items": {
+   "ru": [
+    "Страницы готовых меню на неделю оформлены заново. Наверху чек недели: сколько уходит на каждый отдел магазина, итог, цена на человека в день и калории.",
+    "Рядом цена той же недели в разных сетях, от дешёвой к дорогой.",
+    "Неделя теперь таблицей: дни строками, завтрак, обед и ужин колонками, у блюд фото.",
+    "В экономном меню чек показывает, на сколько эта неделя дешевле обычной недели на двоих."
+   ],
+   "en": [
+    "The ready-made weekly menu pages have a new look. At the top is the week's receipt: what each store aisle costs, the total, the price per person per day and the calories.",
+    "Next to it is the same week priced at different chains, cheapest first.",
+    "The week is now a table: days as rows, breakfast, lunch and dinner as columns, with dish photos.",
+    "On the budget menu the receipt shows how much less this week costs than a regular week for two."
+   ]
+  }
+ },
+ {
   "version": "1.22",
   "date": "2026-10-08",
   "title": {

@@ -1,46 +1,79 @@
 {{template "head" .}}
 <nav class="crumbs" aria-label="breadcrumbs"><a href="/">{{t .L "page.brand"}}</a><span>›</span><span>{{.H1}}</span></nav>
 
-<header class="colhead colhead--rich colhead--noimg">
-  <div class="colhead__body">
-    <p class="colhead__eyebrow">{{t .L "menu.eyebrow"}}</p>
-    <h1 class="colhead__title">{{.H1}}</h1>
-    <ul class="colfacts">
-      <li><b class="num">{{.Week}}</b><span>{{t .L "menu.fact.week" .People}}</span></li>
-      <li><b class="num">{{.PerDay}}</b><span>{{t .L "menu.fact.day"}}</span></li>
-      <li><b class="num">{{.KcalDay}}</b><span>{{t .L "menu.fact.kcal"}}</span></li>
-      <li><b class="num">{{.Items}}</b><span>{{t .L "menu.fact.items"}}</span></li>
-    </ul>
-    <div class="coltext">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
-    <div class="colhead__actions">
+<div class="mhero">
+  <div class="mhero__body">
+    <h1 class="mhero__title">{{.H1}}</h1>
+    <div class="mhero__text">{{range .Intro}}<p>{{.}}</p>{{end}}</div>
+    <div class="mhero__actions">
       <a class="btn btn-primary btn-lg" href="{{.PlanHref}}">{{t .L "menu.cta"}}</a>
+      <a class="mhero__jump" href="#week">{{t .L "menu.jump"}}</a>
     </div>
   </div>
-</header>
 
-<section class="rpage__section" aria-labelledby="week">
+  {{/* Чек недели: отделы магазина с суммами, линия отрыва, итог. Цифры — оценка по средним ценам сетей. */}}
+  <aside class="mcheck" aria-labelledby="mcheck-h">
+    <div class="mcheck__head">
+      <h2 class="mcheck__title" id="mcheck-h">{{t .L "menu.check.title"}}</h2>
+      <p class="mcheck__meta">{{t .L "menu.check.meta" .People .StartDate}}</p>
+    </div>
+    <ul class="mcheck__lines">{{range $i, $x := .Lines}}<li style="--i: {{$i}}">
+      <span class="mcheck__name">{{.Label}} <small class="num">{{.Items}}</small></span>
+      <span class="mcheck__dots" aria-hidden="true"></span>
+      {{if .Money}}<span class="mcheck__cost num">{{.Money}}</span>{{else}}<span class="mcheck__home">{{t $.L "menu.check.home"}}</span>{{end}}
+    </li>{{end}}</ul>
+    <div class="tear tear--static" aria-hidden="true"><i></i></div>
+    <dl class="mcheck__totals">
+      <div class="mcheck__total"><dt>{{t .L "menu.check.total"}}</dt><dd class="num">{{.Week}}</dd></div>
+      <div><dt>{{t .L "menu.fact.day"}}</dt><dd class="num">{{.PerDay}}</dd></div>
+      <div><dt>{{t .L "menu.fact.kcal"}}</dt><dd class="num">{{.KcalDay}}</dd></div>
+    </dl>
+    {{with .Save}}<div class="mcheck__save">
+      <p class="mcheck__regular"><a href="{{.Href}}">{{.Label}}</a> <span class="num">{{.Regular}}</span></p>
+      <p class="mcheck__diff"><b class="num">−{{.Week}}</b> {{t $.L "menu.check.save" .Month}}</p>
+    </div>{{end}}
+    <p class="mcheck__note">{{t .L "menu.check.note" .CountryName}}</p>
+  </aside>
+
+  {{with .Stores}}<section class="mstores" aria-labelledby="stores-h">
+    <h2 class="mstores__title" id="stores-h">{{t $.L "menu.stores.h"}}</h2>
+    <p class="mstores__lead">{{t $.L "menu.stores.lead" $.Items}}</p>
+    <ul class="stores__list">{{range .}}<li{{if .Cheapest}} class="is-cheapest"{{end}}><span class="stores__name">{{.Name}}{{if .Cheapest}} <small>{{t $.L "feast.stores.min"}}</small>{{end}}</span><span class="stores__bar" aria-hidden="true"><i style="width: {{.Pct}}%"></i></span><span class="stores__money num is-rub">≈ {{.Money}}</span></li>{{end}}</ul>
+    <p class="mstores__note">{{t $.L "feast.stores.note"}}</p>
+  </section>{{end}}
+</div>
+
+<section class="mweek" aria-labelledby="week">
   <div class="rpage__section-head"><h2 id="week">{{t .L "menu.week.title" .StartDate}}</h2></div>
-  <div class="menus menus--week">
-    {{range .Days}}<article class="menu">
-      <header class="menu__head"><h3 class="menu__title">{{.Label}}</h3><p class="menu__note"><span class="num">{{.Money}}</span> · <span class="num">{{.Kcal}}</span> {{t $.L "kcal"}} · <span class="num">{{.Cook}}</span></p></header>
-      <ol class="menu__list">
-        {{range .Dishes}}<li><a class="menu__item menu__item--noimg" href="{{.Href}}">
-          <span class="menu__slot">{{.Slot}}</span>
-          <span class="menu__name">{{.Title}}{{if .Leftover}} <small>{{t $.L "menu.leftover"}}</small>{{else if .Batch}} <small>{{t $.L "menu.batch"}}</small>{{end}}</span>
-          <span class="menu__meta num">{{.Time}} · {{.Money}}</span>
-        </a></li>{{end}}
-      </ol>
-    </article>{{end}}
+  <div class="mweek__sheet">
+    <div class="mweek__heads" aria-hidden="true"><span></span>{{range .Heads}}<span>{{.Label}}</span>{{end}}</div>
+    <ol class="mweek__days">
+      {{range .Days}}<li class="mweek__day">
+        <div class="mweek__dhead">
+          <h3 class="mweek__dname">{{.Label}} <span>{{.Date}}</span></h3>
+          <p class="mweek__dstats"><span class="num is-rub">{{.Money}}</span> <span class="num">{{.Kcal}} {{t $.L "kcal"}}</span> <span class="num">{{.Cook}}</span></p>
+        </div>
+        {{range .Cells}}<div class="mweek__cell mweek__cell--{{.Key}}">{{range .Dishes}}<a class="mdish" href="{{.Href}}">
+          <span class="mdish__img">{{if .Image}}<img src="{{.Image}}" alt="" width="72" height="72" loading="lazy" decoding="async">{{end}}</span>
+          <span class="mdish__text"><span class="mdish__slot">{{.Slot}}</span>
+          <span class="mdish__name">{{.Title}}</span>
+          <span class="mdish__meta"><span class="num">{{.Time}}</span><span class="num is-rub">{{.Money}}</span>{{if .Leftover}}<span class="mdish__tag">{{t $.L "menu.leftover"}}</span>{{else if .Batch}}<span class="mdish__tag">{{t $.L "menu.batch"}}</span>{{end}}</span></span>
+        </a>{{end}}</div>{{end}}
+      </li>{{end}}
+    </ol>
   </div>
 </section>
 
-{{if .Groups}}
-<section class="rpage__section" aria-labelledby="list">
-  <div class="rpage__section-head"><h2 id="list">{{t .L "menu.list.title" .Items}}</h2></div>
-  <div class="menu__foot menu__foot--groups">{{range .Groups}}<span>{{.Label}}: <b class="num">{{.Items}}</b> · <span class="num">{{.Money}}</span></span>{{end}}</div>
+<section class="mbuy" aria-label="{{t .L "menu.list.title" .Items}}">
+  {{if .Groups}}<details class="feast__list mbuy__list">
+    <summary>{{t .L "menu.list.title" .Items}}</summary>
+    <div class="feast__groups">{{range .Groups}}<div class="feast__group">
+      <div class="feast__ghead"><b>{{.Label}}</b>{{if .Money}}<span class="num">≈ {{.Money}}</span>{{else}}<span class="mcheck__home">{{t $.L "menu.check.home"}}</span>{{end}}</div>
+      <ul>{{range .Items}}<li><span>{{.Name}}</span><span class="num">{{.Qty}}</span></li>{{end}}</ul>
+    </div>{{end}}</div>
+  </details>{{end}}
   <p class="rpage__note">{{t .L "menu.list.note"}}</p>
 </section>
-{{end}}
 
 <section class="colhow" aria-label="{{t .L "coll.faq"}}">
   <div class="colhow__col">
