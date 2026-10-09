@@ -1,5 +1,25 @@
 [
  {
+  "version": "1.24",
+  "date": "2026-10-09",
+  "title": {
+   "ru": "Самокат и Яндекс Лавка",
+   "en": "Samokat and Yandex Lavka"
+  },
+  "items": {
+   "ru": [
+    "В анкете можно выбрать Самокат и Яндекс Лавку. Цены в них считаем по той же корзине с поправкой на сервис: Самокат выходит примерно на четверть дороже Пятёрочки, Лавка — примерно на пятую часть.",
+    "Поправку мы взяли из сравнения одной корзины в разных доставках, так что это оценка, а не ценник.",
+    "Обе доставки появились и в сравнении цен на страницах готовых меню."
+   ],
+   "en": [
+    "You can now pick Samokat and Yandex Lavka in the quiz. Prices use the same basket adjusted for the service: Samokat comes out about a quarter more expensive than Pyaterochka, Lavka about a fifth.",
+    "The adjustment comes from comparing one basket across delivery services, so it is an estimate, not a price tag.",
+    "Both services also appear in the price comparison on the ready-made menu pages."
+   ]
+  }
+ },
+ {
   "version": "1.23",
   "date": "2026-10-09",
   "title": {
