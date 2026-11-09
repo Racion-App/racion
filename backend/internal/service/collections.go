@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
+	"time"
 	"unicode/utf8"
 
 	"racion/internal/domain"
@@ -38,6 +40,24 @@ type CollectionRepo interface {
 type Collections struct {
 	repo    CollectionRepo
 	recipes *Recipes
+
+	// Редакционные подборки нужны почти каждой странице (подвал, рецепт, каталог, sitemap), а меняются
+	// только из админки: держим их в памяти, иначе база пересчитывает один и тот же список десятки раз в секунду.
+	curMu  sync.Mutex
+	curAt  time.Time
+	curGen uint64
+	cur    []domain.Collection
+}
+
+// curatedTTL — сколько живёт список без правок (страховка, если подборку поменяли мимо сервиса).
+const curatedTTL = 2 * time.Minute
+
+// dropCurated — сбросить список после любой правки подборок.
+func (c *Collections) dropCurated() {
+	c.curMu.Lock()
+	c.cur = nil
+	c.curGen++
+	c.curMu.Unlock()
 }
 
 func NewCollections(repo CollectionRepo, recipes *Recipes) *Collections {
@@ -90,10 +110,12 @@ func (c *Collections) Rename(ctx context.Context, userID, id, name string) error
 	if err != nil {
 		return err
 	}
+	defer c.dropCurated()
 	return c.repo.Rename(ctx, userID, id, name)
 }
 
 func (c *Collections) Delete(ctx context.Context, userID, id string) error {
+	defer c.dropCurated()
 	return c.repo.Delete(ctx, userID, id)
 }
 
@@ -101,6 +123,7 @@ func (c *Collections) Toggle(ctx context.Context, userID, id, recipeID string, o
 	if _, err := c.recipes.Find(ctx, recipeID); err != nil {
 		return err
 	}
+	defer c.dropCurated()
 	return c.repo.Toggle(ctx, userID, id, recipeID, on)
 }
 
@@ -129,16 +152,34 @@ func (c *Collections) Publish(ctx context.Context, userID, id string, public boo
 	if slug == "" {
 		slug = uniqueSlug(c.recipes.catalog.Load(), col.Name) + "-" + id[:6]
 	}
+	defer c.dropCurated()
 	if err := c.repo.Publish(ctx, userID, id, public, slug); err != nil {
 		return col, err
 	}
 	return c.repo.Get(ctx, id)
 }
 
-// Curated — редакционные подборки для каталога и sitemap.
+// Curated — редакционные подборки для каталога и sitemap. Возвращает свою копию среза:
+// вызывающие подменяют элементы (Localized), общий список от этого не меняется.
 func (c *Collections) Curated(ctx context.Context) []domain.Collection {
-	list, _ := c.repo.Public(ctx, true)
-	return c.withCovers(ctx, list)
+	c.curMu.Lock()
+	if c.cur != nil && time.Since(c.curAt) < curatedTTL {
+		out := slices.Clone(c.cur)
+		c.curMu.Unlock()
+		return out
+	}
+	gen := c.curGen
+	c.curMu.Unlock()
+	list, err := c.repo.Public(ctx, true)
+	list = c.withCovers(ctx, list)
+	if err == nil {
+		c.curMu.Lock()
+		if gen == c.curGen { // пока читали, подборку могли поправить — тогда старый список не кладём
+			c.cur, c.curAt = list, time.Now()
+		}
+		c.curMu.Unlock()
+	}
+	return slices.Clone(list)
 }
 
 // BySlug — публичная подборка с рецептами.
@@ -179,6 +220,7 @@ func (c *Collections) SaveCurated(ctx context.Context, actor domain.User, in Cur
 	if utf8.RuneCountInString(in.Description) > 600 {
 		return domain.Collection{}, domain.Invalid("collection.name")
 	}
+	defer c.dropCurated()
 	id := in.ID
 	if id == "" {
 		col, err := c.repo.Create(ctx, actor.ID, name)
@@ -240,6 +282,7 @@ func (c *Collections) AdminList(ctx context.Context) ([]domain.Collection, error
 	return c.withCovers(ctx, list), err
 }
 func (c *Collections) AdminDelete(ctx context.Context, id string) error {
+	defer c.dropCurated()
 	return c.repo.AdminDelete(ctx, id)
 }
 

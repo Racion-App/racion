@@ -63,8 +63,9 @@ func New(d Deps) http.Handler {
 	imagesDir = d.Images
 	featuredFn = func(l i18n.Lang, p string) []FootLink {
 		var out []FootLink
+		curated := d.Services.Collections.Curated(context.Background()) // один раз на подвал, а не на каждую ссылку
 		for _, slug := range featuredSlugs {
-			for _, c := range d.Services.Collections.Curated(context.Background()) {
+			for _, c := range curated {
 				if c.Slug == slug && c.Public {
 					c = c.Localized(string(l))
 					out = append(out, FootLink{Name: c.Name, Href: p + "/collection/" + c.Slug})
