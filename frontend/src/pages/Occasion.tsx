@@ -36,8 +36,7 @@ export function Occasion() {
   const [style, setStyle] = useState(() => ["lavish", "buffet"].includes(query.get("style") ?? "") ? query.get("style")! : "home");
   const [extraDays, setExtraDays] = useState(() => query.get("january") === "1");
   const [january, setJanuary] = useState([0, 0, 0]);
-  const [cocktail, setCocktail] = useState("");
-  const [glasses, setGlasses] = useState(1);
+  const [alcohol, setAlcohol] = useState(false);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +71,7 @@ export function Occasion() {
       // анкету не проходили — считаем, что плита, духовка и микроволновка есть (как в квизе по умолчанию)
       const equipment = draft.equipment?.length ? draft.equipment : ["stove", "oven", "microwave"];
       const thrifty = id === "newyear" && new URLSearchParams(location.search).get("thrifty") === "1";
-      const newYear = id === "newyear" ? { style: thrifty && style === "home" ? "cheap" : style, january: extraDays ? january : [0, 0, 0], cocktail, glasses: cocktail ? Math.min(guests, glasses) : 0 } : undefined;
+      const newYear = id === "newyear" ? { style: thrifty && style === "home" ? "cheap" : style, january: extraDays ? january : [0, 0, 0], alcohol } : undefined;
       const plan = await api.createOccasion(id, guests, { ...draft, newYear, equipment, country, store, region: draft.region ?? "" } as Params, thrifty);
       track("occasion_built", { id, guests });
       nav(`/plan/${plan.id}`);
@@ -118,19 +117,17 @@ export function Occasion() {
                   ))}
                 </div>}
                 {id === "newyear" && <>
-                  <label className="occ__row"><span>{t("feast.style.label")}</span>
-                    <select className="form-select" value={style} onChange={(e) => setStyle(e.target.value)}>
-                      {["home", "lavish", "buffet"].map((key) => <option key={key} value={key}>{t("feast.style." + key)}</option>)}
-                    </select>
-                  </label>
-                  <label className="occ__row"><span>{t("course.cocktails")}</span>
-                    <select className="form-select" value={cocktail} onChange={(e) => setCocktail(e.target.value)}>
-                      {["", "ny_kir_royal", "ny_mandarin_bellini"].map((key) => <option key={key} value={key}>{t("feast.cocktail." + (key || "none"))}</option>)}
-                    </select>
-                  </label>
-                  {cocktail && <label className="occ__row"><span>{t("feast.drink.glasses")}</span>
-                    <input className="form-control" type="number" min={1} max={guests} value={Math.min(glasses, guests)} onChange={(e) => setGlasses(Math.max(1, Math.min(guests, Math.trunc(Number(e.target.value)))))} />
-                  </label>}
+                  <div className="occ__row">
+                    <label htmlFor="feast-style">{t("feast.style.label")}</label>
+                    <Select id="feast-style" value={style} onChange={setStyle}
+                      aria-label={t("feast.style.label")}
+                      options={["home", "lavish", "buffet"].map(key => ({ value: key, label: t("feast.style." + key) }))} />
+                  </div>
+                  <button type="button" className="switch" role="switch" aria-checked={alcohol} onClick={() => setAlcohol(!alcohol)}>
+                    <span className="switch__text">{t("feast.alcohol")}</span>
+                    <span className="switch__track" aria-hidden><span className="switch__knob" /></span>
+                  </button>
+                  <Link to={(lang === "ru" ? "" : "/" + lang) + "/collection/cocktails"} reloadDocument>{t("feast.bar.catalog")}</Link>
                   <label><input type="checkbox" checked={extraDays} onChange={(e) => setExtraDays(e.target.checked)} /> {t("feast.january.add")}</label>
                   {extraDays && <fieldset className="agesec"><legend>{t("feast.january.guests")}</legend><p>{t("feast.january.hint")}</p>
                     {january.map((n,i) => <label key={i} className="occ__row"><span>{t("feast.january.date",{n:i+1})}</span>

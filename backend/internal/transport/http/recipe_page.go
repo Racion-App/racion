@@ -496,7 +496,7 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Pct":    map[string]int{"Kcal": int(math.Round(kcal / 20)), "Protein": int(math.Round(prot / 0.75)), "Fat": int(math.Round(fat / 0.7)), "Carb": int(math.Round(carb / 2.6))},
 		"Per100": kcal / math.Max(grams, 1) * 100,
 		"Cost":   cost, "Priced": priced, "CostNote": costNote,
-		"JarLabel": jarLabel, "ShelfLabel": shelfLabel, "StoreNote": storeNote, "GlassML": planner.HolidayGlassML(rc.ID),
+		"JarLabel": jarLabel, "ShelfLabel": shelfLabel, "StoreNote": storeNote, "GlassML": s.catalog.GlassML(rc),
 		"Ings": ings, "Steps": steps, "Related": related, "Kid": kid, "Tags": tags, "Sides": sides, "SidesTitle": sidesTitle, "SideFor": sideFor, "Notes": notesPtr(rc.NotesFor(l)),
 		"Equipment": eq, "Buy": buy, "Offer": offer, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}

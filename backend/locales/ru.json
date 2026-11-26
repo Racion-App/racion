@@ -1,4 +1,9 @@
 {
+  "feast.alcohol": "Добавить алкогольные коктейли",
+  "feast.bar.catalog": "Все коктейли и шоты",
+  "course.mixed": "Алкогольные коктейли",
+  "course.shots": "Шоты",
+  "course.mocktails": "Безалкогольные коктейли",
   "feast.cocktail.ny_mandarin_bellini": "Мандариновый беллини",
   "feast.cocktail.ny_kir_royal": "Кир рояль",
   "feast.cocktail.none": "Только безалкогольные",

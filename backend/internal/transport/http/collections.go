@@ -332,6 +332,14 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 	if len(recipes) > 0 && table*10 >= len(recipes)*4 {
 		course := func(rc planner.Recipe) string {
 			switch {
+			case col.Slug == "cocktails":
+				if !hasTag(rc, "alcohol") {
+					return "mocktails"
+				}
+				if hasTag(rc, "shot") {
+					return "shots"
+				}
+				return "mixed"
 			case col.Slug == "new-year-table" && hasTag(rc, "drink"):
 				return "drinks"
 			case hasTag(rc, "salad"):
@@ -350,7 +358,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 			k := course(rc)
 			byCourse[k] = append(byCourse[k], cards[i])
 		}
-		for _, k := range []string{"salads", "starters", "soup", "mains", "desserts", "drinks"} {
+		for _, k := range []string{"salads", "starters", "soup", "mains", "desserts", "drinks", "mixed", "shots", "mocktails"} {
 			if g := byCourse[k]; len(g) > 0 {
 				groups = append(groups, group{k, i18n.T(pl.L, "course."+k), g})
 			}
@@ -432,6 +440,10 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}
 	s.collectionExtras(col.Slug, pl, recipes, data)
+	if col.Slug == "cocktails" {
+		data["PlanHref"] = pl.P + "/event/newyear"
+		data["PlanLabel"] = i18n.T(pl.L, "feast.cta.btn")
+	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "collection.html", data); err != nil {
 		s.log.Error("collection page", zap.Error(err))

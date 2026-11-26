@@ -1,4 +1,9 @@
 {
+  "feast.alcohol": "Include alcoholic cocktails",
+  "feast.bar.catalog": "All cocktails and shots",
+  "course.mixed": "Alcoholic cocktails",
+  "course.shots": "Shots",
+  "course.mocktails": "Alcohol-free cocktails",
   "feast.cocktail.ny_mandarin_bellini": "Mandarin bellini",
   "feast.cocktail.ny_kir_royal": "Kir royal",
   "feast.cocktail.none": "Alcohol-free drinks only",

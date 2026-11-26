@@ -46,6 +46,7 @@ type Occasion struct {
 type NewYearOptions struct {
 	Style    string `json:"style,omitempty"`
 	January  [3]int `json:"january,omitempty"`
+	Alcohol  bool   `json:"alcohol,omitempty"`
 	Cocktail string `json:"cocktail,omitempty"`
 	Glasses  int    `json:"glasses,omitempty"`
 }
@@ -62,7 +63,9 @@ func (o Occasion) menuCourses(options *NewYearOptions, january int) []OccasionCo
 		if themed := o.Styles[options.Style]; len(themed) > 0 {
 			courses = themed
 		}
-		if options.Glasses > 0 && (options.Cocktail == "ny_kir_royal" || options.Cocktail == "ny_mandarin_bellini") {
+		if options.Alcohol {
+			courses = append(slices.Clone(courses), OccasionCourse{Key: "cocktails", Base: 1, All: []string{"drink", "alcohol"}})
+		} else if options.Glasses > 0 && (options.Cocktail == "ny_kir_royal" || options.Cocktail == "ny_mandarin_bellini") {
 			courses = append(slices.Clone(courses), OccasionCourse{Key: "cocktails", Base: 1, Pool: []string{options.Cocktail}})
 		}
 	}
@@ -282,13 +285,29 @@ func (c *Catalog) BuildOccasionWithSeed(o Occasion, p Params, guests int, seed i
 // Volume of one finished serving, in ml, for the published New Year drinks.
 var holidayGlassML = map[string]int{"ny_kir_royal": 120, "ny_mandarin_bellini": 150, "ny_pomegranate_spritz": 200, "ny_pear_punch": 250, "ny_mandarin_lemonade": 250, "tg_apple_cider_hot": 250, "ny_mulled_wine_nonalco": 200, "vd_berry_mojito_nonalco": 350, "tg_cranberry_lemonade": 250}
 
-func HolidayGlassML(id string) int { return holidayGlassML[id] }
+func (c *Catalog) GlassML(r Recipe) int {
+	if ml := holidayGlassML[r.ID]; ml > 0 {
+		return ml
+	}
+	if !slices.Contains(r.Tags, "bar") {
+		return 0
+	}
+	// Estimate the undiluted volume. Pourable yogurt in lassis is sold by weight.
+	var ml float64
+	for _, item := range r.Ingredients {
+		if c.Ingredients[item.IngredientID].Unit == "ml" || item.IngredientID == "yogurt_plain" {
+			ml += item.Amount
+		}
+	}
+	return int(math.Round(ml))
+}
 
 func (c *Catalog) fillOccasionDay(day Day, o Occasion, courses []OccasionCourse, p Params, guests int, e effective, pr pricer, rng *rand.Rand) Day {
 	lang := i18n.Lang(p.Lang)
 	usedMain := map[string]bool{}
 	for _, course := range courses {
 		e.adultCocktail = course.Key == "cocktails"
+		e.bar = e.adultCocktail || course.Key == "drinks"
 		start := len(day.Dishes)
 		// сначала рецепты курса (pool), затем — подходящие по тегам, если из pool не набралось
 		var primary, backup []Recipe
@@ -372,10 +391,10 @@ func (c *Catalog) fillOccasionDay(day Day, o Occasion, courses []OccasionCourse,
 				d := &dishes[i]
 				// Split one course among the dishes being served, rounding up to whole recipe portions.
 				d.Servings = (guests + len(dishes) - 1) / len(dishes)
-				if course.Key == "cocktails" {
+				if course.Key == "cocktails" && !p.NewYear.Alcohol {
 					d.Servings = min(guests, max(1, p.NewYear.Glasses))
 				}
-				d.DrinkML = holidayGlassML[d.RecipeID] * d.Servings
+				d.DrinkML = c.GlassML(c.RecipeByID[d.RecipeID]) * d.Servings
 			}
 		}
 	}

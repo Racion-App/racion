@@ -86,7 +86,7 @@ export type Weaning = {
 export type WeaningFood = { id: string; group: string; from: number; name: string; img?: string };
 
 export type Params = {
-  newYear?: { style: string; january: number[]; cocktail: string; glasses: number };
+  newYear?: { style: string; january: number[]; alcohol?: boolean; cocktail?: string; glasses?: number };
   lang?: string;
   country: string;
   store: string;

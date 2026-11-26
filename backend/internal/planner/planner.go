@@ -245,6 +245,7 @@ func hasEquipment(have []string, need string) bool {
 type effective struct {
 	Params
 	adultCocktail bool
+	bar           bool
 	kidExclude    []string
 	kidTags       []string
 	kidAllergens  []string // аллергии детей, которые едят с общего стола
@@ -278,7 +279,7 @@ func (c *Catalog) effective(p Params) effective {
 
 // allowed — проходит ли рецепт фильтры пользователя.
 func (c *Catalog) allowed(r Recipe, e effective) bool {
-	if r.Hidden || (slices.Contains(r.Tags, "alcohol") && !e.adultCocktail) {
+	if r.Hidden || (slices.Contains(r.Tags, "bar") && !e.bar) || (slices.Contains(r.Tags, "alcohol") && !e.adultCocktail) {
 		return false
 	}
 	for _, eq := range r.Equipment {
@@ -1541,6 +1542,8 @@ func (c *Catalog) swapOccasion(plan Plan, day int, slot string, pr pricer, tg ta
 	key := fmt.Sprintf("%d:%s:%d", day, slot, di)
 	rejected := append(slices.Clone(plan.Rejected[key]), cur.RecipeID)
 	e := c.effective(plan.Params)
+	e.adultCocktail = cur.Course == "cocktails"
+	e.bar = e.adultCocktail || cur.Course == "drinks"
 	// сначала рецепты курса (pool), запасные по тегам — только если из pool ничего не осталось;
 	// без этого закуску 14 февраля меняло на «детский борщик»: у курса с pool нет правил по тегам, и fits пускал всё
 	var pool, backup []Recipe
@@ -1564,7 +1567,7 @@ func (c *Catalog) swapOccasion(plan Plan, day int, slot string, pr pricer, tg ta
 	r := pool[rng.Intn(len(pool))]
 	d := c.dish(r, "dinner", pr)
 	d.Servings, d.Portions = cur.Servings, cur.Portions
-	d.DrinkML = holidayGlassML[r.ID] * d.Servings
+	d.DrinkML = c.GlassML(r) * d.Servings
 	d.Course = cur.Course
 	d.Why = i18n.T(i18n.Lang(plan.Params.Lang), "course."+cur.Course)
 	_ = tg

@@ -4,7 +4,7 @@ import "testing"
 
 func TestNewYearOptionalDatesAndCocktail(t *testing.T) {
 	c := testCatalog(t)
-	cocktail := Recipe{ID: "ny_kir_royal", Title: "Кир рояль", Slot: "snack", Tags: []string{"alcohol"}, Ingredients: []RecipeIngredient{{"blackcurrant_liqueur", 10}}}
+	cocktail := Recipe{ID: "ny_kir_royal", Title: "Кир рояль", Slot: "snack", Tags: []string{"drink", "alcohol", "bar"}, Ingredients: []RecipeIngredient{{"blackcurrant_liqueur", 10}}}
 	c.Recipes = append(c.Recipes, cocktail)
 	c.RecipeByID[cocktail.ID] = cocktail
 	course := []OccasionCourse{{Key: "salads", Base: 1, Pool: []string{"olivier"}}}
@@ -44,5 +44,43 @@ func TestNewYearOptionalDatesAndCocktail(t *testing.T) {
 	basic, err := c.BuildOccasion(o, p, 8)
 	if err != nil || len(basic.Days) != 1 || len(basic.Days[0].Dishes) != 1 {
 		t.Fatalf("default table: %v, error %v", basic.Days, err)
+	}
+}
+
+func TestCocktailSwitchAndReplacement(t *testing.T) {
+	c := testCatalog(t)
+	cocktail := Recipe{ID: "bar_test_one", Slot: "snack", Tags: []string{"drink", "alcohol", "bar"}, Ingredients: []RecipeIngredient{{"sparkling_wine", 80}}}
+	other := cocktail
+	other.ID = "bar_test_two"
+	other.Ingredients = []RecipeIngredient{{"sparkling_wine", 60}}
+	for _, r := range []Recipe{cocktail, other} {
+		c.Recipes = append(c.Recipes, r)
+		c.RecipeByID[r.ID] = r
+	}
+	regular := []OccasionCourse{{Key: "salads", Base: 1, Pool: []string{"olivier"}}}
+	o := Occasion{ID: "newyear", Courses: regular}
+	previous := occasions
+	SetOccasions([]Occasion{o})
+	t.Cleanup(func() { SetOccasions(previous) })
+	p := Params{Country: "RU", Lang: "ru", Equipment: []string{"stove", "oven"}, NewYear: &NewYearOptions{}}
+	off, err := c.BuildOccasion(o, p, 6)
+	if err != nil || len(off.Days[0].Dishes) != 1 {
+		t.Fatalf("off: %v %v", off.Days, err)
+	}
+	if c.Allowed(cocktail, p) {
+		t.Fatal("bar recipe eligible for a regular meal")
+	}
+	p.NewYear.Alcohol = true
+	on, err := c.BuildOccasion(o, p, 6)
+	if err != nil || len(on.Days[0].Dishes) != 2 {
+		t.Fatalf("on: %v %v", on.Days, err)
+	}
+	first := on.Days[0].Dishes[1]
+	if first.Course != "cocktails" || first.Servings != 6 || first.DrinkML != 6*c.GlassML(c.RecipeByID[first.RecipeID]) {
+		t.Fatal(first)
+	}
+	swapped, err := c.swapOccasion(on, 0, "dinner#1", c.pricerFor(on.Params), targets{})
+	if err != nil || first.RecipeID == swapped.Days[0].Dishes[1].RecipeID || first.DrinkML == swapped.Days[0].Dishes[1].DrinkML {
+		t.Fatalf("replacement: %v %v", swapped.Days, err)
 	}
 }

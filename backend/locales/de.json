@@ -1,4 +1,9 @@
 {
+  "feast.alcohol": "Alkoholische Cocktails hinzufügen",
+  "feast.bar.catalog": "Alle Cocktails und Shots",
+  "course.mixed": "Alkoholische Cocktails",
+  "course.shots": "Shots",
+  "course.mocktails": "Alkoholfreie Cocktails",
   "feast.cocktail.ny_mandarin_bellini": "Mandarinen-Bellini",
   "feast.cocktail.ny_kir_royal": "Kir Royal",
   "feast.cocktail.none": "Nur alkoholfreie Getränke",
