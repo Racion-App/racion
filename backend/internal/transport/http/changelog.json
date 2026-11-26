@@ -1,5 +1,26 @@
 [
  {
+  "version": "1.26",
+  "date": "2026-11-26",
+  "title": {"ru": "Ссылки в мессенджерах", "en": "Link previews"},
+  "items": {
+   "ru": ["Когда вы отправляете ссылку на план в Telegram, в чате снова появляется карточка с названием меню и стоимостью продуктов."],
+   "en": ["When you share a plan in Telegram, the chat preview shows the menu title and grocery cost again."]
+  }
+ },
+ {
+  "version": "1.25",
+  "date": "2026-11-26",
+  "title": {
+   "ru": "Список покупок",
+   "en": "Shopping list"
+  },
+  "items": {
+   "ru": ["Убрали рекламу из заголовка списка покупок, чтобы число позиций было видно рядом с названием."],
+   "en": ["We removed ads from the shopping list heading so you can see the item count next to the title."]
+  }
+ },
+ {
   "version": "1.24",
   "date": "2026-10-09",
   "title": {
