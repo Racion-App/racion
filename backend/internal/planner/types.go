@@ -285,7 +285,8 @@ type Params struct {
 	ExcludeRecipes []string `json:"excludeRecipes,omitempty"`
 	// Thrifty — праздничный стол подешевле: без дорогих блюд и с самыми недорогими в каждом курсе.
 	// Ставит сервер (страница «Новогодний стол», вариант «недорогой»), из квиза не приходит.
-	Thrifty bool `json:"-"`
+	Thrifty bool            `json:"-"`
+	NewYear *NewYearOptions `json:"newYear,omitempty"`
 	// Favorites — избранные рецепты из кабинета; тоже подставляет сервер. Получают бонус в подборе.
 	Favorites []string `json:"favorites,omitempty"`
 	// Collection — id коллекции из кабинета: неделю собираем из неё; CollectionIDs подставляет сервер.
@@ -326,8 +327,9 @@ type Dish struct {
 	Cost     float64   `json:"cost"` // на порцию, без «домашних» продуктов, с индексом магазина
 	Why      string    `json:"why"`  // почему выбрано: коротко и честно, на языке плана
 	WhyCode  WhyCode   `json:"whyCode"`
-	Side     *Side     `json:"side,omitempty"`     // гарнир к основному (итоги выше — суммой с ним)
-	Prep     *PrepInfo `json:"prep,omitempty"`     // режим заготовок: когда и как приготовлено
+	Side     *Side     `json:"side,omitempty"` // гарнир к основному (итоги выше — суммой с ним)
+	Prep     *PrepInfo `json:"prep,omitempty"` // режим заготовок: когда и как приготовлено
+	DrinkML  int       `json:"drinkMl,omitempty"`
 	Servings int       `json:"servings,omitempty"` // корзина: на сколько человек готовят именно это блюдо
 	// Portions — порций именно в этот день, если их меньше, чем в приёме обычно (ребёнок в будни в саду)
 	Portions float64 `json:"portions,omitempty"`

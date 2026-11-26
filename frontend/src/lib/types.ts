@@ -86,6 +86,7 @@ export type Weaning = {
 export type WeaningFood = { id: string; group: string; from: number; name: string; img?: string };
 
 export type Params = {
+  newYear?: { style: string; january: number[]; cocktail: string; glasses: number };
   lang?: string;
   country: string;
   store: string;
@@ -118,6 +119,7 @@ export type MemberView = { name: string; goal: string; goalLabel: string; kcal: 
 export const APPETITES = ["small", "normal", "big"] as const;
 
 export type Dish = {
+  drinkMl?: number;
   kidNote?: string; // как подать малышу, который ест с общего стола: «виноград — на четвертинки»
   kidPortion?: string; // сколько положить детям: «2 года — суп 150–180 г» (СанПиН 2.3/2.4.4282-26)
   servings?: number; // стол: на сколько человек готовят это блюдо

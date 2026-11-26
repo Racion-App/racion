@@ -2571,7 +2571,7 @@ button.fastcal__day { width: 100%; padding: 0; font: inherit; color: inherit; cu
     &:hover { color: var(--ds-label-primary); } } }
 .feast__pane { display: none; gap: 16px; padding: 18px 16px 16px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
   @media (min-width: 560px) { padding: 20px 20px 18px; } }
-@each $v in 4, 6, 8, cheap {
+@each $v in 4, 6, 8, cheap, lavish, buffet {
   #fv-#{$v}:checked ~ .feast__pane[data-v="#{$v}"] { display: grid; }
   #fv-#{$v}:checked ~ .feast__tabs [data-v="#{$v}"] { background: var(--ds-bg-elevated); color: var(--ds-blue); box-shadow: var(--ds-shadow-sm); }
   #fv-#{$v}:focus-visible ~ .feast__tabs [data-v="#{$v}"] { box-shadow: var(--ds-shadow-focus); }

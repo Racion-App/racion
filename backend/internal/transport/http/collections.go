@@ -332,6 +332,8 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 	if len(recipes) > 0 && table*10 >= len(recipes)*4 {
 		course := func(rc planner.Recipe) string {
 			switch {
+			case col.Slug == "new-year-table" && hasTag(rc, "drink"):
+				return "drinks"
 			case hasTag(rc, "salad"):
 				return "salads"
 			case hasTag(rc, "dessert") || hasTag(rc, "sweet") || hasTag(rc, "drink"):
@@ -348,7 +350,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 			k := course(rc)
 			byCourse[k] = append(byCourse[k], cards[i])
 		}
-		for _, k := range []string{"salads", "starters", "soup", "mains", "desserts"} {
+		for _, k := range []string{"salads", "starters", "soup", "mains", "desserts", "drinks"} {
 			if g := byCourse[k]; len(g) > 0 {
 				groups = append(groups, group{k, i18n.T(pl.L, "course."+k), g})
 			}

@@ -244,12 +244,13 @@ func hasEquipment(have []string, need string) bool {
 // effective — параметры с учётом детских ограничений (жёстко, как просили).
 type effective struct {
 	Params
-	kidExclude   []string
-	kidTags      []string
-	kidAllergens []string // аллергии детей, которые едят с общего стола
-	momExclude   []string // беременность и кормление грудью: печень, сыры с плесенью, тунец, алкоголь…
-	momRaw       bool     // без сырого мяса и рыбы (тег raw)
-	storeLevel   int      // ассортимент выбранного магазина; без магазина — всё доступно
+	adultCocktail bool
+	kidExclude    []string
+	kidTags       []string
+	kidAllergens  []string // аллергии детей, которые едят с общего стола
+	momExclude    []string // беременность и кормление грудью: печень, сыры с плесенью, тунец, алкоголь…
+	momRaw        bool     // без сырого мяса и рыбы (тег raw)
+	storeLevel    int      // ассортимент выбранного магазина; без магазина — всё доступно
 }
 
 func (c *Catalog) effective(p Params) effective {
@@ -277,7 +278,7 @@ func (c *Catalog) effective(p Params) effective {
 
 // allowed — проходит ли рецепт фильтры пользователя.
 func (c *Catalog) allowed(r Recipe, e effective) bool {
-	if r.Hidden {
+	if r.Hidden || (slices.Contains(r.Tags, "alcohol") && !e.adultCocktail) {
 		return false
 	}
 	for _, eq := range r.Equipment {
@@ -687,6 +688,11 @@ func (c *Catalog) Localize(plan Plan, l i18n.Lang) Plan {
 			}
 			d.Label = i18n.T(l, key)
 			plan.Occasion.Title = d.Label
+			if i > 0 && plan.Occasion.ID == "newyear" && plan.Params.NewYear != nil {
+				if date, err := time.Parse("2006-01-02", d.Date); err == nil && date.Day() <= 3 {
+					d.Label = i18n.T(l, "feast.january.day", date.Day(), plan.Params.NewYear.January[date.Day()-1])
+				}
+			}
 		}
 		d.Dishes = slices.Clone(d.Dishes)
 		for j := range d.Dishes {
@@ -1050,15 +1056,29 @@ func (c *Catalog) finish(plan *Plan) {
 		if day.Skipped {
 			continue
 		}
+		covers := 0
+		if plan.Occasion != nil && plan.Occasion.ID == "newyear" {
+			covers = plan.Occasion.Guests
+			if d > 0 && p.NewYear != nil {
+				date, err := time.Parse("2006-01-02", day.Date)
+				if err == nil && date.Month() == time.January && date.Day() <= 3 {
+					covers = p.NewYear.January[date.Day()-1]
+				}
+			}
+		}
 		for _, dish := range day.Dishes {
-			day.Kcal += dish.Kcal
-			day.Protein += dish.Protein
-			day.Fat += dish.Fat
-			day.Carb += dish.Carb
+			share := 1.0
+			if covers > 0 && dish.Servings > 0 {
+				share = float64(dish.Servings) / float64(covers)
+			}
+			day.Kcal += dish.Kcal * share
+			day.Protein += dish.Protein * share
+			day.Fat += dish.Fat * share
+			day.Carb += dish.Carb * share
 			day.Cost += dish.Cost * plan.portionsForDish(dish)
 			for i, m := range p.Members {
 				if m.eats(dish.Slot) {
-					day.PerMember[i] += math.Round(dish.Kcal * factors[i])
+					day.PerMember[i] += math.Round(dish.Kcal * factors[i] * share)
 				}
 			}
 			if dish.Leftover {
@@ -1502,7 +1522,14 @@ func (c *Catalog) swapOccasion(plan Plan, day int, slot string, pr pricer, tg ta
 		return plan, fmt.Errorf("plan.readonly")
 	}
 	var course OccasionCourse
-	for _, cs := range o.Courses {
+	january := 0
+	if day > 0 && o.ID == "newyear" {
+		date, err := time.Parse("2006-01-02", plan.Days[day].Date)
+		if err == nil {
+			january = date.Day()
+		}
+	}
+	for _, cs := range o.menuCourses(plan.Params.NewYear, january) {
 		if cs.Key == cur.Course {
 			course = cs
 		}
@@ -1536,6 +1563,8 @@ func (c *Catalog) swapOccasion(plan Plan, day int, slot string, pr pricer, tg ta
 	rng := rand.New(rand.NewSource(plan.Seed + int64(len(rejected))*7919 + int64(di)))
 	r := pool[rng.Intn(len(pool))]
 	d := c.dish(r, "dinner", pr)
+	d.Servings, d.Portions = cur.Servings, cur.Portions
+	d.DrinkML = holidayGlassML[r.ID] * d.Servings
 	d.Course = cur.Course
 	d.Why = i18n.T(i18n.Lang(plan.Params.Lang), "course."+cur.Course)
 	_ = tg

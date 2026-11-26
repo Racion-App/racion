@@ -30,15 +30,43 @@ type OccasionCourse struct {
 }
 
 type Occasion struct {
-	ID        string           `json:"id"`
-	Icon      string           `json:"icon"`
-	Months    []int            `json:"months"`    // когда актуально (1–12); пусто — всегда
-	Countries []string         `json:"countries"` // где отмечают (коды стран); пусто — везде
-	Guests    int              `json:"guests"`    // по умолчанию
-	Kind      string           `json:"kind"`      // menu (по умолчанию) | week — пресет квиза
-	Preset    *OccasionPreset  `json:"preset,omitempty"`
-	Extra     []string         `json:"equipment"` // техника, которую событие добавляет к анкете (мангал на пикнике)
-	Courses   []OccasionCourse `json:"courses"`
+	ID        string                      `json:"id"`
+	Icon      string                      `json:"icon"`
+	Months    []int                       `json:"months"`    // когда актуально (1–12); пусто — всегда
+	Countries []string                    `json:"countries"` // где отмечают (коды стран); пусто — везде
+	Guests    int                         `json:"guests"`    // по умолчанию
+	Kind      string                      `json:"kind"`      // menu (по умолчанию) | week — пресет квиза
+	Preset    *OccasionPreset             `json:"preset,omitempty"`
+	Extra     []string                    `json:"equipment"` // техника, которую событие добавляет к анкете (мангал на пикнике)
+	Courses   []OccasionCourse            `json:"courses"`
+	Styles    map[string][]OccasionCourse `json:"styles,omitempty"`
+	January   [][]OccasionCourse          `json:"january,omitempty"`
+}
+
+type NewYearOptions struct {
+	Style    string `json:"style,omitempty"`
+	January  [3]int `json:"january,omitempty"`
+	Cocktail string `json:"cocktail,omitempty"`
+	Glasses  int    `json:"glasses,omitempty"`
+}
+
+func (o Occasion) menuCourses(options *NewYearOptions, january int) []OccasionCourse {
+	if o.ID != "newyear" {
+		return o.Courses
+	}
+	if january > 0 && january <= len(o.January) {
+		return o.January[january-1]
+	}
+	courses := o.Courses
+	if options != nil {
+		if themed := o.Styles[options.Style]; len(themed) > 0 {
+			courses = themed
+		}
+		if options.Glasses > 0 && (options.Cocktail == "ny_kir_royal" || options.Cocktail == "ny_mandarin_bellini") {
+			courses = append(slices.Clone(courses), OccasionCourse{Key: "cocktails", Base: 1, Pool: []string{options.Cocktail}})
+		}
+	}
+	return courses
 }
 
 // OccasionPreset — для событий-недель (Пост): что подставить в квиз.
@@ -151,6 +179,9 @@ func (oc OccasionCourse) fits(r Recipe) bool {
 
 // BuildOccasion — меню события: по каждому курсу count блюд, разных по главному продукту, с фото — чаще.
 func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) {
+	if o.ID == "newyear" {
+		return c.BuildOccasionWithSeed(o, p, guests, int64(guests))
+	}
 	return c.BuildOccasionWithSeed(o, p, guests, time.Now().UnixNano())
 }
 
@@ -161,6 +192,16 @@ func (c *Catalog) BuildOccasionWithSeed(o Occasion, p Params, guests int, seed i
 	}
 	if guests > 40 {
 		guests = 40
+	}
+	if o.ID == "newyear" {
+		household := c.effective(p)
+		p.Exclude = append(slices.Clone(p.Exclude), household.kidExclude...)
+		p.Exclude = append(p.Exclude, household.momExclude...)
+		p.ExcludeTags = append(slices.Clone(p.ExcludeTags), household.kidTags...)
+		if household.momRaw {
+			p.ExcludeTags = append(p.ExcludeTags, "raw", "alcohol")
+		}
+		p.Allergens = append(slices.Clone(p.Allergens), household.kidAllergens...)
 	}
 	p.Adults = guests
 	p.Members = make([]Member, guests)
@@ -180,9 +221,75 @@ func (c *Catalog) BuildOccasionWithSeed(o Occasion, p Params, guests int, seed i
 	e := c.effective(p)
 	pr := c.pricerFor(p)
 	rng := rand.New(rand.NewSource(seed))
-	day := Day{Index: 0, Date: p.StartDate, Label: i18n.T(lang, "occasion."+o.ID+".title"), Dishes: []Dish{}}
+	dates := []time.Time{}
+	covers := []int{guests}
+	january := []int{0}
+	if o.ID == "newyear" {
+		now := time.Now()
+		year := now.Year()
+		if now.Month() == time.January && now.Day() <= 3 {
+			year--
+		}
+		start := time.Date(year, time.December, 31, 12, 0, 0, 0, time.UTC)
+		dates = append(dates, start)
+		p.StartDate = start.Format("2006-01-02")
+		if p.NewYear != nil {
+			for i, n := range p.NewYear.January {
+				if n < 0 || n > 40 {
+					return Plan{}, fmt.Errorf("january guests out of range")
+				}
+				if n == 0 {
+					continue
+				}
+				covers = append(covers, n)
+				january = append(january, i+1)
+				dates = append(dates, start.AddDate(0, 0, i+1))
+			}
+		}
+	}
+	var days []Day
+	guestVisits := 0
+	for i, n := range covers {
+		day := Day{Index: i, Date: p.StartDate, Label: i18n.T(lang, "occasion."+o.ID+".title")}
+		if len(dates) > 0 {
+			day.Date = dates[i].Format("2006-01-02")
+		}
+		if i > 0 {
+			day.Label = i18n.T(lang, "feast.january.day", january[i], n)
+		}
+		day = c.fillOccasionDay(day, o, o.menuCourses(p.NewYear, january[i]), p, n, e, pr, rng)
+		if len(day.Dishes) == 0 {
+			return Plan{}, fmt.Errorf("occasion: no dishes")
+		}
+		days = append(days, day)
+		guestVisits += n
+	}
+	plan := Plan{
+		Params: p, Lang: p.Lang, Country: CountryOf(p.Country), Store: c.Stores[p.Store],
+		Portions: float64(guests), SlotPortions: map[string]float64{"dinner": float64(guests)},
+		Days: days,
+		Goal: Goal{Level: "none", Label: GoalLabel(lang, "none")},
+		Seed: seed, Rejected: map[string][]string{}, GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Notes: []string{}, Warnings: []string{},
+		Occasion: &OccasionInfo{ID: o.ID, Title: i18n.T(lang, "occasion."+o.ID+".title"), Guests: guests},
+	}
+	c.finish(&plan)
+	plan.Warnings = occasionWarnings(plan, lang) // недельные предупреждения («ужин: 6 вариантов») к столу не относятся
+	plan.Budget = Budget{Mode: "week", Value: plan.Totals.Cost, PerDay: plan.Totals.Cost / float64(guestVisits), TargetWeek: plan.Totals.Cost}
+	return plan, nil
+}
+
+// Volume of one finished serving, in ml, for the published New Year drinks.
+var holidayGlassML = map[string]int{"ny_kir_royal": 120, "ny_mandarin_bellini": 150, "ny_pomegranate_spritz": 200, "ny_pear_punch": 250, "ny_mandarin_lemonade": 250, "tg_apple_cider_hot": 250, "ny_mulled_wine_nonalco": 200, "vd_berry_mojito_nonalco": 350, "tg_cranberry_lemonade": 250}
+
+func HolidayGlassML(id string) int { return holidayGlassML[id] }
+
+func (c *Catalog) fillOccasionDay(day Day, o Occasion, courses []OccasionCourse, p Params, guests int, e effective, pr pricer, rng *rand.Rand) Day {
+	lang := i18n.Lang(p.Lang)
 	usedMain := map[string]bool{}
-	for _, course := range o.Courses {
+	for _, course := range courses {
+		e.adultCocktail = course.Key == "cocktails"
+		start := len(day.Dishes)
 		// сначала рецепты курса (pool), затем — подходящие по тегам, если из pool не набралось
 		var primary, backup []Recipe
 		for _, r := range c.Recipes {
@@ -259,24 +366,20 @@ func (c *Catalog) BuildOccasionWithSeed(o Occasion, p Params, guests int, seed i
 			day.Dishes = append(day.Dishes, d)
 			picked++
 		}
+		if o.ID == "newyear" {
+			dishes := day.Dishes[start:]
+			for i := range dishes {
+				d := &dishes[i]
+				// Split one course among the dishes being served, rounding up to whole recipe portions.
+				d.Servings = (guests + len(dishes) - 1) / len(dishes)
+				if course.Key == "cocktails" {
+					d.Servings = min(guests, max(1, p.NewYear.Glasses))
+				}
+				d.DrinkML = holidayGlassML[d.RecipeID] * d.Servings
+			}
+		}
 	}
-	if len(day.Dishes) == 0 {
-		return Plan{}, fmt.Errorf("occasion: no dishes")
-	}
-	plan := Plan{
-		Params: p, Lang: p.Lang, Country: CountryOf(p.Country), Store: c.Stores[p.Store],
-		Portions: float64(guests), SlotPortions: map[string]float64{"dinner": float64(guests)},
-		Days: []Day{day},
-		Goal: Goal{Level: "none", Label: GoalLabel(lang, "none")},
-		Seed: seed, Rejected: map[string][]string{}, GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-		Notes: []string{}, Warnings: []string{},
-		Occasion: &OccasionInfo{ID: o.ID, Title: i18n.T(lang, "occasion."+o.ID+".title"), Guests: guests},
-	}
-	c.finish(&plan)
-	plan.Warnings = occasionWarnings(plan, lang) // недельные предупреждения («ужин: 6 вариантов») к столу не относятся
-	plan.Budget = Budget{Mode: "week", Value: plan.Totals.Cost, PerDay: plan.Totals.Cost / float64(guests), TargetWeek: plan.Totals.Cost}
-	plan.Totals.KcalPerDay = math.Round(plan.Days[0].Kcal)
-	return plan, nil
+	return day
 }
 
 // occasionWarnings — курсы стола, в которые не попало ни одного блюда (аллергии, стоп-продукты, техника).
@@ -290,7 +393,7 @@ func occasionWarnings(plan Plan, l i18n.Lang) []string {
 		return out
 	}
 	var empty []string
-	for _, course := range o.Courses {
+	for _, course := range o.menuCourses(plan.Params.NewYear, 0) {
 		if !slices.ContainsFunc(plan.Days[0].Dishes, func(d Dish) bool { return d.Course == course.Key }) {
 			empty = append(empty, i18n.T(l, "course."+course.Key))
 		}

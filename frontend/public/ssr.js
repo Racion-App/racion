@@ -32,7 +32,15 @@
   function trim(v){return v.toFixed(2).replace(/\.?0+$/,'').replace('.',dec)}
   function fmt(v,u){if(u==='pcs'){return (v%1?trim(v):v)+' '+U.uPcs}if(u==='ml'){return v>=1000?trim(v/1000)+' '+U.uL:Math.round(v)+' '+U.uMl}return v>=1000?trim(v/1000)+' '+U.uKg:Math.round(v)+' '+U.uG}
   document.querySelectorAll('[data-portions]').forEach(function(b){b.addEventListener('click',function(){
-    n=Math.min(12,Math.max(1,n+Number(b.dataset.portions)));out.textContent=n;
+    var glass=document.querySelector('[data-glass-ml]');
+    n=Math.min(glass?40:12,Math.max(1,n+Number(b.dataset.portions)));out.textContent=n;
+    if(glass){
+      var ml=n*Number(glass.dataset.glassMl);
+      glass.querySelector('[data-glasses]').textContent=n;
+      glass.querySelector('[data-litres]').textContent=ml>=1000?trim(ml/1000):ml;
+      glass.querySelector('[data-volume-unit]').textContent=ml>=1000?U.uL:U.uMl;
+      glass.querySelector('[data-jugs]').textContent=Math.ceil(ml/1000);
+    }
     cells.forEach(function(c){c.textContent=fmt(Number(c.dataset.amount)*n,c.dataset.unit);c.classList.remove('is-fresh');void c.offsetWidth;c.classList.add('is-fresh')});
   })});
 })();

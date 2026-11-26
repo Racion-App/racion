@@ -32,6 +32,12 @@ export function Occasion() {
   const [store, setStore] = useState(draft.store || "");
   // ?guests=6 — со страницы «Новогодний стол»: стол открывается на то же число гостей, что и вкладка
   const [guests, setGuests] = useState(() => Math.min(40, Math.max(0, Number(new URLSearchParams(location.search).get("guests")) || 0)));
+  const query = new URLSearchParams(location.search);
+  const [style, setStyle] = useState(() => ["lavish", "buffet"].includes(query.get("style") ?? "") ? query.get("style")! : "home");
+  const [extraDays, setExtraDays] = useState(() => query.get("january") === "1");
+  const [january, setJanuary] = useState([0, 0, 0]);
+  const [cocktail, setCocktail] = useState("");
+  const [glasses, setGlasses] = useState(1);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +72,8 @@ export function Occasion() {
       // анкету не проходили — считаем, что плита, духовка и микроволновка есть (как в квизе по умолчанию)
       const equipment = draft.equipment?.length ? draft.equipment : ["stove", "oven", "microwave"];
       const thrifty = id === "newyear" && new URLSearchParams(location.search).get("thrifty") === "1";
-      const plan = await api.createOccasion(id, guests, { ...draft, equipment, country, store, region: draft.region ?? "" } as Params, thrifty);
+      const newYear = id === "newyear" ? { style: thrifty && style === "home" ? "cheap" : style, january: extraDays ? january : [0, 0, 0], cocktail, glasses: cocktail ? Math.min(guests, glasses) : 0 } : undefined;
+      const plan = await api.createOccasion(id, guests, { ...draft, newYear, equipment, country, store, region: draft.region ?? "" } as Params, thrifty);
       track("occasion_built", { id, guests });
       nav(`/plan/${plan.id}`);
     } catch (e) {
@@ -105,11 +112,31 @@ export function Occasion() {
             </div>
             {occ.kind === "menu" && (
               <>
-                <div className="occ__courses">
+                {id !== "newyear" && <div className="occ__courses">
                   {occ.courses.map((c) => (
                     <span key={c} className="chip chip--sm">{c}</span>
                   ))}
-                </div>
+                </div>}
+                {id === "newyear" && <>
+                  <label className="occ__row"><span>{t("feast.style.label")}</span>
+                    <select className="form-select" value={style} onChange={(e) => setStyle(e.target.value)}>
+                      {["home", "lavish", "buffet"].map((key) => <option key={key} value={key}>{t("feast.style." + key)}</option>)}
+                    </select>
+                  </label>
+                  <label className="occ__row"><span>{t("course.cocktails")}</span>
+                    <select className="form-select" value={cocktail} onChange={(e) => setCocktail(e.target.value)}>
+                      {["", "ny_kir_royal", "ny_mandarin_bellini"].map((key) => <option key={key} value={key}>{t("feast.cocktail." + (key || "none"))}</option>)}
+                    </select>
+                  </label>
+                  {cocktail && <label className="occ__row"><span>{t("feast.drink.glasses")}</span>
+                    <input className="form-control" type="number" min={1} max={guests} value={Math.min(glasses, guests)} onChange={(e) => setGlasses(Math.max(1, Math.min(guests, Math.trunc(Number(e.target.value)))))} />
+                  </label>}
+                  <label><input type="checkbox" checked={extraDays} onChange={(e) => setExtraDays(e.target.checked)} /> {t("feast.january.add")}</label>
+                  {extraDays && <fieldset className="agesec"><legend>{t("feast.january.guests")}</legend><p>{t("feast.january.hint")}</p>
+                    {january.map((n,i) => <label key={i} className="occ__row"><span>{t("feast.january.date",{n:i+1})}</span>
+                      <input className="form-control" type="number" min={0} max={40} value={n || ""} placeholder="0" onChange={(e) => setJanuary(january.map((old,j) => j === i ? Math.min(40, Math.max(0, Math.trunc(Number(e.target.value)))) : old))} />
+                    </label>)}</fieldset>}
+                </>}
                 <div className="occ__row">
                   <span className="occ__label">{t("occ.guests")}</span>
                   <div className="counter occ__counter">

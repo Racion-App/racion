@@ -22,7 +22,7 @@ type feastVariant struct {
 	Thrifty bool
 }
 
-var feastVariants = []feastVariant{{"4", 4, false}, {"6", 6, false}, {"8", 8, false}, {"cheap", 6, true}}
+var feastVariants = []feastVariant{{"4", 4, false}, {"6", 6, false}, {"8", 8, false}, {"cheap", 6, true}, {"lavish", 8, false}, {"buffet", 6, false}}
 
 // кэш столов на час: вариант+язык+страна (сборка стола — проход по всему каталогу)
 var feastCache sync.Map
@@ -37,6 +37,7 @@ func (s *Server) feastPlan(v feastVariant, pl pageLocale) (planner.Plan, bool) {
 		return planner.Plan{}, false
 	}
 	p := planner.Params{Lang: string(pl.L), Country: pl.Country.Code, Equipment: []string{"stove", "oven", "microwave"}, Thrifty: v.Thrifty}
+	p.NewYear = &planner.NewYearOptions{Style: v.Key}
 	plan, err := s.catalog.BuildOccasionWithSeed(o, p, v.Guests, int64(v.Guests))
 	if err != nil || len(plan.Days) == 0 {
 		return planner.Plan{}, false
@@ -45,7 +46,7 @@ func (s *Server) feastPlan(v feastVariant, pl pageLocale) (planner.Plan, bool) {
 	return plan, true
 }
 
-type feastDish struct{ Title, Href, Image, Money string }
+type feastDish struct{ Title, Href, Image, Money, Yield string }
 
 type feastCourse struct {
 	Title  string
@@ -94,7 +95,11 @@ func (s *Server) feastViews(pl pageLocale) ([]feastView, planner.Plan) {
 			def = plan
 		}
 		people := i18n.Plural(l, v.Guests, "feast.people")
-		if v.Thrifty {
+		if v.Key == "lavish" || v.Key == "buffet" {
+			fv.Href += "&style=" + v.Key
+			fv.Tab = i18n.T(l, "feast.style."+v.Key)
+			fv.Title = fv.Tab + " · " + i18n.T(l, "feast.tab.guests", v.Guests)
+		} else if v.Thrifty {
 			fv.Href += "&thrifty=1"
 			fv.Tab, fv.Title = i18n.T(l, "feast.tab.cheap"), i18n.T(l, "feast.table.cheap", v.Guests, people)
 		} else {
@@ -110,7 +115,11 @@ func (s *Server) feastViews(pl pageLocale) ([]feastView, planner.Plan) {
 				img = rc.Image
 			}
 			c := &fv.Courses[len(fv.Courses)-1]
-			c.Dishes = append(c.Dishes, feastDish{Title: d.Title, Href: pl.P + "/recipe/" + d.RecipeID, Image: img, Money: formatMoney(pl.Country, d.Cost)})
+			yield := i18n.T(l, "feast.portions.n", d.Servings)
+			if d.DrinkML > 0 {
+				yield = i18n.T(l, "feast.drink.yield", d.Servings, formatQty(l, float64(d.DrinkML), "ml"), (d.DrinkML+999)/1000)
+			}
+			c.Dishes = append(c.Dishes, feastDish{Title: d.Title, Href: pl.P + "/recipe/" + d.RecipeID, Image: img, Money: formatMoney(pl.Country, d.Cost), Yield: yield})
 			fv.Dishes++
 			if d.Course == "salads" {
 				fv.Salads++

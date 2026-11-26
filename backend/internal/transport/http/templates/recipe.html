@@ -67,6 +67,7 @@
             <button type="button" class="counter__btn" data-portions="1" aria-label="{{t .L "recipe.more"}}">+</button>
           </div>
         </div>
+        {{with .GlassML}}<p data-glass-ml="{{.}}" aria-live="polite">{{t $.L "feast.drink.glasses"}} <b data-glasses>1</b> · <b data-litres>{{.}}</b> <span data-volume-unit>{{t $.L "unit.ml"}}</span> · {{t $.L "feast.drink.jugs"}} <b data-jugs>1</b></p>{{end}}
         <ol class="ings" data-subs-title="{{t .L "subs.title"}}" data-subs-back="{{t .L "subs.back"}}" data-kcal="{{t .L "kcal"}}" data-u-g="{{t .L "unit.g"}}" data-u-kg="{{t .L "unit.kg"}}" data-u-ml="{{t .L "unit.ml"}}" data-u-l="{{t .L "unit.l"}}" data-u-pcs="{{t .L "unit.pcs"}}" data-dec="{{if eq .L "en"}}.{{else}},{{end}}">
           {{range .Ings}}<li class="ings__row{{if .Pantry}} ings__row--pantry{{end}}" id="ing-{{.N}}">
             <span class="ings__n num">{{.N}}</span>

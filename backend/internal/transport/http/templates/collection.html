@@ -83,6 +83,7 @@
   {{range .}}<div class="feast__pane" data-v="{{.Key}}">
     <div class="feast__head">
       <h3>{{.Title}}</h3>
+      {{if or (eq .Key "4") (eq .Key "6") (eq .Key "8")}}<p>{{t $.L "feast.style.home"}}</p>{{end}}
       <ul class="colfacts">
         <li><b class="num is-rub">≈ {{.Total}}</b><span>{{t $.L "feast.norm.total"}}</span></li>
         <li><b class="num is-rub">≈ {{.PerGuest}}</b><span>{{t $.L "feast.norm.guest"}}</span></li>
@@ -95,6 +96,7 @@
       <ul class="feast__tiles">{{range .Dishes}}<li><a class="feast__tile" href="{{.Href}}">
         <span class="feast__photo">{{if .Image}}<img src="{{.Image}}" alt="" width="384" height="256" loading="lazy" decoding="async">{{end}}</span>
         <span class="feast__name">{{.Title}}</span>
+        <small>{{.Yield}}</small>
         <span class="feast__money num is-rub">≈ {{.Money}} <small>{{t $.L "feast.portion"}}</small></span>
       </a></li>{{end}}</ul>
     </div>{{end}}
@@ -108,6 +110,7 @@
     </details>
     <div class="colhead__actions">
       <a class="btn btn-soft feast__own" href="{{.Href}}">{{t $.L "feast.cta.btn"}}</a>
+      <a class="btn btn-soft" href="{{.Href}}&amp;january=1">{{t $.L "feast.january.add"}}</a>
       <button type="button" class="btn btn-primary" data-share-table="{{.Key}}" data-label="{{t $.L "growth.feast.share"}}" data-copied="{{t $.L "social.copied"}}"><span data-share-label aria-live="polite">{{t $.L "growth.feast.share"}}</span></button>
     </div>
   </div>{{end}}

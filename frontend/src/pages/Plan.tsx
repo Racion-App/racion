@@ -54,6 +54,7 @@ export function Plan() {
   const [extras, setExtras] = useState<Extra[]>([]);
   const [extraForm, setExtraForm] = useState<{ open: boolean; name: string; qty: string; due: string }>({ open: false, name: "", qty: "", due: "" });
   const [recipeId, setRecipeId] = useState<string | null>(null);
+  const [dishServings, setDishServings] = useState<number>();
   const [swapping, setSwapping] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
   // блок заготовок: свёрнут/развёрнут, итоги по всем дням заготовок
@@ -754,6 +755,7 @@ export function Plan() {
                 anyBusy={swapping !== null}
                 onOpen={() => {
                   setRecipeId(dish.recipeId);
+                  setDishServings(dish.servings);
                   track("recipe_open", { id: dish.recipeId });
                 }}
                 onSwap={() => swap(day.index, dish.course ? `${dish.slot}#${di}` : dish.slot)}
@@ -1058,7 +1060,7 @@ export function Plan() {
           <button type="button" className="btn btn-link btn-sm" onClick={() => setMoving(null)}>{t("dish.move.cancel")}</button>
         </div>
       )}
-      <RecipeSheet recipeId={recipeId} portions={plan.portions} country={plan.country.code} onClose={() => setRecipeId(null)} />
+      <RecipeSheet recipeId={recipeId} portions={dishServings ?? plan.portions} country={plan.country.code} onClose={() => { setRecipeId(null); setDishServings(undefined); }} />
       {user && <PlanChat planId={plan.id} open={chatOpen} onClose={() => setChatOpen(false)} onPlan={(p) => { setPlan(p); setToast(t("chat.applied")); }} />}
       <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} planId={plan.id} storeCart={!!plan.priceSource.store} storeCode={plan.store.code} storeName={plan.store.name} country={plan.country.code} region={plan.priceSource.regionCode || undefined} items={cartItems} onToast={setToast} />
 
@@ -1171,6 +1173,9 @@ function DishRow({ dish, cy, fresh, busy, anyBusy, onOpen, onSwap, onOpenSide, o
           )}
         </div>
         {dish.kidPortion && <div className="dish__portion">{dish.kidPortion}</div>}
+        {!!dish.course && !!dish.servings && <div className="dish__portion">{dish.drinkMl
+          ? t("feast.drink.yield", {0:dish.servings, 1:(dish.drinkMl / 1000).toLocaleString(lang) + " " + t("unit.l"), 2:Math.ceil(dish.drinkMl / 1000)})
+          : t("feast.portions.n", {0:dish.servings})}</div>}
         {dish.kidNote && (
           <div className="dish__kid">
             <Baby size={12} aria-hidden /> {dish.kidNote}
