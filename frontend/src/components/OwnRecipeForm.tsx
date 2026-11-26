@@ -4,7 +4,7 @@ import { api, ApiError } from "../lib/api";
 import { track } from "../lib/analytics";
 import { approx } from "../lib/format";
 import type { Country, ImportDraft, IngredientRef, Labeled, OwnRecipe, OwnRecipeInput } from "../lib/types";
-import { OWN_TAGS, slotLabel } from "../lib/types";
+import { OWN_TAGS, recipeSlots, slotLabel } from "../lib/types";
 import { locales, useT } from "../i18n";
 import { PhotoField } from "./PhotoField";
 import { Select } from "./Select";
@@ -257,14 +257,9 @@ export function OwnRecipeForm({ initial, equipment, country, ai, photos, importF
 
       <div className="ownform__row">
         <div className="auth__field">
-          <span id="own-slot">{t("own.slot")}</span>
-          <div className="segmented segmented--4" role="radiogroup" aria-labelledby="own-slot">
-            {["breakfast", "lunch", "dinner", "snack"].map((s) => (
-              <button key={s} type="button" role="radio" aria-checked={slot === s} onClick={() => setSlot(s)}>
-                {slotLabel(lang, s)}
-              </button>
-            ))}
-          </div>
+          <label htmlFor="own-slot">{t("own.slot")}</label>
+          <Select id="own-slot" aria-label={t("own.slot")} value={slot} onChange={setSlot}
+            options={recipeSlots.map(s => ({ value: s, label: slotLabel(lang, s) }))} />
         </div>
         <label className="auth__field ownform__time">
           <span>{t("own.time")}</span>

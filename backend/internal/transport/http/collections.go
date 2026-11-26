@@ -329,7 +329,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 			table++
 		}
 	}
-	if len(recipes) > 0 && table*10 >= len(recipes)*4 {
+	if col.Slug == "cocktails" || (len(recipes) > 0 && table*10 >= len(recipes)*4) {
 		course := func(rc planner.Recipe) string {
 			switch {
 			case col.Slug == "cocktails":
@@ -340,7 +340,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 					return "shots"
 				}
 				return "mixed"
-			case col.Slug == "new-year-table" && hasTag(rc, "drink"):
+			case rc.Slot == "cocktail" || (col.Slug == "new-year-table" && hasTag(rc, "drink")):
 				return "drinks"
 			case hasTag(rc, "salad"):
 				return "salads"
@@ -364,7 +364,7 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
-		for _, slot := range []string{"breakfast", "lunch", "dinner", "snack"} {
+		for _, slot := range planner.RecipeSlotOrder {
 			var g []recipeCard
 			for _, c := range cards {
 				if c.Slot == slot {

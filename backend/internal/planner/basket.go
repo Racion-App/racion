@@ -103,7 +103,7 @@ type BasketInfo struct {
 // slotOf — к какому приёму отнести блюдо на столе. Нужен только для подписи в чеке: завтраки и
 // обеды в корзине встречаются редко, но если человек положил сырники, пусть они и называются завтраком.
 func slotOf(r Recipe) string {
-	if r.Slot != "" && slices.Contains([]string{"breakfast", "lunch", "dinner", "snack"}, r.Slot) {
+	if r.Slot != "" && slices.Contains(RecipeSlotOrder, r.Slot) {
 		return r.Slot
 	}
 	return "dinner"

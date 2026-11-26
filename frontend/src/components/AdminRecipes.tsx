@@ -7,7 +7,7 @@ import { PhotoField } from "./PhotoField";
 import { Select } from "./Select";
 import { useConfirm } from "./Confirm";
 import { AList, ARow } from "./AdminList";
-import { slotLabel } from "../lib/types";
+import { recipeSlots, slotLabel } from "../lib/types";
 import { useT } from "../i18n";
 
 // Рецепты базы в админке: поиск по названию или id, форма правки/создания, удаление.
@@ -232,7 +232,7 @@ function RecipeForm({ initial, equipment, knownTags, photos, ai, onSaved, onCanc
       <div className="ownform__row">
         <div className="auth__field">
           <span>{t("own.slot")}</span>
-          <Select aria-label={t("own.slot")} value={slot} onChange={setSlot} options={["breakfast", "lunch", "dinner", "snack"].map((s) => ({ value: s, label: slotLabel(lang, s) }))} />
+          <Select aria-label={t("own.slot")} value={slot} onChange={setSlot} options={recipeSlots.map((s) => ({ value: s, label: slotLabel(lang, s) }))} />
         </div>
         <label className="auth__field ownform__time">
           <span>{t("own.time")}</span>

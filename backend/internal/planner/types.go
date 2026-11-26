@@ -2,6 +2,7 @@
 package planner
 
 import (
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -452,6 +453,9 @@ type Plan struct {
 
 // Справочники для UI.
 var SlotOrder = []string{"breakfast", "lunch", "dinner", "snack"}
+
+// RecipeSlotOrder includes catalogue-only categories outside the weekly meal schedule.
+var RecipeSlotOrder = slices.Concat(SlotOrder, []string{"cocktail"})
 
 // SlotLabel, CategoryLabel и остальные подписи — через i18n по ключу.
 func SlotLabel(l i18n.Lang, slot string) string      { return i18n.T(l, "slot."+slot) }

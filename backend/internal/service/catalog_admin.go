@@ -187,7 +187,7 @@ func (a *CatalogAdmin) validate(c *planner.Catalog, in domain.CatalogRecipeInput
 	if utf8.RuneCountInString(rc.Description) > 300 {
 		return rc, domain.Invalid("own.err.description")
 	}
-	if !slices.Contains(planner.SlotOrder, rc.Slot) {
+	if !slices.Contains(planner.RecipeSlotOrder, rc.Slot) {
 		return rc, domain.Invalid("own.err.slot")
 	}
 	if rc.TimeMin < 1 || rc.TimeMin > 600 {

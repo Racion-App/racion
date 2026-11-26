@@ -24,7 +24,7 @@ func (s *Server) adminRecipeSchema(w http.ResponseWriter, r *http.Request) {
 	}
 	l := i18n.FromRequest(r)
 	slots := []map[string]string{}
-	for _, id := range []string{"breakfast", "lunch", "dinner", "snack"} {
+	for _, id := range planner.RecipeSlotOrder {
 		slots = append(slots, map[string]string{"id": id, "label": i18n.T(l, "slot."+id)})
 	}
 	equipment := []map[string]string{}

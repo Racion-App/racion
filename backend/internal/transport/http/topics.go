@@ -176,7 +176,7 @@ func (s *Server) cookPage(w http.ResponseWriter, r *http.Request) {
 	}
 	var groups []group
 	bySlot := map[string]int{}
-	for _, slot := range planner.SlotOrder {
+	for _, slot := range planner.RecipeSlotOrder {
 		var g []recipeCard
 		for _, c := range cards {
 			if c.Slot == slot {

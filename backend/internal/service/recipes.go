@@ -163,7 +163,7 @@ func (s *Recipes) validate(in *domain.OwnRecipeInput) error {
 	if utf8.RuneCountInString(in.Description) > 300 {
 		return domain.Invalid("own.err.description")
 	}
-	if !slices.Contains(planner.SlotOrder, in.Slot) {
+	if !slices.Contains(planner.RecipeSlotOrder, in.Slot) {
 		return domain.Invalid("own.err.slot")
 	}
 	if in.TimeMin < 1 || in.TimeMin > 600 {

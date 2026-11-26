@@ -872,7 +872,7 @@ body.catside-open { overflow: hidden; .consent { display: none; } } // банн�
 .catbar { display: flex; gap: 10px; align-items: center; margin: 0 0 14px;
   .cattabs { flex: 1 1 auto; min-width: 0; }
   &__filters { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; @media (min-width: 900px) { display: none; } } }
-.cattabs { display: flex; gap: 4px; padding: 3px; border-radius: var(--ds-radius-md); background: var(--ds-fill-3); overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; }
+.cattabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 3px; border-radius: var(--ds-radius-md); background: var(--ds-fill-3); overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; }
   &__tab { flex: 1 0 auto; text-align: center; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--ds-label-secondary); text-decoration: none; white-space: nowrap; transition: background var(--ds-dur-fast), color var(--ds-dur-fast);
     &:hover { color: var(--ds-label-primary); opacity: 1; }
     &[aria-current="page"] { background: var(--ds-bg-elevated); color: var(--ds-blue); box-shadow: var(--ds-shadow-sm); } } }
@@ -1012,7 +1012,8 @@ main.pages.is-loading {
     &--breakfast { background: var(--ds-orange); }
     &--lunch { background: var(--ds-green); }
     &--dinner { background: var(--ds-blue); }
-    &--snack { background: var(--ds-purple); } }
+    &--snack { background: var(--ds-purple); }
+    &--cocktail { background: var(--ds-teal); } }
   &__body { display: grid; gap: 6px; padding: 12px 14px 14px; align-content: start; }
   &__title { font-weight: 600; font-size: 15px; line-height: 1.3; }
   &__meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--ds-label-secondary); .is-rub { color: var(--ds-green); } }
@@ -1198,6 +1199,7 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   &--lunch { --rp-tint: var(--ds-green-tint); }
   &--dinner { --rp-tint: var(--ds-blue-tint); }
   &--snack { --rp-tint: var(--ds-purple-tint); }
+  &--cocktail { --rp-tint: color-mix(in srgb, var(--ds-teal) 14%, transparent); }
   &__title { font-size: 30px; font-weight: 700; letter-spacing: -0.022em; line-height: 1.12; margin: 0; max-width: 24ch; text-wrap: balance; }
   &__lead { font-size: 16px; line-height: 1.45; color: var(--ds-label-secondary); margin: 0; max-width: 62ch; }
   &__facts {

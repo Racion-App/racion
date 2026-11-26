@@ -31,6 +31,8 @@ var synonyms = map[string][]string{
 	"обед":     {"lunch"},
 	"ужин":     {"dinner"},
 	"перекус":  {"snack"},
+	"коктейл":  {"cocktail"},
+	"шоты":     {"shot"},
 	"десерт":   {"sweet"},
 	"сладкое":  {"sweet"},
 	"острое":   {"spicy"},
@@ -246,7 +248,7 @@ type FilterGroup struct {
 
 // CatalogFilters — группы фильтров каталога в порядке показа.
 var CatalogFilters = []FilterGroup{
-	{"slot", []string{"breakfast", "lunch", "dinner", "snack"}, false},
+	{"slot", planner.RecipeSlotOrder, false},
 	{"tag", []string{"pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty", "batch", "premium", "kidmenu", "preserve", "quickpickle"}, true},
 	{"main", []string{"poultry", "meat", "fish", "veg", "dairy"}, false},
 	{"time", []string{"20", "40", "60"}, false},

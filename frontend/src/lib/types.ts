@@ -299,6 +299,7 @@ export type ImportDraft = {
 export type IngredientRef = { id: string; label: string; unit: string; pantry: boolean; category: string };
 export const OWN_TAGS = ["pp", "protein", "soup", "salad", "vegetarian", "sweet", "spicy", "hearty"];
 
+export const recipeSlots = ["breakfast", "lunch", "dinner", "snack", "cocktail"] as const;
 export const slotLabel = (_lang: string, slot: string) => tStatic(`slot.${slot}`);
 
 export type User = { id: string; email: string; name: string; nick: string; avatar?: string; defaults: Partial<Params> | Record<string, never> };
