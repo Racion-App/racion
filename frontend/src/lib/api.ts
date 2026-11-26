@@ -163,7 +163,7 @@ export const api = {
   adminDeleteCollection: (id: string) => request<void>(`/api/admin/collections/${id}`, { method: "DELETE" }),
   // язык в адресе: ответ кэшируется браузером на 10 минут, и без него после смены языка приходили старые названия
   occasions: (lang: string) => request<OccasionView[]>(`/api/occasions?lang=${encodeURIComponent(lang)}`),
-  createOccasion: (id: string, guests: number, params: Params) => request<Plan>(`/api/occasions/${id}`, { method: "POST", body: JSON.stringify({ guests, params }) }),
+  createOccasion: (id: string, guests: number, params: Params, thrifty = false) => request<Plan>(`/api/occasions/${id}`, { method: "POST", body: JSON.stringify({ guests, params, thrifty }) }),
   createTable: (items: { recipeId: string; servings: number }[], guests: number, params: Params) => request<Plan>("/api/baskets", { method: "POST", body: JSON.stringify({ items, guests, params }) }),
   recipeSubs: (id: string, country?: string) => request<SubRow[]>(`/api/recipes/${encodeURIComponent(id)}/subs${country ? `?country=${country}` : ""}`),
   feedback: (id: string, liked: boolean) => request<{ ok: boolean }>(`/api/recipes/${encodeURIComponent(id)}/feedback`, { method: "POST", body: JSON.stringify({ liked }) }),

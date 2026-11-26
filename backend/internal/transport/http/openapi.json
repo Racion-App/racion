@@ -406,6 +406,11 @@
                     "minimum": 1,
                     "maximum": 40
                   },
+                  "thrifty": {
+                    "type": "boolean",
+                    "description": "Choose the lower-cost New Year table.",
+                    "default": false
+                  },
                   "params": {
                     "$ref": "#/components/schemas/Params"
                   }

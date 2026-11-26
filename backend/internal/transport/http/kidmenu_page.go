@@ -111,14 +111,14 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		kcalSum += kcal
 		days = append(days, dv)
 	}
-	type groupView struct {
-		Label, Money string
-		Items        int
-	}
-	var groups []groupView
+	var groups []feastGroup
 	for _, g := range plan.Shopping {
 		if len(g.Items) > 0 {
-			groups = append(groups, groupView{g.Label, formatMoney(pl.Country, g.Cost), len(g.Items)})
+			group := feastGroup{Label: g.Label, Money: formatMoney(pl.Country, g.Cost)}
+			for _, item := range g.Items {
+				group.Items = append(group.Items, feastItem{item.Name, formatQty(l, item.Buy, item.Unit)})
+			}
+			groups = append(groups, group)
 		}
 	}
 	// «съест за неделю» — то, что реально уходит в тарелку, без остатков упаковок: на одного малыша
@@ -179,7 +179,7 @@ func (s *Server) kidMenuPage(w http.ResponseWriter, r *http.Request, m kidMenuPr
 		"H1": h1, "Intro": intro, "Norm": planner.KidNorm(m.Age, "", l), "Rules": rules, "Days": days, "Groups": groups, "FAQ": faq,
 		"Scale": ageScale(pl, m.Slug), "Norms": norms, "Plate": s.kidPlate(s.plateDay(km.Days), pl),
 		"Week": week, "PerDay": perDay, "KcalDay": int(math.Round(kcalSum / 7)), "Items": plan.Totals.Items, "Dishes": dishes, "Age": age,
-		"StartDate": start, "PlanHref": "/?s=2&kid=" + strconv.Itoa(m.Age),
+		"StartDate": start, "PlanHref": pl.P + "/?s=2&kid=" + strconv.Itoa(m.Age),
 	}
 	var buf bytes.Buffer
 	if err := pageTpl.ExecuteTemplate(&buf, "kidmenu.html", data); err != nil {

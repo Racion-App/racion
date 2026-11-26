@@ -151,6 +151,11 @@ func (oc OccasionCourse) fits(r Recipe) bool {
 
 // BuildOccasion — меню события: по каждому курсу count блюд, разных по главному продукту, с фото — чаще.
 func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) {
+	return c.BuildOccasionWithSeed(o, p, guests, time.Now().UnixNano())
+}
+
+// BuildOccasionWithSeed keeps the published menu reproducible when a recipient opens a shared link.
+func (c *Catalog) BuildOccasionWithSeed(o Occasion, p Params, guests int, seed int64) (Plan, error) {
 	if guests < 1 {
 		guests = o.Guests
 	}
@@ -174,8 +179,7 @@ func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) 
 	lang := i18n.Lang(p.Lang)
 	e := c.effective(p)
 	pr := c.pricerFor(p)
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	seed := rng.Int63()
+	rng := rand.New(rand.NewSource(seed))
 	day := Day{Index: 0, Date: p.StartDate, Label: i18n.T(lang, "occasion."+o.ID+".title"), Dishes: []Dish{}}
 	usedMain := map[string]bool{}
 	for _, course := range o.Courses {
@@ -192,6 +196,7 @@ func (c *Catalog) BuildOccasion(o Occasion, p Params, guests int) (Plan, error) 
 			}
 		}
 		byPhoto := func(list []Recipe) {
+			slices.SortFunc(list, func(a, b Recipe) int { return strings.Compare(a.ID, b.ID) })
 			rng.Shuffle(len(list), func(i, j int) { list[i], list[j] = list[j], list[i] })
 			// с фото — вперёд, чтобы праздничный стол выглядел как стол
 			slices.SortStableFunc(list, func(a, b Recipe) int {

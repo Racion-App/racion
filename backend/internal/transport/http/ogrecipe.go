@@ -147,10 +147,17 @@ func (s *Server) ogCollection(w http.ResponseWriter, r *http.Request) {
 	col = col.Localized(string(l))
 	facts := fmt.Sprintf("%d %s", len(recipes), i18n.Plural(l, len(recipes), "catalog.recipe"))
 	card := ogimg.Card{Domain: strings.TrimPrefix(strings.TrimPrefix(s.baseURL(r), "https://"), "http://"), Title: col.Name, Facts: facts, CTA: i18n.T(l, "og.cta.collection")}
-	key := "c|" + slug + "|" + string(l) + "|" + col.Name + "|" + facts + "|" + col.CoverAuto
+	cover := col.CoverAuto
+	if topic := topicCovers[slug]; topic != "" && topicLang(l) {
+		cover = topic
+	}
+	key := "c|" + slug + "|" + string(l) + "|" + col.Name + "|" + facts + "|" + cover
 	data := ogc.get(key)
 	if data == nil {
-		card.Photo = loadPhoto(col.CoverAuto)
+		card.Photo = loadPhoto(cover)
+		if card.Photo == nil && cover != col.CoverAuto {
+			card.Photo = loadPhoto(col.CoverAuto)
+		}
 		data, err = ogimg.Render(card)
 		if err != nil {
 			s.fail(w, r, err)

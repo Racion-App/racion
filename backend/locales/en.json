@@ -1,4 +1,18 @@
 {
+  "growth.budget.title": "Affordable weekly meals for your household budget",
+  "growth.budget.description": "Set a weekly grocery budget and the number of adults. Browse seven dinners for two or four, see the estimated grocery total and build your own meal plan.",
+  "growth.budget.action": "Plan meals around my budget",
+  "growth.budget.lead": "Each example includes groceries for seven days of breakfast, lunch and dinner. Enter the number of adults and the amount you want to spend. You can add children in the planner.",
+  "growth.budget.adults": "Number of adults",
+  "growth.budget.week": "Weekly budget",
+  "growth.budget.build": "Choose a store and plan meals",
+  "growth.budget.example": "Seven days of meals for {0} adults",
+  "growth.budget.full": "See all meals and groceries for two",
+  "growth.kids.list": "Weekly grocery list by age",
+  "growth.kids.lead": "Choose your child’s age to see what to buy for the seven-day menu.",
+  "growth.kids.dinners": "Dinners for the whole family",
+  "growth.kids.own": "Build my family’s grocery list",
+  "growth.feast.share": "Share this table",
   "_meta": {
     "name": "English",
     "english": "English",

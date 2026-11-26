@@ -37,7 +37,7 @@ func (s *Server) feastPlan(v feastVariant, pl pageLocale) (planner.Plan, bool) {
 		return planner.Plan{}, false
 	}
 	p := planner.Params{Lang: string(pl.L), Country: pl.Country.Code, Equipment: []string{"stove", "oven", "microwave"}, Thrifty: v.Thrifty}
-	plan, err := s.catalog.BuildOccasion(o, p, v.Guests)
+	plan, err := s.catalog.BuildOccasionWithSeed(o, p, v.Guests, int64(v.Guests))
 	if err != nil || len(plan.Days) == 0 {
 		return planner.Plan{}, false
 	}
@@ -95,6 +95,7 @@ func (s *Server) feastViews(pl pageLocale) ([]feastView, planner.Plan) {
 		}
 		people := i18n.Plural(l, v.Guests, "feast.people")
 		if v.Thrifty {
+			fv.Href += "&thrifty=1"
 			fv.Tab, fv.Title = i18n.T(l, "feast.tab.cheap"), i18n.T(l, "feast.table.cheap", v.Guests, people)
 		} else {
 			fv.Tab, fv.Title = i18n.T(l, "feast.tab.guests", v.Guests), i18n.T(l, "feast.table", v.Guests, people)

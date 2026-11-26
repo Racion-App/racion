@@ -1,5 +1,14 @@
 [
  {
+  "version": "1.27",
+  "date": "2026-11-26",
+  "title": {"ru": "Меню под бюджет семьи", "en": "Meal plans for your household budget"},
+  "items": {
+   "ru": ["В «Бюджетной неделе» можно посмотреть семь ужинов на двоих и четверых, задать свою сумму и собрать меню.", "В детском меню на неделю теперь видно, сколько продуктов купить. Новогодний стол можно отправить близким со своим числом гостей."],
+   "en": ["Budget Week shows seven dinners for two or four adults. Enter your weekly budget to build your own menu.", "Children’s weekly menus now include grocery quantities. You can share the New Year table with the guest count you picked."]
+  }
+ },
+ {
   "version": "1.26",
   "date": "2026-11-26",
   "title": {"ru": "Ссылки в мессенджерах", "en": "Link previews"},

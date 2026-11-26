@@ -43,8 +43,11 @@
   </div>
     {{if .Groups}}<article class="dayc dayc--list" aria-labelledby="list">
       <header class="dayc__head"><h3 id="list">{{t .L "menu.list.title" .Items}}</h3></header>
-      <ul class="shoplist">{{range .Groups}}<li><span>{{.Label}}</span><span class="num">{{.Items}} · {{.Money}}</span></li>{{end}}</ul>
+      {{range .Groups}}<details class="faq"><summary>{{.Label}} · {{.Money}}</summary>
+        <ul class="shoplist">{{range .Items}}<li><span>{{.Name}}</span><span class="num">{{.Qty}}</span></li>{{end}}</ul>
+      </details>{{end}}
       <p class="dayc__note">{{t .L "menu.list.note"}}</p>
+      <a class="btn btn-soft" href="{{.PlanHref}}">{{t .L "growth.kids.own"}}</a>
     </article>{{end}}
   </div>
 </section>

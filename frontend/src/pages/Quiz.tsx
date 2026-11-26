@@ -62,6 +62,18 @@ const DEFAULTS: Params = {
 
 const EMPTY_MEMBER: Member = { name: "", goal: "", appetite: "normal", slots: [] };
 
+function readBudgetEntry(sp: URLSearchParams) {
+  const adults = Number(sp.get("adults"));
+  const amount = Number(sp.get("weeklyBudget"));
+  const country = sp.get("budgetCountry") ?? "";
+  if (!Number.isInteger(adults) || adults < 1 || adults > 8 || !Number.isInteger(amount) || amount < 1 || amount > 100_000_000 || !/^[A-Z]{2}$/.test(country)) return null;
+  return { adults, amount, country };
+}
+
+function budgetMembers(members: Member[], count: number) {
+  return Array.from({ length: count }, (_, i) => members[i] ?? { ...EMPTY_MEMBER });
+}
+
 function toggle(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
 }
@@ -93,6 +105,18 @@ export function Quiz() {
   const { user } = useAuth();
   const { t, tn, lang } = useT();
   const [sp, setSp] = useSearchParams();
+  const [budgetEntry] = useState(() => readBudgetEntry(sp));
+  const [budgetVariant] = useState(() => {
+    if (lang !== "ru") return null;
+    try {
+      const key = "racion.budget-entry.v1";
+      const saved = localStorage.getItem(key);
+      if (saved === "link" || saved === "control") return saved;
+      const choice = Math.random() < 0.5 ? "link" : "control";
+      localStorage.setItem(key, choice);
+      return choice;
+    } catch { return null; }
+  });
   const step = Math.min(STEPS, Math.max(1, Number(sp.get("s") ?? 1) || 1));
   // Шаг, с которого открыли страницу, появляется без анимации: первый шаг уже был в HTML (home-pages.mjs),
   // и затухание из нуля выглядело бы миганием. Дальше переходы между шагами анимируются как обычно.
@@ -113,6 +137,15 @@ export function Quiz() {
       init.members = Array.from({ length: Math.max(init.kids?.length ? 0 : 1, init.adults) }, () => ({ ...EMPTY_MEMBER, goal: init.goal }));
     }
     init.kids = grownKids(init.kids);
+    if (budgetEntry) {
+      if (init.country !== budgetEntry.country) { init.store = ""; init.region = ""; }
+      init.country = budgetEntry.country;
+      init.budgetMode = "week";
+      init.budgetValue = budgetEntry.amount;
+      init.adults = budgetEntry.adults;
+      init.members = budgetMembers(init.members, init.adults);
+      init.collection = "";
+    }
     // со страницы «Меню ребёнка в N лет»: /?s=2&kid=18 — добавляем ребёнка этого возраста с отдельным меню
     const kidAge = Number(sp.get("kid"));
     if (sp.has("kid") && Number.isInteger(kidAge) && kidAge >= 0 && kidAge <= 204 && !init.kids.some((k) => k.ageMonths === kidAge)) {
@@ -188,7 +221,15 @@ export function Quiz() {
   const nextStart = nextWeekStart(lastPlan?.startDate);
   const quickButton = useRef<HTMLButtonElement>(null);
   const quickSeen = useRef(false);
-  const showQuickStart = step === 1 && !!lastPlan && !eventPreset && !p.collection;
+  const showQuickStart = step === 1 && !!lastPlan && !eventPreset && !p.collection && !budgetEntry;
+  const testBudgetLink = lang === "ru" && step === 1 && !budgetEntry && !p.collection && !sp.has("event") && !sp.has("collection");
+  const budgetSeen = useRef(false);
+  useEffect(() => {
+    if (testBudgetLink && budgetVariant && !budgetSeen.current) {
+      budgetSeen.current = true;
+      track("budget_home_view", { variant: budgetVariant });
+    }
+  }, [testBudgetLink, budgetVariant]);
   const recordQuickView = useCallback(() => {
     if (quickSeen.current) return;
     quickSeen.current = true;
@@ -237,7 +278,14 @@ export function Quiz() {
     if (!user) return;
     api.family().then((f) => {
       if (f.adults.length === 0 && f.kids.length === 0) return;
-      setP((prev) => ({ ...prev, members: f.adults.length ? f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })) : prev.members, adults: f.adults.length || prev.adults, goal: f.adults[0]?.goal ?? prev.goal, kids: grownKids(f.kids) }));
+      setP((prev) => {
+        const family = f.adults.length ? f.adults.map((m) => ({ ...m, slots: m.slots ?? [] })) : prev.members;
+        const members = budgetEntry ? budgetMembers(family, prev.adults) : family;
+        const kids = grownKids(f.kids);
+        const requested = prev.kids.find((k) => k.ageMonths === kidParam);
+        if (requested && !kids.some((k) => k.ageMonths === kidParam)) kids.push(requested);
+        return { ...prev, members, adults: members.length, goal: members[0]?.goal ?? prev.goal, kids };
+      });
       setFromFamily(true);
     }).catch(() => undefined);
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -253,7 +301,7 @@ export function Quiz() {
     } catch {
       // приватный режим
     }
-    if (!chosen && meta.geoCountry && meta.geoCountry !== p.country) {
+    if (!chosen && !budgetEntry && meta.geoCountry && meta.geoCountry !== p.country) {
       setP((prev) => ({ ...prev, country: meta.geoCountry, store: "", region: "", budgetValue: 0 }));
       track("quiz_geo_country", { country: meta.geoCountry });
     }
@@ -304,7 +352,13 @@ export function Quiz() {
     }
     if (done === user.id) return;
     const d = user.defaults as Partial<Params>;
-    setP((prev) => ({ ...prev, ...d, members: d.members && d.members.length ? d.members : prev.members, wants: d.wants ?? [], have: d.have ?? prev.have ?? [], kids: d.kids ? grownKids(d.kids) : prev.kids }));
+    setP((prev) => {
+      const values = { ...prev, ...d, members: d.members?.length ? d.members : prev.members, wants: d.wants ?? [], have: d.have ?? prev.have ?? [], kids: d.kids ? grownKids(d.kids) : prev.kids };
+      const requested = prev.kids.find((k) => k.ageMonths === kidParam);
+      if (requested && !values.kids.some((k) => k.ageMonths === kidParam)) values.kids = [...values.kids, requested];
+      if (budgetEntry) Object.assign(values, { country: prev.country, store: prev.store, region: prev.region, collection: "", adults: prev.adults, members: budgetMembers(values.members, prev.adults), budgetMode: prev.budgetMode, budgetValue: prev.budgetValue });
+      return values;
+    });
     try {
       localStorage.setItem(PREFILL_KEY, user.id);
     } catch {
@@ -483,6 +537,8 @@ export function Quiz() {
                   )
                 )}
                 <p className="quiz__trust">{t("quiz.trust")}</p>
+                {testBudgetLink && budgetVariant === "link" && <a href="/collection/budget-week" onClick={() => track("budget_home_click")}>{t("growth.budget.action")}</a>}
+                {budgetEntry && <p>{t("growth.budget.week")} · {p.budgetValue.toLocaleString(lang)} {country?.symbol}</p>}
               </div>
             )}
             <h1 className="quiz__title" ref={titleRef} tabIndex={-1}>

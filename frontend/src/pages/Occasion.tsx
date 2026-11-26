@@ -65,7 +65,8 @@ export function Occasion() {
     try {
       // анкету не проходили — считаем, что плита, духовка и микроволновка есть (как в квизе по умолчанию)
       const equipment = draft.equipment?.length ? draft.equipment : ["stove", "oven", "microwave"];
-      const plan = await api.createOccasion(id, guests, { ...draft, equipment, country, store, region: draft.region ?? "" } as Params);
+      const thrifty = id === "newyear" && new URLSearchParams(location.search).get("thrifty") === "1";
+      const plan = await api.createOccasion(id, guests, { ...draft, equipment, country, store, region: draft.region ?? "" } as Params, thrifty);
       track("occasion_built", { id, guests });
       nav(`/plan/${plan.id}`);
     } catch (e) {

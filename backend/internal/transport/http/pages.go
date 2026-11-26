@@ -87,7 +87,7 @@ var pageTpl = template.Must(template.New("").Funcs(template.FuncMap{
 type FootLink struct{ Name, Href string }
 
 // featuredSlugs — подборки, которые держим в подвале всего сайта: самые частые поисковые вопросы.
-var featuredSlugs = []string{"dinner-ideas", "birthday-table", "new-year-table", "kids-party"}
+var featuredSlugs = []string{"dinner-ideas", "birthday-table", "new-year-table", "kids-party", "budget-week", "kids-1-3"}
 
 // featuredFn ставит сервер при старте: шаблоны разбираются раньше, чем есть каталог.
 var featuredFn func(l i18n.Lang, p string) []FootLink

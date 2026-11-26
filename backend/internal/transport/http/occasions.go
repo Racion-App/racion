@@ -50,12 +50,14 @@ func (s *Server) occasions(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) createOccasion(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Guests int            `json:"guests"`
-		Params planner.Params `json:"params"`
+		Guests  int            `json:"guests"`
+		Thrifty bool           `json:"thrifty"`
+		Params  planner.Params `json:"params"`
 	}
 	if !decode(w, r, 32<<10, &body) {
 		return
 	}
+	body.Params.Thrifty = body.Thrifty && r.PathValue("id") == "newyear"
 	plan, err := s.svc.Plans.CreateOccasion(r.Context(), r.PathValue("id"), body.Params, body.Guests, langOf(r, body.Params.Lang), currentUser(r))
 	if err != nil {
 		s.fail(w, r, err)

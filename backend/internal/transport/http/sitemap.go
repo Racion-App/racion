@@ -50,6 +50,11 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="%s" href="%s%s%s"/>`, al, base, prefix(al), path)
 		}
 		fmt.Fprintf(&b, `<xhtml:link rel="alternate" hreflang="x-default" href="%s%s"/>`, base, path)
+		if slug, collection := strings.CutPrefix(path, "/collection/"); collection && topicLang(l) {
+			if cover := topicCovers[slug]; cover != "" {
+				fmt.Fprintf(&b, `<image:image><image:loc>%s%s</image:loc></image:image>`, base, cover)
+			}
+		}
 		fmt.Fprintf(&b, "<changefreq>%s</changefreq><priority>%s</priority></url>\n", freq, prio)
 	}
 	// главная: у каждого языка своя оболочка (/en, /de) со своим head, поэтому она в карте с альтернативами

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -17,7 +18,52 @@ import (
 // /menu/post, теперь здесь, чтобы у темы был один адрес. Дополнения есть на ru, en, de (тексты только там).
 
 // topicCovers — фото шапки темы (ima2, frontend/public/images/topics): общий стол вместо обложки-блюда.
-var topicCovers = map[string]string{"new-year-table": "/images/topics/new-year.webp", "lent-menu": "/images/topics/post.webp"}
+var topicCovers = map[string]string{
+	"budget-week":    "/images/topics/budget-week-family.webp",
+	"kids-1-3":       "/images/topics/kids-1-3-family.webp",
+	"new-year-table": "/images/topics/new-year-table-family.webp",
+	"lent-menu":      "/images/topics/post.webp",
+}
+
+type budgetDish struct{ Slot, Name, Href string }
+type budgetDay struct {
+	Label  string
+	Dishes []budgetDish
+}
+type budgetExample struct {
+	Adults int
+	Money  string
+	Days   []budgetDay
+}
+
+func (s *Server) budgetExamples(pl pageLocale) []budgetExample {
+	base, _ := menuBySlug("budget")
+	var examples []budgetExample
+	for _, adults := range []int{2, 4} {
+		preset := base
+		if adults == 4 {
+			preset = menuPreset{"budget-four-adults", func(country planner.Country) planner.Params {
+				p := base.Params(country)
+				p.Adults = 4
+				return p
+			}}
+		}
+		plan := s.menuPlan(preset, pl)
+		if len(plan.Days) != 7 {
+			continue
+		}
+		ex := budgetExample{Adults: adults, Money: formatMoney(pl.Country, plan.Totals.Cost)}
+		for _, day := range plan.Days {
+			row := budgetDay{Label: day.Label}
+			for _, dish := range day.Dishes {
+				row.Dishes = append(row.Dishes, budgetDish{planner.SlotLabel(pl.L, dish.Slot), dish.Title, pl.P + "/recipe/" + dish.RecipeID})
+			}
+			ex.Days = append(ex.Days, row)
+		}
+		examples = append(examples, ex)
+	}
+	return examples
+}
 
 // lentParams — те же ограничения, что у события «Постная неделя» (occasions.json, id lent).
 func lentParams(country string) planner.Params {
@@ -47,6 +93,12 @@ func (s *Server) collectionExtras(slug string, pl pageLocale, recipes []planner.
 		}
 	}
 	switch slug {
+	case "budget-week":
+		data["BudgetExamples"] = s.budgetExamples(pl)
+		data["BudgetDefault"] = math.Max(1, math.Round(pl.Country.Default*0.7)*14)
+		data["PlanHref"], data["PlanLabel"] = "#budget-week", i18n.T(l, "growth.budget.action")
+	case "kids-1-3", "kids-dinner":
+		data["FamilyWeek"] = true
 	case "new-year-table":
 		views, def := s.feastViews(pl)
 		if len(views) == 0 {

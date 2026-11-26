@@ -1,4 +1,18 @@
 {
+  "growth.budget.title": "Günstiger Wochenplan für dein Haushaltsbudget",
+  "growth.budget.description": "Plane mit deinem Einkaufsbudget und der Anzahl der Erwachsenen. Sieh dir sieben Abendessen für zwei oder vier Personen mit geschätzten Kosten an und erstelle deinen Wochenplan.",
+  "growth.budget.action": "Menü für mein Budget planen",
+  "growth.budget.lead": "Die Beispiele enthalten die Einkäufe für sieben Tage mit Frühstück, Mittagessen und Abendessen. Gib an, wie viele Erwachsene mitessen und wie viel du ausgeben möchtest. Kinder kannst du im Planer ergänzen.",
+  "growth.budget.adults": "Anzahl der Erwachsenen",
+  "growth.budget.week": "Wochenbudget",
+  "growth.budget.build": "Laden wählen und Menü planen",
+  "growth.budget.example": "Wochenmenü für {0} Erwachsene",
+  "growth.budget.full": "Alle Mahlzeiten und Einkäufe für zwei",
+  "growth.kids.list": "Wocheneinkauf nach Alter",
+  "growth.kids.lead": "Wähle das Alter deines Kindes, um die Einkaufsliste zum Wochenmenü zu öffnen.",
+  "growth.kids.dinners": "Abendessen für die ganze Familie",
+  "growth.kids.own": "Einkaufsliste für meine Familie erstellen",
+  "growth.feast.share": "Dieses Festmenü teilen",
   "_meta": {
     "country": "DE",
     "date": "{d}. {month} {y}",

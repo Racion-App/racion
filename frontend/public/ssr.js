@@ -113,9 +113,46 @@
 // Каталог без перезагрузки: клик по стране, фильтру, странице и поиск подменяют <main> ответом сервера
 // «Поделиться» на страницах подборок: системный диалог или копирование адреса
 (function(){
-  var b=document.querySelector("[data-share-page]");if(!b)return;
-  b.addEventListener("click",function(){var url=location.origin+location.pathname;if(navigator.share){navigator.share({title:document.title,url:url}).catch(function(){});return}
-    navigator.clipboard.writeText(url).then(function(){b.classList.add("is-done");setTimeout(function(){b.classList.remove("is-done")},1500)})});
+  const mainButton = document.querySelector("[data-share-page]");
+  if (!mainButton) return;
+  const feast = document.querySelector(".feast");
+  function openSharedTable() {
+    if (!feast) return;
+    const radio = document.getElementById(location.hash.slice(1));
+    if (radio && feast.contains(radio) && radio.matches(".feast__radio")) {
+      radio.checked = true;
+      feast.scrollIntoView({ block: "start" });
+    }
+  }
+  openSharedTable();
+  window.addEventListener("hashchange", openSharedTable);
+  for (const button of document.querySelectorAll("[data-share-page], [data-share-table]")) {
+    button.addEventListener("click", async function(){
+      const url = new URL(location.pathname, location.origin);
+      const selected = feast && feast.querySelector(".feast__radio:checked");
+      if (selected) {
+        url.hash = selected.id;
+        url.searchParams.set("country", feast.dataset.country);
+        url.searchParams.set("utm_source", "menu_share");
+        url.searchParams.set("utm_medium", "referral");
+        url.searchParams.set("utm_campaign", "new_year_table");
+      }
+      const title = selected ? selected.getAttribute("aria-label") : document.title;
+      try {
+        if (navigator.share) { await navigator.share({ title, url: url.href }); return; }
+        await navigator.clipboard.writeText(url.href);
+        const label = button.querySelector("[data-share-label]");
+        if (label) label.textContent = button.dataset.copied;
+        button.classList.add("is-done");
+        setTimeout(function(){
+          button.classList.remove("is-done");
+          if (label) label.textContent = button.dataset.label;
+        }, 1800);
+      } catch (err) {
+        if (err.name !== "AbortError") window.prompt(title, url.href);
+      }
+    });
+  }
 })();
 // Метрика подключена inline в layout.html; живой каталог меняет адрес через pushState — сообщаем о просмотре
 (function(){
