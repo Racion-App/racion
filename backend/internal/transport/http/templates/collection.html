@@ -26,6 +26,8 @@
     {{if .Text.Intro}}<div class="coltext">{{range .Text.Intro}}<p>{{.}}</p>{{end}}</div>{{end}}
   </div>
 </header>
+{{with .CocktailGuides}}{{template "cocktail-occasions" .}}{{end}}
+{{with .DrinkGuide}}<p class="agesec__lead"><a href="{{.Path}}">{{.Name}}</a></p>{{end}}
 
 {{with .BudgetExamples}}
 <section class="agesec" aria-labelledby="budget-week">

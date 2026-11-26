@@ -160,6 +160,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("DELETE /api/admin/offers/{id}", s.adminDeleteOffer)
 	mux.HandleFunc("DELETE /api/admin/collections/{id}", s.adminDeleteCollection)
 	mux.HandleFunc("GET /collection/{slug}", s.collectionPage)
+	mux.HandleFunc("GET /collection/cocktails/{occasion}", s.cocktailGuidePage)
 	mux.HandleFunc("GET /recipes/from", s.cookHubPage)
 	mux.HandleFunc("GET /weaning", s.weaningPage)
 	mux.HandleFunc("GET /preserves", s.jarsPage(hubPreserves))

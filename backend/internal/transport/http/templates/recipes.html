@@ -1,5 +1,5 @@
 {{template "head" .}}
-<h1 class="pages__title">{{t .L "catalog.title"}}</h1>
+<h1 class="pages__title">{{if .CocktailHeading}}{{.CocktailHeading}}{{else}}{{t .L "catalog.title"}}{{end}}</h1>
 <p class="pages__lead">{{t .L "catalog.lead" .Total (plural .L .Total "catalog.recipe")}} <a class="pages__country" href="#country">{{t .L "catalog.prices.for" .CountryLabel .Country.Symbol}}</a></p>
 <form class="pages__search search" action="{{.P}}/recipes" method="get" role="search">
   {{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
@@ -86,6 +86,7 @@
     {{t .L "catalog.filters"}}{{if gt .ActiveCount 0}} <span class="filters__count num">{{.ActiveCount}}</span>{{end}}
   </button>
 </div>
+{{with .CocktailGuides}}{{template "cocktail-occasions" .}}{{end}}
 <h2 class="catsection"><span>{{.SectionTitle}}</span> <span class="catsection__n num">{{.Total}}</span></h2>
 {{if .Items}}
 <div class="rgrid">

@@ -74,6 +74,13 @@ func (s *Server) sitemapLang(w http.ResponseWriter, r *http.Request) {
 	for _, col := range curated {
 		url("/collection/"+col.Slug, "weekly", "0.7")
 	}
+	if l == i18n.RU {
+		for _, guide := range cocktailGuides {
+			fmt.Fprintf(&b, "<url><loc>%s%s</loc>", base, guide.Path())
+			lastmod(guide.Path())
+			b.WriteString("</url>\n")
+		}
+	}
 	// «Что приготовить из …» есть только на ru, en, de
 	if topicLang(l) {
 		urlTopics := func(path string) {

@@ -1,0 +1,23 @@
+{{template "head" .}}
+<nav class="crumbs" aria-label="Хлебные крошки"><a href="/collections">Подборки</a><span>›</span><a href="/collection/cocktails">Коктейли</a><span>›</span><span aria-current="page">{{.Guide.Name}}</span></nav>
+<header class="colhead colhead--rich">
+  {{if .Cover}}<img class="colhead__img" src="{{.Cover}}" alt="" width="768" height="512" fetchpriority="high">{{end}}
+  <div class="colhead__body">
+    <h1 class="colhead__title">{{.Guide.Name}}</h1>
+    <p class="colhead__lead">{{.Guide.Description}}</p>
+    {{with .Guide.TableSlug}}<a href="/collection/{{.}}">{{$.Guide.TableName}}</a>{{end}}
+  </div>
+</header>
+{{range .Sections}}<section class="rpage__section">
+  <div class="rpage__section-head"><h2>{{.Heading}}</h2></div>
+  <p class="agesec__lead">{{.Note}}</p>
+  <div class="rgrid">{{range .Cards}}{{template "card" .}}{{end}}</div>
+</section>{{end}}
+{{range .Guide.FAQ}}<section class="agesec"><h2>{{.Q}}</h2><p>{{.A}}</p></section>{{end}}
+<p class="agesec__lead"><a href="/recipes?slot=cocktail">Все рецепты коктейлей</a></p>
+{{template "foot" .}}
+
+{{define "cocktail-occasions"}}<section class="rpage__section" aria-labelledby="cocktail-occasions">
+  <div class="rpage__section-head"><h2 id="cocktail-occasions">Коктейли для праздников и пятничного вечера</h2></div>
+  <nav class="jarnav" aria-labelledby="cocktail-occasions">{{range .}}<a class="chip" href="{{.Path}}">{{.Name}}</a>{{end}}</nav>
+</section>{{end}}

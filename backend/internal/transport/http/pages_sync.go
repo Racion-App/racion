@@ -62,5 +62,16 @@ func (s *Server) pageList() []service.Page {
 		}
 		pages = append(pages, service.Page{Path: hub.Path, Hash: hex.EncodeToString(sum.Sum(nil)), Langs: topicLangs})
 	}
+	for _, guide := range cocktailGuides {
+		raw, _ := json.Marshal(guide)
+		sum := sha1.New()
+		sum.Write(raw)
+		for _, section := range guide.Sections {
+			for _, id := range section.Recipes {
+				sum.Write([]byte(hashes[id]))
+			}
+		}
+		pages = append(pages, service.Page{Path: guide.Path(), Hash: hex.EncodeToString(sum.Sum(nil)), Langs: []i18n.Lang{i18n.RU}})
+	}
 	return pages
 }

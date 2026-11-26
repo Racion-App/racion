@@ -639,6 +639,12 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 	}
 	// вторая и дальше страницы каталога — с номером, иначе у всех один заголовок
 	metaDesc := i18n.T(pl.L, "catalog.meta", total, i18n.Plural(pl.L, total, "catalog.recipe"))
+	cocktailCategory := pl.L == i18n.RU && activeCount == 1 && active.Has("slot", "cocktail") && q == ""
+	const cocktailHeading = "Рецепты коктейлей в домашних условиях"
+	if cocktailCategory {
+		title = cocktailHeading + " — Рацион"
+		metaDesc = "Алкогольные и безалкогольные коктейли с фото, составом и пропорциями. Выберите напиток на Новый год, Рождество, Хэллоуин, день рождения или вечер пятницы."
+	}
 	if page > 1 {
 		pn := i18n.T(pl.L, "catalog.page.n", page)
 		title = strings.TrimSuffix(title, " — "+i18n.T(pl.L, "page.brand")) + " — " + pn + " — " + i18n.T(pl.L, "page.brand")
@@ -660,7 +666,7 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 			NoIndex:     q != "" || len(active["price"]) > 0 || len(active["pmin"]) > 0 || len(have) > 0,
 			OGImage:     brandOG(base, pl.L),
 			OGWide:      true,
-			JSONLD:      catalogLD(base, pl, title),
+			JSONLD:      catalogLD(base, pl, title, link(canon, page)),
 			Alternates:  s.alternates(r, query(active, page)),
 		},
 		"L": pl.L, "P": pl.P, "Country": pl.Country,
@@ -668,6 +674,12 @@ func (s *Server) recipesPage(w http.ResponseWriter, r *http.Request) {
 		"Filters": views, "ActiveCount": activeCount, "Q": q, "ResetHref": link(service.ActiveFilters{}, 1),
 		"Items": all[lo:hi], "Total": total, "Page": page, "Pages": pages,
 		"Prev": "", "Next": "",
+	}
+	if cocktailCategory {
+		data["CocktailHeading"] = cocktailHeading
+		if page == 1 {
+			data["CocktailGuides"] = cocktailGuides
+		}
 	}
 	if page > 1 {
 		data["Prev"] = link(active, page-1)
@@ -898,9 +910,9 @@ func ogLocale(l i18n.Lang) string {
 }
 
 // catalogLD — крошки каталога; сам список постраничный, его перечисляет sitemap.
-func catalogLD(base string, pl pageLocale, title string) template.JS {
+func catalogLD(base string, pl pageLocale, title, path string) template.JS {
 	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "catalog.title"), base + pl.P + "/recipes"}})
-	page := map[string]any{"@type": "CollectionPage", "name": title, "url": base + pl.P + "/recipes", "inLanguage": string(pl.L), "isPartOf": map[string]any{"@type": "WebSite", "name": i18n.T(pl.L, "page.brand"), "url": base + "/"}}
+	page := map[string]any{"@type": "CollectionPage", "name": title, "url": base + path, "inLanguage": string(pl.L), "isPartOf": map[string]any{"@type": "WebSite", "name": i18n.T(pl.L, "page.brand"), "url": base + "/"}}
 	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": []any{page, crumbs}})
 	return template.JS(b)
 }

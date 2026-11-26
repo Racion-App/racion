@@ -440,6 +440,16 @@ func (s *Server) collectionPage(w http.ResponseWriter, r *http.Request) {
 		"Col": col, "Cards": cards, "Cover": cover, "PlanHref": "/?s=1&collection=" + col.ID, "Text": text, "Facts": facts, "Menus": menus, "Groups": groups, "Others": others, "OthersTotal": len(allCurated),
 	}
 	s.collectionExtras(col.Slug, pl, recipes, data)
+	if pl.L == i18n.RU {
+		for _, guide := range cocktailGuides {
+			if guide.TableSlug == col.Slug {
+				data["DrinkGuide"] = guide
+			}
+		}
+		if col.Slug == "cocktails" {
+			data["CocktailGuides"] = cocktailGuides
+		}
+	}
 	if col.Slug == "cocktails" {
 		data["PlanHref"] = pl.P + "/event/newyear"
 		data["PlanLabel"] = i18n.T(pl.L, "feast.cta.btn")
@@ -505,14 +515,16 @@ func (s *Server) collectionsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // collectionLD — подборка как ItemList рецептов плюс хлебные крошки: поисковики и ассистенты видят состав целиком.
-func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []recipeCard, faq []domain.QA) template.JS {
+func collectionLD(base string, pl pageLocale, name, desc, slug string, cards []recipeCard, faq []domain.QA, parents ...[2]string) template.JS {
 	items := make([]map[string]any, 0, len(cards))
 	for i, c := range cards {
 		items = append(items, map[string]any{"@type": "ListItem", "position": i + 1, "url": base + pl.P + "/recipe/" + c.ID, "name": c.Title})
 	}
 	url := base + pl.P + "/collection/" + slug
 	list := map[string]any{"@type": "ItemList", "@id": url + "#list", "url": url, "name": name, "description": desc, "numberOfItems": len(cards), "itemListElement": items, "inLanguage": string(pl.L)}
-	crumbs := breadcrumbLD([][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "coll.public.title"), base + pl.P + "/collections"}, {name, ""}})
+	trail := [][2]string{{i18n.T(pl.L, "page.brand"), base + "/"}, {i18n.T(pl.L, "coll.public.title"), base + pl.P + "/collections"}}
+	trail = append(trail, parents...)
+	crumbs := breadcrumbLD(append(trail, [2]string{name, ""}))
 	graph := []any{list, crumbs}
 	if len(faq) > 0 {
 		var qs []map[string]any
