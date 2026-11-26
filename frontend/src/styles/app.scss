@@ -2600,7 +2600,7 @@ button.fastcal__day { width: 100%; padding: 0; font: inherit; color: inherit; cu
   li { font-size: 14px; }
   .num { white-space: nowrap; color: var(--ds-label-secondary); } }
 .feast__money { font-size: 13px; font-weight: 600; color: var(--ds-green);
-  small { font-family: var(--ds-font-sans); font-size: 12px; font-weight: 500; color: var(--ds-label-secondary); } }
+  small { display: inline-block; max-width: 100%; font-family: var(--ds-font-sans); font-size: 12px; font-weight: 500; color: var(--ds-label-secondary); } }
 .feast__list { border-top: 1px solid var(--ds-separator); padding-top: 12px;
   summary { display: flex; align-items: baseline; gap: 8px; min-height: 32px; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; list-style: none;
     &::-webkit-details-marker { display: none; }
