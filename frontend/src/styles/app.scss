@@ -406,7 +406,12 @@ a { text-underline-offset: 3px; }
 
 .list {
   padding: 8px 20px 4px;
-  &__head { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 0 4px; h2 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.016em; } span { font-size: 13px; color: var(--ds-label-secondary); } }
+  &__head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 8px 0 4px;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.016em;
+    small { font-size: 13px; font-weight: 400; letter-spacing: normal; color: var(--ds-label-secondary); }
+    div { display: none !important; }
+  }
   // список в мессенджер: бот присылает его по отделам, отметки общие с сайтом
   &__bots { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
   &__group { padding: 10px 0 6px; border-top: 1px solid var(--ds-fill-4); &:first-of-type { border-top: 0; } }

@@ -849,12 +849,12 @@ export function Plan() {
 
         <aside className="receipt__list">
         <section className="list" aria-label={t("list.title")}>
-          <div className="list__head">
-            <h2>{t("list.title")}</h2>
-            <span>
+          <h2 className="list__head" data-ap-blacklist="">
+            {t("list.title")}{" "}
+            <small>
               {plan.totals.items} {tn("items", plan.totals.items)}
-            </span>
-          </div>
+            </small>
+          </h2>
           {plan.bots && (plan.bots.telegram || plan.bots.max) && (
             <div className="list__bots">
               {(["telegram", "max"] as const).map((p) => {
