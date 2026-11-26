@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Para la mesa",
+  "feast.tableWine": "Incluir vino espumoso y vino tinto",
   "_meta": {
     "country": "ES",
     "date": "{d} de {month} de {y}",

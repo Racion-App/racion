@@ -1,4 +1,6 @@
 {
+  "feast.extras": "À servir à table",
+  "feast.tableWine": "Prévoir du vin mousseux et du vin rouge",
   "_meta": {
     "country": "FR",
     "date": "{d} {month} {y}",

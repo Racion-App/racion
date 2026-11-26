@@ -37,7 +37,7 @@ func (s *Server) feastPlan(v feastVariant, pl pageLocale) (planner.Plan, bool) {
 		return planner.Plan{}, false
 	}
 	p := planner.Params{Lang: string(pl.L), Country: pl.Country.Code, Equipment: []string{"stove", "oven", "microwave"}, Thrifty: v.Thrifty}
-	p.NewYear = &planner.NewYearOptions{Style: v.Key}
+	p.NewYear = &planner.NewYearOptions{Style: v.Key, TableWine: true}
 	plan, err := s.catalog.BuildOccasionWithSeed(o, p, v.Guests, int64(v.Guests))
 	if err != nil || len(plan.Days) == 0 {
 		return planner.Plan{}, false
@@ -66,6 +66,7 @@ type feastView struct {
 	Guests, Dishes, Items, Salads          int
 	Courses                                []feastCourse
 	Groups                                 []feastGroup
+	Extras                                 []feastItem
 	Checked                                bool
 }
 
@@ -124,6 +125,14 @@ func (s *Server) feastViews(pl pageLocale) ([]feastView, planner.Plan) {
 			if d.Course == "salads" {
 				fv.Salads++
 			}
+		}
+		for _, item := range s.catalog.NewYearTableExtras(&plan) {
+			ing := s.catalog.Ingredients[item.IngredientID]
+			qty := formatQty(l, item.Amount, ing.Unit)
+			if !ing.Loose && ing.Pack > 0 {
+				qty = strconv.Itoa(int(item.Amount/ing.Pack)) + " × " + formatQty(l, ing.Pack, ing.Unit)
+			}
+			fv.Extras = append(fv.Extras, feastItem{Name: ing.LocalName(l), Qty: qty})
 		}
 		for _, g := range plan.Shopping {
 			fg := feastGroup{Label: g.Label, Money: formatMoney(pl.Country, g.Cost)}

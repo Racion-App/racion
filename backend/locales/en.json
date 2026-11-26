@@ -1,4 +1,6 @@
 {
+  "feast.extras": "For the table",
+  "feast.tableWine": "Include sparkling and red wine",
   "feast.alcohol": "Include alcoholic cocktails",
   "feast.bar.catalog": "All cocktails and shots",
   "course.mixed": "Alcoholic cocktails",

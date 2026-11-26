@@ -1,4 +1,6 @@
 {
+  "feast.extras": "К столу",
+  "feast.tableWine": "Игристое и красное вино к столу",
   "feast.alcohol": "Добавить алкогольные коктейли",
   "feast.bar.catalog": "Все коктейли и шоты",
   "course.mixed": "Алкогольные коктейли",
@@ -2232,7 +2234,7 @@
   "feast.dish.one": "блюдо",
   "feast.dish.few": "блюда",
   "feast.dish.many": "блюд",
-  "feast.portion": "порция",
+  "feast.portion": "за порцию",
   "feast.norm.total": "весь стол",
   "feast.norm.guest": "на одного гостя",
   "feast.norm.dishes": "{0} на столе",

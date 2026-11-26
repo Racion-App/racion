@@ -37,6 +37,7 @@ export function Occasion() {
   const [extraDays, setExtraDays] = useState(() => query.get("january") === "1");
   const [january, setJanuary] = useState([0, 0, 0]);
   const [alcohol, setAlcohol] = useState(false);
+  const [tableWine, setTableWine] = useState(true);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export function Occasion() {
       // анкету не проходили — считаем, что плита, духовка и микроволновка есть (как в квизе по умолчанию)
       const equipment = draft.equipment?.length ? draft.equipment : ["stove", "oven", "microwave"];
       const thrifty = id === "newyear" && new URLSearchParams(location.search).get("thrifty") === "1";
-      const newYear = id === "newyear" ? { style: thrifty && style === "home" ? "cheap" : style, january: extraDays ? january : [0, 0, 0], alcohol } : undefined;
+      const newYear = id === "newyear" ? { style: thrifty && style === "home" ? "cheap" : style, january: extraDays ? january : [0, 0, 0], alcohol, tableWine } : undefined;
       const plan = await api.createOccasion(id, guests, { ...draft, newYear, equipment, country, store, region: draft.region ?? "" } as Params, thrifty);
       track("occasion_built", { id, guests });
       nav(`/plan/${plan.id}`);
@@ -123,6 +124,10 @@ export function Occasion() {
                       aria-label={t("feast.style.label")}
                       options={["home", "lavish", "buffet"].map(key => ({ value: key, label: t("feast.style." + key) }))} />
                   </div>
+                  <button type="button" className="switch" role="switch" aria-checked={tableWine} onClick={() => setTableWine(!tableWine)}>
+                    <span className="switch__text">{t("feast.tableWine")}</span>
+                    <span className="switch__track" aria-hidden><span className="switch__knob" /></span>
+                  </button>
                   <button type="button" className="switch" role="switch" aria-checked={alcohol} onClick={() => setAlcohol(!alcohol)}>
                     <span className="switch__text">{t("feast.alcohol")}</span>
                     <span className="switch__track" aria-hidden><span className="switch__knob" /></span>

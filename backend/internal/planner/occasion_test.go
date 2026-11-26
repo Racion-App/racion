@@ -2,6 +2,36 @@ package planner
 
 import "testing"
 
+func TestNewYearTableShopping(t *testing.T) {
+	c := testCatalog(t)
+	course := []OccasionCourse{{Key: "salads", Base: 2, Pool: []string{"olivier", "crab_salad"}}}
+	o := Occasion{ID: "newyear", Courses: course, January: [][]OccasionCourse{course}}
+	p := Params{Country: "RU", Lang: "ru", Equipment: []string{"stove"}, NewYear: &NewYearOptions{January: [3]int{4}, TableWine: true}}
+	for _, wine := range []bool{true, false} {
+		p.NewYear.TableWine = wine
+		plan, err := c.BuildOccasion(o, p, 8)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.finish(&plan) // a recalculation must not add another round of groceries
+		need := map[string]float64{}
+		for _, group := range plan.Shopping {
+			for _, item := range group.Items {
+				need[item.IngredientID] = item.Needed
+			}
+		}
+		if need["mandarin"] != 1600 {
+			t.Fatalf("expected mandarins for December 31 only, got %v", need["mandarin"])
+		}
+		if wine && (need["sparkling_wine"] != 1500 || need["red_wine"] != 750) {
+			t.Fatal("expected two bottles of sparkling wine and one of red")
+		}
+		if !wine && (need["sparkling_wine"] != 0 || need["red_wine"] != 0) {
+			t.Fatal("bottles present with table wine turned off")
+		}
+	}
+}
+
 func TestNewYearOptionalDatesAndCocktail(t *testing.T) {
 	c := testCatalog(t)
 	cocktail := Recipe{ID: "ny_kir_royal", Title: "Кир рояль", Slot: "snack", Tags: []string{"drink", "alcohol", "bar"}, Ingredients: []RecipeIngredient{{"blackcurrant_liqueur", 10}}}

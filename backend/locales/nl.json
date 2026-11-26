@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Voor op tafel",
+  "feast.tableWine": "Mousserende en rode wijn toevoegen",
   "_meta": {
     "country": "NL",
     "date": "{d} {month} {y}",

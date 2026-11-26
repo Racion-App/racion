@@ -44,11 +44,12 @@ type Occasion struct {
 }
 
 type NewYearOptions struct {
-	Style    string `json:"style,omitempty"`
-	January  [3]int `json:"january,omitempty"`
-	Alcohol  bool   `json:"alcohol,omitempty"`
-	Cocktail string `json:"cocktail,omitempty"`
-	Glasses  int    `json:"glasses,omitempty"`
+	Style     string `json:"style,omitempty"`
+	January   [3]int `json:"january,omitempty"`
+	Alcohol   bool   `json:"alcohol,omitempty"`
+	TableWine bool   `json:"tableWine,omitempty"`
+	Cocktail  string `json:"cocktail,omitempty"`
+	Glasses   int    `json:"glasses,omitempty"`
 }
 
 func (o Occasion) menuCourses(options *NewYearOptions, january int) []OccasionCourse {
@@ -302,6 +303,27 @@ func (c *Catalog) GlassML(r Recipe) int {
 	return int(math.Round(ml))
 }
 
+// NewYearTableExtras are groceries served as bought on December 31.
+func (c *Catalog) NewYearTableExtras(plan *Plan) []RecipeIngredient {
+	if plan.Occasion == nil || plan.Occasion.ID != "newyear" || plan.Params.NewYear == nil || len(plan.Days) == 0 || plan.Days[0].Skipped {
+		return nil
+	}
+	guests := plan.Occasion.Guests
+	items := []RecipeIngredient{{"mandarin", float64(guests * 200)}}
+	if plan.Params.NewYear.TableWine {
+		items = append(items, RecipeIngredient{"sparkling_wine", float64((guests+5)/6) * 750}, RecipeIngredient{"red_wine", float64((guests+7)/8) * 750})
+	}
+	e := c.effective(plan.Params)
+	e.adultCocktail = true
+	return slices.DeleteFunc(items, func(item RecipeIngredient) bool {
+		r := Recipe{Ingredients: []RecipeIngredient{item}}
+		if item.IngredientID != "mandarin" {
+			r.Tags = []string{"alcohol"}
+		}
+		return !c.allowed(r, e)
+	})
+}
+
 func (c *Catalog) fillOccasionDay(day Day, o Occasion, courses []OccasionCourse, p Params, guests int, e effective, pr pricer, rng *rand.Rand) Day {
 	lang := i18n.Lang(p.Lang)
 	usedMain := map[string]bool{}
@@ -391,6 +413,9 @@ func (c *Catalog) fillOccasionDay(day Day, o Occasion, courses []OccasionCourse,
 				d := &dishes[i]
 				// Split one course among the dishes being served, rounding up to whole recipe portions.
 				d.Servings = (guests + len(dishes) - 1) / len(dishes)
+				if course.Key == "salads" && day.Index == 0 {
+					d.Servings = max(d.Servings, (guests+1)/2)
+				}
 				if course.Key == "cocktails" && !p.NewYear.Alcohol {
 					d.Servings = min(guests, max(1, p.NewYear.Glasses))
 				}

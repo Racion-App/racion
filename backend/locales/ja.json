@@ -1,4 +1,6 @@
 {
+  "feast.extras": "食卓に添えるもの",
+  "feast.tableWine": "スパークリングワインと赤ワインを加える",
   "_meta": {
     "country": "JP",
     "date": "{y}年{month}{d}日",

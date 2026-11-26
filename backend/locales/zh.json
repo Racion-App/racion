@@ -1,4 +1,6 @@
 {
+  "feast.extras": "佐餐搭配",
+  "feast.tableWine": "加入起泡酒和红葡萄酒",
   "_meta": {
     "country": "CN",
     "date": "{y}年{month}{d}日",

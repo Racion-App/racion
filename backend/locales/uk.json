@@ -1,4 +1,6 @@
 {
+  "feast.extras": "До столу",
+  "feast.tableWine": "Ігристе й червоне вино до столу",
   "_meta": {
     "country": "UA",
     "date": "{d} {month} {y}",

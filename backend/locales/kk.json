@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Дастарқанға",
+  "feast.tableWine": "Көпіршікті және қызыл шарап қосу",
   "_meta": {
     "country": "KZ",
     "date": "{y} ж. {d} {month}",

@@ -105,13 +105,19 @@
         <li><b class="num">{{.Items}}</b><span>{{t $.L "feast.norm.items"}}</span></li>
       </ul>
     </div>
+    {{with .Extras}}<div class="feast__extras">
+      <h4>{{t $.L "feast.extras"}}</h4>
+      <ul>{{range .}}<li>{{.Name}} <span class="num">{{.Qty}}</span></li>{{end}}</ul>
+    </div>{{end}}
     {{range .Courses}}<div class="feast__course">
       <h4>{{.Title}}</h4>
       <ul class="feast__tiles">{{range .Dishes}}<li><a class="feast__tile" href="{{.Href}}">
         <span class="feast__photo">{{if .Image}}<img src="{{.Image}}" alt="" width="384" height="256" loading="lazy" decoding="async">{{end}}</span>
         <span class="feast__name">{{.Title}}</span>
-        <small>{{.Yield}}</small>
-        <span class="feast__money num is-rub">≈ {{.Money}} <small>{{t $.L "feast.portion"}}</small></span>
+        <span class="feast__meta">
+          <span class="feast__yield">{{.Yield}}</span>
+          <span class="feast__money num is-rub">≈ {{.Money}} <small>{{t $.L "feast.portion"}}</small></span>
+        </span>
       </a></li>{{end}}</ul>
     </div>{{end}}
     <details class="feast__list">

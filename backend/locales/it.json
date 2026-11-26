@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Da mettere in tavola",
+  "feast.tableWine": "Includi spumante e vino rosso",
   "_meta": {
     "country": "IT",
     "date": "{d} {month} {y}",

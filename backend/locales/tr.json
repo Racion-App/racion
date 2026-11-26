@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Sofraya",
+  "feast.tableWine": "Köpüklü şarap ve kırmızı şarap ekle",
   "_meta": {
     "country": "TR",
     "date": "{d} {month} {y}",

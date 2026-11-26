@@ -1110,6 +1110,14 @@ func (c *Catalog) finish(plan *Plan) {
 				}
 			}
 		}
+		if d == 0 {
+			for _, item := range c.NewYearTableExtras(plan) {
+				id := item.IngredientID
+				need[id] += item.Amount
+				usedIn[id] = append(usedIn[id], i18n.T(lang, "feast.extras"))
+				day.Cost += item.Amount * pr.unitPrice(c.Ingredients[id])
+			}
+		}
 		day.Cost = pr.round(day.Cost)
 		usedCost += day.Cost
 		kcal += day.Kcal

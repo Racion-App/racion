@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Na stół",
+  "feast.tableWine": "Dodaj wino musujące i czerwone",
   "_meta": {
     "country": "PL",
     "date": "{d} {month} {y}",

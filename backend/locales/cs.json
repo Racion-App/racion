@@ -1,4 +1,6 @@
 {
+  "feast.extras": "Na sváteční stůl",
+  "feast.tableWine": "Přidat šumivé a červené víno",
   "_meta": {
     "country": "CZ",
     "date": "{d}. {month} {y}",

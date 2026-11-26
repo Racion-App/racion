@@ -2592,7 +2592,14 @@ button.fastcal__day { width: 100%; padding: 0; font: inherit; color: inherit; cu
 .feast__photo { display: block; aspect-ratio: 3 / 2; background: var(--ds-fill-4);
   img { display: block; width: 100%; height: 100%; object-fit: cover; } }
 .feast__name { padding: 10px 12px 2px; font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--ds-label-primary); transition: color var(--ds-dur-fast) var(--ds-ease-standard); }
-.feast__money { padding: 2px 12px 11px; font-size: 13px; font-weight: 600; color: var(--ds-green);
+.feast__meta { display: grid; gap: 3px; padding: 4px 12px 11px; min-width: 0; }
+.feast__yield { font-size: 13px; line-height: 1.35; color: var(--ds-label-secondary); overflow-wrap: anywhere; }
+.feast__extras { margin-bottom: 20px;
+  h4 { margin: 0 0 6px; font-size: 15px; }
+  ul { display: flex; flex-wrap: wrap; gap: 6px 20px; padding: 0; margin: 0; list-style: none; }
+  li { font-size: 14px; }
+  .num { white-space: nowrap; color: var(--ds-label-secondary); } }
+.feast__money { font-size: 13px; font-weight: 600; color: var(--ds-green);
   small { font-family: var(--ds-font-sans); font-size: 12px; font-weight: 500; color: var(--ds-label-secondary); } }
 .feast__list { border-top: 1px solid var(--ds-separator); padding-top: 12px;
   summary { display: flex; align-items: baseline; gap: 8px; min-height: 32px; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; list-style: none;
