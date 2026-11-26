@@ -135,7 +135,7 @@ func (s *Server) cocktailGuidePage(w http.ResponseWriter, r *http.Request) {
 	rememberCountry(w, r)
 	base := s.baseURL(r)
 	data := map[string]any{
-		"Base": pageBase{Title: g.Name + " — рецепты с фото — Рацион", Description: g.Description, Canonical: base + g.Path(), OGImage: base + "/og" + g.Path() + ".jpg", OGType: "article", OGWide: true, User: currentUser(r) != nil,
+		"Base": pageBase{Title: g.Name + " — рецепты с фото — Рацион", Description: g.Description, Canonical: base + g.Path(), OGImage: base + "/collection/cocktails/covers/" + g.Slug + ".jpg", OGImageType: "image/jpeg", OGType: "article", OGWide: true, User: currentUser(r) != nil,
 			JSONLD: collectionLD(base, pl, g.Name, g.Description, "cocktails/"+g.Slug, g.Cards, g.FAQ, [2]string{"Коктейли", base + "/collection/cocktails"})},
 		"L": pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true, "Guide": g, "Sections": g.Groups, "Cover": g.Cover,
 	}

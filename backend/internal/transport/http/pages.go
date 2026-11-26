@@ -258,6 +258,7 @@ type pageBase struct {
 	Description string
 	Canonical   string
 	OGImage     string
+	OGImageType string
 	OGType      string // article для рецепта и подборки, website для остального
 	OGWide      bool   // картинка 1200×630 (брендовая), иначе фото блюда 768×512
 	JSONLD      template.JS
