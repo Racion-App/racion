@@ -13,6 +13,7 @@ import path from "node:path";
 
 const dist = path.resolve("dist");
 const seo = JSON.parse(fs.readFileSync(path.resolve("home-seo.json"), "utf8"));
+const holidayLinks = JSON.parse(fs.readFileSync(path.resolve("src/components/holiday-links.json"), "utf8"));
 const src = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 const base = "https://racion.app";
 const langs = Object.keys(seo);
@@ -76,7 +77,8 @@ function features(lang) {
   const p = lang === "ru" ? "" : `/${lang}`;
   const z = esc(zero(lang, t.country));
   const rows = HOME_FEATURES.map((n) => `<li class="feat__row"><div class="feat__item"><h3>${esc(t[`features.${n}.t`])}</h3></div><span class="feat__price num">${z}</span></li>`).join("");
-  return `<section class="feat feat--home" aria-labelledby="feat-home"><h2 class="feat__rtitle" id="feat-home">${esc(t["features.title"])}</h2><p class="feat__sub">${esc(t["features.home"])}</p><ol class="feat__rows">${rows}</ol><a class="feat__more" href="${p}/features">${esc(t["features.all"])} ${CHEVRON}</a></section>`;
+  const holidays = lang === "ru" ? `<nav class="jarnav" aria-label="К праздничному столу">${holidayLinks.map(({ href, label }) => `<a class="chip" href="${esc(href)}">${esc(label)}</a>`).join("")}</nav>` : "";
+  return `${holidays}<section class="feat feat--home" aria-labelledby="feat-home"><h2 class="feat__rtitle" id="feat-home">${esc(t["features.title"])}</h2><p class="feat__sub">${esc(t["features.home"])}</p><ol class="feat__rows">${rows}</ol><a class="feat__more" href="${p}/features">${esc(t["features.all"])} ${CHEVRON}</a></section>`;
 }
 
 const RECEIPT = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M14 8H8"></path><path d="M16 12H8"></path><path d="M13 16H8"></path></svg>';

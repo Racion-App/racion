@@ -85,6 +85,10 @@
         </ol>
       </section>
 
+      {{with .MenuLinks}}<nav class="rpage__section" aria-labelledby="recipe-menus">
+        <h2 id="recipe-menus">Что приготовить ещё</h2>
+        <div class="rpage__tags">{{range .}}<a class="chip" href="{{.Href}}">{{.Label}}</a>{{end}}</div>
+      </nav>{{end}}
       {{if .Notes}}<section class="rpage__section notes" aria-labelledby="notes">
         <h2 id="notes">{{t .L "recipe.notes"}}</h2>
         <dl class="notes__list">

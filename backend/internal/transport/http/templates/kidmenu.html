@@ -28,6 +28,7 @@
 
 <section class="agesec" aria-labelledby="week">
   <h2 id="week">{{t .L "menu.week.title" .StartDate}}</h2>
+  {{if eq .P ""}}<p class="agesec__lead"><a href="/collection/kids-1-3#breakfasts">Чем заменить молочную кашу на завтрак</a></p>{{end}}
   <div class="weekwrap">
   <div class="weekgrid">
     {{range .Days}}<article class="dayc">

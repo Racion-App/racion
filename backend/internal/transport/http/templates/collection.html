@@ -12,7 +12,11 @@
       <p class="kidpick__q" id="kidpick-q">{{t .L "kidpick.q"}}</p>
       <div class="kidpick__ages" role="group" aria-labelledby="kidpick-q">{{range .KidAges}}<a class="kidpick__age" href="{{.Href}}">{{.Label}}</a>{{end}}</div>
       <p class="kidpick__hint">{{t .L "kidpick.hint"}}</p>
-      {{if .KidExamples}}<p class="kidpick__more">{{t .L "kidpick.examples"}} {{range $i, $e := .KidExamples}}{{if $i}}<span aria-hidden="true"> · </span>{{end}}<a href="{{$e.Href}}">{{$e.Label}}</a>{{end}}</p>{{end}}
+      {{if .Breakfasts}}<nav aria-label="Детское меню">
+        <p class="kidpick__more">Готовое меню на неделю по возрасту</p>
+        <div class="agescale">{{range .KidExamples}}<a href="{{.Href}}#week">{{.Label}}</a>{{end}}</div>
+        <p class="kidpick__more"><a href="#breakfasts">Завтраки без молока</a></p>
+      </nav>{{else if .KidExamples}}<p class="kidpick__more">{{t .L "kidpick.examples"}} {{range $i, $e := .KidExamples}}{{if $i}}<span aria-hidden="true"> · </span>{{end}}<a href="{{$e.Href}}">{{$e.Label}}</a>{{end}}</p>{{end}}
       {{if .FamilyWeek}}<p class="kidpick__more"><a href="#family-list">{{t .L "growth.kids.list"}}</a></p>{{end}}
     </div>
     {{end}}
@@ -28,6 +32,13 @@
 </header>
 {{with .CocktailGuides}}{{template "cocktail-occasions" .}}{{end}}
 {{with .DrinkGuide}}<p class="agesec__lead"><a href="{{.Path}}">{{.Name}}</a></p>{{end}}
+{{with .Breakfasts}}
+<section class="rpage__section" aria-labelledby="breakfasts">
+  <h2 id="breakfasts">Завтраки без молока для детей 1–3 лет</h2>
+  <p class="agesec__lead">Для каши на воде можно взять рис с грушей, гречку с яблоком или пшено с тыквой. Если ребёнок сегодня не хочет кашу, здесь есть паровой омлет с кабачком и банановые оладьи. Оба рецепта содержат яйцо.</p>
+  <div class="rgrid">{{range .}}{{template "card" .}}{{end}}</div>
+  <p class="agesec__lead"><a href="/menu/child-2#week">Посмотреть завтрак, обед и ужин на каждый день для ребёнка в 2 года</a></p>
+</section>{{end}}
 
 {{with .BudgetExamples}}
 <section class="agesec" aria-labelledby="budget-week">

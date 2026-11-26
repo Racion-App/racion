@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { money } from "../lib/format";
 import type { Country } from "../lib/types";
 import { useT } from "../i18n";
+import holidayLinks from "./holiday-links.json";
 
 // HomeFeatures — «Что умеет Рацион» под первым вопросом квиза: несколько строк чека с ценой «0»
 // и ссылка на страницу возможностей. Квиз остаётся главным, блок — для тех, кто сначала читает.
@@ -13,20 +14,25 @@ export function HomeFeatures({ country }: { country?: Country }) {
   const zero = money(0, country, lang);
   const prefix = lang === "ru" ? "" : `/${lang}`;
   return (
-    <section className="feat feat--home" aria-labelledby="feat-home">
-      <h2 className="feat__rtitle" id="feat-home">{t("features.title")}</h2>
-      <p className="feat__sub">{t("features.home")}</p>
-      <ol className="feat__rows">
-        {HOME_FEATURES.map((n) => (
-          <li key={n} className="feat__row">
-            <div className="feat__item"><h3>{t(`features.${n}.t`)}</h3></div>
-            <span className="feat__price num">{zero}</span>
-          </li>
-        ))}
-      </ol>
-      <a className="feat__more" href={`${prefix}/features`}>
-        {t("features.all")} <ChevronRight size={16} aria-hidden />
-      </a>
-    </section>
+    <>
+      {lang === "ru" && <nav className="jarnav" aria-label="К праздничному столу">
+        {holidayLinks.map(({ href, label }) => <a className="chip" key={href} href={href}>{label}</a>)}
+      </nav>}
+      <section className="feat feat--home" aria-labelledby="feat-home">
+        <h2 className="feat__rtitle" id="feat-home">{t("features.title")}</h2>
+        <p className="feat__sub">{t("features.home")}</p>
+        <ol className="feat__rows">
+          {HOME_FEATURES.map((n) => (
+            <li key={n} className="feat__row">
+              <div className="feat__item"><h3>{t(`features.${n}.t`)}</h3></div>
+              <span className="feat__price num">{zero}</span>
+            </li>
+          ))}
+        </ol>
+        <a className="feat__more" href={`${prefix}/features`}>
+          {t("features.all")} <ChevronRight size={16} aria-hidden />
+        </a>
+      </section>
+    </>
   );
 }

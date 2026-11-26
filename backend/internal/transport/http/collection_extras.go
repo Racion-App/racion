@@ -99,6 +99,15 @@ func (s *Server) collectionExtras(slug string, pl pageLocale, recipes []planner.
 		data["PlanHref"], data["PlanLabel"] = "#budget-week", i18n.T(l, "growth.budget.action")
 	case "kids-1-3", "kids-dinner":
 		data["FamilyWeek"] = true
+		if slug == "kids-1-3" && l == i18n.RU {
+			var cards []recipeCard
+			for _, id := range dairyFreeBreakfasts {
+				if rc, ok := s.catalog.RecipeByID[id]; ok && !rc.Hidden {
+					cards = append(cards, s.card(rc, pl))
+				}
+			}
+			data["Breakfasts"] = cards
+		}
 	case "new-year-table":
 		views, def := s.feastViews(pl)
 		if len(views) == 0 {

@@ -501,6 +501,9 @@ func (s *Server) recipePage(w http.ResponseWriter, r *http.Request) {
 		"Equipment": eq, "Buy": buy, "Offer": offer, "SlotHref": slotHref, "SlotCrumb": slotCrumb, "AllLabel": allLabel, "Facts": facts,
 	}
 	var buf bytes.Buffer
+	if l == i18n.RU && !rc.Own {
+		data["MenuLinks"] = recipeMenuLinks(rc.ID)
+	}
 	if err := pageTpl.ExecuteTemplate(&buf, "recipe.html", data); err != nil {
 		s.log.Error("recipe page", zap.Error(err))
 		s.errorPage(w, r, 500)
