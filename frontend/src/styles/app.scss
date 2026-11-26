@@ -2565,8 +2565,8 @@ button.fastcal__day { width: 100%; padding: 0; font: inherit; color: inherit; cu
 // Блюда — плитками с фото, как стол сверху; список покупок свёрнут под плитками.
 .feast { display: grid; gap: 14px; margin: 8px 0 22px; }
 .feast__radio { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-.feast__tabs { max-width: 560px;
-  label { flex: 1 1 0; display: grid; place-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary); white-space: nowrap; cursor: pointer;
+.feast__tabs { max-width: 100%; width: fit-content; min-width: 0; flex-wrap: wrap; overflow: visible;
+  label { flex: 1 1 auto; display: grid; place-items: center; min-width: 0; max-width: 100%; min-height: 40px; padding: 4px 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ds-label-secondary); text-align: center; overflow-wrap: anywhere; cursor: pointer;
     transition: background var(--ds-dur-fast) var(--ds-ease-standard), color var(--ds-dur-fast) var(--ds-ease-standard);
     &:hover { color: var(--ds-label-primary); } } }
 .feast__pane { display: none; gap: 16px; padding: 18px 16px 16px; border-radius: var(--ds-radius-xl); background: var(--ds-bg-elevated); border: 1px solid var(--ds-separator);
