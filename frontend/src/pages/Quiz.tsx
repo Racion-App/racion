@@ -186,6 +186,41 @@ export function Quiz() {
     api.myPlans().then((list) => setLastPlan(list.find((x) => !x.occasion) ?? lastWeekSummary())).catch(() => setLastPlan(lastWeekSummary()));
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const nextStart = nextWeekStart(lastPlan?.startDate);
+  const quickButton = useRef<HTMLButtonElement>(null);
+  const quickSeen = useRef(false);
+  const showQuickStart = step === 1 && !!lastPlan && !eventPreset && !p.collection;
+  const recordQuickView = useCallback(() => {
+    if (quickSeen.current) return;
+    quickSeen.current = true;
+    track("quick_rebuild_view", { account: !!user, enabled: !quickButton.current?.disabled });
+  }, [user]);
+
+  useEffect(() => {
+    const button = quickButton.current;
+    if (!showQuickStart || !button || quickSeen.current || !window.IntersectionObserver) return;
+    let inView = false;
+    const check = () => {
+      if (!inView || document.hidden || document.querySelector("dialog[open]")) return;
+      const rect = button.getBoundingClientRect();
+      const x = (Math.max(0, rect.left) + Math.min(window.innerWidth, rect.right)) / 2;
+      const y = (Math.max(0, rect.top) + Math.min(window.innerHeight, rect.bottom)) / 2;
+      if (button.contains(document.elementFromPoint(x, y))) recordQuickView();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.intersectionRatio >= 0.5;
+      check();
+    }, { threshold: 0.5 });
+    observer.observe(button);
+    // Sheet снимает блокировку прокрутки body при закрытии, даже если кнопка не сдвинулась.
+    const sheets = new MutationObserver(check);
+    sheets.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    document.addEventListener("visibilitychange", check);
+    return () => {
+      observer.disconnect();
+      sheets.disconnect();
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [showQuickStart, recordQuickView]);
   useEffect(() => {
     const cid = sp.get("collection");
     if (cid) setP((prev) => ({ ...prev, collection: cid }));
@@ -359,9 +394,14 @@ export function Quiz() {
     if (busy) return;
     setBusy(true);
     setSubmitError(null);
+    if (startDate) {
+      recordQuickView();
+      track("quick_rebuild", { account: !!user });
+    }
     track("plan_submit", { country: p.country, store: p.store, region: p.region, adults: p.adults, kids: p.kids.length, goal: p.goal, budgetMode: p.budgetMode, budgetValue: p.budgetValue });
     try {
       const plan = await api.createPlan(startDate ? { ...p, startDate } : p);
+      if (startDate) track("quick_rebuild_created", { account: !!user });
       rememberNames(plan);
       track("plan_created", { id: plan.id, cost: plan.totals.cost });
       if (user) api.updateMe({ defaults: p }).catch(() => {});
@@ -449,16 +489,17 @@ export function Quiz() {
               {t("quiz.q1")}
             </h1>
             <p className="quiz__hint">{p.country === "RU" ? t("quiz.q1.hint.RU") : t("quiz.q1.hint")}</p>
-            {lastPlan && !eventPreset && !p.collection && (
+            {showQuickStart && lastPlan && (
               <div className="quickstart" aria-label={t("quick.title")}>
                 <Link className="quickstart__card" to={`/plan/${lastPlan.id}`} onClick={() => track("quick_open_plan", { account: !!user })}>
                   <span className="quickstart__icon"><CalendarDays size={20} aria-hidden /></span>
                   <span><b>{t("quick.open")}</b><small>{lastPlan.title || t("plan.title", { range: weekRange(lastPlan.startDate, lang) })} · {lastPlan.items} {tn("items", lastPlan.items)}{lastPlan.checked > 0 ? ` · ${t("quick.bought", { n: lastPlan.checked })}` : ""}</small></span>
                 </Link>
-                <button type="button" className="quickstart__card" disabled={busy || !p.store} onClick={() => { track("quick_rebuild", { account: !!user }); void submit(nextStart); }}>
+                <button ref={quickButton} type="button" className="quickstart__card" disabled={busy || !p.store} onClick={() => void submit(nextStart)}>
                   <span className="quickstart__icon"><RefreshCw size={20} aria-hidden /></span>
                   <span><b>{t("quick.next")}</b><small>{p.store ? t("quick.next.sub", { range: weekRange(nextStart, lang), store: stores.find((s) => s.code === p.store)?.name ?? p.store }) : weekRange(nextStart, lang)}</small></span>
                 </button>
+                {submitError && <p className="error-inline" role="alert"><AlertCircle size={18} aria-hidden /> {submitError}</p>}
               </div>
             )}
             {eventPreset && (
