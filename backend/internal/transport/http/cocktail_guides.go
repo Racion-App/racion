@@ -87,53 +87,64 @@ var cocktailGuides = []cocktailGuide{
 	},
 }
 
-func (s *Server) cocktailGuidePage(w http.ResponseWriter, r *http.Request) {
-	for _, g := range cocktailGuides {
-		if g.Slug != r.PathValue("occasion") {
+type guideSectionView struct {
+	cocktailSection
+	Cards []recipeCard
+}
+
+type cocktailGuideView struct {
+	cocktailGuide
+	Groups []guideSectionView
+	Cards  []recipeCard
+	Cover  string
+}
+
+func (s *Server) cocktailGuideView(slug string, pl pageLocale) (cocktailGuideView, bool) {
+	for _, guide := range cocktailGuides {
+		if guide.Slug != slug {
 			continue
 		}
-		pl, _ := s.stableLocale(r)
-		rememberCountry(w, r)
-		type sectionView struct {
-			cocktailSection
-			Cards []recipeCard
-		}
-		var sections []sectionView
-		var all []recipeCard
-		cover := ""
-		for _, section := range g.Sections {
-			var cards []recipeCard
+		view := cocktailGuideView{cocktailGuide: guide}
+		for _, section := range guide.Sections {
+			group := guideSectionView{cocktailSection: section}
 			for _, id := range section.Recipes {
 				if rc, ok := s.catalog.RecipeByID[id]; ok && !rc.Hidden && (rc.Slot == "cocktail" || hasTag(rc, "drink")) {
-					cards = append(cards, s.card(rc, pl))
-					if cover == "" {
-						cover = rc.Image
+					group.Cards = append(group.Cards, s.card(rc, pl))
+					if view.Cover == "" {
+						view.Cover = rc.Image
 					}
 				}
 			}
-			if len(cards) > 0 {
-				sections = append(sections, sectionView{section, cards})
-				all = append(all, cards...)
+			if len(group.Cards) > 0 {
+				view.Groups = append(view.Groups, group)
+				view.Cards = append(view.Cards, group.Cards...)
 			}
 		}
-		if len(all) == 0 {
-			break
-		}
-		base := s.baseURL(r)
-		data := map[string]any{
-			"Base": pageBase{Title: g.Name + " — рецепты с фото — Рацион", Description: g.Description, Canonical: base + g.Path(), OGImage: topicOG(base, cover, pl.L), OGType: "article", OGWide: cover == "", User: currentUser(r) != nil,
-				JSONLD: collectionLD(base, pl, g.Name, g.Description, "cocktails/"+g.Slug, all, g.FAQ, [2]string{"Коктейли", base + "/collection/cocktails"})},
-			"L": pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true, "Guide": g, "Sections": sections, "Cover": cover,
-		}
-		var buf bytes.Buffer
-		if err := pageTpl.ExecuteTemplate(&buf, "cocktail_guide.html", data); err != nil {
-			s.log.Error("cocktail guide", zap.Error(err))
-			s.errorPage(w, r, http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = buf.WriteTo(w)
+		return view, len(view.Cards) > 0
+	}
+	return cocktailGuideView{}, false
+}
+
+func (s *Server) cocktailGuidePage(w http.ResponseWriter, r *http.Request) {
+	pl, _ := s.stableLocale(r)
+	g, ok := s.cocktailGuideView(r.PathValue("occasion"), pl)
+	if !ok {
+		s.notFoundPage(w, r)
 		return
 	}
-	s.notFoundPage(w, r)
+	rememberCountry(w, r)
+	base := s.baseURL(r)
+	data := map[string]any{
+		"Base": pageBase{Title: g.Name + " — рецепты с фото — Рацион", Description: g.Description, Canonical: base + g.Path(), OGImage: base + "/og" + g.Path() + ".jpg", OGType: "article", OGWide: true, User: currentUser(r) != nil,
+			JSONLD: collectionLD(base, pl, g.Name, g.Description, "cocktails/"+g.Slug, g.Cards, g.FAQ, [2]string{"Коктейли", base + "/collection/cocktails"})},
+		"L": pl.L, "P": pl.P, "Country": pl.Country, "NavRecipes": true, "Guide": g, "Sections": g.Groups, "Cover": g.Cover,
+	}
+	var buf bytes.Buffer
+	if err := pageTpl.ExecuteTemplate(&buf, "cocktail_guide.html", data); err != nil {
+		s.log.Error("cocktail guide", zap.Error(err))
+		s.errorPage(w, r, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = buf.WriteTo(w)
 }

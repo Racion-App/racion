@@ -174,6 +174,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /og/event/{id}", s.ogEvent)
 	mux.HandleFunc("GET /og/recipe/{id}", s.ogRecipe)
 	mux.HandleFunc("GET /og/collection/{slug}", s.ogCollection)
+	mux.HandleFunc("GET /og/collection/cocktails/{file}", s.ogCocktailGuide)
 	mux.HandleFunc("GET /api/me/collections", s.myCollections)
 	mux.HandleFunc("POST /api/me/collections", s.limited(s.lim.write, s.createCollection))
 	mux.HandleFunc("PUT /api/me/collections/{id}", s.limited(s.lim.write, s.renameCollection))

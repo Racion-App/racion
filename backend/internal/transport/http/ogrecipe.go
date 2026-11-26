@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"container/list"
 	"fmt"
 	"image"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/image/webp"
 
@@ -145,19 +147,39 @@ func (s *Server) ogCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	col = col.Localized(string(l))
-	facts := fmt.Sprintf("%d %s", len(recipes), i18n.Plural(l, len(recipes), "catalog.recipe"))
-	card := ogimg.Card{Domain: strings.TrimPrefix(strings.TrimPrefix(s.baseURL(r), "https://"), "http://"), Title: col.Name, Facts: facts, CTA: i18n.T(l, "og.cta.collection")}
 	cover := col.CoverAuto
 	if topic := topicCovers[slug]; topic != "" && topicLang(l) {
 		cover = topic
 	}
-	key := "c|" + slug + "|" + string(l) + "|" + col.Name + "|" + facts + "|" + cover
+	s.writeCollectionCard(w, r, slug, l, col.Name, len(recipes), cover, col.CoverAuto)
+}
+
+func (s *Server) ogCocktailGuide(w http.ResponseWriter, r *http.Request) {
+	slug, ok := strings.CutSuffix(r.PathValue("file"), ".jpg")
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	pl, _ := s.stableLocale(r)
+	g, ok := s.cocktailGuideView(slug, pl)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	s.writeCollectionCard(w, r, "cocktails/"+slug, pl.L, g.Name, len(g.Cards), g.Cover, "")
+}
+
+func (s *Server) writeCollectionCard(w http.ResponseWriter, r *http.Request, slug string, l i18n.Lang, title string, count int, cover, fallback string) {
+	facts := fmt.Sprintf("%d %s", count, i18n.Plural(l, count, "catalog.recipe"))
+	card := ogimg.Card{Domain: strings.TrimPrefix(strings.TrimPrefix(s.baseURL(r), "https://"), "http://"), Title: title, Facts: facts, CTA: i18n.T(l, "og.cta.collection")}
+	key := "c|" + slug + "|" + string(l) + "|" + title + "|" + facts + "|" + cover + "|" + fallback
 	data := ogc.get(key)
 	if data == nil {
 		card.Photo = loadPhoto(cover)
-		if card.Photo == nil && cover != col.CoverAuto {
-			card.Photo = loadPhoto(col.CoverAuto)
+		if card.Photo == nil && fallback != "" && cover != fallback {
+			card.Photo = loadPhoto(fallback)
 		}
+		var err error
 		data, err = ogimg.Render(card)
 		if err != nil {
 			s.fail(w, r, err)
@@ -167,5 +189,5 @@ func (s *Server) ogCollection(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Cache-Control", "public, max-age=86400")
-	_, _ = w.Write(data)
+	http.ServeContent(w, r, slug+".jpg", time.Time{}, bytes.NewReader(data))
 }
